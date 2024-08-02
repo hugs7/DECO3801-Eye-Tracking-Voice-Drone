@@ -24,7 +24,7 @@ eye_landmarks = {
     },
 }
 
-face_landmarks = [i for i in range(0, 478)]
+face_landmarks = [i for i in range(0, 468)]
 
 
 class LandmarkData(TypedDict, total=False):
@@ -43,6 +43,14 @@ landmark_mapping = {
         "colour": CM.lime,
         "points": [336, 296, 334, 293, 300, 276, 283, 282, 295],
     },
+    "upper_eyelid_left": {"colour": CM.royal_blue, "points": [157, 158, 159, 470, 247, 113, 30, 29, 27, 28, 56, 190]},
+    "lower_eyelid_left": {"colour": CM.royal_blue, "points": [25, 110, 24, 472, 23, 145, 153, 22, 26, 154, 112, 173, 343]},
+    "under_eye_left": {
+        "colour": CM.cornflower_blue,
+        "points": [31, 111, 228, 229, 230, 231, 232, 233, 244, 120, 121, 128, 245, 100, 47, 114, 188],
+    },
+    "eyesocket_outside_left": {"colour": CM.coral, "points": [124, 35, 111, 46]},
+    "above_eye_left": {"colour": CM.white, "points": [225, 224, 223, 222, 221, 189]},
     "lips": {"colour": CM.yellow, "points": [39, 37, 267]},
     "moustache": {},
     "nose_bridge": {
@@ -58,7 +66,7 @@ landmark_mapping = {
             351,
         ],
     },
-    "tear_trough_left": {"colour": CM.cornflower_blue, "points": []},
+    "tear_trough_left": {"colour": CM.cornflower_blue, "points": [243, 155, 133]},
     "tear_trough_right": {"colour": CM.cornflower_blue, "points": []},
     "chin": {
         "colour": CM.coral,
@@ -133,6 +141,10 @@ landmark_mapping = {
             210,
             202,
             169,
+            182,
+            96,
+            57,
+            36,
         ],
     },
     "cheek_right": {
