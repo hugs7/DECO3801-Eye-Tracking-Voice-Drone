@@ -91,16 +91,7 @@ landmark_mapping = {
     "moustache": {},
     "nose_bridge": {
         "colour": CM.sky_blue,
-        "points": [
-            9,
-            8,
-            193,
-            168,
-            41,
-            122,
-            6,
-            351,
-        ],
+        "points": [9, 8, 193, 168, 41, 122, 6, 351, 417],
     },
     "nose_lower": {
         "colour": CM.yellow,
@@ -147,7 +138,7 @@ landmark_mapping = {
     },
     "nostrils": {},
     "tear_trough_left": {"colour": CM.cornflower_blue, "points": [243, 155, 133]},
-    "tear_trough_right": {"colour": CM.cornflower_blue, "points": []},
+    "tear_trough_right": {"colour": CM.cornflower_blue, "points": [412, 465, 464, 413, 414]},
     "chin": {
         "colour": CM.coral,
         "points": [
