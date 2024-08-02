@@ -38,29 +38,7 @@ def track_face(img, face):
         cv2.circle(img, (face[i][0], face[i][1]), 1, (0, 255, 0), cv2.FILLED)
 
 
-while run:
-    success, frame = cam.read()
-    frame = cv2.flip(frame, 1)
-    rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    windowName = "eyetracking"
-    output = face_mesh.process(rgb_frame)
-    points = output.multi_face_landmarks
-
-    frame_h, frame_w, _ = frame.shape
-
-    # if points:
-    #     landmarks = points[0].landmark
-    #     current_time = time.time()
-    #     # if current_time - last_print_time > print_interval:
-    #     last_print_time = current_time
-    #     # print(type(landmarks))
-    #     for id, landmark in enumerate(landmarks[400:]):
-    #         x, y = normalise_landmark(landmark, frame_w, frame_h)
-    #         cv2.circle(frame, (x, y), 3, (0, 255, 0))
-    #         print(x, y)
-    #         # if id == 1:
-    #         #     pyautogui.moveTo(x, y)
-
+def face_detector(frame, windowName):
     if cam.get(cv2.CAP_PROP_POS_FRAMES) == cam.get(cv2.CAP_PROP_FRAME_COUNT):
         cam.set(cv2.CAP_PROP_POS_FRAMES, 0)
 
@@ -76,7 +54,32 @@ while run:
         cv2.imshow(windowName, img)
         cv2.waitKey(1)
 
-    # cv2.imshow(windowName, frame)
+
+while run:
+    success, frame = cam.read()
+    frame = cv2.flip(frame, 1)
+    rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    windowName = "eyetracking"
+    output = face_mesh.process(rgb_frame)
+    points = output.multi_face_landmarks
+
+    frame_h, frame_w, _ = frame.shape
+
+    if points:
+        landmarks = points[0].landmark
+        current_time = time.time()
+        # if current_time - last_print_time > print_interval:
+        last_print_time = current_time
+        # print(type(landmarks))
+        for id, landmark in enumerate(landmarks[469:]):
+            x, y = normalise_landmark(landmark, frame_w, frame_h)
+            cv2.circle(frame, (x, y), 3, (0, 255, 0))
+            print(x, y)
+            # if id == 1:
+            #     pyautogui.moveTo(x, y)
+
+    cv2.imshow(windowName, frame)
+
     if cv2.waitKey(1) & 0xFF == ord("q"):
         run = False
 
