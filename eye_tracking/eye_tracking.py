@@ -13,6 +13,8 @@ window_height = 900
 windowName = "eyetracking"
 print_interval = 5  # Time interval in seconds
 last_print_time = time.time()
+prev_points = []
+current_points = []
 
 # Initialize video capture and face mesh detector
 cam = cv2.VideoCapture(0)
@@ -89,13 +91,23 @@ while run:
                 else:
                     print(f"Point class {point_class} does not have a colour")
             else:
+                if len(current_points) <= 1:
+                    if id not in prev_points:
+                        # Add some points
+                        current_points.append(id)
+
                 if id in lm.face_landmarks:
                     colour = (0, 255, 0)
                 else:
                     colour = (0, 0, 255)
 
-                cv2.circle(frame, (x, y), 3, colour)
-                cv2.putText(frame, str(id), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 255, 255), 1, cv2.LINE_AA)
+                if id in current_points:
+                    cv2.circle(frame, (x, y), 3, colour)
+                    cv2.putText(frame, str(id), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 255, 255), 1, cv2.LINE_AA)
+
+        if len(current_points) == 0:
+            # We need to reset prev_points
+            prev_points = []
 
         if calibrated:
             track_eye_movement(landmarks, frame_w, frame_h)
@@ -106,6 +118,9 @@ while run:
     if key == ord("q"):
         run = False
     elif key == ord("\r"):  # Enter key to calibrate
+        # Clear the current points
+        prev_points.extend(current_points)
+        current_points = []
         if points:
             calibrate_eye_positions(landmarks, frame_w, frame_h)
             calibrated = True
