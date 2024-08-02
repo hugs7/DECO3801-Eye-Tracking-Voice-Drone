@@ -10,7 +10,7 @@ class ColourMap:
     green: Tuple[int, int, int] = (0, 255, 0)
     blue: Tuple[int, int, int] = (255, 0, 0)
     yellow: Tuple[int, int, int] = (226, 235, 52)
-    line: Tuple[int, int, int] = (153, 235, 52)
+    lime: Tuple[int, int, int] = (153, 235, 52)
     light_green: Tuple[int, int, int] = (104, 235, 5)
     spring_green: Tuple[int, int, int] = (52, 235, 76)
     forest_green: Tuple[int, int, int] = (52, 235, 104)
