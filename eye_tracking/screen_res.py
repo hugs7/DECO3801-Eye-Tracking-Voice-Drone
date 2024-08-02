@@ -33,6 +33,7 @@ def calibrate_eye_positions(landmarks, frame_w, frame_h):
 
 
 def track_eye_movement(landmarks, frame_w, frame_h):
+    sensitivity = 25
     for eye in ["left", "right"]:
         iris_x, iris_y = normalise_landmark(landmarks[lm.eye_landmarks[eye]["top"]], frame_w, frame_h)
         ref_x, ref_y = reference_positions[eye]["top"]
@@ -41,8 +42,8 @@ def track_eye_movement(landmarks, frame_w, frame_h):
         dy = iris_y - ref_y
 
         # Overlay a dot corresponding to the eye movement
-        overlay_x = frame_w // 2 + dx * 5  # Adjust the multiplier as needed
-        overlay_y = frame_h // 2 + dy * 5  # Adjust the multiplier as needed
+        overlay_x = frame_w // 2 + dx * sensitivity
+        overlay_y = frame_h // 2 + dy * sensitivity
         cv2.circle(frame, (overlay_x, overlay_y), 5, (255, 0, 0), cv2.FILLED)
 
 
@@ -85,7 +86,7 @@ while run:
                 colour = (0, 0, 255)
 
             cv2.circle(frame, (x, y), 3, colour)
-            cv2.putText(frame, str(id), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 255, 255), 1, cv2.LINE_AA)
+            # cv2.putText(frame, str(id), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 255, 255), 1, cv2.LINE_AA)
 
         if calibrated:
             track_eye_movement(landmarks, frame_w, frame_h)
