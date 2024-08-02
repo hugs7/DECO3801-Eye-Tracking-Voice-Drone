@@ -1,9 +1,15 @@
 import speech_recognition as sr
 import sounddevice as sd
 import numpy as np
+import time
+from scipy.io.wavfile import write
+
 
 recognizer = sr.Recognizer()
 
+def save_audio(audio):
+    with open("recorded_audio.wav", "wb") as f:
+        f.write(audio.get_wav_data())
 
 def print_volume(indata, frames, time, status):
     volume_norm = np.linalg.norm(indata) * 10
@@ -18,7 +24,9 @@ def capture_voice_input():
     with sr.Microphone() as source:
         #print(f"Listening on source", source.list_microphone_names(), "\n\n", source.list_working_microphones())
         print("Listening...")
-        audio = recognizer.listen(source)
+        
+        audio = recognizer.listen(source, phrase_time_limit=5)
+        save_audio(audio)
     return audio
 
 
@@ -36,16 +44,18 @@ def convert_voice_to_text(audio):
 
 
 def process_voice_command(text):
-    if "left" in text.lower():
-        print("Left")
-    elif "right" in text.lower():
-        print("Right")
-    elif "up" in text.lower():
-        print("Up")
-    elif "down" in text.lower():
-        print("Down")  
-    else:
-        print("Command Not understood. Try again.")
+    commands = {
+        "left": "Left",
+        "right": "Right",
+        "up": "Up",
+        "down": "Down",
+        "forward": "Forward",
+        "back" : "Back"
+    }
+    command = text.lower()
+    # Use the get method to provide a default value if the command is not found
+    result = commands.get(command, "Command Not understood. Try again.")
+    print(result)
     return False
 
 
@@ -55,7 +65,7 @@ def main():
         audio = capture_voice_input()
         text = convert_voice_to_text(audio)
         end_program = process_voice_command(text)
-
+        time.sleep(1)
 
 if __name__ == "__main__":
     main()
