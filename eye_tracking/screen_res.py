@@ -27,13 +27,20 @@ def normalise_landmark(landmark, frame_w, frame_h):
 
 
 def click_event(event, x, y, faces, detector):
-    if event == cv2.EVENT_LBUTTONDOWN and faces[0]:
-        lstOfPoints = [detector.findDistance(faces[0][i], (x, y))[0] for i in range(0, 468)]
-        print(lstOfPoints.index(min(lstOfPoints)))
+    if event == cv2.EVENT_LBUTTONDOWN and faces:
+        for face in faces:
+            lstOfPoints = [detector.findDistance(face[i], (x, y))[0] for i in range(0, 468)]
+            print(lstOfPoints.index(min(lstOfPoints)))
 
 
-while True:
-    _, frame = cam.read()
+def track_face(img, face):
+    for i in range(0, 468):
+        cv2.circle(img, (face[i][0], face[i][1]), 1, (0, 255, 0), cv2.FILLED)
+    cv2.setMouseCallback("Eye Tracking", lambda event, x, y, flags, params: click_event(event, x, y, faces, detector))
+
+
+while run:
+    success, frame = cam.read()
     frame = cv2.flip(frame, 1)
     rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     output = face_mesh.process(rgb_frame)
@@ -57,22 +64,19 @@ while True:
     if cam.get(cv2.CAP_PROP_POS_FRAMES) == cam.get(cv2.CAP_PROP_FRAME_COUNT):
         cam.set(cv2.CAP_PROP_POS_FRAMES, 0)
 
-    success, img = cam.read()
-    img, faces = detector.findFaceMesh(img, draw=False)
+    img, faces = detector.findFaceMesh(frame, draw=False)
     if faces:
-        face = faces[0]
-        for i in range(0, 468):
-            cv2.circle(img, (face[i][0], face[i][1]), 1, (0, 255, 0), cv2.FILLED)
-        cv2.imshow("Image", img)
-        cv2.setMouseCallback("Image", lambda event, x, y, flags, params: click_event(event, x, y, faces, detector))
-        cv2.waitKey(1)
+        for face in faces:
+            track_face(img, face)
+        cv2.imshow("Eye Tracking", img)
+
     else:
-        cv2.imshow("Image", img)
+        cv2.imshow("Eye Tracking", img)
         cv2.waitKey(1)
 
-    cv2.imshow("Eye Tracking", frame)
+    # cv2.imshow("Eye Tracking", frame)
     if cv2.waitKey(1) & 0xFF == ord("q"):
-        break
+        run = False
 
 # Release the resources
 cam.release()
