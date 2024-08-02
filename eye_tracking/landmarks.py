@@ -259,6 +259,15 @@ def classify_point(point_id: int):
     return None
 
 
+def check_duplicates_in_list(lst: List[int], num_to_check: int):
+    """
+    Check if a number is in a list more than once
+    """
+
+    if lst.count(num_to_check) > 1:
+        print(f"Duplicate point found: {num_to_check}")
+
+
 def check_for_duplicate_points():
     """
     Check for duplicate points in the landmark_mapping
@@ -270,7 +279,12 @@ def check_for_duplicate_points():
         if "points" not in value:
             continue
         for point in value["points"]:
+            check_duplicates_in_list(value["points"], point)
             if point in points:
                 print(f"Duplicate point found: {point}")
             else:
                 points.append(point)
+
+
+if __name__ == "__main__":
+    check_for_duplicate_points()
