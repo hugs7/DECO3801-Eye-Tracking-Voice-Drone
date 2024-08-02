@@ -19,4 +19,4 @@ eye_landmarks = {
     },
 }
 
-face_landmarks = [i for i in range(0, 468)]
+face_landmarks = [i for i in range(0, 478)]
