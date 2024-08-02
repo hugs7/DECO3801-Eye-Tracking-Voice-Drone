@@ -36,13 +36,13 @@ def click_event(event, x, y, faces, detector):
 def track_face(img, face):
     for i in range(0, 468):
         cv2.circle(img, (face[i][0], face[i][1]), 1, (0, 255, 0), cv2.FILLED)
-    cv2.setMouseCallback("Eye Tracking", lambda event, x, y, flags, params: click_event(event, x, y, faces, detector))
 
 
 while run:
     success, frame = cam.read()
     frame = cv2.flip(frame, 1)
     rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    windowName = "eyetracking"
     output = face_mesh.process(rgb_frame)
     points = output.multi_face_landmarks
 
@@ -65,16 +65,18 @@ while run:
         cam.set(cv2.CAP_PROP_POS_FRAMES, 0)
 
     img, faces = detector.findFaceMesh(frame, draw=False)
+    print("Num faces", len(faces))
     if faces:
         for face in faces:
             track_face(img, face)
-        cv2.imshow("Eye Tracking", img)
+        cv2.imshow(windowName, img)
+        cv2.setMouseCallback(windowName, lambda event, x, y, flags, params: click_event(event, x, y, faces, detector))
 
     else:
-        cv2.imshow("Eye Tracking", img)
+        cv2.imshow(windowName, img)
         cv2.waitKey(1)
 
-    # cv2.imshow("Eye Tracking", frame)
+    # cv2.imshow(windowName, frame)
     if cv2.waitKey(1) & 0xFF == ord("q"):
         run = False
 
