@@ -5,7 +5,6 @@ Screen res
 
 import cv2
 import time
-import pyautogui
 import mediapipe as mp
 from cvzone.FaceMeshModule import FaceMeshDetector
 
@@ -75,8 +74,6 @@ while run:
             x, y = normalise_landmark(landmark, frame_w, frame_h)
             cv2.circle(frame, (x, y), 3, (0, 255, 0))
             print(x, y)
-            # if id == 1:
-            #     pyautogui.moveTo(x, y)
 
     cv2.imshow(windowName, frame)
 
