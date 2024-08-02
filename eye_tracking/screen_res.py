@@ -80,13 +80,22 @@ while run:
         for id, landmark in enumerate(landmarks):
             x, y = normalise_landmark(landmark, frame_w, frame_h)
 
-            if id in lm.face_landmarks:
-                colour = (0, 255, 0)
+            point_class_label = lm.classify_point(id)
+            point_class = lm.landmark_mapping.get(point_class_label, None)
+            if point_class_label is not None:
+                # Do not show points we already had mapped
+                if "colour" in point_class:
+                    colour = point_class["colour"]
+                else:
+                    print(f"Point class {point_class} does not have a colour")
             else:
-                colour = (0, 0, 255)
+                if id in lm.face_landmarks:
+                    colour = (0, 255, 0)
+                else:
+                    colour = (0, 0, 255)
 
-            cv2.circle(frame, (x, y), 3, colour)
-            # cv2.putText(frame, str(id), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 255, 255), 1, cv2.LINE_AA)
+                cv2.circle(frame, (x, y), 3, colour)
+                cv2.putText(frame, str(id), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 255, 255), 1, cv2.LINE_AA)
 
         if calibrated:
             track_eye_movement(landmarks, frame_w, frame_h)
