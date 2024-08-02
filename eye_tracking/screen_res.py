@@ -1,24 +1,22 @@
-"""
-Screen res
-02/08/2024
-"""
-
 import cv2
 import time
 import mediapipe as mp
-from cvzone.FaceMeshModule import FaceMeshDetector
 from mediapipe.python.solutions.face_mesh import FaceMesh
 import landmarks as lm
 
 # Initialize variables
 run = True
+calibrated = False
+reference_positions = {"left": {}, "right": {}}
+window_width = 1280  # Replace with your desired width
+window_height = 900
+windowName = "eyetracking"
 print_interval = 5  # Time interval in seconds
 last_print_time = time.time()
 
 # Initialize video capture and face mesh detector
 cam = cv2.VideoCapture(0)
-face_mesh = FaceMesh(refine_landmarks=True, max_num_faces=3)
-detector = FaceMeshDetector(maxFaces=1)
+face_mesh = FaceMesh(refine_landmarks=True, max_num_faces=1)
 
 
 def normalise_landmark(landmark, frame_w, frame_h):
@@ -27,38 +25,28 @@ def normalise_landmark(landmark, frame_w, frame_h):
     return x, y
 
 
-def click_event(event, x, y, points, detector):
-    if event == cv2.EVENT_LBUTTONDOWN and points:
-        lstOfPoints = [detector.findDistance(points, (x, y))[0] for i in range(0, 468)]
-        print(lstOfPoints.index(min(lstOfPoints)))
+def calibrate_eye_positions(landmarks, frame_w, frame_h):
+    for eye in ["left", "right"]:
+        for pos in ["top", "bottom", "left", "right"]:
+            x, y = normalise_landmark(landmarks[lm.eye_landmarks[eye][pos]], frame_w, frame_h)
+            reference_positions[eye][pos] = (x, y)
 
 
-def track_face(img, face):
-    for i in range(0, 468):
-        cv2.circle(img, (face[i][0], face[i][1]), 1, (0, 255, 0), cv2.FILLED)
+def track_eye_movement(landmarks, frame_w, frame_h):
+    for eye in ["left", "right"]:
+        iris_x, iris_y = normalise_landmark(landmarks[lm.eye_landmarks[eye]["top"]], frame_w, frame_h)
+        ref_x, ref_y = reference_positions[eye]["top"]
 
+        dx = iris_x - ref_x
+        dy = iris_y - ref_y
 
-def face_detector(frame, windowName):
-    if cam.get(cv2.CAP_PROP_POS_FRAMES) == cam.get(cv2.CAP_PROP_FRAME_COUNT):
-        cam.set(cv2.CAP_PROP_POS_FRAMES, 0)
-
-    img, faces = detector.findFaceMesh(frame, draw=False)
-    print("Num faces", len(faces))
-    if faces:
-        for face in faces:
-            track_face(img, face)
-        cv2.imshow(windowName, img)
-        cv2.setMouseCallback(windowName, lambda event, x, y, flags, params: click_event(event, x, y, faces, detector))
-
-    else:
-        cv2.imshow(windowName, img)
-        cv2.waitKey(1)
+        # Overlay a dot corresponding to the eye movement
+        overlay_x = frame_w // 2 + dx * 5  # Adjust the multiplier as needed
+        overlay_y = frame_h // 2 + dy * 5  # Adjust the multiplier as needed
+        cv2.circle(frame, (overlay_x, overlay_y), 5, (255, 0, 0), cv2.FILLED)
 
 
 # Set the desired window size
-window_width = 1280  # Replace with your desired width
-window_height = 900
-windowName = "eyetracking"
 cv2.namedWindow(windowName, cv2.WINDOW_NORMAL)
 cv2.resizeWindow(windowName, window_width, window_height)
 
@@ -76,6 +64,18 @@ while run:
         current_time = time.time()
         last_print_time = current_time
 
+        if not calibrated:
+            cv2.putText(
+                frame,
+                "Look at the camera and press Enter to calibrate",
+                (50, 50),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.7,
+                (255, 255, 255),
+                2,
+                cv2.LINE_AA,
+            )
+
         for id, landmark in enumerate(landmarks):
             x, y = normalise_landmark(landmark, frame_w, frame_h)
 
@@ -87,11 +87,18 @@ while run:
             cv2.circle(frame, (x, y), 3, colour)
             cv2.putText(frame, str(id), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 255, 255), 1, cv2.LINE_AA)
 
-    cv2.imshow(windowName, frame)
-    cv2.setMouseCallback(windowName, lambda event, x, y, flags, params: click_event(event, x, y, points, detector))
+        if calibrated:
+            track_eye_movement(landmarks, frame_w, frame_h)
 
-    if cv2.waitKey(1) & 0xFF == ord("q"):
+    cv2.imshow(windowName, frame)
+
+    key = cv2.waitKey(1) & 0xFF
+    if key == ord("q"):
         run = False
+    elif key == ord("\r"):  # Enter key to calibrate
+        if points:
+            calibrate_eye_positions(landmarks, frame_w, frame_h)
+            calibrated = True
 
 # Release the resources
 cam.release()
