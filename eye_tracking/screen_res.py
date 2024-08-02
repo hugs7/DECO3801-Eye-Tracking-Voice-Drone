@@ -14,6 +14,7 @@ face_mesh = mp.solutions.face_mesh.FaceMesh()
 
 while True:
     _, frame = cam.read()
+    frame = cv2.flip(frame, 1)
     rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     output = face_mesh.process(rgb_frame)
     points = output.multi_face_landmarks
