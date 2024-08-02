@@ -11,13 +11,13 @@ def print_volume(indata, frames, time, status):
 
 
 def capture_voice_input():
-    with sd.InputStream(callback=print_volume):
+    """ with sd.InputStream(callback=print_volume):
         sd.sleep(10000)
 
-    return
+    return"""
     with sr.Microphone() as source:
-        print(f"Listening on source", source.list_microphone_names(), "\n\n", source.list_working_microphones())
-
+        #print(f"Listening on source", source.list_microphone_names(), "\n\n", source.list_working_microphones())
+        print("Listening...")
         audio = recognizer.listen(source)
     return audio
 
@@ -38,9 +38,12 @@ def convert_voice_to_text(audio):
 def process_voice_command(text):
     if "left" in text.lower():
         print("Left")
-    elif "Right" in text.lower():
+    elif "right" in text.lower():
         print("Right")
-        return True
+    elif "up" in text.lower():
+        print("Up")
+    elif "down" in text.lower():
+        print("Down")  
     else:
         print("Command Not understood. Try again.")
     return False
