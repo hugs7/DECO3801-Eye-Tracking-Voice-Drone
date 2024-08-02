@@ -8,6 +8,7 @@ import time
 import mediapipe as mp
 from cvzone.FaceMeshModule import FaceMeshDetector
 from mediapipe.python.solutions.face_mesh import FaceMesh
+import landmarks as lm
 
 # Initialize variables
 run = True
@@ -26,11 +27,10 @@ def normalise_landmark(landmark, frame_w, frame_h):
     return x, y
 
 
-def click_event(event, x, y, faces, detector):
-    if event == cv2.EVENT_LBUTTONDOWN and faces:
-        for face in faces:
-            lstOfPoints = [detector.findDistance(face[i], (x, y))[0] for i in range(0, 468)]
-            print(lstOfPoints.index(min(lstOfPoints)))
+def click_event(event, x, y, points, detector):
+    if event == cv2.EVENT_LBUTTONDOWN and points:
+        lstOfPoints = [detector.findDistance(points, (x, y))[0] for i in range(0, 468)]
+        print(lstOfPoints.index(min(lstOfPoints)))
 
 
 def track_face(img, face):
@@ -55,11 +55,17 @@ def face_detector(frame, windowName):
         cv2.waitKey(1)
 
 
+# Set the desired window size
+window_width = 1280  # Replace with your desired width
+window_height = 900
+windowName = "eyetracking"
+cv2.namedWindow(windowName, cv2.WINDOW_NORMAL)
+cv2.resizeWindow(windowName, window_width, window_height)
+
 while run:
     success, frame = cam.read()
     frame = cv2.flip(frame, 1)
     rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    windowName = "eyetracking"
     output = face_mesh.process(rgb_frame)
     points = output.multi_face_landmarks
 
@@ -68,15 +74,21 @@ while run:
     if points:
         landmarks = points[0].landmark
         current_time = time.time()
-        # if current_time - last_print_time > print_interval:
         last_print_time = current_time
-        # print(type(landmarks))
-        for id, landmark in enumerate(landmarks[469:]):
+
+        for id, landmark in enumerate(landmarks):
             x, y = normalise_landmark(landmark, frame_w, frame_h)
-            cv2.circle(frame, (x, y), 3, (0, 255, 0))
-            print(x, y)
+
+            if id in lm.face_landmarks:
+                colour = (0, 255, 0)
+            else:
+                colour = (0, 0, 255)
+
+            cv2.circle(frame, (x, y), 3, colour)
+            cv2.putText(frame, str(id), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 255, 255), 1, cv2.LINE_AA)
 
     cv2.imshow(windowName, frame)
+    cv2.setMouseCallback(windowName, lambda event, x, y, flags, params: click_event(event, x, y, points, detector))
 
     if cv2.waitKey(1) & 0xFF == ord("q"):
         run = False
