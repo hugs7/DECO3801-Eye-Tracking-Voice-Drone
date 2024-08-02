@@ -67,5 +67,6 @@ def main():
         end_program = process_voice_command(text)
         time.sleep(1)
 
+
 if __name__ == "__main__":
     main()
