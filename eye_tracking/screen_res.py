@@ -7,6 +7,7 @@ import cv2
 import time
 import mediapipe as mp
 from cvzone.FaceMeshModule import FaceMeshDetector
+from mediapipe.python.solutions.face_mesh import FaceMesh
 
 # Initialize variables
 run = True
@@ -15,7 +16,7 @@ last_print_time = time.time()
 
 # Initialize video capture and face mesh detector
 cam = cv2.VideoCapture(0)
-face_mesh = mp.solutions.face_mesh.FaceMesh(refine_landmarks=True)
+face_mesh = FaceMesh(refine_landmarks=True, max_num_faces=3)
 detector = FaceMeshDetector(maxFaces=1)
 
 
