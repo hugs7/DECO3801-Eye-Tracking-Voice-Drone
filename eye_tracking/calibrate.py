@@ -196,31 +196,16 @@ class CalibrationData:
         self.eye_calibration[self.step][side] = eye_calibration_side_data
 
 
-def calibrate_init(
-    face_landmarks: List[NormalisedLandmark], landmark_mapping: landmarks.Landmarks, frame_dim: coordinate.Coordinate2D
-) -> CalibrationData:
+def calibrate_init(landmark_mapping: landmarks.Landmarks, frame_dim: coordinate.Coordinate2D) -> CalibrationData:
     """
-    Calibrate eye positions based on the landmarks
-    :param face_landmarks: The landmarks to calibrate from the face mesh
+    Initialises the calibration. Creates a CalibrationData object for the calibration process
     :param landmark_mapping: The mapping of landmarks
     :param frame_dim: The dimensions of the frame
-    :return ReferencePositions: The reference positions
+    :return: A new CalibrationData object
     """
 
-    reference_positions = CalibrationData(landmark_mapping, frame_dim)
-
-    eye_landmark_mapping = landmark_mapping.eyes
-
-    for eye in ["left", "right"]:
-        for pos in ["top", "bottom", "left", "right", "centre"]:
-            eye_landmarks: landmarks.EyeLandmarks = landmark_mapping.get_part_by_name(eye)
-            eye_points: landmarks.EyePoints = eye_landmarks.points
-            pos_id = eye_points.get_side(pos)
-            eye_coord = face_landmarks[pos_id]
-            landmark_coord = landmarks.normalise_landmark(eye_coord, frame_dim)
-            # reference_positions[eye][pos] = landmark_coord
-
-    return reference_positions
+    calibration_data = CalibrationData(landmark_mapping, frame_dim)
+    return calibration_data
 
 
 def perform_calibration(
