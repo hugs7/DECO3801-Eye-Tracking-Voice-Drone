@@ -39,6 +39,19 @@ class Colour:
 
         return self.red, self.green, self.blue
 
+    @staticmethod
+    def parse_colour(obj: dict, colour_key: str = "colour") -> "Colour":
+        """
+        Parses a colour name to a Colour object
+        :param obj: The object to parse
+        :param colour_key: The colour key. Default is "colour"
+        :return None
+        """
+
+        colour_name = obj[colour_key]
+        colour = ColourMap.__dict__[colour_name]
+        obj[colour_key] = colour
+
 
 class ColourMap:
     red = Colour("red", 0, 0, 255)
