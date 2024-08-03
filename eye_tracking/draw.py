@@ -2,14 +2,21 @@
 Module to draw on the screen
 """
 
+from typing import List
 import cv2
 import cv2.typing as cv_t
+from google.protobuf.internal.containers import RepeatedCompositeContainer
+import numpy as np
 
 import landmarks
 import coordinate
 
+from types.NormalisedLandmark import NormalisedLandmark
 
-def draw_landmarks(frame, face_landmarks, landmark_mapping: landmarks.Landmarks, frame_dim: coordinate.Coordinate) -> None:
+
+def draw_landmarks(
+    frame: np.ndarray, face_landmarks: List[NormalisedLandmark], landmark_mapping: landmarks.Landmarks, frame_dim: coordinate.Coordinate
+) -> None:
     """
     Draws the landmarks on the frame
     :param frame: The frame to draw the landmarks on
