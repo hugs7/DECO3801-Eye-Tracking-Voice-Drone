@@ -19,7 +19,7 @@ def draw_landmarks(
     frame: np.ndarray,
     face_landmarks: List[NormalisedLandmark],
     landmark_mapping: landmarks.Landmarks,
-    frame_dim: coordinate.Coordinate2D,
+    frame_dim: coordinate.Coordinate3D,
     landmark_visibility: Dict[str, bool],
 ) -> None:
     """

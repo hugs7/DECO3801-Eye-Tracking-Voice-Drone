@@ -188,7 +188,7 @@ def normalise_landmark(landmark, frame_dim: coordinate.Coordinate3D) -> coordina
     y = int(landmark.y * frame_dim.y)
     z = int(landmark.z * frame_dim.z)
 
-    return coordinate.Coordinate2D(x, y, z)
+    return coordinate.Coordinate3D(x, y, z)
 
 
 def get_image_coord_of_landmark(face_landmarks: List[NormalisedLandmark], landmark_id: int, frame_dim: np.ndarray) -> Tuple[int, int]:
