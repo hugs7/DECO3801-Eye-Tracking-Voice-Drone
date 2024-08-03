@@ -3,7 +3,7 @@ Initialises the eye_tracking package.
 """
 
 import os
-import file_helper
+import utils.file_helper as file_helper
 
 import constants
 import landmarks

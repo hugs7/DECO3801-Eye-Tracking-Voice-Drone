@@ -6,8 +6,8 @@ Defines the mapping for landmarks
 from typing import Dict, List, Union, TypedDict, Optional
 
 import constants
-import list_helper
-import dict_helper
+import utils.list_helper as list_helper
+import utils.dict_helper as dict_helper
 from colours import ColourMap as CM, Colour
 
 

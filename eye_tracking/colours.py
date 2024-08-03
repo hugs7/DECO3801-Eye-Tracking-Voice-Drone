@@ -4,7 +4,7 @@ Defines some colours
 
 from typing import Tuple
 
-import math_utils
+import utils.math_utils as math_utils
 
 MIN_COLOUR_VALUE = 0
 MAX_COLOUR_VALUE = 255
