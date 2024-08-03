@@ -4,6 +4,7 @@ Defines main loop for eye tracking
 
 from typing import Tuple, List
 import cv2
+from mediapipe.python.solutions.face_mesh import FaceMesh
 
 import constants
 import coordinate
@@ -16,21 +17,25 @@ import pose_estimation
 from colours import ColourMap as CM
 from custom_types.NormalisedLandmark import NormalisedLandmark
 
+reference_positions = None
+calibrated = False
+show_landmarks = True
+
 
 def main_loop(
-    calibrated: bool, show_landmarks: bool, cam, face_mesh, landmark_mapping: landmarks.LandmarkMapping, upscale_dim: coordinate.Coordinate
-) -> Tuple[bool, bool, bool]:
+    cam: cv2.VideoCapture, face_mesh: FaceMesh, landmark_mapping: landmarks.LandmarkMapping, upscale_dim: coordinate.Coordinate
+) -> bool:
     """
     Defines one iteration of the main loop
     to track eye movement
-    :param calibrated: Whether the eye has been calibrated
-    :param show_landmarks: Whether to show the landmarks
     :param cam: The camera object
     :param face_mesh: The face mesh object
     :param landmark_mapping: The landmark mapping
     :param upscale_dim: The dimensions to upscale to
-    :return Tuple[bool, bool]: The run status and calibration status
+    :return bool: Whether to continue running
     """
+
+    global calibrated, reference_positions, show_landmarks
 
     success, frame = cam.read()
     frame = cv2.flip(frame, 1)
@@ -63,6 +68,7 @@ def main_loop(
             draw.draw_landmarks(upscaled_frame, landmarks, landmark_mapping, upscale_dim)
 
         if calibrated:
+            exit(0)
             eye_movement.track_eye_movement(upscaled_frame, landmarks, frame_dim)
 
         pose_estimation.estimate_pose(upscaled_frame, landmarks, landmark_mapping)
@@ -77,11 +83,11 @@ def main_loop(
     elif key == ord("\r"):
         # Enter key to calibrate
         if points:
-            reference_positions = calibrate.calibrate_eye_positions(landmarks, frame_dim)
+            reference_positions = calibrate.calibrate_eye_positions(landmarks, landmark_mapping, frame_dim)
             calibrated = True
     elif key == ord("l"):
         # Toggle landmarks
         show_landmarks = not show_landmarks
         print(f"Show landmarks: {show_landmarks}")
 
-    return run, calibrated, show_landmarks
+    return run
