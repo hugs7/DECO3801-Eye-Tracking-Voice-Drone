@@ -2,7 +2,7 @@
     "eyes": [
         {
             "name": "left",
-            "colour": "red",
+            "colour": "cyan",
             "points": {
                 "centre": 468,
                 "right": 469,
@@ -13,7 +13,7 @@
         },
         {
             "name": "right",
-            "colour": "red",
+            "colour": "cyan",
             "points": {
                 "centre": 473,
                 "right": 474,
@@ -35,7 +35,7 @@
         {
             "name": "lower_eyelid_left",
             "colour": "royal_blue",
-            "points": [25, 110, 24, 23, 145, 153, 22, 26, 154, 112, 173, 343, 144, 163, 226, 7]
+            "points": [25, 110, 24, 23, 145, 153, 22, 26, 154, 112, 173, 144, 163, 226, 7]
         },
         { "name": "lower_eyelid_right", "colour": "royal_blue", "points": [249, 255, 373, 390, 374, 381, 380, 382] },
         {
@@ -46,7 +46,7 @@
         {
             "name": "under_eye_right",
             "colour": "cornflower_blue",
-            "points": [357, 350, 277, 349, 329, 348, 347, 449, 450, 451, 452, 253, 254, 339, 448, 261, 252, 256, 453]
+            "points": [357, 350, 277, 349, 329, 348, 347, 449, 343, 450, 451, 452, 253, 254, 339, 448, 261, 252, 256, 453]
         },
         { "name": "eyesocket_outside_left", "colour": "coral", "points": [124, 35, 111, 46] },
         { "name": "eyesocket_outside_right", "colour": "coral", "points": [265, 446, 342, 353] },

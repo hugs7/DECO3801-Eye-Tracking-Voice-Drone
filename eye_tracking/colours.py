@@ -34,7 +34,14 @@ class Colour:
         """
         return math_utils.in_range(value, MIN_COLOUR_VALUE, MAX_COLOUR_VALUE)
 
-    def get_colour(self) -> Tuple[int, int, int]:
+    def get_colour_bgr(self) -> Tuple[int, int, int]:
+        """
+        Returns colour as rgb tuple
+        :return Tuple[int, int, int]: The colour as an RGB tuple
+        """
+        return self.blue, self.green, self.red
+
+    def get_colour_rgb(self) -> Tuple[int, int, int]:
         """
         Returns colour as rgb tuple
         :return Tuple[int, int, int]: The colour as an RGB tuple
@@ -65,7 +72,7 @@ class ColourMap:
     light_green = Colour("light_green", 104, 235, 5)
     spring_green = Colour("spring_green", 52, 235, 76)
     forest_green = Colour("forest_green", 52, 235, 104)
-    torquoise = Colour("torquoise", 52, 235, 174)
+    torquoise = Colour("torquoise", 66, 245, 224)
     cyan = Colour("cyan", 52, 229, 235)
     sky_blue = Colour("sky_blue", 52, 162, 235)
     cornflower_blue = Colour("cornflower_blue", 52, 116, 235)

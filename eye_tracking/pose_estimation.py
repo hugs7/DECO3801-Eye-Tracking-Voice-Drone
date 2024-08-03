@@ -36,7 +36,7 @@ def project_gaze_point(rotation_vector, translation_vector, camera_matrix, dist_
     p1 = (int(eye_landmark[0]), int(eye_landmark[1]))
     p2 = (int(gaze_point2D[0][0][0]), int(gaze_point2D[0][0][1]))
 
-    cv2.line(frame, p1, p2, colour.get_colour(), 2)
+    cv2.line(frame, p1, p2, colour.get_colour_bgr(), 2)
 
     return p2
 
@@ -95,13 +95,13 @@ def estimate_pose(frame: np.ndarray, face_landmarks: List[NormalisedLandmark], l
     # Draw landmarks and pose line
     dot_size = 10
     for p in image_points:
-        cv2.circle(frame, (int(p[0]), int(p[1])), dot_size, CM.red.get_colour(), -1)
+        cv2.circle(frame, (int(p[0]), int(p[1])), dot_size, CM.red.get_colour_bgr(), -1)
 
     p1 = (int(image_points[0][0]), int(image_points[0][1]))
     p2 = (int(nose_end_point2D[0][0][0]), int(nose_end_point2D[0][0][1]))
 
-    cv2.line(frame, p1, p2, CM.blue.get_colour(), 2)
-    cv2.circle(frame, p2, 10, CM.red.get_colour(), -1)
+    cv2.line(frame, p1, p2, CM.blue.get_colour_bgr(), 2)
+    cv2.circle(frame, p2, 10, CM.red.get_colour_bgr(), -1)
 
     # Calculate and draw gaze points for both eyes
     eye_landmark_mapping = landmark_mapping.eyes

@@ -62,7 +62,7 @@ def main_loop(
                 (50, 50),
                 cv2.FONT_HERSHEY_SIMPLEX,
                 0.7,
-                CM.white.get_colour(),
+                CM.white.get_colour_bgr(),
                 2,
                 cv2.LINE_AA,
             )
