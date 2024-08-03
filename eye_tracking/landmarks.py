@@ -152,6 +152,25 @@ class Landmarks:
 
         return None
 
+    def get_part_by_name(self, part_name: str) -> Optional[Union[EyeLandmarks, FacePart]]:
+        """
+        Get a part by its name
+        :param part_name: The name of the part
+        :return: The part or None if not found
+        """
+
+        # Search in eye landmarks
+        for eye_data in self.eyes:
+            if eye_data.name == part_name:
+                return eye_data
+
+        # Search in face landmarks
+        for face_part in self.face:
+            if face_part.name == part_name:
+                return face_part
+
+        return None
+
 
 def normalise_landmark(landmark, frame_dim: coordinate.Coordinate) -> coordinate.Coordinate:
     """
