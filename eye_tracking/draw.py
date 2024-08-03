@@ -25,8 +25,8 @@ def draw_landmarks(
     :return: None
     """
 
-    dot_radius = 3
-    font_scale = 0.3
+    dot_radius = 7
+    font_scale = 0.8
     thickness = 1
 
     for id, landmark in enumerate(face_landmarks):
@@ -38,5 +38,5 @@ def draw_landmarks(
 
         centre = landmark_coord.to_point()
         colour = point_class.colour.get_colour()
-        cv2.circle(frame, centre, dot_radius, colour)
+        cv2.circle(frame, centre, dot_radius, colour, cv2.FILLED)
         cv2.putText(frame, str(id), centre, cv2.FONT_HERSHEY_SIMPLEX, font_scale, colour, thickness, cv2.LINE_AA)
