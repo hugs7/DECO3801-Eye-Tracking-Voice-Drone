@@ -227,7 +227,6 @@ def perform_calibration(
         if next_step is None:
             print("Calibration complete")
             # Output calibration data
-            print(calibration_data)
 
             return False, True
         else:
