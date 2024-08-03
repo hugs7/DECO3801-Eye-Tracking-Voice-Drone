@@ -40,6 +40,8 @@ class LandmarkMapping(TypedDict):
 
 class FaceLandmarks:
     def __init__(self, landmark_mapping: LandmarkMapping):
+        seen_points = set()
+
         # === Eyes ===
         dict_helper.check_property_exists(landmark_mapping, "eyes", "landmark_mapping")
 
@@ -63,6 +65,12 @@ class FaceLandmarks:
             if len(duplicated_points) > 0:
                 raise ValueError(f"Duplicated points found in eye class {eye}: {duplicated_points}")
 
+            overlap = seen_points.intersection(parsed_eye_points)
+            if len(overlap) > 0:
+                raise ValueError(f"Duplicate points found in eye class {eye}: {overlap}")
+
+            seen_points.update(parsed_eye_points)
+
         # === Face ===
         dict_helper.check_property_exists(landmark_mapping, "face", "landmark_mapping")
 
@@ -80,6 +88,12 @@ class FaceLandmarks:
             duplicated_points = list_helper.find_duplicates_in_list(face_points)
             if len(duplicated_points) > 0:
                 raise ValueError(f"Duplicated points found in face part {face_part}: {duplicated_points}")
+
+            overlap = seen_points.intersection(face_points)
+            if len(overlap) > 0:
+                raise ValueError(f"Duplicate points found in face part {face_part}: {overlap}")
+
+            seen_points.update(face_points)
 
         print("landmark_mapping")
         print(landmark_mapping)
