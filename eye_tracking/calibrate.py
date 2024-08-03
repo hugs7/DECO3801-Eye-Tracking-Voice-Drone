@@ -2,7 +2,7 @@
 Module to help with eye tracking calibration
 """
 
-from typing import Optional
+from typing import List, Optional
 from enum import Enum
 import cv2
 
@@ -81,7 +81,7 @@ class CalibrationData:
 
 
 def calibrate_init(
-    face_landmarks: NormalisedLandmark, landmark_mapping: landmarks.Landmarks, frame_dim: coordinate.Coordinate
+    face_landmarks: List[NormalisedLandmark], landmark_mapping: landmarks.Landmarks, frame_dim: coordinate.Coordinate
 ) -> CalibrationData:
     """
     Calibrate eye positions based on the landmarks
