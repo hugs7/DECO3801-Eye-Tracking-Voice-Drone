@@ -54,16 +54,8 @@ def main_loop(
 
     global loop_data
 
-    success, frame = cam.read()
-    frame = cv2.flip(frame, 1)
-    rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    output = face_mesh.process(rgb_frame)
-    points = output.multi_face_landmarks
-
-    # Upscale the frame
-    upscaled_frame = cv2.resize(frame, upscaled_dim.to_tuple())
-    frame_h, frame_w, _ = upscaled_frame.shape
-    frame_dim = coordinate.Coordinate(frame_w, frame_h)
+    points, frame = camera.read_camera_feed(cam, face_mesh)
+    upscaled_frame, frame_dim = camera.upscale(frame, frame_dim)
 
     if points:
         landmarks: List[NormalisedLandmark] = points[0].landmark
