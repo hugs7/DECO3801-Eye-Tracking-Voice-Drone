@@ -75,9 +75,9 @@ def main_loop(
             if loop_data["calibrated"]:
                 print("Calibrated")
                 print(loop_data["calibration_data"])
-                pose_estimation.estimate_gaze(upscaled_frame, landmarks, landmark_mapping, loop_data["calibration_data"])
 
         elif loop_data["calibrated"]:
+            pose_estimation.estimate_gaze(upscaled_frame, landmarks, landmark_mapping, loop_data["calibration_data"])
             # eye_movement.track_eye_movement(upscaled_frame, landmarks, frame_dim)
             pass
 
