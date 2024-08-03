@@ -35,10 +35,9 @@ class FacePart:
         self.points = points
 
 
-class LandmarkMapping:
-    def __init__(self, eyes: Dict[str, EyeLandmarks], face: List[FacePart]):
-        self.eyes = eyes
-        self.face = face
+class LandmarkMapping(TypedDict):
+    eyes: Dict[str, EyeLandmarks]
+    face: List[FacePart]
 
 
 class Landmarks:
@@ -113,9 +112,9 @@ class Landmarks:
             seen_points.update(face_part.points)
             face.append(face_part)
 
-        landmark_mapping = LandmarkMapping(eyes=eyes, face=face)
-
-        self.landmark_mapping = landmark_mapping
+        self.eyes = eyes
+        self.face = face
+        self.landmark_mapping: LandmarkMapping = {"eyes": eyes, "face": face}
 
     def classify_point(self, point_id: int) -> Optional[Union[EyeLandmarks, FacePart]]:
         """
