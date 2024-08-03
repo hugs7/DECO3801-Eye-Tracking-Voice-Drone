@@ -54,7 +54,7 @@ class Landmarks:
             dict_helper.check_property_exists(eye_data, "colour", "eye class")
             dict_helper.check_property_exists(eye_data, "points", "eye class")
 
-            Colour.parse_colour(eye_data)
+            eye_colour = Colour.parse_colour(eye_data)
             eye_points_data = eye_data["points"]
 
             for expected_key in ["centre", "right", "top", "left", "bottom"]:
@@ -67,7 +67,7 @@ class Landmarks:
                 left=eye_points_data["left"],
                 bottom=eye_points_data["bottom"],
             )
-            eye_landmarks = EyeLandmarks(colour=eye_data["colour"], points=eye_points)
+            eye_landmarks = EyeLandmarks(colour=eye_colour, points=eye_points)
 
             # Check for duplicates
             parsed_eye_points = [eye_points.centre, eye_points.right, eye_points.top, eye_points.left, eye_points.bottom]
@@ -93,10 +93,10 @@ class Landmarks:
             dict_helper.check_property_exists(face_part_data, "colour", "face part")
             dict_helper.check_property_exists(face_part_data, "points", "face part")
 
-            Colour.parse_colour(face_part_data)
+            face_part_colour = Colour.parse_colour(face_part_data)
             face_part = FacePart(
                 name=face_part_data["name"],
-                colour=face_part_data["colour"],
+                colour=face_part_colour,
                 points=face_part_data["points"],
             )
 
@@ -124,12 +124,12 @@ class Landmarks:
         """
 
         # Search in eye landmarks
-        for eye, eye_data in self.landmark_mapping.eyes.items():
+        for eye, eye_data in self.eyes.items():
             if point_id in vars(eye_data.points).values():
                 return eye_data
 
         # Search in face landmarks
-        for face_part in self.landmark_mapping.face:
+        for face_part in self.face:
             if point_id in face_part.points:
                 return face_part
 
