@@ -1,5 +1,6 @@
 """
 Defines types for NormalisedLandmark
+Defined here because it is not available in the mediapipe python package
 """
 
 
