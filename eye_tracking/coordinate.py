@@ -44,6 +44,13 @@ class Coordinate3D:
         """
         return self.x, self.y, self.z
 
+    def to_point(self) -> cv_t.Point3f:
+        """
+        Returns the coordinates as a tuple of integers
+        :return Tuple[int, int, int]: The coordinates as a tuple of integers
+        """
+        point = (int(self.x), int(self.y), int(self.z))
+
     def __str__(self) -> str:
         return f"({self.x}, {self.y}, {self.z})"
 
