@@ -3,6 +3,7 @@ Module to track eye movement
 """
 
 import cv2
+import numpy as np
 
 import calibrate
 import landmarks
@@ -10,7 +11,10 @@ import coordinate
 
 
 def track_eye_movement(
-    frame, face_landmarks: landmarks.Landmarks, frame_dim: coordinate.Coordinate, reference_positions: calibrate.ReferencePositions
+    frame: np.ndarray,
+    face_landmarks: landmarks.Landmarks,
+    frame_dim: coordinate.Coordinate,
+    reference_positions: calibrate.ReferencePositions,
 ) -> None:
     """
     Tracks eye movement based on the face landmarks and draws a dot for where the user is looking
