@@ -14,7 +14,7 @@ def track_eye_movement(
     frame: np.ndarray,
     face_landmarks: landmarks.Landmarks,
     frame_dim: coordinate.Coordinate,
-    reference_positions: calibrate.ReferencePositions,
+    reference_positions,
 ) -> None:
     """
     Tracks eye movement based on the face landmarks and draws a dot for where the user is looking

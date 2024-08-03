@@ -17,7 +17,7 @@ import pose_estimation
 from colours import ColourMap as CM
 from custom_types.NormalisedLandmark import NormalisedLandmark
 
-reference_positions = None
+calibration_data = None
 calibrated = False
 show_landmarks = True
 
@@ -35,7 +35,7 @@ def main_loop(
     :return bool: Whether to continue running
     """
 
-    global calibrated, reference_positions, show_landmarks
+    global calibrated, show_landmarks, calibration_data
 
     success, frame = cam.read()
     frame = cv2.flip(frame, 1)
@@ -43,18 +43,16 @@ def main_loop(
     output = face_mesh.process(rgb_frame)
     points = output.multi_face_landmarks
 
-    frame_h, frame_w, _ = frame.shape
-    frame_dim = coordinate.Coordinate(frame_w, frame_h)
-
     # Upscale the frame
     upscaled_frame = cv2.resize(frame, upscale_dim.to_tuple())
+    frame_h, frame_w, _ = upscaled_frame.shape
+    frame_dim = coordinate.Coordinate(frame_w, frame_h)
 
     if points:
         landmarks: List[NormalisedLandmark] = points[0].landmark
-
         if not calibrated:
             cv2.putText(
-                frame,
+                upscaled_frame,
                 "Look at the camera and press Enter to calibrate",
                 (50, 50),
                 cv2.FONT_HERSHEY_SIMPLEX,
@@ -67,9 +65,12 @@ def main_loop(
         if show_landmarks:
             draw.draw_landmarks(upscaled_frame, landmarks, landmark_mapping, upscale_dim)
 
-        if calibrated:
-            exit(0)
-            eye_movement.track_eye_movement(upscaled_frame, landmarks, frame_dim)
+        if calibrated and calibration_data is not None:
+            # We enter the calibration mode
+            calibrate.perform_calibration(calibration_data, upscaled_frame)
+
+        # if calibrated:
+        #     eye_movement.track_eye_movement(upscaled_frame, landmarks, frame_dim)
 
         pose_estimation.estimate_pose(upscaled_frame, landmarks, landmark_mapping)
 
@@ -83,7 +84,8 @@ def main_loop(
     elif key == ord("\r"):
         # Enter key to calibrate
         if points:
-            reference_positions = calibrate.calibrate_eye_positions(landmarks, landmark_mapping, frame_dim)
+            calibration_data = calibrate.calibrate_init(landmarks, landmark_mapping, frame_dim)
+            print("initiating calibration", calibration_data)
             calibrated = True
     elif key == ord("l"):
         # Toggle landmarks
