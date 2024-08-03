@@ -3,6 +3,7 @@ File Helper Utils
 """
 
 import os
+import sys
 import json
 
 
@@ -39,7 +40,7 @@ def resolve_path(relative_path: str, expect_exists: bool = True) -> str:
     """
 
     # Get path of the entry point
-    entry_point = os.path.dirname(os.path.abspath(__file__))
+    entry_point = os.path.dirname(os.path.abspath(sys.argv[0]))
 
     # Join the entry point with the relative path
     absolute_path = os.path.join(entry_point, relative_path)
