@@ -23,7 +23,21 @@ class Colour:
             raise ValueError(f"Invalid red value {red}")
 
     def _is_valid_colour_value(self, value: int) -> bool:
+        """
+        Check if a colour value is valid
+        :param value: The colour value
+        :return: True if the value is valid, False otherwise
+        """
+
         return math_utils.in_range(value, MIN_COLOUR_VALUE, MAX_COLOUR_VALUE)
+
+    def get_colour(self) -> Tuple[int, int, int]:
+        """
+        Returns colour as rgb tuple
+        :return Tuple[int, int, int]: The colour as an RGB tuple
+        """
+
+        return self.red, self.green, self.blue
 
 
 class ColourMap:
