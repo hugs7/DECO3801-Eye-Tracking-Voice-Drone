@@ -43,10 +43,9 @@ def toggle_landmark_part(part, landmark_visibility: Dict[str, bool]) -> None:
     print(f"Toggled {part} to {landmark_visibility[part]}")
 
 
-def handle_loop_key_events(landmarks: List[NormalisedLandmark], landmark_mapping, frame_dim, loop_data: loop.LoopData, points) -> bool:
+def handle_loop_key_events(landmark_mapping, frame_dim, loop_data: loop.LoopData, points) -> bool:
     """
     Handles key events in the loop
-    :param landmarks: The landmarks
     :param landmark_mapping: The landmark mapping
     :param frame_dim: The frame dimensions
     :param loop_data: The loop data
@@ -59,11 +58,10 @@ def handle_loop_key_events(landmarks: List[NormalisedLandmark], landmark_mapping
         run = False
     elif is_key_event(key, "c"):
         # 'c' to begin calibration
-        if landmarks:
-            calibration_data = calibrate.calibrate_init(landmarks, landmark_mapping, frame_dim)
-            print("initiating calibration", calibration_data)
-            loop_data["calibration_data"] = calibration_data
-            loop_data["calibrating"] = True
+        calibration_data = calibrate.calibrate_init(landmark_mapping, frame_dim)
+        print("initiating calibration", calibration_data)
+        loop_data["calibration_data"] = calibration_data
+        loop_data["calibrating"] = True
     elif is_key_event(key, "l"):
         # 'l' to toggle landmarks
         toggle_setting("show_landmarks", loop_data)
