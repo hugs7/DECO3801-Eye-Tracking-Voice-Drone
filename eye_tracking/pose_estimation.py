@@ -30,7 +30,7 @@ def project_gaze_point(rotation_vector, translation_vector, camera_matrix, dist_
 def estimate_head_pose(frame: np.ndarray, face_landmarks: List[NormalisedLandmark], landmark_mapping: landmarks.Landmarks):
     # Frame dimensions
     frame_h, frame_w, _ = frame.shape
-    frame_size = coordinate.Coordinate(frame_w, frame_h)
+    frame_size = coordinate.Coordinate2D(frame_w, frame_h)
 
     reference_points = {
         "nose_top": 1,
@@ -115,7 +115,7 @@ def estimate_gaze(
 ):
     # Frame dimensions
     frame_h, frame_w, _ = frame.shape
-    frame_size = coordinate.Coordinate(frame_w, frame_h)
+    frame_size = coordinate.Coordinate2D(frame_w, frame_h)
 
     # Get the point_ids of all the points around and including the eyes
 

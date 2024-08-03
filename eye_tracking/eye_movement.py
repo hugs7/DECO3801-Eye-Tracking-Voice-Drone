@@ -13,7 +13,7 @@ import coordinate
 def track_eye_movement(
     frame: np.ndarray,
     face_landmarks: landmarks.Landmarks,
-    frame_dim: coordinate.Coordinate,
+    frame_dim: coordinate.Coordinate2D,
     reference_positions,
 ) -> None:
     """

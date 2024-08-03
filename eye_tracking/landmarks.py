@@ -176,7 +176,7 @@ class Landmarks:
         return None
 
 
-def normalise_landmark(landmark, frame_dim: coordinate.Coordinate) -> coordinate.Coordinate:
+def normalise_landmark(landmark, frame_dim: coordinate.Coordinate2D) -> coordinate.Coordinate2D:
     """
     Normalise a landmark to the width and height of the frame
     :param landmark: The landmark to normalise
@@ -187,7 +187,7 @@ def normalise_landmark(landmark, frame_dim: coordinate.Coordinate) -> coordinate
     x = int(landmark.x * frame_dim.x)
     y = int(landmark.y * frame_dim.y)
 
-    return coordinate.Coordinate(x, y)
+    return coordinate.Coordinate2D(x, y)
 
 
 def get_image_coord_of_landmark(face_landmarks: List[NormalisedLandmark], landmark_id: int, frame_dim: np.ndarray) -> Tuple[int, int]:

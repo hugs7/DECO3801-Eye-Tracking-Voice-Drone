@@ -4,34 +4,34 @@ Eye tracking driver
 """
 
 import cv2
-from mediapipe.python.solutions.face_mesh import FaceMesh
 
 import init
 import loop
-import coordinate
 
 
 def main():
-    landmark_mapping = init.landmark_mapping_init()
+    """
+    Defines entry point for the eye tracking application
+    """
+
+    landmark_mapping = init.init_landmark_mapping()
 
     # Initialise variables
     run = True
+    cam = init.camera_init()
+
     window_width = 1280
     window_height = 900
-    feed_ratio = window_width / window_height
-    upscaled_window_width = 2400
-    upscaled_window_height = int(upscaled_window_width / feed_ratio)
-    upscaled_dim = coordinate.Coordinate(upscaled_window_width, upscaled_window_height)
-    landmark_visibility = init.set_landmark_button_visibility()
-    init.window_init(window_width, window_height, landmark_visibility, upscaled_dim)
 
-    cam = init.camera_init()
-    face_mesh = init.face_mesh_init()
+    frame_dim = init.init_window(window_width, window_height, landmark_visibility)
+
+    landmark_visibility = init.init_landmark_visibility()
+    face_mesh = init.init_face_mesh()
 
     while run:
-        run = loop.main_loop(cam, face_mesh, landmark_mapping, upscaled_dim, landmark_visibility)
+        run = loop.main_loop(cam, face_mesh, landmark_mapping, frame_dim, landmark_visibility)
 
-    # Release the resources
+    # Clean up
     cam.release()
     cv2.destroyAllWindows()
 

@@ -18,7 +18,7 @@ def draw_landmarks(
     frame: np.ndarray,
     face_landmarks: List[NormalisedLandmark],
     landmark_mapping: landmarks.Landmarks,
-    frame_dim: coordinate.Coordinate,
+    frame_dim: coordinate.Coordinate2D,
     landmark_visibility: Dict[str, bool],
 ) -> None:
     """
@@ -55,7 +55,7 @@ def draw_landmarks(
         cv2.putText(frame, str(id), centre, cv2.FONT_HERSHEY_SIMPLEX, font_scale, colour, thickness, cv2.LINE_AA)
 
 
-def draw_buttons(frame: np.ndarray, frame_dim: coordinate.Coordinate, landmark_visibility: Dict[str, bool]) -> None:
+def draw_buttons(frame: np.ndarray, frame_dim: coordinate.Coordinate2D, landmark_visibility: Dict[str, bool]) -> None:
     font_scale = 1
     button_positions = calculate_button_positions(frame_dim, landmark_visibility)
     for part, (top_left, bottom_right) in button_positions.items():
@@ -65,7 +65,7 @@ def draw_buttons(frame: np.ndarray, frame_dim: coordinate.Coordinate, landmark_v
 
 
 def calculate_button_positions(
-    frame_dim: coordinate.Coordinate, landmark_visibility: Dict[str, int]
+    frame_dim: coordinate.Coordinate2D, landmark_visibility: Dict[str, int]
 ) -> Dict[str, Tuple[Tuple[int, int], Tuple[int, int]]]:
     positions = {}
     num_buttons_per_row = frame_dim.x // (constants.BUTTON_WIDTH + constants.BUTTON_PADDING_X)
