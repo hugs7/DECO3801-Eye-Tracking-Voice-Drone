@@ -6,141 +6,152 @@ Defines the mapping for landmarks
 from typing import Dict, List, Union, TypedDict, Optional
 
 import constants
+from colours import Colour
+import coordinate
+
 import utils.list_helper as list_helper
 import utils.dict_helper as dict_helper
-from colours import ColourMap as CM, Colour
 
 
-class FaceLandmarkData(TypedDict):
-    colour: Colour
-    points: List[int]
+class EyePoints:
+    def __init__(self, centre: int, right: int, top: int, left: int, bottom: int):
+        self.centre = centre
+        self.right = right
+        self.top = top
+        self.left = left
+        self.bottom = bottom
 
 
-class EyePoints(TypedDict):
-    centre: int
-    right: int
-    top: int
-    left: int
-    bottom: int
+class EyeLandmarks:
+    def __init__(self, colour: Colour, points: EyePoints):
+        self.colour = colour
+        self.points = points
 
 
-class EyeLandmarkData(TypedDict):
-    colour: Colour
-    points: EyePoints
-
-
-EyeLandmarkMapping = Dict[str, EyeLandmarkData]
-FaceLandmarkMapping = Dict[str, FaceLandmarkData]
+class FacePart:
+    def __init__(self, name: str, colour: Colour, points: List[int]):
+        self.name = name
+        self.colour = colour
+        self.points = points
 
 
 class LandmarkMapping(TypedDict):
-    eyes: EyeLandmarkMapping
-    face: FaceLandmarkMapping
+    eyes: Dict[str, EyeLandmarks]
+    face: Dict[str, FacePart]
 
 
 class FaceLandmarks:
-    def __init__(self, landmark_mapping: LandmarkMapping):
+    def __init__(self, landmark_mapping_data: Dict[str, Dict[str, Union[Dict, List]]]):
         seen_points = set()
 
         # === Eyes ===
-        dict_helper.check_property_exists(landmark_mapping, "eyes", "landmark_mapping")
+        if "eyes" not in landmark_mapping_data:
+            raise ValueError("landmark_mapping must have an 'eyes' property")
 
-        for eye, eye_data in landmark_mapping["eyes"].items():
-            dict_helper.check_property_exists(eye_data, "colour", f"eye class {eye}")
-            dict_helper.check_property_exists(eye_data, "points", f"eye class {eye}")
+        eyes_data = landmark_mapping_data["eyes"]
+        eyes = {}
+        for eye_name, eye_data in eyes_data.items():
+            if "colour" not in eye_data:
+                raise ValueError(f"eye class {eye_name} must have a 'colour' property")
+            if "points" not in eye_data:
+                raise ValueError(f"eye class {eye_name} must have a 'points' property")
 
             Colour.parse_colour(eye_data)
+            eye_points_data = eye_data["points"]
 
-            # Check centre, right, top, left, bottom are present and unique
-            eye_points = eye_data["points"]
-            parsed_eye_points = []
+            for expected_key in ["centre", "right", "top", "left", "bottom"]:
+                if expected_key not in eye_points_data:
+                    raise ValueError(f"eye class {eye_name} must have a '{expected_key}' property")
 
-            for expected_key in constants.EXPECTED_EYE_POINT_KEYS:
-                dict_helper.check_property_exists(eye_points, expected_key, f"eye class {eye}")
-
-                parsed_eye_points.append(eye_points[expected_key])
+            eye_points = EyePoints(
+                centre=eye_points_data["centre"],
+                right=eye_points_data["right"],
+                top=eye_points_data["top"],
+                left=eye_points_data["left"],
+                bottom=eye_points_data["bottom"],
+            )
+            eye_landmarks = EyeLandmarks(colour=eye_data["colour"], points=eye_points)
 
             # Check for duplicates
+            parsed_eye_points = [eye_points.centre, eye_points.right, eye_points.top, eye_points.left, eye_points.bottom]
             duplicated_points = list_helper.find_duplicates_in_list(parsed_eye_points)
-            if len(duplicated_points) > 0:
-                raise ValueError(f"Duplicated points found in eye class {eye}: {duplicated_points}")
+            if duplicated_points:
+                raise ValueError(f"Duplicated points found in eye class {eye_name}: {duplicated_points}")
 
             overlap = seen_points.intersection(parsed_eye_points)
-            if len(overlap) > 0:
-                raise ValueError(f"Duplicate points found in eye class {eye}: {overlap}")
+            if overlap:
+                raise ValueError(f"Duplicate points found in eye class {eye_name}: {overlap}")
 
             seen_points.update(parsed_eye_points)
+            eyes[eye_name] = eye_landmarks
 
         # === Face ===
-        dict_helper.check_property_exists(landmark_mapping, "face", "landmark_mapping")
+        if "face" not in landmark_mapping_data:
+            raise ValueError("landmark_mapping must have a 'face' property")
 
-        for face_part in landmark_mapping["face"]:
-            dict_helper.check_property_exists(face_part, "name", f"face class {face_part}")
-            dict_helper.check_property_exists(face_part, "colour", f"face class {face_part}")
-            dict_helper.check_property_exists(face_part, "points", f"face class {face_part}")
+        face_data = landmark_mapping_data["face"]
+        face = []
+        for face_part_data in face_data:
+            if "name" not in face_part_data:
+                raise ValueError(f"face part must have a 'name' property")
+            if "colour" not in face_part_data:
+                raise ValueError(f"face part must have a 'colour' property")
+            if "points" not in face_part_data:
+                raise ValueError(f"face part must have a 'points' property")
 
-            Colour.parse_colour(face_part)
-
-            # Check points are a list of unique ints
-            face_points = face_part["points"]
+            Colour.parse_colour(face_part_data)
+            face_part = FacePart(
+                name=face_part_data["name"],
+                colour=face_part_data["colour"],
+                points=face_part_data["points"],
+            )
 
             # Check for duplicates
-            duplicated_points = list_helper.find_duplicates_in_list(face_points)
-            if len(duplicated_points) > 0:
-                raise ValueError(f"Duplicated points found in face part {face_part}: {duplicated_points}")
+            duplicated_points = list_helper.find_duplicates_in_list(face_part.points)
+            if duplicated_points:
+                raise ValueError(f"Duplicated points found in face part {face_part.name}: {duplicated_points}")
 
-            overlap = seen_points.intersection(face_points)
-            if len(overlap) > 0:
-                raise ValueError(f"Duplicate points found in face part {face_part}: {overlap}")
+            overlap = seen_points.intersection(face_part.points)
+            if overlap:
+                raise ValueError(f"Duplicate points found in face part {face_part.name}: {overlap}")
 
-            seen_points.update(face_points)
+            seen_points.update(face_part.points)
+            face.append(face_part)
 
-        print("landmark_mapping")
-        print(landmark_mapping)
+        landmark_mapping = LandmarkMapping(eyes=eyes, face=face)
+
         self.landmark_mapping = landmark_mapping
 
-    def classify_point(self, point_id: int) -> Optional[str]:
+    def classify_point(self, point_id: int) -> Optional[Union[EyeLandmarks, FacePart]]:
         """
         Takes a point id and returns its class (e.g., "eyebrow_left")
+        :param point_id: The point id
+        :return: The class of the point or None if not found
         """
-        for key, value in self.landmark_mapping.items():
-            # Handle eye points separately
-            if isinstance(value, dict):
-                for subkey, subvalue in value.items():
-                    if point_id in subvalue["points"].values():
-                        return f"{key}_{subkey}"
 
-            # Handle face points
-            else:
-                if point_id in value["points"]:
-                    return key
+        # Search in eye landmarks
+        for eye, eye_data in self.landmark_mapping.eyes.items():
+            if point_id in vars(eye_data.points).values():
+                return eye_data
+
+        # Search in face landmarks
+        for face_part in self.landmark_mapping.face:
+            if point_id in face_part.points:
+                return face_part
+
         return None
 
-    def check_for_duplicate_points(self):
-        """
-        Check for duplicate points in the landmark_mapping
-        """
-        points = set()
-        duplicates = set()
 
-        for key, value in self.landmark_mapping.items():
-            # Handle eye points separately
-            if isinstance(value, dict):
-                for subkey, subvalue in value.items():
-                    for point in subvalue["points"].values():
-                        if point in points:
-                            duplicates.add(point)
-                        else:
-                            points.add(point)
-            # Handle face points
-            else:
-                for point in value["points"]:
-                    if point in points:
-                        duplicates.add(point)
-                    else:
-                        points.add(point)
+def normalise_landmark(landmark, frame_w, frame_h) -> coordinate.Coordinate:
+    """
+    Normalise a landmark to the width and height of the frame
+    :param landmark: The landmark to normalise
+    :param frame_w: The width of the frame
+    :param frame_h: The height of the frame
+    :return Coordinate: The normalised landmark
+    """
 
-        if duplicates:
-            print(f"Duplicate points found: {duplicates}")
-        else:
-            print("No duplicate points found")
+    x = int(landmark.x * frame_w)
+    y = int(landmark.y * frame_h)
+
+    return coordinate.Coordinate(x, y)
