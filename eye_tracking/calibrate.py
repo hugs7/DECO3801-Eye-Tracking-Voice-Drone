@@ -6,6 +6,7 @@ from typing import Dict, List, Optional, Tuple, Union, TypedDict
 from enum import Enum
 import cv2
 
+import draw
 import landmarks
 import constants
 import coordinate
@@ -209,7 +210,7 @@ def calibrate_init(landmark_mapping: landmarks.Landmarks, frame_dim: coordinate.
 
 
 def perform_calibration(
-    face_landmarks: List[NormalisedLandmark], calibration_data: CalibrationData, frame: cv2.VideoCapture
+    face_landmarks: List[NormalisedLandmark], calibration_data: CalibrationData, frame: cv2.VideoCapture, frame_dim: coordinate.Coordinate2D
 ) -> Tuple[bool, bool]:
     """
     Perform the calibration
@@ -219,38 +220,7 @@ def perform_calibration(
     :return: Tuple[bool, bool]: Whether calibrating and whether calibrated
     """
 
-    dot_radius = 30
-
-    # Give 10% padding from the edge of the screen on both axes
-    padding_percentage = 0.1
-    frame_dim = calibration_data.frame_dim
-    padding_from_edge_x = int(padding_percentage * frame_dim.x)
-    padding_from_edge_y = int(padding_percentage * frame_dim.y)
-
-    # Define dot positions programmatically
-    positions = {
-        CalibrationStep.CENTER: (calibration_data.frame_dim.x // 2, calibration_data.frame_dim.y // 2),
-        CalibrationStep.TOP_LEFT: (padding_from_edge_x, padding_from_edge_y),
-        CalibrationStep.TOP_RIGHT: (calibration_data.frame_dim.x - padding_from_edge_x, padding_from_edge_y),
-        CalibrationStep.BOTTOM_LEFT: (padding_from_edge_x, calibration_data.frame_dim.y - padding_from_edge_y),
-        CalibrationStep.BOTTOM_RIGHT: (
-            calibration_data.frame_dim.x - padding_from_edge_x,
-            calibration_data.frame_dim.y - padding_from_edge_y,
-        ),
-        CalibrationStep.MIDDLE_TOP: (calibration_data.frame_dim.x // 2, padding_from_edge_y),
-        CalibrationStep.MIDDLE_BOTTOM: (calibration_data.frame_dim.x // 2, calibration_data.frame_dim.y - padding_from_edge_y),
-        CalibrationStep.MIDDLE_LEFT: (padding_from_edge_x, calibration_data.frame_dim.y // 2),
-        CalibrationStep.MIDDLE_RIGHT: (calibration_data.frame_dim.x - padding_from_edge_x, calibration_data.frame_dim.y // 2),
-    }
-
-    # Draw dots on the frame
-    for pos_name, coord in positions.items():
-        if pos_name == calibration_data.step:
-            colour = CM.green
-        else:
-            colour = CM.grey
-
-        cv2.circle(frame, coord, dot_radius, colour.get_colour_bgr(), -1, cv2.FILLED)
+    draw.render_calibration_grid(frame, frame_dim, calibration_data.step)
 
     key = cv2.waitKey(1) & 0xFF
     if key != 255:
@@ -290,7 +260,7 @@ def perform_calibration(
                     eye_calibration_data[ref_pos] = []
                     for landmark_id in ref_points:
                         eye_point_ids.append(landmark_id)
-                        ref_landmark = landmarks.get_image_coord_of_landmark(face_landmarks, landmark_id, frame_dim)
+                        ref_landmark = landmarks.get_image_coord_of_landmark(face_landmarks, landmark_id, frame)
                         ref_lmk_with_id = (landmark_id, ref_landmark)
                         eye_calibration_data[ref_pos].append(ref_lmk_with_id)
 
@@ -302,7 +272,7 @@ def perform_calibration(
                 for pos in ["top", "bottom", "left", "right", "centre"]:
                     pos_id = eye_points.get_side(pos)
                     eye_point_ids.append(pos_id)
-                    landmark_coord = landmarks.get_image_coord_of_landmark(face_landmarks, pos_id, frame_dim)
+                    landmark_coord = landmarks.get_image_coord_of_landmark(face_landmarks, pos_id, frame)
                     eye_calibration_data["eye"][pos] = landmark_coord
 
                 # Save to calibration data

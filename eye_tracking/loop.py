@@ -68,7 +68,7 @@ def main_loop(
 
         if loop_data["calibrating"]:
             # We enter the calibration mode
-            calibrating, calibrated = calibrate.perform_calibration(landmarks, loop_data["calibration_data"], upscaled_frame)
+            calibrating, calibrated = calibrate.perform_calibration(landmarks, loop_data["calibration_data"], upscaled_frame, frame_dim)
             loop_data["calibrating"] = calibrating
             loop_data["calibrated"] = calibrated
 

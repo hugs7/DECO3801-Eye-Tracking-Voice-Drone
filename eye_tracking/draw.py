@@ -12,6 +12,7 @@ from colours import ColourMap as CM
 import coordinate
 import constants
 from custom_types.NormalisedLandmark import NormalisedLandmark
+import calibrate
 
 
 def draw_landmarks(
@@ -103,3 +104,44 @@ def render_text(upscaled_frame: cv2.VideoCapture, text: str) -> None:
         2,
         cv2.LINE_AA,
     )
+
+
+def render_calibration_grid(
+    frame: cv2.VideoCapture, frame_dim: coordinate.Coordinate2D, calibration_step: calibrate.CalibrationStep
+) -> None:
+    """
+    Renders the calibration grid on the screen
+    :param frame_dim: The dimensions of the frame
+    :return: None
+    """
+
+    # Give 10% padding from the edge of the screen on both axes
+    padding_percentage = 0.1
+    padding_from_edge_x = int(padding_percentage * frame_dim.x)
+    padding_from_edge_y = int(padding_percentage * frame_dim.y)
+
+    # Define dot positions programmatically
+    CalibrationStep = calibrate.CalibrationStep
+    positions = {
+        CalibrationStep.CENTER: (frame_dim.x // 2, frame_dim.y // 2),
+        CalibrationStep.TOP_LEFT: (padding_from_edge_x, padding_from_edge_y),
+        CalibrationStep.TOP_RIGHT: (frame_dim.x - padding_from_edge_x, padding_from_edge_y),
+        CalibrationStep.BOTTOM_LEFT: (padding_from_edge_x, frame_dim.y - padding_from_edge_y),
+        CalibrationStep.BOTTOM_RIGHT: (
+            frame_dim.x - padding_from_edge_x,
+            frame_dim.y - padding_from_edge_y,
+        ),
+        CalibrationStep.MIDDLE_TOP: (frame_dim.x // 2, padding_from_edge_y),
+        CalibrationStep.MIDDLE_BOTTOM: (frame_dim.x // 2, frame_dim.y - padding_from_edge_y),
+        CalibrationStep.MIDDLE_LEFT: (padding_from_edge_x, frame_dim.y // 2),
+        CalibrationStep.MIDDLE_RIGHT: (frame_dim.x - padding_from_edge_x, frame_dim.y // 2),
+    }
+
+    # Draw dots on the frame
+    for pos_name, coord in positions.items():
+        if pos_name == calibration_step:
+            colour = CM.green
+        else:
+            colour = CM.grey
+
+        cv2.circle(frame, coord, constants.CALIBRATION_GRID_DOT_RADIUS, colour.get_colour_bgr(), -1, cv2.FILLED)
