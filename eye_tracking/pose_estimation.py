@@ -7,7 +7,7 @@ from typing import List, Tuple
 import landmarks
 from custom_types.NormalisedLandmark import NormalisedLandmark
 import coordinate
-from colours import ColourMap as CM
+from colours import ColourMap as CM, Colour
 
 
 def get_image_coord_of_landmark(face_landmarks: List[NormalisedLandmark], landmark_id: int, frame_dim: np.ndarray) -> Tuple[int, int]:
@@ -25,7 +25,10 @@ def get_image_coord_of_landmark(face_landmarks: List[NormalisedLandmark], landma
     return normalised_landmark.to_tuple()
 
 
-def project_gaze_point(rotation_vector, translation_vector, camera_matrix, dist_coeffs, eye_landmark, frame):
+def project_gaze_point(rotation_vector, translation_vector, camera_matrix, dist_coeffs, eye_landmark, frame, colour: Colour):
+    """
+    Project the gaze point and draw it on the frame.
+    """
     # Project a 3D point (0, 0, 1000.0) onto the image plane.
     (gaze_point2D, _) = cv2.projectPoints(np.array([(0.0, 0.0, 1000.0)]), rotation_vector, translation_vector, camera_matrix, dist_coeffs)
 
@@ -33,8 +36,7 @@ def project_gaze_point(rotation_vector, translation_vector, camera_matrix, dist_
     p1 = (int(eye_landmark[0]), int(eye_landmark[1]))
     p2 = (int(gaze_point2D[0][0][0]), int(gaze_point2D[0][0][1]))
 
-    cv2.line(frame, p1, p2, CM.green.get_colour(), 2)
-    cv2.circle(frame, p2, 5, CM.red.get_colour(), -1)
+    cv2.line(frame, p1, p2, colour.get_colour(), 2)
 
     return p2
 
@@ -51,21 +53,6 @@ def estimate_pose(frame: np.ndarray, face_landmarks: List[NormalisedLandmark], l
         "right_eye_corner": 359,
         "left_mouth_corner": 146,
         "right_mouth_corner": 307,
-    }
-
-    eye_landmarks = {
-        "left": {
-            "top": 469,
-            "bottom": 470,
-            "left": 471,
-            "right": 472,
-        },
-        "right": {
-            "top": 473,
-            "bottom": 474,
-            "left": 475,
-            "right": 476,
-        },
     }
 
     image_points = []
@@ -114,10 +101,21 @@ def estimate_pose(frame: np.ndarray, face_landmarks: List[NormalisedLandmark], l
     p2 = (int(nose_end_point2D[0][0][0]), int(nose_end_point2D[0][0][1]))
 
     cv2.line(frame, p1, p2, CM.blue.get_colour(), 2)
+    cv2.circle(frame, p2, 10, CM.red.get_colour(), -1)
 
     # Calculate and draw gaze points for both eyes
-    for eye, landmarks in eye_landmarks.items():
-        eye_landmark = get_image_coord_of_landmark(face_landmarks, landmarks["left"], frame_size)
-        project_gaze_point(rotation_vector, translation_vector, camera_matrix, dist_coeffs, eye_landmark, frame)
+    eye_landmark_mapping = landmark_mapping.eyes
+    for eye, eye_landmarks in eye_landmark_mapping.items():
+        eye_landmarks: landmarks.EyeLandmarks
+        landmark_points = eye_landmarks.points
+        for side, colour in [
+            ("centre", CM.blue),
+            ("right", CM.cornflower_blue),
+            ("top", CM.cyan),
+            ("left", CM.magenta),
+            ("bottom", CM.yellow),
+        ]:
+            eye_landmark = get_image_coord_of_landmark(face_landmarks, landmark_points.get_side(side), frame_size)
+            project_gaze_point(rotation_vector, translation_vector, camera_matrix, dist_coeffs, eye_landmark, frame, colour)
 
     return rotation_vector, translation_vector
