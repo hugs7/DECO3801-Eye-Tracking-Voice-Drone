@@ -28,7 +28,11 @@ class EyeLandmarkData(TypedDict):
 
 EyeLandmarkMapping = Dict[str, EyeLandmarkData]
 FaceLandmarkMapping = Dict[str, FaceLandmarkData]
-LandmarkMapping = Dict[str, Union[EyeLandmarkMapping, FaceLandmarkMapping]]
+
+
+class LandmarkMapping(TypedDict):
+    eyes: EyeLandmarkMapping
+    face: FaceLandmarkMapping
 
 
 class FaceLandmarks:
