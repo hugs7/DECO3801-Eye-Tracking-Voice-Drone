@@ -26,7 +26,7 @@ def project_gaze_point(rotation_vector, translation_vector, camera_matrix, dist_
     return p2
 
 
-def estimate_pose(frame: np.ndarray, face_landmarks: List[NormalisedLandmark], landmark_mapping: landmarks.Landmarks):
+def estimate_head_pose(frame: np.ndarray, face_landmarks: List[NormalisedLandmark], landmark_mapping: landmarks.Landmarks):
     # Frame dimensions
     frame_h, frame_w, _ = frame.shape
     frame_size = coordinate.Coordinate(frame_w, frame_h)
