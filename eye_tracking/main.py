@@ -9,16 +9,14 @@ from mediapipe.python.solutions.face_mesh import FaceMesh
 import init
 import loop
 
-# Initialize video capture and face mesh detector
-
 
 def main():
     landmark_mapping = init.landmark_mapping_init()
 
-    # Initialize variables
+    # Initialise variables
     run = True
     calibrated = False
-    window_width = 1280  # Replace with your desired width
+    window_width = 1280
     window_height = 900
 
     init.window_init(window_width, window_height)
