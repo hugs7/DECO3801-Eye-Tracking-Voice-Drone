@@ -11,20 +11,22 @@ total_landmarks = 478
 
 eye_landmarks = {
     "left": {
-        "top": 469,
-        "bottom": 470,
+        "centre": 468,
+        "right": 469,
+        "top": 470,
         "left": 471,
-        "right": 472,
+        "bottom": 472,
     },
     "right": {
-        "top": 473,
-        "bottom": 474,
-        "left": 475,
-        "right": 476,
+        "centre": 473,
+        "right": 474,
+        "top": 475,
+        "left": 476,
+        "bottom": 477,
     },
 }
 
-face_landmarks = [i for i in range(0, 468)]
+face_landmarks = [i for i in range(0, 467 + 1)]
 
 
 class LandmarkData(TypedDict, total=False):
@@ -45,7 +47,7 @@ landmark_mapping = {
     },
     "upper_eyelid_left": {
         "colour": CM.royal_blue,
-        "points": [157, 158, 159, 470, 247, 113, 30, 29, 27, 28, 56, 190, 160, 161, 146, 33, 130, 246],
+        "points": [157, 158, 159, 247, 113, 30, 29, 27, 28, 56, 190, 160, 161, 146, 33, 130, 246],
     },
     "upper_eyelid_right": {
         "colour": CM.royal_blue,
@@ -53,7 +55,7 @@ landmark_mapping = {
     },
     "lower_eyelid_left": {
         "colour": CM.royal_blue,
-        "points": [25, 110, 24, 472, 23, 145, 153, 22, 26, 154, 112, 173, 343, 144, 163, 226, 7],
+        "points": [25, 110, 24, 23, 145, 153, 22, 26, 154, 112, 173, 343, 144, 163, 226, 7],
     },
     "lower_eyelid_right": {
         "colour": CM.royal_blue,
