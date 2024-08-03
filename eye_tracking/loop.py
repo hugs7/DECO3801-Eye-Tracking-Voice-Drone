@@ -2,7 +2,7 @@
 Defines main loop for eye tracking
 """
 
-from typing import Tuple
+from typing import Tuple, List
 import cv2
 
 import constants
@@ -12,6 +12,8 @@ import draw
 import eye_movement
 import landmarks
 from colours import ColourMap as CM
+
+from types.NormalisedLandmark import NormalisedLandmark
 
 
 def main_loop(calibrated: bool, cam, face_mesh, landmark_mapping: landmarks.LandmarkMapping) -> Tuple[bool, bool]:
@@ -33,8 +35,8 @@ def main_loop(calibrated: bool, cam, face_mesh, landmark_mapping: landmarks.Land
     frame_dim = coordinate.Coordinate(frame_w, frame_h)
 
     if points:
-        landmarks = points[0].landmark
-
+        landmarks: List[NormalisedLandmark] = points[0].landmark
+        print(landmarks)
         if not calibrated:
             cv2.putText(
                 frame,
