@@ -69,13 +69,15 @@ def calculate_button_positions(
 ) -> Dict[str, Tuple[Tuple[int, int], Tuple[int, int]]]:
     positions = {}
     num_buttons_per_row = frame_dim.x // (constants.BUTTON_WIDTH + constants.BUTTON_PADDING_X)
+    total_rows = (len(landmark_visibility) + num_buttons_per_row - 1) // num_buttons_per_row  # Total rows needed
+
     for i, part in enumerate(landmark_visibility.keys()):
         col = i % num_buttons_per_row
         row = i // num_buttons_per_row
 
         top_left = (
             col * (constants.BUTTON_WIDTH + constants.BUTTON_PADDING_X),
-            row * (constants.BUTTON_HEIGHT + constants.BUTTON_PADDING_Y),
+            frame_dim.y - ((total_rows - row) * (constants.BUTTON_HEIGHT + constants.BUTTON_PADDING_Y)),
         )
         bottom_right = (top_left[0] + constants.BUTTON_WIDTH, top_left[1] + constants.BUTTON_HEIGHT)
 
