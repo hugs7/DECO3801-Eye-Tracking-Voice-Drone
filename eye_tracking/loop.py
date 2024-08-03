@@ -18,6 +18,7 @@ from colours import ColourMap as CM
 from custom_types.NormalisedLandmark import NormalisedLandmark
 
 calibration_data = None
+calibrating = False
 calibrated = False
 show_landmarks = True
 show_settings = False
@@ -40,7 +41,7 @@ def main_loop(
     :return bool: Whether to continue running
     """
 
-    global calibrated, show_landmarks, calibration_data, show_settings
+    global calibrated, calibrating, show_landmarks, calibration_data, show_settings
 
     success, frame = cam.read()
     frame = cv2.flip(frame, 1)
@@ -70,9 +71,9 @@ def main_loop(
         if show_landmarks:
             draw.draw_landmarks(upscaled_frame, landmarks, landmark_mapping, upscaled_dim, landmark_visibility)
 
-        if calibrated and calibration_data is not None:
+        if calibrating:
             # We enter the calibration mode
-            calibrate.perform_calibration(calibration_data, upscaled_frame)
+            calibrating, calibrated = calibrate.perform_calibration(landmarks, calibration_data, upscaled_frame)
 
         # if calibrated:
         #     eye_movement.track_eye_movement(upscaled_frame, landmarks, frame_dim)
@@ -86,23 +87,25 @@ def main_loop(
     # Render
     cv2.imshow(constants.EYE_TRACKING_WINDOW_NAME, upscaled_frame)
 
-    key = cv2.waitKey(1) & 0xFF
+    # Only wait for key if not in calibration mode
     run = True
-    if key == ord("q"):
-        run = False
-    elif key == ord("c"):
-        # 'C' to begin calibration
-        if points:
-            calibration_data = calibrate.calibrate_init(landmarks, landmark_mapping, frame_dim)
-            print("initiating calibration", calibration_data)
-            calibrated = True
-    elif key == ord("l"):
-        # 'l' to toggle landmarks
-        show_landmarks = not show_landmarks
-        print(f"Show landmarks: {show_landmarks}")
-    elif key == ord("o"):
-        # 'o' to toggle options
-        print("Toggling options")
-        show_settings = not show_settings
+    if not calibrating:
+        key = cv2.waitKey(1) & 0xFF
+        if key == ord("q"):
+            run = False
+        elif key == ord("c"):
+            # 'C' to begin calibration
+            if points:
+                calibration_data = calibrate.calibrate_init(landmarks, landmark_mapping, frame_dim)
+                print("initiating calibration", calibration_data)
+                calibrating = True
+        elif key == ord("l"):
+            # 'l' to toggle landmarks
+            show_landmarks = not show_landmarks
+            print(f"Show landmarks: {show_landmarks}")
+        elif key == ord("o"):
+            # 'o' to toggle options
+            print("Toggling options")
+            show_settings = not show_settings
 
     return run

@@ -2,7 +2,7 @@
 Module to help with eye tracking calibration
 """
 
-from typing import List, Optional
+from typing import Dict, List, Optional, Tuple, Union
 from enum import Enum
 import cv2
 
@@ -52,7 +52,18 @@ def get_next_calibration_step(step: CalibrationStep) -> Optional[CalibrationStep
     return calibration_order[next_index]
 
 
-class EyeReferencePosition:
+class EyeCalibrationData:
+    def __init__(self, eye: Dict[str, List[int]], upper_eyelid: List[int], lower_eyelid: List[int], above_eye: List[int]):
+        self.eye = eye
+        self.upper_eyelid = upper_eyelid
+        self.lower_eyelid = lower_eyelid
+        self.above_eye = above_eye
+
+    def __str__(self):
+        return f"Eye: {self.eye}\n\tUpper eyelid: {self.upper_eyelid},\n\tLower eyelid: {self.lower_eyelid},\n\tAbove eye: {self.above_eye}"
+
+
+class EyePosition:
     def __init__(
         self,
         top: NormalisedLandmark,
@@ -76,8 +87,42 @@ class CalibrationData:
         # Boolean for if user is looking straight ahead. User will need to
         # keep their head straight during calibration
         self.looking_straight: bool = True
-
+        self.eye_calibration: Dict[str, EyeCalibrationData] = {}
         self.step = calibration_order[0]
+
+    def __str__(self):
+        string = "Calibration Data\n"
+
+        for step, step_data in self.eye_calibration.items():
+            string += f"Step: {step}\n"
+
+            for side, eye_data in step_data.items():
+                string += f"Side: {side}\n"
+
+                string += f"{eye_data}\n"
+
+            string += "----------------\n"
+
+        return string
+
+    def set_eye_calibration(self, side: str, eye_calibration_data: Dict[str, Union[List[int], int]]):
+        """
+        Set the calibration data for an eye
+        :param side: The side of the eye
+        :param data: The calibration data
+        :return: None
+        """
+
+        eye = eye_calibration_data["eye"]
+        upper_eyelid = eye_calibration_data["upper_eyelid"]
+        lower_eyelid = eye_calibration_data["lower_eyelid"]
+        above_eye = eye_calibration_data["above_eye"]
+
+        eye_calibration_data = EyeCalibrationData(eye, upper_eyelid, lower_eyelid, above_eye)
+
+        # Add to the calibration data
+        self.eye_calibration[self.step] = {}
+        self.eye_calibration[self.step][side] = eye_calibration_data
 
 
 def calibrate_init(
@@ -107,12 +152,15 @@ def calibrate_init(
     return reference_positions
 
 
-def perform_calibration(calibration_data: CalibrationData, frame: cv2.VideoCapture):
+def perform_calibration(
+    face_landmarks: List[NormalisedLandmark], calibration_data: CalibrationData, frame: cv2.VideoCapture
+) -> Tuple[bool, bool]:
     """
     Perform the calibration
+    :param face_landmarks: The landmarks from the face mesh
     :param calibration_data: The calibration data
     :param frame: The frame to draw on
-    :return: None
+    :return: Tuple[bool, bool]: Whether calibrating and whether calibrated
     """
 
     dot_radius = 30
@@ -157,19 +205,47 @@ def perform_calibration(calibration_data: CalibrationData, frame: cv2.VideoCaptu
         next_step = get_next_calibration_step(calibration_data.step)
         if next_step is None:
             print("Calibration complete")
+            # Output calibration data
+            print(calibration_data)
+
+            return False, True
         else:
             # Capture data from the current step
             # We need to capture (for each eye) the top, bottom, left, right, and centre points
             # as well as the coordinates of the positions around the eye
+
+            ref_regions = [
+                "upper_eyelid",
+                "lower_eyelid",
+                "above_eye",
+            ]
+
             for eye in ["left", "right"]:
-                eye_reference
+                eye_calibration_data: Dict[str, Union[List[int], int]] = {}
+
+                # Collect reference points (around eye)
+                for ref_pos in ref_regions:
+                    side_ref_pos = f"{ref_pos}_{eye}"
+                    ref_landmark = calibration_data.landmark_mapping.get_part_by_name(side_ref_pos)
+                    ref_points = ref_landmark.points
+                    eye_calibration_data[ref_pos] = []
+                    for landmark_id in ref_points:
+                        ref_landmark = landmarks.get_image_coord_of_landmark(face_landmarks, landmark_id, frame_dim)
+                        eye_calibration_data[ref_pos].append(ref_landmark)
+
                 eye_landmarks = calibration_data.landmark_mapping.get_part_by_name(eye)
                 eye_points = eye_landmarks.points
+
+                # Collect eye points
                 for pos in ["top", "bottom", "left", "right", "centre"]:
                     pos_id = eye_points.get_side(pos)
                     eye_coord = face_landmarks[pos_id]
                     landmark_coord = landmarks.normalise_landmark(eye_coord, frame_dim)
-                    # reference_positions[eye][pos] = landmark_coord
+                    eye_calibration_data["eye"] = {}
+                    eye_calibration_data["eye"][pos] = landmark_coord
+
+                # Save to calibration data
+                calibration_data.set_eye_calibration(eye, eye_calibration_data)
 
             calibration_data.step = next_step
             print(f"Moving to next calibration step: {calibration_data.step}")
@@ -178,3 +254,6 @@ def perform_calibration(calibration_data: CalibrationData, frame: cv2.VideoCaptu
         print("Calibration cancelled")
         calibration_data.step = CalibrationStep.CENTER
         calibration_data.looking_straight = True
+        return False, False
+
+    return True, False

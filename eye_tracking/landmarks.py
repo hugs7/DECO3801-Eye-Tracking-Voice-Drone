@@ -3,7 +3,9 @@ Defines the mapping for landmarks
 02/08/2024
 """
 
-from typing import Dict, List, Union, TypedDict, Optional
+from typing import Dict, List, Tuple, Union, TypedDict, Optional
+
+import numpy as np
 
 import constants
 from colours import Colour
@@ -11,6 +13,8 @@ import coordinate
 
 import utils.list_helper as list_helper
 import utils.dict_helper as dict_helper
+
+from custom_types.NormalisedLandmark import NormalisedLandmark
 
 
 class EyePoints:
@@ -184,3 +188,18 @@ def normalise_landmark(landmark, frame_dim: coordinate.Coordinate) -> coordinate
     y = int(landmark.y * frame_dim.y)
 
     return coordinate.Coordinate(x, y)
+
+
+def get_image_coord_of_landmark(face_landmarks: List[NormalisedLandmark], landmark_id: int, frame_dim: np.ndarray) -> Tuple[int, int]:
+    """
+    Get the image coordinates of a landmark
+    :param face_landmarks: The face landmarks
+    :param landmark_id: The landmark id
+    :param frame_dim: The dimensions of the frame
+    :return Tuple[int, int]: The image coordinates
+    """
+
+    lmk_pick = face_landmarks[landmark_id]
+    normalised_landmark = normalise_landmark(lmk_pick, frame_dim)
+
+    return normalised_landmark.to_tuple()

@@ -2,27 +2,12 @@
 
 import cv2
 import numpy as np
-from typing import List, Tuple
+from typing import List
 
 import landmarks
 from custom_types.NormalisedLandmark import NormalisedLandmark
 import coordinate
 from colours import ColourMap as CM, Colour
-
-
-def get_image_coord_of_landmark(face_landmarks: List[NormalisedLandmark], landmark_id: int, frame_dim: np.ndarray) -> Tuple[int, int]:
-    """
-    Get the image coordinates of a landmark
-    :param face_landmarks: The face landmarks
-    :param landmark_id: The landmark id
-    :param frame_dim: The dimensions of the frame
-    :return Tuple[int, int]: The image coordinates
-    """
-
-    lmk_pick = face_landmarks[landmark_id]
-    normalised_landmark = landmarks.normalise_landmark(lmk_pick, frame_dim)
-
-    return normalised_landmark.to_tuple()
 
 
 def project_gaze_point(rotation_vector, translation_vector, camera_matrix, dist_coeffs, eye_landmark, frame, colour: Colour):
@@ -57,7 +42,7 @@ def estimate_pose(frame: np.ndarray, face_landmarks: List[NormalisedLandmark], l
 
     image_points = []
     for point in reference_points.values():
-        coord = get_image_coord_of_landmark(face_landmarks, point, frame_size)
+        coord = landmarks.get_image_coord_of_landmark(face_landmarks, point, frame_size)
         image_points.append(coord)
 
     image_points = np.array(image_points, dtype="double")
@@ -115,7 +100,7 @@ def estimate_pose(frame: np.ndarray, face_landmarks: List[NormalisedLandmark], l
             ("left", CM.magenta),
             ("bottom", CM.yellow),
         ]:
-            eye_landmark = get_image_coord_of_landmark(face_landmarks, landmark_points.get_side(side), frame_size)
+            eye_landmark = landmarks.get_image_coord_of_landmark(face_landmarks, landmark_points.get_side(side), frame_size)
             project_gaze_point(rotation_vector, translation_vector, camera_matrix, dist_coeffs, eye_landmark, frame, colour)
 
     return rotation_vector, translation_vector
