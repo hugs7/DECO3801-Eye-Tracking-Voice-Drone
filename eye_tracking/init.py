@@ -12,20 +12,7 @@ import landmarks
 from colours import ColourMap as CM, Colour
 
 
-def parse_colour(obj: dict, colour_key: str = "colour") -> Colour:
-    """
-    Parses a colour name to a Colour object
-    :param obj: The object to parse
-    :param colour_key: The colour key. Default is "colour"
-    :return None
-    """
-
-    colour_name = parse_colour(obj[colour_key])
-    colour = CM.__dict__[colour_name]
-    obj[colour_key] = colour
-
-
-def eye_tracking_init() -> landmarks.LandmarkMapping:
+def eye_tracking_init() -> landmarks.FaceLandmarks:
     """
     Initialises the eye tracking package
     """
