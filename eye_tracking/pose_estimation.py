@@ -25,6 +25,20 @@ def get_image_coord_of_landmark(face_landmarks: List[NormalisedLandmark], landma
     return normalised_landmark.to_tuple()
 
 
+def project_gaze_point(rotation_vector, translation_vector, camera_matrix, dist_coeffs, eye_landmark, frame):
+    # Project a 3D point (0, 0, 1000.0) onto the image plane.
+    (gaze_point2D, _) = cv2.projectPoints(np.array([(0.0, 0.0, 1000.0)]), rotation_vector, translation_vector, camera_matrix, dist_coeffs)
+
+    # Draw gaze point
+    p1 = (int(eye_landmark[0]), int(eye_landmark[1]))
+    p2 = (int(gaze_point2D[0][0][0]), int(gaze_point2D[0][0][1]))
+
+    cv2.line(frame, p1, p2, CM.green.get_colour(), 2)
+    cv2.circle(frame, p2, 5, CM.red.get_colour(), -1)
+
+    return p2
+
+
 def estimate_pose(frame: np.ndarray, face_landmarks: List[NormalisedLandmark], landmark_mapping: landmarks.Landmarks):
     # Frame dimensions
     frame_h, frame_w, _ = frame.shape
@@ -37,6 +51,21 @@ def estimate_pose(frame: np.ndarray, face_landmarks: List[NormalisedLandmark], l
         "right_eye_corner": 359,
         "left_mouth_corner": 146,
         "right_mouth_corner": 307,
+    }
+
+    eye_landmarks = {
+        "left": {
+            "top": 469,
+            "bottom": 470,
+            "left": 471,
+            "right": 472,
+        },
+        "right": {
+            "top": 473,
+            "bottom": 474,
+            "left": 475,
+            "right": 476,
+        },
     }
 
     image_points = []
@@ -85,5 +114,10 @@ def estimate_pose(frame: np.ndarray, face_landmarks: List[NormalisedLandmark], l
     p2 = (int(nose_end_point2D[0][0][0]), int(nose_end_point2D[0][0][1]))
 
     cv2.line(frame, p1, p2, CM.blue.get_colour(), 2)
+
+    # Calculate and draw gaze points for both eyes
+    for eye, landmarks in eye_landmarks.items():
+        eye_landmark = get_image_coord_of_landmark(face_landmarks, landmarks["left"], frame_size)
+        project_gaze_point(rotation_vector, translation_vector, camera_matrix, dist_coeffs, eye_landmark, frame)
 
     return rotation_vector, translation_vector
