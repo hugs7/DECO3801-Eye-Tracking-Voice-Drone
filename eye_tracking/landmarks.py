@@ -37,7 +37,8 @@ class EyePoints:
 
 
 class EyeLandmarks:
-    def __init__(self, colour: Colour, points: EyePoints):
+    def __init__(self, name: str, colour: Colour, points: EyePoints):
+        self.name = name
         self.colour = colour
         self.points = points
 
@@ -63,11 +64,13 @@ class Landmarks:
             raise ValueError("landmark_mapping must have an 'eyes' property")
 
         eyes_data = landmark_mapping_data["eyes"]
-        eyes = {}
-        for eye_name, eye_data in eyes_data.items():
+        eyes = []
+        for eye_data in eyes_data:
+            dict_helper.check_property_exists(eye_data, "name", "eye class")
             dict_helper.check_property_exists(eye_data, "colour", "eye class")
             dict_helper.check_property_exists(eye_data, "points", "eye class")
 
+            eye_name = eye_data["name"]
             eye_colour = Colour.parse_colour(eye_data)
             eye_points_data = eye_data["points"]
 
@@ -81,7 +84,7 @@ class Landmarks:
                 left=eye_points_data["left"],
                 bottom=eye_points_data["bottom"],
             )
-            eye_landmarks = EyeLandmarks(colour=eye_colour, points=eye_points)
+            eye_landmarks = EyeLandmarks(eye_name, colour=eye_colour, points=eye_points)
 
             # Check for duplicates
             parsed_eye_points = [eye_points.centre, eye_points.right, eye_points.top, eye_points.left, eye_points.bottom]
@@ -94,7 +97,7 @@ class Landmarks:
                 raise ValueError(f"Duplicate points found in eye class {eye_name}: {overlap}")
 
             seen_points.update(parsed_eye_points)
-            eyes[eye_name] = eye_landmarks
+            eyes.append(eye_landmarks)
 
         # === Face ===
         if "face" not in landmark_mapping_data:
@@ -138,7 +141,7 @@ class Landmarks:
         """
 
         # Search in eye landmarks
-        for eye, eye_data in self.eyes.items():
+        for eye_data in self.eyes:
             if point_id in vars(eye_data.points).values():
                 return eye_data
 
