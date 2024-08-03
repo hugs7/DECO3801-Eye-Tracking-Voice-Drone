@@ -60,16 +60,7 @@ def main_loop(
     if points:
         landmarks: List[NormalisedLandmark] = points[0].landmark
         if not loop_data["calibrated"]:
-            cv2.putText(
-                upscaled_frame,
-                "Look at the centre of the screen then press 'c' to begin calibration",
-                (50, 50),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                0.7,
-                CM.white.get_colour_bgr(),
-                2,
-                cv2.LINE_AA,
-            )
+            draw.render_text(upscaled_frame, "Look at the centre of the screen then press 'c' to begin calibration")
 
         if loop_data["show_landmarks"]:
             draw.draw_landmarks(upscaled_frame, landmarks, landmark_mapping, frame_dim, landmark_visibility)

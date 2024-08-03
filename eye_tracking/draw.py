@@ -83,3 +83,23 @@ def calculate_button_positions(
 
         positions[part] = (top_left, bottom_right)
     return positions
+
+
+def render_text(upscaled_frame: cv2.VideoCapture, text: str) -> None:
+    """
+    Renders text on screen in the top left corner
+    :param upscaled_frame: The frame to render the text on
+    :param text: The text to render
+    :return: None
+    """
+
+    cv2.putText(
+        upscaled_frame,
+        text,
+        (50, 50),
+        cv2.FONT_HERSHEY_SIMPLEX,
+        0.7,
+        CM.white.get_colour_bgr(),
+        2,
+        cv2.LINE_AA,
+    )
