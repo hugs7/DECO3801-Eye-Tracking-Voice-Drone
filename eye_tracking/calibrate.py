@@ -5,6 +5,9 @@ Module to help with eye tracking calibration
 from typing import TypedDict
 
 import landmarks
+import coordinate
+
+from types.NormalisedLandmark import NormalisedLandmark
 
 
 class ReferencePositions(TypedDict):
@@ -14,12 +17,11 @@ class ReferencePositions(TypedDict):
     right: tuple
 
 
-def calibrate_eye_positions(landmarks, frame_w, frame_h) -> ReferencePositions:
+def calibrate_eye_positions(face_landmarks: NormalisedLandmark, frame_dim: coordinate.Coordinate) -> ReferencePositions:
     """
     Calibrate eye positions based on the landmarks
-    :param landmarks: The landmarks to calibrate
-    :param frame_w: The width of the frame
-    :param frame_h: The height of the frame
+    :param face_landmarks: The landmarks to calibrate from the face mesh
+    :param frame_dim: The dimensions of the frame
     :return ReferencePositions: The reference positions
     """
 
@@ -27,7 +29,8 @@ def calibrate_eye_positions(landmarks, frame_w, frame_h) -> ReferencePositions:
 
     for eye in ["left", "right"]:
         for pos in ["top", "bottom", "left", "right"]:
-            x, y = landmarks.normalise_landmark(landmarks[landmarks.eye_landmarks[eye][pos]], frame_w, frame_h)
-            reference_positions[eye][pos] = (x, y)
+
+            landmark_coord = landmarks.normalise_landmark(face_landmarks[face_landmarks.eye_landmarks[eye][pos]], frame_dim)
+            reference_positions[eye][pos] = landmark_coord
 
     return reference_positions
