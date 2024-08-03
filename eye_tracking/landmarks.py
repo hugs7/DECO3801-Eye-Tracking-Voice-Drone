@@ -5,7 +5,7 @@ Defines the mapping for landmarks
 
 from typing import Dict, List, Tuple, Optional, TypedDict
 
-from colours import ColourMap as CM
+from colours import ColourMap as CM, Colour
 
 total_landmarks = 478
 
@@ -30,7 +30,7 @@ face_landmarks = [i for i in range(0, 467 + 1)]
 
 
 class LandmarkData(TypedDict, total=False):
-    colour: Tuple[int, int, int]
+    colour: Colour
     points: List[int]
 
 
