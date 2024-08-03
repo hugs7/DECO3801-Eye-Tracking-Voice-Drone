@@ -41,7 +41,7 @@ class LandmarkMapping:
         self.face = face
 
 
-class FaceLandmarks:
+class Landmarks:
     def __init__(self, landmark_mapping_data: Dict[str, Dict[str, Union[Dict, List]]]):
         seen_points = set()
 
