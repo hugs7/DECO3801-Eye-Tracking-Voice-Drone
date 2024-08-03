@@ -13,7 +13,7 @@ import eye_movement
 import landmarks
 from colours import ColourMap as CM
 
-from types.NormalisedLandmark import NormalisedLandmark
+from custom_types.NormalisedLandmark import NormalisedLandmark
 
 
 def main_loop(calibrated: bool, cam, face_mesh, landmark_mapping: landmarks.LandmarkMapping) -> Tuple[bool, bool]:
@@ -36,7 +36,7 @@ def main_loop(calibrated: bool, cam, face_mesh, landmark_mapping: landmarks.Land
 
     if points:
         landmarks: List[NormalisedLandmark] = points[0].landmark
-        print(landmarks)
+
         if not calibrated:
             cv2.putText(
                 frame,

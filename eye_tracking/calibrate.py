@@ -7,7 +7,7 @@ from typing import TypedDict
 import landmarks
 import coordinate
 
-from types.NormalisedLandmark import NormalisedLandmark
+from custom_types.NormalisedLandmark import NormalisedLandmark
 
 
 class ReferencePositions(TypedDict):
