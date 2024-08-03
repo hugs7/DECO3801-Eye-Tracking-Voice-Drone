@@ -32,7 +32,7 @@ def main_loop(calibrated: bool, cam, face_mesh, landmark_mapping: landmarks.Land
     points = output.multi_face_landmarks
 
     frame_h, frame_w, _ = frame.shape
-    frame_dims = coordinate.Coorrdinate(frame_w, frame_h)
+    frame_dim = coordinate.Coordinate(frame_w, frame_h)
 
     if points:
         landmarks = points[0].landmark
@@ -49,10 +49,10 @@ def main_loop(calibrated: bool, cam, face_mesh, landmark_mapping: landmarks.Land
                 cv2.LINE_AA,
             )
 
-        draw.draw_landmarks(frame, landmarks, frame_dims)
+        draw.draw_landmarks(frame, landmarks, frame_dim)
 
         if calibrated:
-            eye_movement.track_eye_movement(frame, landmarks, frame_dims)
+            eye_movement.track_eye_movement(frame, landmarks, frame_dim)
 
     cv2.imshow(constants.EYE_TRACKING_WINDOW_NAME, frame)
 
