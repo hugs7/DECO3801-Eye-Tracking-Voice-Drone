@@ -93,8 +93,8 @@ while run:
                 else:
                     colour = (0, 0, 255)
 
-                    cv2.circle(frame, (x, y), 3, colour)
-                    cv2.putText(frame, str(id), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 255, 255), 1, cv2.LINE_AA)
+            cv2.circle(frame, (x, y), 3, colour)
+            cv2.putText(frame, str(id), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 255, 255), 1, cv2.LINE_AA)
 
         if calibrated:
             track_eye_movement(landmarks, frame_w, frame_h)
