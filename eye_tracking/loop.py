@@ -11,6 +11,7 @@ import coordinate
 import calibrate
 import draw
 import eye_movement
+import controller
 import landmarks
 import pose_estimation
 import camera
@@ -92,23 +93,6 @@ def main_loop(
     # Only wait for key if not in calibration mode or face not detected
     run = True
     if not loop_data["calibrating"] or not points:
-        key = cv2.waitKey(1) & 0xFF
-        if key == ord("q"):
-            run = False
-        elif key == ord("c"):
-            # 'C' to begin calibration
-            if points:
-                calibration_data = calibrate.calibrate_init(landmarks, landmark_mapping, frame_dim)
-                print("initiating calibration", calibration_data)
-                loop_data["calibration_data"] = calibration_data
-                loop_data["calibrating"] = True
-        elif key == ord("l"):
-            # 'l' to toggle landmarks
-            show_landmarks = not loop_data["show_landmarks"]
-            loop_data["show_landmarks"] = show_landmarks
-        elif key == ord("o"):
-            # 'o' to toggle options
-            show_settings = not loop_data["show_settings"]
-            loop_data["show_settings"] = show_settings
+        run = controller.handle_loop_key_events(landmarks, landmark_mapping, frame_dim, loop_data)
 
     return run

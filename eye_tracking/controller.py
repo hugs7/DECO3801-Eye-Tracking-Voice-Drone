@@ -6,9 +6,21 @@ from typing import Dict
 import cv2
 
 import draw
+import loop
+import calibrate
 
 
-def mouse_callback(event, x, y, flag, params):
+def mouse_callback(event, x, y, flag, params) -> None:
+    """
+    Callback for mouse events occurring in the window
+    :param event: The event
+    :param x: The x coordinate
+    :param y: The y coordinate
+    :param flag: The flag
+    :param params: The parameters
+    :return None
+    """
+
     landmark_visibility = params["landmark_visibility"]
     upscaled_dim = params["upscaled_dim"]
     if event == cv2.EVENT_LBUTTONDOWN:
@@ -18,6 +30,55 @@ def mouse_callback(event, x, y, flag, params):
                 toggle_landmark_part(part, landmark_visibility)
 
 
-def toggle_landmark_part(part, landmark_visibility: Dict[str, bool]):
+def toggle_landmark_part(part, landmark_visibility: Dict[str, bool]) -> None:
+    """
+    Toggles the visibility of a landmark part
+    :param part: The part to toggle
+    :param landmark_visibility: The visibility of the landmarks
+    :return None
+    """
     landmark_visibility[part] = not landmark_visibility[part]
     print(f"Toggled {part} to {landmark_visibility[part]}")
+
+
+def handle_loop_key_events(landmarks, landmark_mapping, frame_dim, loop_data: loop.LoopData, points) -> bool:
+    """
+    Handles key events in the loop
+    :param landmarks: The landmarks
+    :param landmark_mapping: The landmark mapping
+    :param frame_dim: The frame dimensions
+    :param loop_data: The loop data
+    :param points: The points
+    :return: Whether to continue running
+    """
+    run = True
+    key = cv2.waitKey(1) & 0xFF
+    if key == ord("q"):
+        run = False
+    elif key == ord("c"):
+        # 'c' to begin calibration
+        if points:
+            calibration_data = calibrate.calibrate_init(landmarks, landmark_mapping, frame_dim)
+            print("initiating calibration", calibration_data)
+            loop_data["calibration_data"] = calibration_data
+            loop_data["calibrating"] = True
+    elif key == ord("l"):
+        # 'l' to toggle landmarks
+        toggle_setting("show_landmarks", loop_data)
+    elif key == ord("o"):
+        # 'o' to toggle options
+        toggle_setting("show_settings", loop_data)
+
+    return run
+
+
+def toggle_setting(setting_key: str, loop_data: loop.LoopData) -> None:
+    """
+    Toggles a setting in the loop data
+    :param setting_key: The setting key to toggle
+    :param loop_data: The loop data
+    :return: None
+    """
+
+    loop_data[setting_key] = not loop_data[setting_key]
+    print(f"Toggled {setting_key} to {loop_data[setting_key]}")
