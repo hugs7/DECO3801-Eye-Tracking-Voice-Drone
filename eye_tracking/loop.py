@@ -71,10 +71,10 @@ def main_loop(
                 cv2.LINE_AA,
             )
 
-        if LoopData["show_landmarks"]:
+        if loop_data["show_landmarks"]:
             draw.draw_landmarks(upscaled_frame, landmarks, landmark_mapping, frame_dim, landmark_visibility)
 
-        if LoopData["calibrating"]:
+        if loop_data["calibrating"]:
             # We enter the calibration mode
             calibrating, calibrated = calibrate.perform_calibration(landmarks, loop_data["calibration_data"], upscaled_frame)
             loop_data["calibrating"] = calibrating
@@ -92,7 +92,7 @@ def main_loop(
         # pose_estimation.estimate_pose(upscaled_frame, landmarks, landmark_mapping)
 
     # Draw buttons
-    if show_settings:
+    if loop_data["show_settings"]:
         draw.draw_buttons(upscaled_frame, frame_dim, landmark_visibility)
 
     # Render
@@ -113,11 +113,11 @@ def main_loop(
                 loop_data["calibrating"] = True
         elif key == ord("l"):
             # 'l' to toggle landmarks
-            show_landmarks = not show_landmarks
-            print(f"Show landmarks: {show_landmarks}")
+            show_landmarks = not loop_data["show_landmarks"]
+            loop_data["show_landmarks"] = show_landmarks
         elif key == ord("o"):
             # 'o' to toggle options
-            print("Toggling options")
-            show_settings = not show_settings
+            show_settings = not loop_data["show_settings"]
+            loop_data["show_settings"] = show_settings
 
     return run
