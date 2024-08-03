@@ -29,3 +29,17 @@ class Coordinate:
 
     def __str__(self) -> str:
         return f"({self.x}, {self.y})"
+
+
+def coord_difference(point_a: Tuple[int, int], point_b: Tuple[int, int]) -> Tuple[int, int]:
+    """
+    Calculate the difference between two points
+    :param point_a: The first point
+    :param point_b: The second point
+    :return: Tuple[int, int]: The x and y difference
+    """
+
+    x_diff = point_b[0] - point_a[0]
+    y_diff = point_b[1] - point_a[1]
+
+    return x_diff, y_diff
