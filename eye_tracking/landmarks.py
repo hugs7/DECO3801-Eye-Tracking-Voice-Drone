@@ -3,7 +3,7 @@ Defines the mapping for landmarks
 02/08/2024
 """
 
-from typing import Dict, List, Tuple, Optional, TypedDict, Union
+from typing import Dict, List, Union, TypedDict, Optional
 
 from colours import ColourMap as CM, Colour
 
@@ -18,7 +18,7 @@ class EyePoints(TypedDict):
     right: int
     top: int
     left: int
-    button: int
+    bottom: int
 
 
 class EyeLandmarkData(TypedDict):
@@ -31,38 +31,51 @@ FaceLandmarkMapping = Dict[str, FaceLandmarkData]
 LandmarkMapping = Dict[str, Union[EyeLandmarkMapping, FaceLandmarkMapping]]
 
 
-def classify_point(point_id: int):
-    """
-    Takes a point id and returns it's class (e.g. "lips")
-    """
+class FaceLandmarks:
+    def __init__(self, landmark_mapping: LandmarkMapping):
+        self.landmark_mapping = landmark_mapping
 
-    for key, value in landmark_mapping.items():
-        # Check value has a "points" key
-        if "points" not in value:
-            continue
-        if point_id in value["points"]:
-            return key
-
-    return None
-
-
-def check_for_duplicate_points():
-    """
-    Check for duplicate points in the landmark_mapping
-    """
-
-    points = []
-
-    for key, value in landmark_mapping.items():
-        if "points" not in value:
-            continue
-        for point in value["points"]:
-            check_duplicates_in_list(value["points"], point)
-            if point in points:
-                print(f"Duplicate point found: {point}")
+    def classify_point(self, point_id: int) -> Optional[str]:
+        """
+        Takes a point id and returns its class (e.g., "eyebrow_left")
+        """
+        for key, value in self.landmark_mapping.items():
+            # Handle eye points separately
+            if isinstance(value, dict):
+                for subkey, subvalue in value.items():
+                    if point_id in subvalue["points"].values():
+                        return f"{key}_{subkey}"
+            # Handle face points
             else:
-                points.append(point)
+                if point_id in value["points"]:
+                    return key
+        return None
 
+    def check_for_duplicate_points(self):
+        """
+        Check for duplicate points in the landmark_mapping
+        """
+        points = set()
+        duplicates = set()
 
-if __name__ == "__main__":
-    check_for_duplicate_points()
+        for key, value in self.landmark_mapping.items():
+            # Handle eye points separately
+            if isinstance(value, dict):
+                for subkey, subvalue in value.items():
+                    for point in subvalue["points"].values():
+                        if point in points:
+                            duplicates.add(point)
+                        else:
+                            points.add(point)
+            # Handle face points
+            else:
+                for point in value["points"]:
+                    if point in points:
+                        duplicates.add(point)
+                    else:
+                        points.add(point)
+
+        if duplicates:
+            print(f"Duplicate points found: {duplicates}")
+        else:
+            print("No duplicate points found")
