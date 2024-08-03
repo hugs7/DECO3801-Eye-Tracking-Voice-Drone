@@ -12,7 +12,7 @@ class Coordinate:
         self.x = x
         self.y = y
 
-    def get_coordinates(self) -> Tuple[float, float]:
+    def to_tuple(self) -> Tuple[float, float]:
         """
         Returns the coordinates as a tuple
         :return Tuple[float, float]: The coordinates as a tuple

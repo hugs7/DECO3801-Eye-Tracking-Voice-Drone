@@ -16,12 +16,18 @@ from colours import ColourMap as CM
 from custom_types.NormalisedLandmark import NormalisedLandmark
 
 
-def main_loop(calibrated: bool, cam, face_mesh, landmark_mapping: landmarks.LandmarkMapping) -> Tuple[bool, bool]:
+def main_loop(
+    calibrated: bool, cam, face_mesh, landmark_mapping: landmarks.LandmarkMapping, upscale_dim: coordinate.Coordinate
+) -> Tuple[bool, bool]:
     """
     Defines one iteration of the main loop
     to track eye movement
     :param run: Whether the program should continue running
     :param calibrated: Whether the eye has been calibrated
+    :param cam: The camera object
+    :param face_mesh: The face mesh object
+    :param landmark_mapping: The landmark mapping
+    :param upscale_dim: The dimensions to upscale to
     :return Tuple[bool, bool]: The run status and calibration status
     """
 
@@ -33,6 +39,9 @@ def main_loop(calibrated: bool, cam, face_mesh, landmark_mapping: landmarks.Land
 
     frame_h, frame_w, _ = frame.shape
     frame_dim = coordinate.Coordinate(frame_w, frame_h)
+
+    # Upscale the frame
+    upscaled_frame = cv2.resize(frame, upscale_dim.to_tuple())
 
     if points:
         landmarks: List[NormalisedLandmark] = points[0].landmark
@@ -49,12 +58,12 @@ def main_loop(calibrated: bool, cam, face_mesh, landmark_mapping: landmarks.Land
                 cv2.LINE_AA,
             )
 
-        draw.draw_landmarks(frame, landmarks, landmark_mapping, frame_dim)
+        draw.draw_landmarks(upscaled_frame, landmarks, landmark_mapping, upscale_dim)
 
         if calibrated:
             eye_movement.track_eye_movement(frame, landmarks, frame_dim)
 
-    cv2.imshow(constants.EYE_TRACKING_WINDOW_NAME, frame)
+    cv2.imshow(constants.EYE_TRACKING_WINDOW_NAME, upscaled_frame)
 
     key = cv2.waitKey(1) & 0xFF
     run = True

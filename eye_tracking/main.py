@@ -8,6 +8,7 @@ from mediapipe.python.solutions.face_mesh import FaceMesh
 
 import init
 import loop
+import coordinate
 
 
 def main():
@@ -18,6 +19,10 @@ def main():
     calibrated = False
     window_width = 1280
     window_height = 900
+    feed_ratio = window_width / window_height
+    upscaled_window_width = 2400
+    upscaled_window_height = int(upscaled_window_width / feed_ratio)
+    upscaled_dim = coordinate.Coordinate(upscaled_window_width, upscaled_window_height)
 
     init.window_init(window_width, window_height)
 
@@ -25,7 +30,7 @@ def main():
     face_mesh = init.face_mesh_init()
 
     while run:
-        run, calibrated = loop.main_loop(calibrated, cam, face_mesh, landmark_mapping)
+        run, calibrated = loop.main_loop(calibrated, cam, face_mesh, landmark_mapping, upscaled_dim)
 
     # Release the resources
     cam.release()
