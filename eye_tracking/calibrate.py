@@ -53,11 +53,30 @@ def get_next_calibration_step(step: CalibrationStep) -> Optional[CalibrationStep
 
 
 class EyeCalibrationData:
-    def __init__(self, eye: Dict[str, List[int]], upper_eyelid: List[int], lower_eyelid: List[int], above_eye: List[int]):
-        self.eye = eye
-        self.upper_eyelid = upper_eyelid
-        self.lower_eyelid = lower_eyelid
-        self.above_eye = above_eye
+    def __init__(
+        self,
+        eye: Dict[str, List[int]],
+        upper_eyelid: List[Tuple[int, Tuple[int, int]]],
+        lower_eyelid: List[Tuple[int, Tuple[int, int]]],
+        above_eye: List[Tuple[int, Tuple[int, int]]],
+    ):
+
+        reference_point = upper_eyelid[0][1]
+
+        self.eye = self._transform_coordinates(eye, reference_point)
+        self.upper_eyelid = self._transform_list_of_tuples(upper_eyelid, reference_point)
+        self.lower_eyelid = self._transform_list_of_tuples(lower_eyelid, reference_point)
+        self.above_eye = self._transform_list_of_tuples(above_eye, reference_point)
+
+    def _transform_coordinates(self, coordinates: Dict[str, List[int]], eye_centre: Tuple[int, int]) -> Dict[str, Tuple[int, int]]:
+        """Transform coordinates by subtracting the reference point."""
+        return {k: (v[0] - eye_centre[0], v[1] - eye_centre[1]) for k, v in coordinates.items()}
+
+    def _transform_list_of_tuples(
+        self, coordinates: List[Tuple[int, Tuple[int, int]]], eye_centre: Tuple[int, int]
+    ) -> List[Tuple[int, Tuple[int, int]]]:
+        """Transform a list of tuples by subtracting the reference point."""
+        return [(k, (v[0] - eye_centre[0], v[1] - eye_centre[1])) for k, v in coordinates]
 
     def __str__(self):
         return f"Eye: {self.eye}\n\tUpper eyelid: {self.upper_eyelid},\n\tLower eyelid: {self.lower_eyelid},\n\tAbove eye: {self.above_eye}"
@@ -105,7 +124,7 @@ class CalibrationData:
 
         return string
 
-    def set_eye_calibration(self, side: str, eye_calibration_data: Dict[str, Union[List[int], int]]):
+    def set_calibration(self, side: str, eye_calibration_data: Dict[str, Union[List[int], int]]):
         """
         Set the calibration data for an eye
         :param side: The side of the eye
@@ -231,7 +250,8 @@ def perform_calibration(
                     eye_calibration_data[ref_pos] = []
                     for landmark_id in ref_points:
                         ref_landmark = landmarks.get_image_coord_of_landmark(face_landmarks, landmark_id, frame_dim)
-                        eye_calibration_data[ref_pos].append({landmark_id: ref_landmark})
+                        ref_lmk_with_id = (landmark_id, ref_landmark)
+                        eye_calibration_data[ref_pos].append(ref_lmk_with_id)
 
                 eye_landmarks = calibration_data.landmark_mapping.get_part_by_name(eye)
                 eye_points = eye_landmarks.points
@@ -245,7 +265,7 @@ def perform_calibration(
                     eye_calibration_data["eye"][pos] = landmark_coord
 
                 # Save to calibration data
-                calibration_data.set_eye_calibration(eye, eye_calibration_data)
+                calibration_data.set_calibration(eye, eye_calibration_data)
 
             calibration_data.step = next_step
             print(f"Moving to next calibration step: {calibration_data.step}")
