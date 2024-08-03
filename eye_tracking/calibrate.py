@@ -140,7 +140,9 @@ class CalibrationData:
         eye_calibration_data = EyeCalibrationData(eye, upper_eyelid, lower_eyelid, above_eye)
 
         # Add to the calibration data
-        self.eye_calibration[self.step] = {}
+        if not self.eye_calibration.get(self.step):
+            self.eye_calibration[self.step] = {}
+
         self.eye_calibration[self.step][side] = eye_calibration_data
 
 
@@ -260,8 +262,7 @@ def perform_calibration(
                 eye_calibration_data["eye"] = {}
                 for pos in ["top", "bottom", "left", "right", "centre"]:
                     pos_id = eye_points.get_side(pos)
-                    eye_coord = face_landmarks[pos_id]
-                    landmark_coord = landmarks.normalise_landmark(eye_coord, frame_dim)
+                    landmark_coord = landmarks.get_image_coord_of_landmark(face_landmarks, pos_id, frame_dim)
                     eye_calibration_data["eye"][pos] = landmark_coord
 
                 # Save to calibration data
