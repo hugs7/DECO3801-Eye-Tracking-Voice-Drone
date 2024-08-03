@@ -146,7 +146,7 @@ def perform_calibration(calibration_data: CalibrationData, frame: cv2.VideoCaptu
         else:
             colour = CM.grey
 
-        cv2.circle(frame, coord, dot_radius, colour.get_colour(), -1, cv2.FILLED)
+        cv2.circle(frame, coord, dot_radius, colour.get_colour_bgr(), -1, cv2.FILLED)
 
     key = cv2.waitKey(1) & 0xFF
     if key != 255:
@@ -159,6 +159,17 @@ def perform_calibration(calibration_data: CalibrationData, frame: cv2.VideoCaptu
             print("Calibration complete")
         else:
             # Capture data from the current step
+            # We need to capture (for each eye) the top, bottom, left, right, and centre points
+            # as well as the coordinates of the positions around the eye
+            for eye in ["left", "right"]:
+                eye_reference
+                eye_landmarks = calibration_data.landmark_mapping.get_part_by_name(eye)
+                eye_points = eye_landmarks.points
+                for pos in ["top", "bottom", "left", "right", "centre"]:
+                    pos_id = eye_points.get_side(pos)
+                    eye_coord = face_landmarks[pos_id]
+                    landmark_coord = landmarks.normalise_landmark(eye_coord, frame_dim)
+                    # reference_positions[eye][pos] = landmark_coord
 
             calibration_data.step = next_step
             print(f"Moving to next calibration step: {calibration_data.step}")

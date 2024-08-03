@@ -50,7 +50,7 @@ def draw_landmarks(
             raise ValueError(f"Point class not found for point {id}")
 
         centre = landmark_coord.to_point()
-        colour = point_class.colour.get_colour()
+        colour = point_class.colour.get_colour_bgr()
         cv2.circle(frame, centre, dot_radius, colour, cv2.FILLED)
         cv2.putText(frame, str(id), centre, cv2.FONT_HERSHEY_SIMPLEX, font_scale, colour, thickness, cv2.LINE_AA)
 
@@ -61,7 +61,7 @@ def draw_buttons(frame: np.ndarray, frame_dim: coordinate.Coordinate, landmark_v
     for part, (top_left, bottom_right) in button_positions.items():
         color = (0, 255, 0) if landmark_visibility[part] else (0, 0, 255)
         cv2.rectangle(frame, top_left, bottom_right, color, -1)
-        cv2.putText(frame, part, (top_left[0] + 10, top_left[1] + 20), cv2.FONT_HERSHEY_SIMPLEX, font_scale, CM.black.get_colour(), 2)
+        cv2.putText(frame, part, (top_left[0] + 10, top_left[1] + 20), cv2.FONT_HERSHEY_SIMPLEX, font_scale, CM.black.get_colour_bgr(), 2)
 
 
 def calculate_button_positions(
