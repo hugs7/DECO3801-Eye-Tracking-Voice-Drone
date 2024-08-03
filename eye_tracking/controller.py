@@ -53,19 +53,19 @@ def handle_loop_key_events(landmarks, landmark_mapping, frame_dim, loop_data: lo
     """
     run = True
     key = cv2.waitKey(1) & 0xFF
-    if key == ord("q"):
+    if is_key_event(key, "q"):
         run = False
-    elif key == ord("c"):
+    elif is_key_event(key, "c"):
         # 'c' to begin calibration
         if points:
             calibration_data = calibrate.calibrate_init(landmarks, landmark_mapping, frame_dim)
             print("initiating calibration", calibration_data)
             loop_data["calibration_data"] = calibration_data
             loop_data["calibrating"] = True
-    elif key == ord("l"):
+    elif is_key_event(key, "l"):
         # 'l' to toggle landmarks
         toggle_setting("show_landmarks", loop_data)
-    elif key == ord("o"):
+    elif is_key_event(key, "o"):
         # 'o' to toggle options
         toggle_setting("show_settings", loop_data)
 
@@ -82,3 +82,13 @@ def toggle_setting(setting_key: str, loop_data: loop.LoopData) -> None:
 
     loop_data[setting_key] = not loop_data[setting_key]
     print(f"Toggled {setting_key} to {loop_data[setting_key]}")
+
+
+def is_key_event(key: int, key_binding: str) -> bool:
+    """
+    Checks if the event is a key event
+    :param key: The key event to check
+    :param key_binding: The key binding to trigger the event
+    :return: Whether the event is a key event
+    """
+    return key == ord(key_binding)
