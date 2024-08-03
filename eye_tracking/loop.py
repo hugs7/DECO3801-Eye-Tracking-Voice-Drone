@@ -57,6 +57,7 @@ def main_loop(
 
     points, frame = camera.read_camera_feed(cam, face_mesh)
     upscaled_frame, frame_dim = camera.upscale(frame, frame_dim)
+    landmarks = None
 
     if points:
         landmarks: List[NormalisedLandmark] = points[0].landmark
