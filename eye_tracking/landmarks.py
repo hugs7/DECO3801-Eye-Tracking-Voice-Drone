@@ -35,9 +35,10 @@ class FacePart:
         self.points = points
 
 
-class LandmarkMapping(TypedDict):
-    eyes: Dict[str, EyeLandmarks]
-    face: Dict[str, FacePart]
+class LandmarkMapping:
+    def __init__(self, eyes: Dict[str, EyeLandmarks], face: List[FacePart]):
+        self.eyes = eyes
+        self.face = face
 
 
 class FaceLandmarks:
@@ -51,17 +52,14 @@ class FaceLandmarks:
         eyes_data = landmark_mapping_data["eyes"]
         eyes = {}
         for eye_name, eye_data in eyes_data.items():
-            if "colour" not in eye_data:
-                raise ValueError(f"eye class {eye_name} must have a 'colour' property")
-            if "points" not in eye_data:
-                raise ValueError(f"eye class {eye_name} must have a 'points' property")
+            dict_helper.check_property_exists(eye_data, "colour", "eye class")
+            dict_helper.check_property_exists(eye_data, "points", "eye class")
 
             Colour.parse_colour(eye_data)
             eye_points_data = eye_data["points"]
 
             for expected_key in ["centre", "right", "top", "left", "bottom"]:
-                if expected_key not in eye_points_data:
-                    raise ValueError(f"eye class {eye_name} must have a '{expected_key}' property")
+                dict_helper.check_property_exists(eye_points_data, expected_key, "eye class")
 
             eye_points = EyePoints(
                 centre=eye_points_data["centre"],
@@ -92,12 +90,9 @@ class FaceLandmarks:
         face_data = landmark_mapping_data["face"]
         face = []
         for face_part_data in face_data:
-            if "name" not in face_part_data:
-                raise ValueError(f"face part must have a 'name' property")
-            if "colour" not in face_part_data:
-                raise ValueError(f"face part must have a 'colour' property")
-            if "points" not in face_part_data:
-                raise ValueError(f"face part must have a 'points' property")
+            dict_helper.check_property_exists(face_part_data, "name", "face part")
+            dict_helper.check_property_exists(face_part_data, "colour", "face part")
+            dict_helper.check_property_exists(face_part_data, "points", "face part")
 
             Colour.parse_colour(face_part_data)
             face_part = FacePart(
