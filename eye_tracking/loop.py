@@ -20,6 +20,7 @@ from custom_types.NormalisedLandmark import NormalisedLandmark
 calibration_data = None
 calibrated = False
 show_landmarks = True
+show_settings = False
 
 
 def main_loop(
@@ -39,7 +40,7 @@ def main_loop(
     :return bool: Whether to continue running
     """
 
-    global calibrated, show_landmarks, calibration_data
+    global calibrated, show_landmarks, calibration_data, show_settings
 
     success, frame = cam.read()
     frame = cv2.flip(frame, 1)
@@ -79,7 +80,8 @@ def main_loop(
         # pose_estimation.estimate_pose(upscaled_frame, landmarks, landmark_mapping)
 
     # Draw buttons
-    draw.draw_buttons(upscaled_frame, upscaled_dim, landmark_visibility)
+    if show_settings:
+        draw.draw_buttons(upscaled_frame, upscaled_dim, landmark_visibility)
 
     # Render
     cv2.imshow(constants.EYE_TRACKING_WINDOW_NAME, upscaled_frame)
@@ -98,5 +100,9 @@ def main_loop(
         # 'l' to toggle landmarks
         show_landmarks = not show_landmarks
         print(f"Show landmarks: {show_landmarks}")
+    elif key == ord("o"):
+        # 'o' to toggle options
+        print("Toggling options")
+        show_settings = not show_settings
 
     return run
