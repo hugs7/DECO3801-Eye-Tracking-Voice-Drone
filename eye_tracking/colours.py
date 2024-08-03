@@ -32,7 +32,6 @@ class Colour:
         :param value: The colour value
         :return: True if the value is valid, False otherwise
         """
-
         return math_utils.in_range(value, MIN_COLOUR_VALUE, MAX_COLOUR_VALUE)
 
     def get_colour(self) -> Tuple[int, int, int]:
@@ -40,7 +39,6 @@ class Colour:
         Returns colour as rgb tuple
         :return Tuple[int, int, int]: The colour as an RGB tuple
         """
-
         return self.red, self.green, self.blue
 
     @staticmethod
@@ -49,12 +47,13 @@ class Colour:
         Parses a colour name to a Colour object
         :param obj: The object to parse
         :param colour_key: The colour key. Default is "colour"
-        :return None
+        :return Colour: The parsed Colour object
         """
-
         colour_name = obj[colour_key]
-        colour = ColourMap.__dict__[colour_name]
-        obj[colour_key] = colour
+        if hasattr(ColourMap, colour_name):
+            return getattr(ColourMap, colour_name)
+        else:
+            raise ValueError(f"Colour '{colour_name}' not found in ColourMap.")
 
 
 class ColourMap:
