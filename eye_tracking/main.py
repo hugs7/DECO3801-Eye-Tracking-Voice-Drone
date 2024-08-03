@@ -24,12 +24,12 @@ def main():
     window_height = 900
 
     landmark_visibility = init.init_landmark_visibility()
-    frame_dim = init.init_window(window_width, window_height, landmark_visibility)
+    window_dim = init.init_window(window_width, window_height, landmark_visibility)
 
     face_mesh = init.init_face_mesh()
 
     while run:
-        run = loop.main_loop(cam, face_mesh, landmark_mapping, frame_dim, landmark_visibility)
+        run = loop.main_loop(cam, face_mesh, landmark_mapping, window_dim, landmark_visibility)
 
     # Clean up
     cam.release()

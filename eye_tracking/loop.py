@@ -40,7 +40,7 @@ def main_loop(
     cam: cv2.VideoCapture,
     face_mesh: FaceMesh,
     landmark_mapping: landmarks.LandmarkMapping,
-    frame_dim: coordinate.Coordinate2D,
+    window_dim: coordinate.Coordinate3D,
     landmark_visibility: Dict[str, bool],
 ) -> bool:
     """
@@ -49,14 +49,14 @@ def main_loop(
     :param cam: The camera object
     :param face_mesh: The face mesh object
     :param landmark_mapping: The landmark mapping
-    :param frame_dim: The dimensions to upscale to
+    :param window_dim: The dimensions of the window on screen
     :return bool: Whether to continue running
     """
 
     global loop_data
 
     points, frame = camera.read_camera_feed(cam, face_mesh)
-    upscaled_frame, frame_dim = camera.upscale(frame, frame_dim)
+    upscaled_frame, frame_dim = camera.upscale(frame, window_dim)
 
     if points:
         landmarks: List[NormalisedLandmark] = points[0].landmark
