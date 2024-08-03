@@ -75,8 +75,12 @@ def main_loop(
             # We enter the calibration mode
             calibrating, calibrated = calibrate.perform_calibration(landmarks, calibration_data, upscaled_frame)
 
+            if calibrated:
+                print("Calibrated")
+                print(calibration_data)
+
         # if calibrated:
-        #     eye_movement.track_eye_movement(upscaled_frame, landmarks, frame_dim)
+        # eye_movement.track_eye_movement(upscaled_frame, landmarks, frame_dim)
 
         # pose_estimation.estimate_pose(upscaled_frame, landmarks, landmark_mapping)
 
