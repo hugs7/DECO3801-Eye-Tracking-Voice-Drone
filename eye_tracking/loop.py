@@ -1,60 +1,28 @@
-import cv2
+"""
+Defines main loop for eye tracking
+"""
+
+from typing import Tuple
 import time
-import mediapipe as mp
-from mediapipe.python.solutions.face_mesh import FaceMesh
-import landmarks as lm
+import cv2
 
-# Initialize variables
-run = True
-calibrated = False
-reference_positions = {"left": {}, "right": {}}
-window_width = 1280  # Replace with your desired width
-window_height = 900
-windowName = "eyetracking"
-print_interval = 5  # Time interval in seconds
-last_print_time = time.time()
-
-# Initialize video capture and face mesh detector
-cam = cv2.VideoCapture(0)
-face_mesh = FaceMesh(refine_landmarks=True, max_num_faces=1)
+import constants
+import calibrate
+import draw
+import eye_movement
+import landmarks
 
 
-def normalise_landmark(landmark, frame_w, frame_h):
-    x = int(landmark.x * frame_w)
-    y = int(landmark.y * frame_h)
-    return x, y
+def main_loop(calibrated: bool, cam, face_mesh, landmark_mapping: landmarks.LandmarkMapping) -> Tuple[bool, bool]:
+    """
+    Defines one iteration of the main loop
+    to track eye movement
+    :param calibrated: Whether the eye has been calibrated
+    :return Tuple[bool, bool]: The run status and calibration status
+    """
 
-
-def calibrate_eye_positions(landmarks, frame_w, frame_h):
-    for eye in ["left", "right"]:
-        for pos in ["top", "bottom", "left", "right"]:
-            x, y = normalise_landmark(landmarks[lm.eye_landmarks[eye][pos]], frame_w, frame_h)
-            reference_positions[eye][pos] = (x, y)
-
-
-def track_eye_movement(frame, landmarks, frame_w, frame_h):
-    sensitivity = 25
-    for eye in ["left", "right"]:
-        iris_x, iris_y = normalise_landmark(landmarks[lm.eye_landmarks[eye]["top"]], frame_w, frame_h)
-        ref_x, ref_y = reference_positions[eye]["top"]
-
-        dx = iris_x - ref_x
-        dy = iris_y - ref_y
-
-        # Overlay a dot corresponding to the eye movement
-        overlay_x = frame_w // 2 + dx * sensitivity
-        overlay_y = frame_h // 2 + dy * sensitivity
-        cv2.circle(frame, (overlay_x, overlay_y), 5, (255, 0, 0), cv2.FILLED)
-
-
-# Set the desired window size
-cv2.namedWindow(windowName, cv2.WINDOW_NORMAL)
-cv2.resizeWindow(windowName, window_width, window_height)
-
-
-def main_loop():
     # Define globals
-    global run, calibrated, reference_positions, last_print_time
+    global run, reference_positions, last_print_time
 
     success, frame = cam.read()
     frame = cv2.flip(frame, 1)
@@ -81,43 +49,19 @@ def main_loop():
                 cv2.LINE_AA,
             )
 
-        for id, landmark in enumerate(landmarks):
-            x, y = normalise_landmark(landmark, frame_w, frame_h)
-
-            point_class_label = lm.classify_point(id)
-            point_class = lm.landmark_mapping.get(point_class_label, None)
-            if point_class_label is not None:
-                if "colour" in point_class:
-                    colour = point_class["colour"]
-                else:
-                    print(f"Point class {point_class} does not have a colour")
-            else:
-                if id in lm.face_landmarks:
-                    colour = (0, 255, 0)
-                else:
-                    colour = (0, 0, 255)
-
-            cv2.circle(frame, (x, y), 3, colour)
-            cv2.putText(frame, str(id), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 255, 255), 1, cv2.LINE_AA)
+        draw.draw_landmarks(frame, landmarks, frame_w, frame_h)
 
         if calibrated:
-            track_eye_movement(frame, landmarks, frame_w, frame_h)
+            eye_movement.track_eye_movement(frame, landmarks, frame_w, frame_h)
 
-    cv2.imshow(windowName, frame)
+    cv2.imshow(constants.EYE_TRACKING_WINDOW_NAME, frame)
 
     key = cv2.waitKey(1) & 0xFF
     if key == ord("q"):
         run = False
     elif key == ord("\r"):  # Enter key to calibrate
         if points:
-            calibrate_eye_positions(landmarks, frame_w, frame_h)
+            reference_positions = calibrate.calibrate_eye_positions(landmarks, frame_w, frame_h)
             calibrated = True
 
-
-while run:
-    main_loop()
-
-
-# Release the resources
-cam.release()
-cv2.destroyAllWindows()
+    return run, calibrated
