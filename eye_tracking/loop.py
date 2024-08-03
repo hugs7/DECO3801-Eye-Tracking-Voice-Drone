@@ -62,7 +62,7 @@ def main_loop(calibrated: bool, cam, face_mesh, landmark_mapping: landmarks.Land
         run = False
     elif key == ord("\r"):  # Enter key to calibrate
         if points:
-            reference_positions = calibrate.calibrate_eye_positions(landmarks, frame_w, frame_h)
+            reference_positions = calibrate.calibrate_eye_positions(landmarks, frame_dim)
             calibrated = True
 
     return run, calibrated
