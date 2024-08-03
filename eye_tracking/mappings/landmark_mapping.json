@@ -1,18 +1,24 @@
 {
     "eyes": {
         "left": {
-            "centre": 468,
-            "right": 469,
-            "top": 470,
-            "left": 471,
-            "bottom": 472
+            "colour": "red",
+            "points": {
+                "centre": 468,
+                "right": 469,
+                "top": 470,
+                "left": 471,
+                "bottom": 472
+            }
         },
         "right": {
-            "centre": 473,
-            "right": 474,
-            "top": 475,
-            "left": 476,
-            "bottom": 477
+            "colour": "red",
+            "points": {
+                "centre": 473,
+                "right": 474,
+                "top": 475,
+                "left": 476,
+                "bottom": 477
+            }
         }
     },
     "face": [
