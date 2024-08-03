@@ -93,6 +93,6 @@ def main_loop(
     # Only wait for key if not in calibration mode or face not detected
     run = True
     if not loop_data["calibrating"] or not points:
-        run = controller.handle_loop_key_events(landmarks, landmark_mapping, frame_dim, loop_data)
+        run = controller.handle_loop_key_events(landmarks, landmark_mapping, frame_dim, loop_data, points)
 
     return run
