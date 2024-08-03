@@ -21,6 +21,10 @@ class Colour:
         # Check values
         if not self._is_valid_colour_value(red):
             raise ValueError(f"Invalid red value {red}")
+        if not self._is_valid_colour_value(green):
+            raise ValueError(f"Invalid green value {green}")
+        if not self._is_valid_colour_value(blue):
+            raise ValueError(f"Invalid blue value {blue}")
 
     def _is_valid_colour_value(self, value: int) -> bool:
         """
