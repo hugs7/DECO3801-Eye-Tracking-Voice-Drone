@@ -11,7 +11,7 @@ import landmarks
 import utils.file_helper as file_helper
 
 
-def landmark_mapping_init() -> landmarks.FaceLandmarks:
+def landmark_mapping_init() -> landmarks.Landmarks:
     """
     Initialises the mapping for landmarks on the face
     """
@@ -19,7 +19,7 @@ def landmark_mapping_init() -> landmarks.FaceLandmarks:
     LANDMARK_MAPPING_PATH = file_helper.resolve_path(os.path.join(constants.MAPPINGS_FOLDER, "landmark_mapping.json"))
 
     landmark_mapping = file_helper.load_json(LANDMARK_MAPPING_PATH)
-    lmks = landmarks.FaceLandmarks(landmark_mapping)
+    lmks = landmarks.Landmarks(landmark_mapping)
 
     return lmks
 
