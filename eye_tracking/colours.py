@@ -80,3 +80,4 @@ class ColourMap:
     gold = Colour("gold", 235, 229, 52)
     white = Colour("white", 255, 255, 255)
     black = Colour("black", 0, 0, 0)
+    grey = Colour("grey", 128, 128, 128)

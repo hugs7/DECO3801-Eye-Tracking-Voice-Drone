@@ -22,14 +22,14 @@ def main():
     upscaled_window_width = 2400
     upscaled_window_height = int(upscaled_window_width / feed_ratio)
     upscaled_dim = coordinate.Coordinate(upscaled_window_width, upscaled_window_height)
-
-    init.window_init(window_width, window_height)
+    landmark_visibility = init.set_landmark_button_visibility()
+    init.window_init(window_width, window_height, landmark_visibility, upscaled_dim)
 
     cam = init.camera_init()
     face_mesh = init.face_mesh_init()
 
     while run:
-        run = loop.main_loop(cam, face_mesh, landmark_mapping, upscaled_dim)
+        run = loop.main_loop(cam, face_mesh, landmark_mapping, upscaled_dim, landmark_visibility)
 
     # Release the resources
     cam.release()

@@ -1,6 +1,7 @@
 {
-    "eyes": {
-        "left": {
+    "eyes": [
+        {
+            "name": "left",
             "colour": "red",
             "points": {
                 "centre": 468,
@@ -10,7 +11,8 @@
                 "bottom": 472
             }
         },
-        "right": {
+        {
+            "name": "right",
             "colour": "red",
             "points": {
                 "centre": 473,
@@ -20,7 +22,7 @@
                 "bottom": 477
             }
         }
-    },
+    ],
     "face": [
         { "name": "eyebrow_left", "colour": "lime", "points": [70, 63, 105, 66, 65, 52, 53, 107, 55] },
         { "name": "eyebrow_right", "colour": "lime", "points": [336, 296, 334, 293, 300, 276, 283, 282, 295, 285] },
