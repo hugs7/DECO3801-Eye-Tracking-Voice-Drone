@@ -59,7 +59,7 @@ def main_loop(
 
     if points:
         landmarks: List[NormalisedLandmark] = points[0].landmark
-        if not calibrated:
+        if not loop_data["calibrated"]:
             cv2.putText(
                 upscaled_frame,
                 "Look at the centre of the screen then press 'c' to begin calibration",
@@ -77,6 +77,8 @@ def main_loop(
         if LoopData["calibrating"]:
             # We enter the calibration mode
             calibrating, calibrated = calibrate.perform_calibration(landmarks, calibration_data, upscaled_frame)
+            loop_data["calibrating"] = calibrating
+            loop_data["calibrated"] = calibrated
 
             if loop_data["calibrated"]:
                 print("Calibrated")
