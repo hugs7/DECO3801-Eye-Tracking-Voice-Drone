@@ -64,7 +64,7 @@ def main_loop(
         if calibrated:
             eye_movement.track_eye_movement(upscaled_frame, landmarks, frame_dim)
 
-    pose_estimation.estimate_pose(upscaled_frame, landmarks, landmark_mapping)
+        pose_estimation.estimate_pose(upscaled_frame, landmarks, landmark_mapping)
 
     # Render
     cv2.imshow(constants.EYE_TRACKING_WINDOW_NAME, upscaled_frame)
