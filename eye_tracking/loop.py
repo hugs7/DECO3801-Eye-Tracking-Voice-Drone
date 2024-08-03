@@ -22,7 +22,7 @@ def main_loop(calibrated: bool, cam, face_mesh, landmark_mapping: landmarks.Land
     """
 
     # Define globals
-    global run, reference_positions, last_print_time
+    global run, reference_positions
 
     success, frame = cam.read()
     frame = cv2.flip(frame, 1)
@@ -34,8 +34,6 @@ def main_loop(calibrated: bool, cam, face_mesh, landmark_mapping: landmarks.Land
 
     if points:
         landmarks = points[0].landmark
-        current_time = time.time()
-        last_print_time = current_time
 
         if not calibrated:
             cv2.putText(
