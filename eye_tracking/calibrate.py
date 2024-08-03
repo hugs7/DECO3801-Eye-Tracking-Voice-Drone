@@ -103,7 +103,7 @@ class EyePosition:
 
 
 class CalibrationData:
-    def __init__(self, landmark_mapping: landmarks.Landmarks, frame_dim: coordinate.Coordinate):
+    def __init__(self, landmark_mapping: landmarks.Landmarks, frame_dim: coordinate.Coordinate2D):
         self.landmark_mapping = landmark_mapping
         self.frame_dim = frame_dim
 
@@ -197,7 +197,7 @@ class CalibrationData:
 
 
 def calibrate_init(
-    face_landmarks: List[NormalisedLandmark], landmark_mapping: landmarks.Landmarks, frame_dim: coordinate.Coordinate
+    face_landmarks: List[NormalisedLandmark], landmark_mapping: landmarks.Landmarks, frame_dim: coordinate.Coordinate2D
 ) -> CalibrationData:
     """
     Calibrate eye positions based on the landmarks

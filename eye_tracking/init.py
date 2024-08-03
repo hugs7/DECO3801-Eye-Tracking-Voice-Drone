@@ -14,7 +14,7 @@ import utils.file_helper as file_helper
 import controller
 
 
-def landmark_mapping_init() -> landmarks.Landmarks:
+def init_landmark_mapping() -> landmarks.Landmarks:
     """
     Initialises the mapping for landmarks on the face
     """
@@ -27,12 +27,20 @@ def landmark_mapping_init() -> landmarks.Landmarks:
     return lmks
 
 
-def window_init(window_width: int, window_height: int, landmark_visibility: Dict[str, bool], upscaled_dim: coordinate.Coordinate) -> None:
+def init_window(window_width: int, window_height: int, landmark_visibility: Dict[str, bool]) -> coordinate.Coordinate2D:
     """
     Initialises the window for the eye tracking application
     :param window_width: The width of the window
     :param window_height: The height of the window
+    :param landmark_visibility: The visibility of the landmarks
+    :return coordinate.Coordinate: The upscaled dimensions
     """
+
+    # Rescale window to fill scren better
+    feed_ratio = window_width / window_height
+    upscaled_window_width = 2400
+    upscaled_window_height = int(upscaled_window_width / feed_ratio)
+    upscaled_dim = coordinate.Coordinate2D(upscaled_window_width, upscaled_window_height)
 
     # Set the desired window size
     cv2.namedWindow(constants.EYE_TRACKING_WINDOW_NAME, cv2.WINDOW_NORMAL)
@@ -44,6 +52,8 @@ def window_init(window_width: int, window_height: int, landmark_visibility: Dict
     }
     cv2.setMouseCallback(constants.EYE_TRACKING_WINDOW_NAME, controller.mouse_callback, mouse_params)
 
+    return upscaled_dim
+
 
 def camera_init() -> cv2.VideoCapture:
     """
@@ -54,7 +64,7 @@ def camera_init() -> cv2.VideoCapture:
     return cam
 
 
-def face_mesh_init() -> FaceMesh:
+def init_face_mesh() -> FaceMesh:
     """
     Initialises the face mesh detector
     :return FaceMesh: The face mesh detector
@@ -63,7 +73,12 @@ def face_mesh_init() -> FaceMesh:
     return face_mesh
 
 
-def set_landmark_button_visibility() -> Dict[str, bool]:
+def init_landmark_visibility() -> Dict[str, bool]:
+    """
+    Initialises the visibility of the landmarks
+    :return Dict[str, bool]: The visibility of the landmarks
+    """
+
     return {
         "left": True,  # Left eye
         "right": True,  # Right eye

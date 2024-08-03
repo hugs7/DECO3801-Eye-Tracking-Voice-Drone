@@ -2,7 +2,7 @@
 Defines main loop for eye tracking
 """
 
-from typing import Tuple, List, Dict
+from typing import Tuple, List, Dict, TypedDict
 import cv2
 from mediapipe.python.solutions.face_mesh import FaceMesh
 
@@ -13,22 +13,33 @@ import draw
 import eye_movement
 import landmarks
 import pose_estimation
-
+import camera
 from colours import ColourMap as CM
 from custom_types.NormalisedLandmark import NormalisedLandmark
 
-calibration_data = None
-calibrating = False
-calibrated = False
-show_landmarks = True
-show_settings = False
+
+class LoopData(TypedDict):
+    calibration_data: Dict[str, Tuple[float, float]]
+    calibrating: bool
+    calibrated: bool
+    show_landmarks: bool
+    show_settings: bool
+
+
+loop_data: LoopData = {
+    "calibration_data": None,
+    "calibrating": False,
+    "calibrated": False,
+    "show_landmarks": True,
+    "show_settings": False,
+}
 
 
 def main_loop(
     cam: cv2.VideoCapture,
     face_mesh: FaceMesh,
     landmark_mapping: landmarks.LandmarkMapping,
-    upscaled_dim: coordinate.Coordinate,
+    frame_dim: coordinate.Coordinate2D,
     landmark_visibility: Dict[str, bool],
 ) -> bool:
     """
@@ -37,11 +48,11 @@ def main_loop(
     :param cam: The camera object
     :param face_mesh: The face mesh object
     :param landmark_mapping: The landmark mapping
-    :param upscaled_dim: The dimensions to upscale to
+    :param frame_dim: The dimensions to upscale to
     :return bool: Whether to continue running
     """
 
-    global calibrated, calibrating, show_landmarks, calibration_data, show_settings
+    global loop_data
 
     success, frame = cam.read()
     frame = cv2.flip(frame, 1)
@@ -68,19 +79,19 @@ def main_loop(
                 cv2.LINE_AA,
             )
 
-        if show_landmarks:
-            draw.draw_landmarks(upscaled_frame, landmarks, landmark_mapping, upscaled_dim, landmark_visibility)
+        if LoopData["show_landmarks"]:
+            draw.draw_landmarks(upscaled_frame, landmarks, landmark_mapping, frame_dim, landmark_visibility)
 
-        if calibrating:
+        if LoopData["calibrating"]:
             # We enter the calibration mode
             calibrating, calibrated = calibrate.perform_calibration(landmarks, calibration_data, upscaled_frame)
 
-            if calibrated:
+            if loop_data["calibrated"]:
                 print("Calibrated")
                 print(calibration_data)
                 pose_estimation.estimate_gaze(upscaled_frame, landmarks, landmark_mapping, calibration_data)
 
-        elif calibrated:
+        elif loop_data["calibrated"]:
             # eye_movement.track_eye_movement(upscaled_frame, landmarks, frame_dim)
             pass
 
@@ -88,14 +99,14 @@ def main_loop(
 
     # Draw buttons
     if show_settings:
-        draw.draw_buttons(upscaled_frame, upscaled_dim, landmark_visibility)
+        draw.draw_buttons(upscaled_frame, frame_dim, landmark_visibility)
 
     # Render
     cv2.imshow(constants.EYE_TRACKING_WINDOW_NAME, upscaled_frame)
 
     # Only wait for key if not in calibration mode or face not detected
     run = True
-    if not calibrating or not points:
+    if not loop_data["calibrating"] or not points:
         key = cv2.waitKey(1) & 0xFF
         if key == ord("q"):
             run = False
@@ -104,7 +115,8 @@ def main_loop(
             if points:
                 calibration_data = calibrate.calibrate_init(landmarks, landmark_mapping, frame_dim)
                 print("initiating calibration", calibration_data)
-                calibrating = True
+                loop_data["calibration_data"] = calibration_data
+                loop_data["calibrating"] = True
         elif key == ord("l"):
             # 'l' to toggle landmarks
             show_landmarks = not show_landmarks
