@@ -76,14 +76,14 @@ def main_loop(
 
         if LoopData["calibrating"]:
             # We enter the calibration mode
-            calibrating, calibrated = calibrate.perform_calibration(landmarks, calibration_data, upscaled_frame)
+            calibrating, calibrated = calibrate.perform_calibration(landmarks, loop_data["calibration_data"], upscaled_frame)
             loop_data["calibrating"] = calibrating
             loop_data["calibrated"] = calibrated
 
             if loop_data["calibrated"]:
                 print("Calibrated")
-                print(calibration_data)
-                pose_estimation.estimate_gaze(upscaled_frame, landmarks, landmark_mapping, calibration_data)
+                print(loop_data["calibration_data"])
+                pose_estimation.estimate_gaze(upscaled_frame, landmarks, landmark_mapping, loop_data["calibration_data"])
 
         elif loop_data["calibrated"]:
             # eye_movement.track_eye_movement(upscaled_frame, landmarks, frame_dim)
