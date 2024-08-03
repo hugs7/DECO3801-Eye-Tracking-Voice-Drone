@@ -21,6 +21,20 @@ class EyePoints:
         self.left = left
         self.bottom = bottom
 
+    def get_side(self, side: str):
+        if side == "right":
+            return self.right
+        elif side == "top":
+            return self.top
+        elif side == "left":
+            return self.left
+        elif side == "bottom":
+            return self.bottom
+        elif side == "centre":
+            return self.centre
+        else:
+            raise ValueError(f"Invalid side: {side}")
+
 
 class EyeLandmarks:
     def __init__(self, colour: Colour, points: EyePoints):
