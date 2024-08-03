@@ -16,8 +16,6 @@ def main():
 
     # Initialise variables
     run = True
-    calibrated = False
-    show_landmarks = False
     window_width = 1280
     window_height = 900
     feed_ratio = window_width / window_height
@@ -31,7 +29,7 @@ def main():
     face_mesh = init.face_mesh_init()
 
     while run:
-        run, calibrated, show_landmarks = loop.main_loop(calibrated, show_landmarks, cam, face_mesh, landmark_mapping, upscaled_dim)
+        run = loop.main_loop(cam, face_mesh, landmark_mapping, upscaled_dim)
 
     # Release the resources
     cam.release()
