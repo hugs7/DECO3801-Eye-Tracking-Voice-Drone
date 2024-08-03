@@ -32,7 +32,7 @@ def calibrate_eye_positions(landmarks, frame_w, frame_h):
             reference_positions[eye][pos] = (x, y)
 
 
-def track_eye_movement(landmarks, frame_w, frame_h):
+def track_eye_movement(frame, landmarks, frame_w, frame_h):
     sensitivity = 25
     for eye in ["left", "right"]:
         iris_x, iris_y = normalise_landmark(landmarks[lm.eye_landmarks[eye]["top"]], frame_w, frame_h)
@@ -51,7 +51,11 @@ def track_eye_movement(landmarks, frame_w, frame_h):
 cv2.namedWindow(windowName, cv2.WINDOW_NORMAL)
 cv2.resizeWindow(windowName, window_width, window_height)
 
-while run:
+
+def main_loop():
+    # Define globals
+    global run, calibrated, reference_positions, last_print_time
+
     success, frame = cam.read()
     frame = cv2.flip(frame, 1)
     rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -97,7 +101,7 @@ while run:
             cv2.putText(frame, str(id), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 255, 255), 1, cv2.LINE_AA)
 
         if calibrated:
-            track_eye_movement(landmarks, frame_w, frame_h)
+            track_eye_movement(frame, landmarks, frame_w, frame_h)
 
     cv2.imshow(windowName, frame)
 
@@ -108,6 +112,11 @@ while run:
         if points:
             calibrate_eye_positions(landmarks, frame_w, frame_h)
             calibrated = True
+
+
+while run:
+    main_loop()
+
 
 # Release the resources
 cam.release()
