@@ -18,12 +18,10 @@ def main_loop(calibrated: bool, cam, face_mesh, landmark_mapping: landmarks.Land
     """
     Defines one iteration of the main loop
     to track eye movement
+    :param run: Whether the program should continue running
     :param calibrated: Whether the eye has been calibrated
     :return Tuple[bool, bool]: The run status and calibration status
     """
-
-    # Define globals
-    global run, reference_positions
 
     success, frame = cam.read()
     frame = cv2.flip(frame, 1)
@@ -49,7 +47,7 @@ def main_loop(calibrated: bool, cam, face_mesh, landmark_mapping: landmarks.Land
                 cv2.LINE_AA,
             )
 
-        draw.draw_landmarks(frame, landmarks, frame_dim)
+        draw.draw_landmarks(frame, landmarks, landmark_mapping, frame_dim)
 
         if calibrated:
             eye_movement.track_eye_movement(frame, landmarks, frame_dim)
@@ -57,6 +55,7 @@ def main_loop(calibrated: bool, cam, face_mesh, landmark_mapping: landmarks.Land
     cv2.imshow(constants.EYE_TRACKING_WINDOW_NAME, frame)
 
     key = cv2.waitKey(1) & 0xFF
+    run = True
     if key == ord("q"):
         run = False
     elif key == ord("\r"):  # Enter key to calibrate
