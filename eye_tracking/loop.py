@@ -18,13 +18,13 @@ from custom_types.NormalisedLandmark import NormalisedLandmark
 
 
 def main_loop(
-    calibrated: bool, cam, face_mesh, landmark_mapping: landmarks.LandmarkMapping, upscale_dim: coordinate.Coordinate
-) -> Tuple[bool, bool]:
+    calibrated: bool, show_landmarks: bool, cam, face_mesh, landmark_mapping: landmarks.LandmarkMapping, upscale_dim: coordinate.Coordinate
+) -> Tuple[bool, bool, bool]:
     """
     Defines one iteration of the main loop
     to track eye movement
-    :param run: Whether the program should continue running
     :param calibrated: Whether the eye has been calibrated
+    :param show_landmarks: Whether to show the landmarks
     :param cam: The camera object
     :param face_mesh: The face mesh object
     :param landmark_mapping: The landmark mapping
@@ -59,7 +59,8 @@ def main_loop(
                 cv2.LINE_AA,
             )
 
-        draw.draw_landmarks(upscaled_frame, landmarks, landmark_mapping, upscale_dim)
+        if show_landmarks:
+            draw.draw_landmarks(upscaled_frame, landmarks, landmark_mapping, upscale_dim)
 
         if calibrated:
             eye_movement.track_eye_movement(upscaled_frame, landmarks, frame_dim)
@@ -73,9 +74,14 @@ def main_loop(
     run = True
     if key == ord("q"):
         run = False
-    elif key == ord("\r"):  # Enter key to calibrate
+    elif key == ord("\r"):
+        # Enter key to calibrate
         if points:
             reference_positions = calibrate.calibrate_eye_positions(landmarks, frame_dim)
             calibrated = True
+    elif key == ord("l"):
+        # Toggle landmarks
+        show_landmarks = not show_landmarks
+        print(f"Show landmarks: {show_landmarks}")
 
-    return run, calibrated
+    return run, calibrated, show_landmarks
