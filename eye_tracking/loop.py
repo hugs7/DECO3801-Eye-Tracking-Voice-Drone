@@ -6,6 +6,7 @@ from typing import Tuple
 import cv2
 
 import constants
+import coordinate
 import calibrate
 import draw
 import eye_movement
@@ -31,6 +32,7 @@ def main_loop(calibrated: bool, cam, face_mesh, landmark_mapping: landmarks.Land
     points = output.multi_face_landmarks
 
     frame_h, frame_w, _ = frame.shape
+    frame_dims = coordinate.Coorrdinate(frame_w, frame_h)
 
     if points:
         landmarks = points[0].landmark
@@ -42,15 +44,15 @@ def main_loop(calibrated: bool, cam, face_mesh, landmark_mapping: landmarks.Land
                 (50, 50),
                 cv2.FONT_HERSHEY_SIMPLEX,
                 0.7,
-                CM.white,
+                CM.white.get_colour(),
                 2,
                 cv2.LINE_AA,
             )
 
-        draw.draw_landmarks(frame, landmarks, frame_w, frame_h)
+        draw.draw_landmarks(frame, landmarks, frame_dims)
 
         if calibrated:
-            eye_movement.track_eye_movement(frame, landmarks, frame_w, frame_h)
+            eye_movement.track_eye_movement(frame, landmarks, frame_dims)
 
     cv2.imshow(constants.EYE_TRACKING_WINDOW_NAME, frame)
 

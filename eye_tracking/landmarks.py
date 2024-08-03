@@ -136,16 +136,15 @@ class Landmarks:
         return None
 
 
-def normalise_landmark(landmark, frame_w, frame_h) -> coordinate.Coordinate:
+def normalise_landmark(landmark, frame_dim: coordinate.Coordinate) -> coordinate.Coordinate:
     """
     Normalise a landmark to the width and height of the frame
     :param landmark: The landmark to normalise
-    :param frame_w: The width of the frame
-    :param frame_h: The height of the frame
+    :param frame_dim: The dimensions of the frame
     :return Coordinate: The normalised landmark
     """
 
-    x = int(landmark.x * frame_w)
-    y = int(landmark.y * frame_h)
+    x = int(landmark.x * frame_dim.x)
+    y = int(landmark.y * frame_dim.y)
 
     return coordinate.Coordinate(x, y)
