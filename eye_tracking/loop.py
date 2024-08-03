@@ -3,7 +3,6 @@ Defines main loop for eye tracking
 """
 
 from typing import Tuple
-import time
 import cv2
 
 import constants
@@ -11,6 +10,7 @@ import calibrate
 import draw
 import eye_movement
 import landmarks
+from colours import ColourMap as CM
 
 
 def main_loop(calibrated: bool, cam, face_mesh, landmark_mapping: landmarks.LandmarkMapping) -> Tuple[bool, bool]:
@@ -42,7 +42,7 @@ def main_loop(calibrated: bool, cam, face_mesh, landmark_mapping: landmarks.Land
                 (50, 50),
                 cv2.FONT_HERSHEY_SIMPLEX,
                 0.7,
-                (255, 255, 255),
+                CM.white,
                 2,
                 cv2.LINE_AA,
             )
