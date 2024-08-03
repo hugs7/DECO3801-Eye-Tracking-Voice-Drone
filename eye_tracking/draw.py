@@ -5,13 +5,12 @@ Module to draw on the screen
 from typing import List
 import cv2
 import cv2.typing as cv_t
-from google.protobuf.internal.containers import RepeatedCompositeContainer
 import numpy as np
 
 import landmarks
 import coordinate
 
-from types.NormalisedLandmark import NormalisedLandmark
+from custom_types.NormalisedLandmark import NormalisedLandmark
 
 
 def draw_landmarks(
