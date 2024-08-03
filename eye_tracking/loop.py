@@ -87,9 +87,9 @@ def main_loop(
     # Render
     cv2.imshow(constants.EYE_TRACKING_WINDOW_NAME, upscaled_frame)
 
-    # Only wait for key if not in calibration mode
+    # Only wait for key if not in calibration mode or face not detected
     run = True
-    if not calibrating:
+    if not calibrating or not points:
         key = cv2.waitKey(1) & 0xFF
         if key == ord("q"):
             run = False
