@@ -2,12 +2,14 @@
 Controller for options in the cv2 window
 """
 
-from typing import Dict
+from typing import Dict, List
 import cv2
 
 import draw
 import loop
 import calibrate
+
+from custom_types.NormalisedLandmark import NormalisedLandmark
 
 
 def mouse_callback(event, x, y, flag, params) -> None:
@@ -41,7 +43,7 @@ def toggle_landmark_part(part, landmark_visibility: Dict[str, bool]) -> None:
     print(f"Toggled {part} to {landmark_visibility[part]}")
 
 
-def handle_loop_key_events(landmarks, landmark_mapping, frame_dim, loop_data: loop.LoopData, points) -> bool:
+def handle_loop_key_events(landmarks: List[NormalisedLandmark], landmark_mapping, frame_dim, loop_data: loop.LoopData, points) -> bool:
     """
     Handles key events in the loop
     :param landmarks: The landmarks
@@ -57,7 +59,7 @@ def handle_loop_key_events(landmarks, landmark_mapping, frame_dim, loop_data: lo
         run = False
     elif is_key_event(key, "c"):
         # 'c' to begin calibration
-        if points:
+        if landmarks:
             calibration_data = calibrate.calibrate_init(landmarks, landmark_mapping, frame_dim)
             print("initiating calibration", calibration_data)
             loop_data["calibration_data"] = calibration_data
