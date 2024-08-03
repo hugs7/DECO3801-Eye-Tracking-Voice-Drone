@@ -67,19 +67,19 @@ class FaceLandmarks:
         dict_helper.check_property_exists(landmark_mapping, "face", "landmark_mapping")
 
         for face_part in landmark_mapping["face"]:
-            dict_helper.check_property_exists(face_part, "name", f"face class {eye}")
-            dict_helper.check_property_exists(face_part, "colour", f"face class {eye}")
-            dict_helper.check_property_exists(face_part, "points", f"face class {eye}")
+            dict_helper.check_property_exists(face_part, "name", f"face class {face_part}")
+            dict_helper.check_property_exists(face_part, "colour", f"face class {face_part}")
+            dict_helper.check_property_exists(face_part, "points", f"face class {face_part}")
 
-            Colour.parse_colour(eye_data)
+            Colour.parse_colour(face_part)
 
             # Check points are a list of unique ints
-            face_points = eye_data["points"]
+            face_points = face_part["points"]
 
             # Check for duplicates
             duplicated_points = list_helper.find_duplicates_in_list(face_points)
             if len(duplicated_points) > 0:
-                raise ValueError(f"Duplicated points found in face class {eye}: {duplicated_points}")
+                raise ValueError(f"Duplicated points found in face part {face_part}: {duplicated_points}")
 
         print("landmark_mapping")
         print(landmark_mapping)
