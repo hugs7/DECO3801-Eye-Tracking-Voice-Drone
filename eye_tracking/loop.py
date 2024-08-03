@@ -41,6 +41,9 @@ def main_loop(
     frame_h, frame_w, _ = frame.shape
     frame_dim = coordinate.Coordinate(frame_w, frame_h)
 
+    # Upscale the frame
+    upscaled_frame = cv2.resize(frame, upscale_dim.to_tuple())
+
     if points:
         landmarks: List[NormalisedLandmark] = points[0].landmark
 
@@ -56,15 +59,12 @@ def main_loop(
                 cv2.LINE_AA,
             )
 
-        draw.draw_landmarks(frame, landmarks, landmark_mapping, upscale_dim)
+        draw.draw_landmarks(upscaled_frame, landmarks, landmark_mapping, upscale_dim)
 
         if calibrated:
-            eye_movement.track_eye_movement(frame, landmarks, frame_dim)
+            eye_movement.track_eye_movement(upscaled_frame, landmarks, frame_dim)
 
-    pose_estimation.estimate_pose(frame, landmarks, landmark_mapping)
-
-    # Upscale the frame
-    upscaled_frame = cv2.resize(frame, upscale_dim.to_tuple())
+    pose_estimation.estimate_pose(upscaled_frame, landmarks, landmark_mapping)
 
     # Render
     cv2.imshow(constants.EYE_TRACKING_WINDOW_NAME, upscaled_frame)
