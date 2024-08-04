@@ -15,7 +15,7 @@ from colours import ColourMap as CM
 
 
 class CalibrationStep(Enum):
-    CENTER = "center"
+    CENTRE = "CENTRE"
     TOP_LEFT = "top-left"
     TOP_RIGHT = "top-right"
     BOTTOM_LEFT = "bottom-left"
@@ -27,7 +27,7 @@ class CalibrationStep(Enum):
 
 
 calibration_order = [
-    CalibrationStep.CENTER,
+    CalibrationStep.CENTRE,
     CalibrationStep.TOP_LEFT,
     CalibrationStep.TOP_RIGHT,
     CalibrationStep.BOTTOM_LEFT,
@@ -126,7 +126,7 @@ class CalibrationData:
 
         eye_centre_reference_data = {}
 
-        centre_step_data = self.eye_calibration[CalibrationStep.CENTER]
+        centre_step_data = self.eye_calibration[CalibrationStep.CENTRE]
         if not centre_step_data:
             raise ValueError("No centre point found")
 
@@ -283,7 +283,7 @@ def perform_calibration(
 
     elif key == ord("q") or key == ord(constants.ESCAPE_KEY):
         print("Calibration cancelled")
-        calibration_data.step = CalibrationStep.CENTER
+        calibration_data.step = CalibrationStep.CENTRE
         calibration_data.looking_straight = True
         return False, False
 
