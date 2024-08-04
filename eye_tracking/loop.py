@@ -81,7 +81,7 @@ def main_loop(
             # eye_movement.track_eye_movement(upscaled_frame, landmarks, frame_dim)
             pass
 
-        # pose_estimation.estimate_pose(upscaled_frame, landmarks, landmark_mapping)
+        # pose_estimation.estimate_head_pose(upscaled_frame, landmarks, landmark_mapping)
 
     # Draw buttons
     if loop_data["show_settings"]:
