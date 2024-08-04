@@ -190,7 +190,9 @@ def normalise_landmark(landmark: NormalisedLandmark, frame_dim: coordinate.Coord
     return coordinate.Coordinate2D(x, y)
 
 
-def get_image_coord_of_landmark(face_landmarks: List[NormalisedLandmark], landmark_id: int, frame_dim: np.ndarray) -> Tuple[int, int]:
+def get_image_coord_of_landmark(
+    face_landmarks: List[NormalisedLandmark], landmark_id: int, frame_dim: coordinate.Coordinate2D
+) -> Tuple[int, int]:
     """
     Get the image coordinates of a landmark
     :param face_landmarks: The face landmarks
