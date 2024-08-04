@@ -123,7 +123,7 @@ def render_calibration_grid(
     # Define dot positions programmatically
     CalibrationStep = calibrate.CalibrationStep
     positions = {
-        CalibrationStep.CENTER: (frame_dim.x // 2, frame_dim.y // 2),
+        CalibrationStep.CENTRE: (frame_dim.x // 2, frame_dim.y // 2),
         CalibrationStep.TOP_LEFT: (padding_from_edge_x, padding_from_edge_y),
         CalibrationStep.TOP_RIGHT: (frame_dim.x - padding_from_edge_x, padding_from_edge_y),
         CalibrationStep.BOTTOM_LEFT: (padding_from_edge_x, frame_dim.y - padding_from_edge_y),

@@ -27,18 +27,25 @@ def project_gaze_point(rotation_vector, translation_vector, camera_matrix, dist_
     return p2
 
 
-def estimate_head_pose(frame: np.ndarray, face_landmarks: List[NormalisedLandmark], landmark_mapping: landmarks.Landmarks):
+def estimate_head_pose(
+    frame: np.ndarray,
+    face_landmarks: List[NormalisedLandmark],
+    landmark_mapping: landmarks.Landmarks,
+    calibration_data: calibrate.CalibrationData,
+):
     # Frame dimensions
     frame_h, frame_w, _ = frame.shape
     frame_size = coordinate.Coordinate2D(frame_w, frame_h)
 
+    eye_landmark_mapping = landmark_mapping.eyes
+    eye_points = eye_landmark_mapping[0].points
+
     reference_points = {
-        "nose_top": 1,
-        "chin": 152,
-        "left_eye_corner": 226,
-        "right_eye_corner": 359,
-        "left_mouth_corner": 146,
-        "right_mouth_corner": 307,
+        "centre": eye_points.centre,
+        "right": eye_points.right,
+        "top": eye_points.top,
+        "left": eye_points.left,
+        "bottom": eye_points.bottom,
     }
 
     image_points = []
@@ -48,7 +55,8 @@ def estimate_head_pose(frame: np.ndarray, face_landmarks: List[NormalisedLandmar
 
     image_points = np.array(image_points, dtype="double")
 
-    # Define the 3D model points
+    # Define the 3D model points from calibration data
+    calibration_data.eye_calibration[calibrate.CalibrationStep.CENTRE]
     model_points = np.array(
         [
             (0.0, 0.0, 0.0),  # Nose tip
@@ -62,8 +70,8 @@ def estimate_head_pose(frame: np.ndarray, face_landmarks: List[NormalisedLandmar
 
     # Camera internals
     focal_length = frame_w
-    center = (frame_w / 2, frame_h / 2)
-    camera_matrix = np.array([[focal_length, 0, center[0]], [0, focal_length, center[1]], [0, 0, 1]], dtype="double")
+    centre = (frame_w / 2, frame_h / 2)
+    camera_matrix = np.array([[focal_length, 0, centre[0]], [0, focal_length, centre[1]], [0, 0, 1]], dtype="double")
 
     # Assuming no lens distortion
     dist_coeffs = np.zeros((4, 1))
@@ -119,7 +127,7 @@ def estimate_gaze(
 
     # Get the point_ids of all the points around and including the eyes
 
-    eye_calibration_data = calibration_data.eye_calibration[calibrate.CalibrationStep.CENTER]
+    eye_calibration_data = calibration_data.eye_calibration[calibrate.CalibrationStep.CENTRE]
     eye_calibration_reference = calibration_data.eye_centre_reference
 
     for eye in ["left", "right"]:
@@ -149,8 +157,8 @@ def estimate_gaze(
 
         # Camera internals
         focal_length = frame_w
-        center = (frame_w / 2, frame_h / 2)
-        camera_matrix = np.array([[focal_length, 0, center[0]], [0, focal_length, center[1]], [0, 0, 1]], dtype="double")
+        centre = (frame_w / 2, frame_h / 2)
+        camera_matrix = np.array([[focal_length, 0, centre[0]], [0, focal_length, centre[1]], [0, 0, 1]], dtype="double")
 
         # Assuming no lens distortion
         dist_coeffs = np.zeros((4, 1))
