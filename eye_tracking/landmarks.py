@@ -68,7 +68,7 @@ class Landmarks:
             raise ValueError("landmark_mapping must have an 'eyes' property")
 
         eyes_data = landmark_mapping_data["eyes"]
-        eyes = []
+        eyes: List[EyeLandmarks] = []
         for eye_data in eyes_data:
             dict_helper.check_property_exists(eye_data, "name", "eye class")
             dict_helper.check_property_exists(eye_data, "colour", "eye class")
@@ -108,7 +108,7 @@ class Landmarks:
             raise ValueError("landmark_mapping must have a 'face' property")
 
         face_data = landmark_mapping_data["face"]
-        face = []
+        face: List[FacePart] = []
         for face_part_data in face_data:
             dict_helper.check_property_exists(face_part_data, "name", "face part")
             dict_helper.check_property_exists(face_part_data, "colour", "face part")
