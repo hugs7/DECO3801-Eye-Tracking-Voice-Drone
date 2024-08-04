@@ -31,7 +31,6 @@ def estimate_head_pose(
     frame: np.ndarray,
     face_landmarks: List[NormalisedLandmark],
     landmark_mapping: landmarks.Landmarks,
-    calibration_data: calibrate.CalibrationData,
 ):
     # Frame dimensions
     frame_h, frame_w, _ = frame.shape
@@ -41,11 +40,12 @@ def estimate_head_pose(
     eye_points = eye_landmark_mapping[0].points
 
     reference_points = {
-        "centre": eye_points.centre,
-        "right": eye_points.right,
-        "top": eye_points.top,
-        "left": eye_points.left,
-        "bottom": eye_points.bottom,
+        "nose_top": 1,
+        "chin": 152,
+        "left_eye_corner": 226,
+        "right_eye_corner": 359,
+        "left_mouth_corner": 146,
+        "right_mouth_corner": 307,
     }
 
     image_points = []
@@ -56,7 +56,6 @@ def estimate_head_pose(
     image_points = np.array(image_points, dtype="double")
 
     # Define the 3D model points from calibration data
-    calibration_data.eye_calibration[calibrate.CalibrationStep.CENTRE]
     model_points = np.array(
         [
             (0.0, 0.0, 0.0),  # Nose tip
@@ -99,15 +98,14 @@ def estimate_head_pose(
 
     # Calculate and draw gaze points for both eyes
     eye_landmark_mapping = landmark_mapping.eyes
-    for eye, eye_landmarks in eye_landmark_mapping.items():
-        eye_landmarks: landmarks.EyeLandmarks
-        landmark_points = eye_landmarks.points
+    for eye in eye_landmark_mapping:
+        landmark_points = eye.points
         for side, colour in [
-            ("centre", CM.blue),
-            ("right", CM.cornflower_blue),
-            ("top", CM.cyan),
-            ("left", CM.magenta),
-            ("bottom", CM.yellow),
+            ("centre", CM.magenta),
+            # ("right", CM.cornflower_blue),
+            # ("top", CM.cyan),
+            # ("left", CM.magenta),
+            # ("bottom", CM.yellow),
         ]:
             eye_landmark = landmarks.get_image_coord_of_landmark(face_landmarks, landmark_points.get_side(side), frame_size)
             project_gaze_point(rotation_vector, translation_vector, camera_matrix, dist_coeffs, eye_landmark, frame, colour)
