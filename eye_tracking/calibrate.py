@@ -260,7 +260,7 @@ def perform_calibration(
                     eye_calibration_data[ref_pos] = []
                     for landmark_id in ref_points:
                         eye_point_ids.append(landmark_id)
-                        ref_landmark = landmarks.get_image_coord_of_landmark(face_landmarks, landmark_id, frame)
+                        ref_landmark = landmarks.get_image_coord_of_landmark(face_landmarks, landmark_id, frame_dim)
                         ref_lmk_with_id = (landmark_id, ref_landmark)
                         eye_calibration_data[ref_pos].append(ref_lmk_with_id)
 
@@ -272,7 +272,7 @@ def perform_calibration(
                 for pos in ["top", "bottom", "left", "right", "centre"]:
                     pos_id = eye_points.get_side(pos)
                     eye_point_ids.append(pos_id)
-                    landmark_coord = landmarks.get_image_coord_of_landmark(face_landmarks, pos_id, frame)
+                    landmark_coord = landmarks.get_image_coord_of_landmark(face_landmarks, pos_id, frame_dim)
                     eye_calibration_data["eye"][pos] = landmark_coord
 
                 # Save to calibration data
