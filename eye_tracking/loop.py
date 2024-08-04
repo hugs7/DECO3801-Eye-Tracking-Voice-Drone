@@ -77,11 +77,11 @@ def main_loop(
                 print(loop_data["calibration_data"])
 
         elif loop_data["calibrated"]:
-            pose_estimation.estimate_gaze(upscaled_frame, landmarks, landmark_mapping, loop_data["calibration_data"])
+            # pose_estimation.estimate_gaze(upscaled_frame, landmarks, landmark_mapping, loop_data["calibration_data"])
             # eye_movement.track_eye_movement(upscaled_frame, landmarks, frame_dim)
             pass
 
-        # pose_estimation.estimate_head_pose(upscaled_frame, landmarks, landmark_mapping)
+        pose_estimation.estimate_head_pose(upscaled_frame, landmarks, landmark_mapping)
 
     # Draw buttons
     if loop_data["show_settings"]:
