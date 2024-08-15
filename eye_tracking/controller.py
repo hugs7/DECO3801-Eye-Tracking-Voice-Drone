@@ -7,7 +7,6 @@ import cv2
 
 import draw
 import loop
-import calibrate
 
 from custom_types.NormalisedLandmark import NormalisedLandmark
 
@@ -43,25 +42,16 @@ def toggle_landmark_part(part, landmark_visibility: Dict[str, bool]) -> None:
     print(f"Toggled {part} to {landmark_visibility[part]}")
 
 
-def handle_loop_key_events(landmark_mapping, frame_dim, loop_data: loop.LoopData, points) -> bool:
+def handle_loop_key_events(loop_data: loop.LoopData) -> bool:
     """
     Handles key events in the loop
-    :param landmark_mapping: The landmark mapping
-    :param frame_dim: The frame dimensions
     :param loop_data: The loop data
-    :param points: The points
     :return: Whether to continue running
     """
     run = True
     key = cv2.waitKey(1) & 0xFF
     if is_key_event(key, "q"):
         run = False
-    elif is_key_event(key, "c"):
-        # 'c' to begin calibration
-        calibration_data = calibrate.calibrate_init(landmark_mapping, frame_dim)
-        print("initiating calibration", calibration_data)
-        loop_data["calibration_data"] = calibration_data
-        loop_data["calibrating"] = True
     elif is_key_event(key, "l"):
         # 'l' to toggle landmarks
         toggle_setting("show_landmarks", loop_data)
