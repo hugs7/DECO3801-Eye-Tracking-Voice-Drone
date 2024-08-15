@@ -78,7 +78,6 @@ def run_until_halt(
 		context.append({"role": "assistant", "content": executed_code})
 		log(executed_code, color=Fore.LIGHTYELLOW_EX)
 		if captured_output != "":
-			
 			context.append({"role": "user", "content": captured_output})
 			log(captured_output, color=Fore.LIGHTCYAN_EX, end="" if captured_output[-1] == "\n" else "\n")
 	return agent_is_done, message
