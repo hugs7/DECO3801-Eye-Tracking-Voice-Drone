@@ -15,14 +15,9 @@ import controller
 
 
 # Pt gaze imports
-import argparse
+import pathlib
 from omegaconf import DictConfig, OmegaConf
 import logging
-
-from gaze.demo import Demo
-
-import gaze.main as ptgaze_main
-
 from gaze.utils import (
     check_path_all,
     download_dlib_pretrained_model,
@@ -32,11 +27,6 @@ from gaze.utils import (
     expanduser_all,
     generate_dummy_camera_params,
 )
-
-import pathlib
-import warnings
-
-import torch
 from omegaconf import DictConfig, OmegaConf
 
 
@@ -67,9 +57,10 @@ def init_ptgaze_config(mode: str) -> DictConfig:
     return config
 
 
-def init_ptgaze():
+def init_ptgaze() -> DictConfig:
     """
     Initialises ptgaze for eye tracking
+    :return DictConfig: The ptgaze config
     """
 
     config = init_ptgaze_config("mpiigaze")
@@ -93,8 +84,7 @@ def init_ptgaze():
 
     check_path_all(config)
 
-    demo = Demo(config)
-    demo.run()
+    return config
 
 
 def init_landmark_mapping() -> landmarks.Landmarks:

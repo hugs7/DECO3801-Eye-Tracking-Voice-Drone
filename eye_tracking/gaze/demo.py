@@ -14,6 +14,9 @@ from .utils import get_3d_face_model
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Custom imports
+import camera
+
 
 class Demo:
     QUIT_KEYS = {27, ord("q")}
@@ -69,7 +72,10 @@ class Demo:
             ok, frame = self.cap.read()
             if not ok:
                 break
-            self._process_image(frame)
+
+            # Upscale feed
+            upscaled_frame = camera.upscale(frame, self.config.demo.upscale_dim)
+            self._process_image(upscaled_frame)
 
             if self.config.demo.display_on_screen:
                 cv2.imshow("frame", self.visualizer.image)

@@ -3,10 +3,9 @@ Eye tracking driver
 02/08/2024
 """
 
-import cv2
-
 import init
-import loop
+
+from gaze.demo import Demo
 
 
 def main():
@@ -14,28 +13,10 @@ def main():
     Defines entry point for the eye tracking application
     """
 
-    landmark_mapping = init.init_landmark_mapping()
+    config = init.init_ptgaze()
 
-    # Initialise variables
-    run = True
-    cam = init.camera_init()
-
-    window_width = 1280
-    window_height = 900
-
-    landmark_visibility = init.init_landmark_visibility()
-    window_dim = init.init_window(window_width, window_height, landmark_visibility)
-
-    face_mesh = init.init_face_mesh()
-
-    init.init_ptgaze()
-
-    while run:
-        run = loop.main_loop(cam, face_mesh, landmark_mapping, window_dim, landmark_visibility)
-
-    # Clean up
-    cam.release()
-    cv2.destroyAllWindows()
+    demo = Demo(config)
+    demo.run()
 
 
 if __name__ == "__main__":
