@@ -19,7 +19,7 @@ import argparse
 from omegaconf import DictConfig, OmegaConf
 import logging
 
-from gaze import demo
+from gaze.demo import Demo
 
 import gaze.main as ptgaze_main
 
@@ -93,7 +93,7 @@ def init_ptgaze():
 
     check_path_all(config)
 
-    demo = demo.Demo(config)
+    demo = Demo(config)
     demo.run()
 
 
