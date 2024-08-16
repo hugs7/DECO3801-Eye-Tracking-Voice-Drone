@@ -6,8 +6,8 @@ import warnings
 import torch
 from omegaconf import DictConfig, OmegaConf
 
-from demo import Demo
-from utils import (
+from gaze.demo import Demo
+from gaze.utils import (
     check_path_all,
     download_dlib_pretrained_model,
     download_ethxgaze_model,
