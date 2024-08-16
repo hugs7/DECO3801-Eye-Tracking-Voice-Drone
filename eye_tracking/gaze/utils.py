@@ -23,11 +23,17 @@ def get_3d_face_model(config: DictConfig) -> FaceModel:
         return FaceModel68()
 
 
+def get_ptgaze_model_dir() -> pathlib.Path:
+    package_root = pathlib.Path(__file__).parent.resolve()
+    model_dir = package_root / "data/models/"
+    return model_dir
+
+
 def download_dlib_pretrained_model() -> None:
     logger.debug("Called download_dlib_pretrained_model()")
 
-    dlib_model_dir = pathlib.Path("~/.ptgaze/dlib/").expanduser()
-    dlib_model_dir.mkdir(exist_ok=True, parents=True)
+    model_dir = get_ptgaze_model_dir()
+    dlib_model_dir = model_dir / "dlib"
     dlib_model_path = dlib_model_dir / "shape_predictor_68_face_landmarks.dat"
     logger.debug(f"Update config.face_detector.dlib_model_path to {dlib_model_path.as_posix()}")
 
@@ -45,7 +51,8 @@ def download_dlib_pretrained_model() -> None:
 
 def download_mpiigaze_model() -> pathlib.Path:
     logger.debug("Called _download_mpiigaze_model()")
-    output_dir = pathlib.Path("~/.ptgaze/models/").expanduser()
+    model_dir = get_ptgaze_model_dir()
+    output_dir = model_dir / "models/"
     output_dir.mkdir(exist_ok=True, parents=True)
     output_path = output_dir / "mpiigaze_resnet_preact.pth"
     if not output_path.exists():
@@ -60,7 +67,8 @@ def download_mpiigaze_model() -> pathlib.Path:
 
 def download_mpiifacegaze_model() -> pathlib.Path:
     logger.debug("Called _download_mpiifacegaze_model()")
-    output_dir = pathlib.Path("~/.ptgaze/models/").expanduser()
+    model_dir = get_ptgaze_model_dir()
+    output_dir = model_dir / "models/"
     output_dir.mkdir(exist_ok=True, parents=True)
     output_path = output_dir / "mpiifacegaze_resnet_simple.pth"
     if not output_path.exists():
@@ -75,7 +83,8 @@ def download_mpiifacegaze_model() -> pathlib.Path:
 
 def download_ethxgaze_model() -> pathlib.Path:
     logger.debug("Called _download_ethxgaze_model()")
-    output_dir = pathlib.Path("~/.ptgaze/models/").expanduser()
+    model_dir = get_ptgaze_model_dir()
+    output_dir = model_dir / "models/"
     output_dir.mkdir(exist_ok=True, parents=True)
     output_path = output_dir / "eth-xgaze_resnet18.pth"
     if not output_path.exists():
