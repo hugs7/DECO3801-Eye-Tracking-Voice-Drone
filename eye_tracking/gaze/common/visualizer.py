@@ -66,15 +66,3 @@ class Visualizer:
         for pt, color in zip(axes2d, AXIS_COLORS):
             pt = self._convert_pt(pt)
             cv2.line(self.image, center, pt, color, lw, cv2.LINE_AA)
-
-    def draw_dot(self, point: Tuple[int, int], color: Tuple[int, int, int] = (0, 0, 255), size: int = 5) -> None:
-        """
-        Draws a dot on the image at the specified 2D coordinates.
-
-        :param point: A tuple (x, y) representing the 2D coordinates on the image where the dot will be drawn.
-        :param color: A tuple (B, G, R) representing the color of the dot. Default is red.
-        :param size: The size (radius) of the dot. Default is 5.
-        """
-        assert self.image is not None, "Image has not been set."
-        point = self._convert_pt(np.array(point))
-        cv2.circle(self.image, point, size, color, cv2.FILLED)
