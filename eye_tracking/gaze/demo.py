@@ -216,15 +216,35 @@ class Demo:
 
     def _draw_gaze_vector(self, face: Face) -> None:
         distance_from_screen = self._estimate_distance_from_screen(face)
-        # length = self.config.demo.gaze_visualization_length
-        length = distance_from_screen
+
         if self.config.mode == "MPIIGaze":
             for key in [FacePartsName.REYE, FacePartsName.LEYE]:
                 eye = getattr(face, key.name.lower())
-                self.visualizer.draw_3d_line(eye.center, eye.center + length * eye.gaze_vector)
-                pitch, yaw = np.rad2deg(eye.vector_to_angle(eye.gaze_vector))
+
+                # Correct the gaze vector direction if necessary
+                gaze_vector = eye.gaze_vector
+                if gaze_vector[2] > 0:  # If the Z-component is positive, flip the vector
+                    gaze_vector = -gaze_vector
+
+                # Use a scaled length for visualization
+                length = distance_from_screen  # This ensures the vector reaches the screen plane
+
+                # Compute the end point of the gaze vector
+                end_point = eye.center + length * gaze_vector
+
+                # Log and visualize the gaze vector
+                self.visualizer.draw_3d_line(eye.center, end_point)
+
+                # Draw a dot at the start and end points of the gaze vector
+                self.visualizer.draw_3d_points(np.array([eye.center]), color=(0, 0, 255), size=5)
+                self.visualizer.draw_3d_points(np.array([end_point]), color=(0, 255, 0), size=5)
+
+                # Calculate and log pitch and yaw
+                pitch, yaw = np.rad2deg(eye.vector_to_angle(gaze_vector))
                 logger.info(f"[{key.name.lower()}] pitch: {pitch:.2f}, yaw: {yaw:.2f}")
+
         elif self.config.mode in ["MPIIFaceGaze", "ETH-XGaze"]:
+            # Similar handling for face gaze mode
             self.visualizer.draw_3d_line(face.center, face.center + length * face.gaze_vector)
             pitch, yaw = np.rad2deg(face.vector_to_angle(face.gaze_vector))
             logger.info(f"[face] pitch: {pitch:.2f}, yaw: {yaw:.2f}")
@@ -237,27 +257,29 @@ class Demo:
         if self.config.mode == "MPIIGaze":
             for key in [FacePartsName.REYE, FacePartsName.LEYE]:
                 eye = getattr(face, key.name.lower())
+                corrected_gaze_vector = eye.gaze_vector.copy()
 
-                # Calculate the pitch and yaw angles in radians
-                pitch, yaw = np.arctan2(eye.gaze_vector[1], eye.gaze_vector[2]), np.arctan2(eye.gaze_vector[0], eye.gaze_vector[2])
-                logger.info(f"[{key.name.lower()}] pitch: {np.rad2deg(pitch):.2f}, yaw: {np.rad2deg(yaw):.2f}")
-                # Calculate the displacement on the screen (in pixels)
-                dx = np.tan(yaw) * Z_screen
-                dy = np.tan(pitch) * Z_screen
+                # If the image is flipped, reverse the x-component of the gaze vector
+                if self.config.demo.use_camera:
+                    corrected_gaze_vector[0] *= -1
 
-                # Assume the center of the screen corresponds to the center of the image
-                screen_center_x = self.visualizer.image.shape[1] / 2
-                screen_center_y = self.visualizer.image.shape[0] / 2
+                self.visualizer.draw_3d_line(eye.center, eye.center + Z_screen * corrected_gaze_vector)
 
-                # Determine the gaze point on the screen
-                gaze_point_2d = (int(screen_center_x + dx), int(screen_center_y - dy))
+                end_point = eye.center + Z_screen * corrected_gaze_vector
+                centre_point_nda = np.array([eye.center])
+                end_point_nda = np.array([end_point])
+                colours = [(0, 0, 255), (0, 255, 0)]
 
-                # Draw the gaze point on the image
-                self.visualizer.draw_dot(gaze_point_2d, color=(0, 0, 255))
+                self.visualizer.draw_3d_points(centre_point_nda, color=colours[0], size=5)
+                self.visualizer.draw_3d_points(end_point_nda, color=colours[1], size=5)
+
+                pitch, yaw = np.rad2deg(eye.vector_to_angle(corrected_gaze_vector))
+                logger.info(f"[{key.name.lower()}] pitch: {pitch:.2f}, yaw: {yaw:.2f}")
+
         elif self.config.mode in ["MPIIFaceGaze", "ETH-XGaze"]:
             gaze_point_3d = face.center + Z_screen * face.gaze_vector / face.gaze_vector[2]
             gaze_point_2d = self._project_to_screen(gaze_point_3d)
-            self.visualizer.draw_dot(gaze_point_2d, color=(0, 0, 255))
+            # self.visualizer.draw_dot(gaze_point_2d, color=(0, 0, 255))
         else:
             raise ValueError
 
