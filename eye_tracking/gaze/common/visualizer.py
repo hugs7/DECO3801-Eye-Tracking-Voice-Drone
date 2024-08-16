@@ -4,8 +4,8 @@ import cv2
 import numpy as np
 from scipy.spatial.transform import Rotation
 
-from common.camera import Camera
-from common.face import Face
+from gaze.common.camera import Camera
+from gaze.common.face import Face
 
 AXIS_COLORS = [(0, 0, 255), (0, 255, 0), (255, 0, 0)]
 
