@@ -33,7 +33,38 @@ from gaze.utils import (
     generate_dummy_camera_params,
 )
 
+import pathlib
+import warnings
+
+import torch
+from omegaconf import DictConfig, OmegaConf
+
+
 logger = logging.getLogger(__name__)
+
+
+def init_ptgaze_config(mode: str) -> DictConfig:
+    """
+    Custom config initialiser for ptgaze
+    """
+
+    package_root = pathlib.Path(__file__).parent.resolve()
+    ptgaze_package_root = package_root / "gaze"
+    if mode == "mpiigaze":
+        path = ptgaze_package_root / "data/configs/mpiigaze.yaml"
+    elif mode == "mpiifacegaze":
+        path = ptgaze_package_root / "data/configs/mpiifacegaze.yaml"
+    elif mode == "eth-xgaze":
+        path = ptgaze_package_root / "data/configs/eth-xgaze.yaml"
+    else:
+        raise ValueError(f"Incorrect mode selected: {mode}")
+
+    logger.info(f"Loading config from {path}")
+    config = OmegaConf.load(path)
+    config.PACKAGE_ROOT = ptgaze_package_root.as_posix()
+    logger.info(f"Pacakge root: {config.PACKAGE_ROOT}")
+
+    return config
 
 
 def init_ptgaze():
@@ -41,8 +72,7 @@ def init_ptgaze():
     Initialises ptgaze for eye tracking
     """
 
-    args: argparse.Namespace = argparse.Namespace("--mode", "mpiigaze")
-    config = ptgaze_main.load_mode_config(args)
+    config = init_ptgaze_config("mpiigaze")
 
     expanduser_all(config)
     if config.gaze_estimator.use_dummy_camera_params:
@@ -53,13 +83,13 @@ def init_ptgaze():
 
     if config.face_detector.mode == "dlib":
         download_dlib_pretrained_model()
-    if args.mode:
-        if config.mode == "MPIIGaze":
-            download_mpiigaze_model()
-        elif config.mode == "MPIIFaceGaze":
-            download_mpiifacegaze_model()
-        elif config.mode == "ETH-XGaze":
-            download_ethxgaze_model()
+
+    if config.mode == "MPIIGaze":
+        download_mpiigaze_model()
+    elif config.mode == "MPIIFaceGaze":
+        download_mpiifacegaze_model()
+    elif config.mode == "ETH-XGaze":
+        download_ethxgaze_model()
 
     check_path_all(config)
 
