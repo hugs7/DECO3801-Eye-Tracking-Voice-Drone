@@ -14,6 +14,59 @@ import utils.file_helper as file_helper
 import controller
 
 
+# Pt gaze imports
+import argparse
+from omegaconf import DictConfig, OmegaConf
+import logging
+
+from gaze import demo
+
+import gaze.main as ptgaze_main
+
+from gaze.utils import (
+    check_path_all,
+    download_dlib_pretrained_model,
+    download_ethxgaze_model,
+    download_mpiifacegaze_model,
+    download_mpiigaze_model,
+    expanduser_all,
+    generate_dummy_camera_params,
+)
+
+logger = logging.getLogger(__name__)
+
+
+def init_ptgaze():
+    """
+    Initialises ptgaze for eye tracking
+    """
+
+    args: argparse.Namespace = argparse.Namespace("--mode", "mpiigaze")
+    config = ptgaze_main.load_mode_config(args)
+
+    expanduser_all(config)
+    if config.gaze_estimator.use_dummy_camera_params:
+        generate_dummy_camera_params(config)
+
+    OmegaConf.set_readonly(config, True)
+    logger.info(OmegaConf.to_yaml(config))
+
+    if config.face_detector.mode == "dlib":
+        download_dlib_pretrained_model()
+    if args.mode:
+        if config.mode == "MPIIGaze":
+            download_mpiigaze_model()
+        elif config.mode == "MPIIFaceGaze":
+            download_mpiifacegaze_model()
+        elif config.mode == "ETH-XGaze":
+            download_ethxgaze_model()
+
+    check_path_all(config)
+
+    demo = demo.Demo(config)
+    demo.run()
+
+
 def init_landmark_mapping() -> landmarks.Landmarks:
     """
     Initialises the mapping for landmarks on the face
