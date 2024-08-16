@@ -74,8 +74,8 @@ class Demo:
                 break
 
             # Upscale feed
-            upscaled_frame = camera.upscale(frame, self.config.demo.upscale_dim)
-            self._process_image(upscaled_frame)
+            # upscaled_frame = camera.upscale(frame, self.config.demo.upscale_dim)
+            self._process_image(frame)
 
             if self.config.demo.display_on_screen:
                 cv2.imshow("frame", self.visualizer.image)
@@ -95,6 +95,7 @@ class Demo:
             self._draw_landmarks(face)
             self._draw_face_template_model(face)
             self._draw_gaze_vector(face)
+            self._draw_gaze_dot_on_screen(face)
             self._display_normalized_image(face)
 
         if self.config.demo.use_camera:
@@ -214,7 +215,9 @@ class Demo:
         cv2.imshow("normalized", normalized)
 
     def _draw_gaze_vector(self, face: Face) -> None:
-        length = self.config.demo.gaze_visualization_length
+        distance_from_screen = self._estimate_distance_from_screen(face)
+        # length = self.config.demo.gaze_visualization_length
+        length = distance_from_screen
         if self.config.mode == "MPIIGaze":
             for key in [FacePartsName.REYE, FacePartsName.LEYE]:
                 eye = getattr(face, key.name.lower())
@@ -227,3 +230,61 @@ class Demo:
             logger.info(f"[face] pitch: {pitch:.2f}, yaw: {yaw:.2f}")
         else:
             raise ValueError
+
+    def _draw_gaze_dot_on_screen(self, face: Face) -> None:
+        Z_screen = self._estimate_distance_from_screen(face)
+
+        if self.config.mode == "MPIIGaze":
+            for key in [FacePartsName.REYE, FacePartsName.LEYE]:
+                eye = getattr(face, key.name.lower())
+
+                # Calculate the pitch and yaw angles in radians
+                pitch, yaw = np.arctan2(eye.gaze_vector[1], eye.gaze_vector[2]), np.arctan2(eye.gaze_vector[0], eye.gaze_vector[2])
+                logger.info(f"[{key.name.lower()}] pitch: {np.rad2deg(pitch):.2f}, yaw: {np.rad2deg(yaw):.2f}")
+                # Calculate the displacement on the screen (in pixels)
+                dx = np.tan(yaw) * Z_screen
+                dy = np.tan(pitch) * Z_screen
+
+                # Assume the center of the screen corresponds to the center of the image
+                screen_center_x = self.visualizer.image.shape[1] / 2
+                screen_center_y = self.visualizer.image.shape[0] / 2
+
+                # Determine the gaze point on the screen
+                gaze_point_2d = (int(screen_center_x + dx), int(screen_center_y - dy))
+
+                # Draw the gaze point on the image
+                self.visualizer.draw_dot(gaze_point_2d, color=(0, 0, 255))
+        elif self.config.mode in ["MPIIFaceGaze", "ETH-XGaze"]:
+            gaze_point_3d = face.center + Z_screen * face.gaze_vector / face.gaze_vector[2]
+            gaze_point_2d = self._project_to_screen(gaze_point_3d)
+            self.visualizer.draw_dot(gaze_point_2d, color=(0, 0, 255))
+        else:
+            raise ValueError
+
+    def _project_to_screen(self, point_3d) -> tuple:
+        # Convert the 3D gaze point to 2D screen coordinates using the camera matrix
+        point_2d = cv2.projectPoints(
+            point_3d, np.eye(3), np.zeros(3), self.gaze_estimator.camera.camera_matrix, self.gaze_estimator.camera.dist_coefficients
+        )[0]
+        return tuple(int(coord) for coord in point_2d.ravel())
+
+    def _estimate_distance_from_screen(self, face: Face) -> float:
+        # Known physical distance between eyes (in meters), adjust this according to your model
+        known_eye_distance = 0.063  # Average distance between eyes in meters
+
+        # Get the 3D coordinates of the eye landmarks
+        left_eye = face.landmarks[FacePartsName.LEYE.value]
+        right_eye = face.landmarks[FacePartsName.REYE.value]
+
+        # Calculate the pixel distance between the eyes in the image
+        eye_distance_pixels = np.linalg.norm(left_eye - right_eye)
+
+        # Focal length in pixels (from camera matrix)
+        focal_length = self.gaze_estimator.camera.camera_matrix[0, 0]  # fx component
+
+        # Estimate the distance from the camera to the face
+        distance = (known_eye_distance * focal_length) / eye_distance_pixels
+        logger.debug(
+            f"Estimated distance from screen: pixels: {eye_distance_pixels:.2f}, foc_len: {focal_length:.2f}, phys: {distance:.2f} meters"
+        )
+        return distance
