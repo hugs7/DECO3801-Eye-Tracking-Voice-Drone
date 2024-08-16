@@ -7,9 +7,9 @@ import cv2
 import numpy as np
 from omegaconf import DictConfig
 
-from common import Face, FacePartsName, Visualizer
-from gaze_estimator import GazeEstimator
-from utils import get_3d_face_model
+from .common import Face, FacePartsName, Visualizer
+from .gaze_estimator import GazeEstimator
+from .utils import get_3d_face_model
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
