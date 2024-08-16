@@ -14,21 +14,11 @@ global img
 
 import CommandHandling as com
 
-#Initialize Keyboard Input
-kp.init()
-
-#Start Connection With Drone
-Drone = tello.Tello()
-Drone.connect()
-
-#Get Battery Info
-print(Drone.get_battery())
-
-#Start Camera Display Stream
-Drone.streamon()
-while True:
+def main():
 #Get The Return Value And Stored It On Variable:
     keyValues = kp.getKey() #Get The Return Value And Stored It On Variable
+    if keyValues == pygame.K_ESCAPE:
+        exit(0)
     com.handle_input(Drone, keyValues)
 #Control The Drone:
 #Get Frame From Drone Camera Camera 
@@ -37,3 +27,20 @@ while True:
 #Show The Frame
     cv2.imshow("DroneCapture", img)
     cv2.waitKey(1)
+
+if __name__ == '__main__':
+    #Initialize Keyboard Input
+    kp.init()
+    
+    #Start Connection With Drone
+    Drone = tello.Tello()
+    Drone.connect()
+
+    #Get Battery Info
+    print(Drone.get_battery())
+
+    #Start Camera Display Stream
+    Drone.streamon()
+    Drone.set_speed(100)
+    while True:
+        main()

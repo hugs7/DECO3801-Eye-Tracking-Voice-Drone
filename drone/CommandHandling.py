@@ -38,34 +38,42 @@ def handle_input(drone, command):
     rotationSpeed = 10
     sysCom = getKey(command)
     print(sysCom)
-    
+
     match sysCom:
         case "ROTATE CW":
             #run clockwise rotation TODO add function to multiply
             #value by correct amount for rotational movement
             yv = rotationSpeed
+            drone.rotate_clockwise(90)
         case "ROTATE CCW":
             #run counter clockwise rotation TODO add function to multiply
             #value by correct amount for rotational movement
             yv = -rotationSpeed
+            drone.rotate_counter_clockwise(90)
         case "UP":
             #run up directional command with value
             ud = liftSpeed
+            drone.move_up(50)
         case "DOWN":
             #run down directional command with value
             ud = -liftSpeed
+            drone.move_down(50)
         case "LEFT":
             #run left directional command with value
             lr = -speed
+            drone.move_left(50)
         case "RIGHT":
             #run right directional command with value
             lr = speed
+            drone.move_right(50)
         case "FORWARD":
             #run forward directional command with value
             fb = moveSpeed
+            drone.move_forward(50)
         case "BACKWARD":
             #run back directional command with value
             fb = -moveSpeed
+            drone.move_back(50)
         case "TAKEOFF":
             #xtra = 1
             drone.takeoff()
@@ -75,6 +83,6 @@ def handle_input(drone, command):
         case "FLIP FORWARD":
             #xtra = 3
             drone.flip_forward()
-    drone.send_rc_control(lr, fb, ud, yv)
-    time.sleep(1) #Ensure value is correctly calculated above
-    drone.send_rc_control(0,0,0,0)
+    #drone.send_rc_control(lr, fb, ud, yv)
+    time.sleep(0.1) #Ensure value is correctly calculated above
+    #drone.send_rc_control(0,0,0,0)
