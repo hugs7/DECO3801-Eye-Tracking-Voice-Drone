@@ -28,6 +28,8 @@ def main():
 
     face_mesh = init.init_face_mesh()
 
+    init.init_ptgaze()
+
     while run:
         run = loop.main_loop(cam, face_mesh, landmark_mapping, window_dim, landmark_visibility)
 
