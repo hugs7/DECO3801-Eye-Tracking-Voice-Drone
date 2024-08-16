@@ -29,16 +29,14 @@ def read_camera_feed(cam: cv2.VideoCapture, face_mesh: FaceMesh) -> Tuple[Any, c
     return points, frame
 
 
-def upscale(frame: cv2.VideoCapture, window_dim: coordinate.Coordinate3D) -> Tuple[cv2.VideoCapture, coordinate.Coordinate3D]:
+def upscale(frame: cv2.VideoCapture, upscaled_dim: Tuple[int, int]) -> cv2.VideoCapture:
     """
     Upscale the frame
     :param frame: The frame to upscale
-    :param frame_dim: The dimensions to upscale to
+    :param upscaled_dim: The dimensions to upscale to (width, height)
     :return cv2.VideoCapture: The upscaled frame
     """
 
-    upscaled_frame = cv2.resize(frame, window_dim.to_tuple())
-    frame_h, frame_w, frame_depth = upscaled_frame.shape
-    window_dim = coordinate.Coordinate3D(frame_w, frame_h, frame_depth)
+    upscaled_frame = cv2.resize(frame, upscaled_dim)
 
-    return upscaled_frame, window_dim
+    return upscaled_frame
