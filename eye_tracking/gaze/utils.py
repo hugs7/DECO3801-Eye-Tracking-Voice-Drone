@@ -26,6 +26,7 @@ def get_3d_face_model(config: DictConfig) -> FaceModel:
 def get_ptgaze_model_dir() -> pathlib.Path:
     package_root = pathlib.Path(__file__).parent.resolve()
     model_dir = package_root / "data/models/"
+    model_dir.mkdir(exist_ok=True, parents=True)
     return model_dir
 
 
@@ -34,6 +35,7 @@ def download_dlib_pretrained_model() -> None:
 
     model_dir = get_ptgaze_model_dir()
     dlib_model_dir = model_dir / "dlib"
+    dlib_model_dir.mkdir(exist_ok=True, parents=True)
     dlib_model_path = dlib_model_dir / "shape_predictor_68_face_landmarks.dat"
     logger.debug(f"Update config.face_detector.dlib_model_path to {dlib_model_path.as_posix()}")
 
