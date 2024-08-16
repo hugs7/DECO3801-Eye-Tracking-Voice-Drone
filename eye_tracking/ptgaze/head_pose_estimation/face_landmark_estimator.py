@@ -44,8 +44,8 @@ class LandmarkEstimator:
         detected = []
         for bbox in bboxes:
             predictions = self.predictor(image[:, :, ::-1], bbox)
-            landmarks = np.array([(pt.x, pt.y) for pt in predictions.parts()], dtype=np.float)
-            bbox = np.array([[bbox.left(), bbox.top()], [bbox.right(), bbox.bottom()]], dtype=np.float)
+            landmarks = np.array([(pt.x, pt.y) for pt in predictions.parts()], dtype=np.float32)
+            bbox = np.array([[bbox.left(), bbox.top()], [bbox.right(), bbox.bottom()]], dtype=np.float32)
             detected.append(Face(bbox, landmarks))
         return detected
 
@@ -57,7 +57,7 @@ class LandmarkEstimator:
             predictions = []
         detected = []
         for bbox, landmarks in zip(bboxes, predictions):
-            bbox = np.array(bbox, dtype=np.float).reshape(2, 2)
+            bbox = np.array(bbox, dtype=np.float32).reshape(2, 2)
             detected.append(Face(bbox, landmarks))
         return detected
 
@@ -69,7 +69,7 @@ class LandmarkEstimator:
             predictions = []
         detected = []
         for bbox, landmarks in zip(bboxes, predictions):
-            bbox = np.array(bbox, dtype=np.float).reshape(2, 2)
+            bbox = np.array(bbox, dtype=np.float32).reshape(2, 2)
             detected.append(Face(bbox, landmarks))
         return detected
 
