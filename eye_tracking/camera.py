@@ -1,10 +1,11 @@
 """
 Module for handling camera and camera feed
+Author: Hugo Burton
+Last Updated: 02/08/2024
 """
 
 from typing import Tuple
 import cv2
-from mediapipe.python.solutions.face_mesh import FaceMesh
 
 
 def upscale(frame: cv2.VideoCapture, upscaled_dim: Tuple[int, int]) -> cv2.VideoCapture:

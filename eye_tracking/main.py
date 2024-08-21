@@ -1,6 +1,7 @@
 """
-Eye tracking driver
-02/08/2024
+Entry point for the eye tracking driver
+Author: Hugo Burton
+Last Updated: 21/08/2024
 """
 
 import init
