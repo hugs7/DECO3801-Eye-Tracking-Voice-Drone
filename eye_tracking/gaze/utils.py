@@ -3,6 +3,8 @@ import logging
 import operator
 import pathlib
 import tempfile
+from typing import Tuple
+import numpy as np
 
 import cv2
 import torch.hub
@@ -171,3 +173,17 @@ def check_path_all(config: DictConfig) -> None:
         _check_path(config, "demo.image_path")
     if config.demo.video_path:
         _check_path(config, "demo.video_path")
+
+
+def upscale(frame: cv2.VideoCapture, upscaled_dim: Tuple[int, int]) -> cv2.VideoCapture:
+    """
+    Upscale the frame
+    :param frame: The frame to upscale
+    :param upscaled_dim: The dimensions to upscale to (width, height)
+    :return cv2.VideoCapture: The upscaled frame
+    """
+
+    upscaled_frame = cv2.resize(frame, upscaled_dim)
+
+    return upscaled_frame
+
