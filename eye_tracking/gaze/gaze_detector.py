@@ -43,7 +43,6 @@ class GazeDetector:
 
         # Calibration
         self.calibrated = False
-        self.calibrating = False
         self.calibration_landmarks = None
 
     def run(self) -> None:
@@ -113,12 +112,8 @@ class GazeDetector:
                 self._draw_gaze_vector(face)
                 self._display_normalized_image(face)
 
-        # if self.calibrating:
-        #     if self.calibration_landmarks is not None:
-        #         self.visualizer.draw_3d_points(self.calibration_landmarks, color=(255, 0, 0), size=1)
-
         if self.config.demo.use_camera:
-            self.visualizer.image = self.visualizer.image[:, ::-1]
+            self.visualizer.flip_image()
         if self.writer:
             self.writer.write(self.visualizer.image)
 
@@ -176,6 +171,11 @@ class GazeDetector:
         return writer
 
     def _wait_key(self) -> bool:
+        """
+        Controller for the gaze detector.
+        :return: True if a recognised key is pressed, False otherwise
+        """
+
         key = cv2.waitKey(self.config.demo.wait_time) & 0xFF
         if key in self.QUIT_KEYS:
             self.stop = True
@@ -190,17 +190,10 @@ class GazeDetector:
         elif key == ord("t"):
             self.show_template_model = not self.show_template_model
         elif key == ord("c"):
-            if self.calibrating:
-                # Disable calibration
-                self.calibrating = False
-                logger.info("Setting calibrated to True")
-                self.calibrated = True
-                self.calibration_landmarks = None
-            else:
-                # Calibrate
-                logger.info("Setting calibrated to False")
-                self.calibrated = False
-                self._calibrate_landmarks()
+            # Calibrate
+            logger.info("Setting calibrated to False")
+            self.calibrated = False
+            self._calibrate_landmarks()
         else:
             return False
         return True
@@ -208,30 +201,35 @@ class GazeDetector:
     def _calibrate_landmarks(
         self,
     ):
-        self.calibrating = True
         # Read camera
         ok, frame = self._read_camera()
         if not ok:
             logger.error("Failed to read camera. Calibration failed.")
-            self.calibrating = False
             return
 
         undistorted = self._undistort_image(frame)
         faces = self.gaze_estimator.detect_faces_raw(undistorted)
         if len(faces) != 1:
             logger.info("Ensure only one face is visible in the camera feed then press 'c' to calibrate again.")
-            self.calibrating = False
             return
 
         face_landmarks = faces[0]
         self.calibration_landmarks = face_landmarks
-        # Add 1 meter to the z-axis
+        # Add 1 meter to the z-axis ??
         self.calibration_landmarks[:, 2] += 1
 
         self.gaze_estimator._face_model3d.set_landmark_calibration(self.calibration_landmarks)
+
+        self.calibrated = True
         logger.info("Calibration successful.")
 
     def _draw_face_bbox(self, face: Face) -> None:
+        """
+        Wrapper to draw a bounding box around the face.
+        :param face: Face object
+        :return: None
+        """
+
         if not self.show_bbox:
             return
         self.visualizer.draw_bbox(face.bbox)
