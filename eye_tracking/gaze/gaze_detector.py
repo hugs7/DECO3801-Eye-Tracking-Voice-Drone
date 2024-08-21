@@ -308,8 +308,8 @@ class GazeDetector:
             self.visualizer.draw_3d_line(average_eye_center, end_point)
 
             # Draw the point on the screen the user is looking at
-            point_on_screen = average_eye_center + (average_eye_distance - 0.15) * average_gaze_vector
-            point_on_screen[1] = 0
+            point_on_screen = average_eye_center + (average_eye_distance * 0.9) * average_gaze_vector
+            point_on_screen[1] *= 0.15  # Scale y-coordinate
 
             # Update buffer and calculate smoothed point
             self.point_buffer.append(point_on_screen)
