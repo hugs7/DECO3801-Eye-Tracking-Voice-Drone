@@ -277,7 +277,7 @@ class GazeDetector:
         else:
             raise ValueError
         if self.config.demo.use_camera:
-            normalized = normalized[:, ::-1]
+            normalized = utils.flip_image(normalized)
         cv2.imshow("normalized", normalized)
 
     def _draw_gaze_vector(self, face: Face) -> None:

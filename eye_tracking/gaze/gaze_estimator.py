@@ -15,7 +15,7 @@ from gaze.common import Camera, Face, FacePartsName
 from gaze.head_pose_estimation import HeadPoseNormalizer, LandmarkEstimator
 from gaze.models import create_model
 from gaze.transforms import create_transform
-from gaze.utils import get_3d_face_model
+from gaze import utils
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +26,7 @@ class GazeEstimator:
     def __init__(self, config: DictConfig):
         self._config = config
 
-        self._face_model3d = get_3d_face_model(config)
+        self._face_model3d = utils.get_3d_face_model(config)
 
         self.camera = Camera(config.gaze_estimator.camera_params)
         self._normalized_camera = Camera(config.gaze_estimator.normalized_camera_params)
@@ -80,7 +80,7 @@ class GazeEstimator:
             image = eye.normalized_image
             normalized_head_pose = eye.normalized_head_rot2d
             if key == FacePartsName.REYE:
-                image = image[:, ::-1].copy()
+                image = utils.flip_image(image).copy()
                 normalized_head_pose *= np.array([1, -1])
             image = self._transform(image)
             images.append(image)
