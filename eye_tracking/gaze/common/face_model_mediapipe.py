@@ -1,4 +1,8 @@
-import dataclasses
+"""
+MediaPipe 3D face model for 468 points mark-up.
+Author: Hugo Burton
+Last Updated: 21/08/2024
+"""
 
 import numpy as np
 

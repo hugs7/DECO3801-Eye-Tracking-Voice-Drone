@@ -1,3 +1,9 @@
+"""
+Main class for the gaze detector.
+Modified by: Hugo Burton
+Last Updated: 21/08/2024
+"""
+
 import datetime
 import logging
 import pathlib
