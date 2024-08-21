@@ -24,6 +24,9 @@ class Camera:
         self.dist_coefficients = np.array(data["distortion_coefficients"]["data"]).reshape(-1, 1)
 
     def project_points(self, points3d: np.ndarray, rvec: Optional[np.ndarray] = None, tvec: Optional[np.ndarray] = None) -> np.ndarray:
+        """
+        Projects 3D world points (metres) to 2D image points (pixels)
+        """
         assert points3d.shape[1] == 3
         if rvec is None:
             rvec = np.zeros(3, dtype=np.float32)
