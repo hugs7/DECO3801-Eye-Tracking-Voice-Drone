@@ -230,7 +230,7 @@ class Demo:
                 end_point = eye.center + length * eye.gaze_vector  # eye.gaze_vector.z is always -1. We scale by length
                 self.visualizer.draw_3d_line(eye.center, end_point)
 
-                point_on_screen = eye.center + (eye.distance - 0.2) * eye.gaze_vector
+                point_on_screen = eye.center + (eye.distance - 0.2) * eye.gaze_vector  # Will adjust the distance offset
                 self.visualizer.draw_3d_points(np.array([point_on_screen]), color=(0, 255, 0), size=5)
                 pitch, yaw = np.rad2deg(eye.vector_to_angle(eye.gaze_vector))
                 logger.info(f"[{key.name.lower()}] pitch: {pitch:.2f}, yaw: {yaw:.2f}")
