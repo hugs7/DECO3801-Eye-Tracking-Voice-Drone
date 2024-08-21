@@ -40,19 +40,19 @@ class LandmarkEstimator:
             raise ValueError
 
     def _detect_faces_dlib(self, image: np.ndarray) -> List[Face]:
-        bboxes = self.detector(image[:, :, ::-1], 0)
+        bboxes = self.detector(self._get_bgr_frame(image), 0)
         detected = []
         for bbox in bboxes:
-            predictions = self.predictor(image[:, :, ::-1], bbox)
+            predictions = self.predictor(self._get_bgr_frame(image), bbox)
             landmarks = np.array([(pt.x, pt.y) for pt in predictions.parts()], dtype=np.float32)
             bbox = np.array([[bbox.left(), bbox.top()], [bbox.right(), bbox.bottom()]], dtype=np.float32)
             detected.append(Face(bbox, landmarks))
         return detected
 
     def _detect_faces_face_alignment_dlib(self, image: np.ndarray) -> List[Face]:
-        bboxes = self.detector(image[:, :, ::-1], 0)
+        bboxes = self.detector(self._get_bgr_frame(image), 0)
         bboxes = [[bbox.left(), bbox.top(), bbox.right(), bbox.bottom()] for bbox in bboxes]
-        predictions = self.predictor.get_landmarks(image[:, :, ::-1], detected_faces=bboxes)
+        predictions = self.predictor.get_landmarks(self._get_bgr_frame(image), detected_faces=bboxes)
         if predictions is None:
             predictions = []
         detected = []
@@ -62,9 +62,9 @@ class LandmarkEstimator:
         return detected
 
     def _detect_faces_face_alignment_sfd(self, image: np.ndarray) -> List[Face]:
-        bboxes = self.detector.detect_from_image(image[:, :, ::-1].copy())
+        bboxes = self.detector.detect_from_image(self._get_bgr_frame(image).copy())
         bboxes = [bbox[:4] for bbox in bboxes]
-        predictions = self.predictor.get_landmarks(image[:, :, ::-1], detected_faces=bboxes)
+        predictions = self.predictor.get_landmarks(self._get_bgr_frame(image), detected_faces=bboxes)
         if predictions is None:
             predictions = []
         detected = []
@@ -75,7 +75,7 @@ class LandmarkEstimator:
 
     def _detect_faces_mediapipe(self, image: np.ndarray) -> List[Face]:
         h, w = image.shape[:2]
-        predictions = self.detector.process(image[:, :, ::-1])
+        predictions = self.detector.process(self._get_bgr_frame(image))
         detected = []
         if predictions.multi_face_landmarks:
             for prediction in predictions.multi_face_landmarks:
@@ -84,3 +84,9 @@ class LandmarkEstimator:
                 bbox = np.round(bbox).astype(np.int32)
                 detected.append(Face(bbox, pts))
         return detected
+
+    def _get_bgr_frame(self, image: np.ndarray) -> np.ndarray:
+        """
+        Converts an RGB image to BGR to be used by OpenCV
+        """
+        return image[:, :, ::-1]
