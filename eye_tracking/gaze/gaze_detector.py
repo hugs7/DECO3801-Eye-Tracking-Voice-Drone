@@ -8,7 +8,6 @@ import datetime
 import logging
 import pathlib
 from typing import Optional, Tuple
-import scipy.spatial.transform as transform
 
 import cv2
 import numpy as np
@@ -16,13 +15,10 @@ from omegaconf import DictConfig
 
 from .common import Face, FacePartsName, Visualizer
 from .gaze_estimator import GazeEstimator
-from .utils import get_3d_face_model
+from gaze import utils
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-# Custom imports
-import camera
 
 
 class GazeDetector:
@@ -31,7 +27,7 @@ class GazeDetector:
     def __init__(self, config: DictConfig):
         self.config = config
         self.gaze_estimator = GazeEstimator(config)
-        face_model_3d = get_3d_face_model(config)
+        face_model_3d = utils.get_3d_face_model(config)
         self.visualizer = Visualizer(self.gaze_estimator.camera, face_model_3d.NOSE_INDEX)
 
         self.cap = self._create_capture()
@@ -99,7 +95,7 @@ class GazeDetector:
             return ok, frame
 
         # Upscale feed
-        upscaled_frame = camera.upscale(frame, self.config.demo.upscale_dim)
+        upscaled_frame = utils.upscale(frame, self.config.demo.upscale_dim)
         return ok, upscaled_frame
 
     def _process_image(self, image) -> None:
