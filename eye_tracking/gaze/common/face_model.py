@@ -30,24 +30,26 @@ class FaceModel:
         tvec = np.array([0, 0, 1], dtype=np.float32)
         _, rvec, tvec = cv2.solvePnP(
             self.LANDMARKS,
-            face.landmarks,
-            camera.camera_matrix,
-            camera.dist_coefficients,
+            face.landmarks,  # This is in the 2D upscaled image 1280x900. Face is not normalised to have offset 0,0 at the nose.
+            camera.camera_matrix,  # From sample params
+            camera.dist_coefficients,  # No distortion coefficients
             rvec,
             tvec,
             useExtrinsicGuess=True,
             flags=cv2.SOLVEPNP_ITERATIVE,
         )
-        rot = Rotation.from_rotvec(rvec)
+        # Rvec is radians of each axis rotated relative to the camera
+        # Tvec is the 3D position of the head in metres (in world coords) relative to the camera
+        rot = Rotation.from_rotvec(rvec)  # Convert the rotation vector to a rotation matrix
         face.head_pose_rot = rot
-        face.head_position = tvec
+        face.head_position = tvec  # 3D position of the head in world coordinates relative to the camera
         face.reye.head_pose_rot = rot
         face.leye.head_pose_rot = rot
 
     def compute_3d_pose(self, face: Face) -> None:
         """Compute the transformed model."""
-        rot = face.head_pose_rot.as_matrix()
-        face.model3d = self.LANDMARKS @ rot.T + face.head_position
+        rot = face.head_pose_rot.as_matrix()  # Has units of radians
+        face.model3d = self.LANDMARKS @ rot.T + face.head_position  # This is the 3D model of the face in world coordinates
 
     def compute_face_eye_centers(self, face: Face, mode: str) -> None:
         """Compute the centers of the face and eyes.
@@ -63,5 +65,7 @@ class FaceModel:
             face.center = face.model3d[np.concatenate([self.REYE_INDICES, self.LEYE_INDICES, self.NOSE_INDICES])].mean(axis=0)
         else:
             face.center = face.model3d[np.concatenate([self.REYE_INDICES, self.LEYE_INDICES, self.MOUTH_INDICES])].mean(axis=0)
+
+        # Face centre is world coordinates in 3D with units metres relative to the camera
         face.reye.center = face.model3d[self.REYE_INDICES].mean(axis=0)
         face.leye.center = face.model3d[self.LEYE_INDICES].mean(axis=0)

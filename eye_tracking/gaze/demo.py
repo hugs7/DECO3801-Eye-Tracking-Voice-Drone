@@ -2,6 +2,7 @@ import datetime
 import logging
 import pathlib
 from typing import Optional
+import scipy.spatial.transform as transform
 
 import cv2
 import numpy as np
@@ -74,8 +75,9 @@ class Demo:
                 break
 
             # Upscale feed
-            # upscaled_frame = camera.upscale(frame, self.config.demo.upscale_dim)
-            self._process_image(frame)
+            upscaled_frame = camera.upscale(frame, self.config.demo.upscale_dim)
+            # upscaled_frame = frame
+            self._process_image(upscaled_frame)
 
             if self.config.demo.display_on_screen:
                 cv2.imshow("frame", self.visualizer.image)
@@ -95,7 +97,6 @@ class Demo:
             self._draw_landmarks(face)
             self._draw_face_template_model(face)
             self._draw_gaze_vector(face)
-            self._draw_gaze_dot_on_screen(face)
             self._display_normalized_image(face)
 
         if self.config.demo.use_camera:
@@ -188,11 +189,17 @@ class Demo:
         logger.info(f"[head] pitch: {pitch:.2f}, yaw: {yaw:.2f}, " f"roll: {roll:.2f}, distance: {face.distance:.2f}")
 
     def _draw_landmarks(self, face: Face) -> None:
+        """
+        Landmarks are 2D points in the upscaled image (pixels).
+        """
         if not self.show_landmarks:
             return
         self.visualizer.draw_points(face.landmarks, color=(0, 255, 255), size=1)
 
     def _draw_face_template_model(self, face: Face) -> None:
+        """
+        Face Template Model is the 3D model of the face in world coordinates (metres)
+        """
         if not self.show_template_model:
             return
         self.visualizer.draw_3d_points(face.model3d, color=(255, 0, 525), size=1)
@@ -215,98 +222,21 @@ class Demo:
         cv2.imshow("normalized", normalized)
 
     def _draw_gaze_vector(self, face: Face) -> None:
-        distance_from_screen = self._estimate_distance_from_screen(face)
+        length = self.config.demo.gaze_visualization_length
 
         if self.config.mode == "MPIIGaze":
             for key in [FacePartsName.REYE, FacePartsName.LEYE]:
                 eye = getattr(face, key.name.lower())
-
-                # Correct the gaze vector direction if necessary
-                gaze_vector = eye.gaze_vector
-                if gaze_vector[2] > 0:  # If the Z-component is positive, flip the vector
-                    gaze_vector = -gaze_vector
-
-                # Use a scaled length for visualization
-                length = distance_from_screen  # This ensures the vector reaches the screen plane
-
-                # Compute the end point of the gaze vector
-                end_point = eye.center + length * gaze_vector
-
-                # Log and visualize the gaze vector
+                end_point = eye.center + length * eye.gaze_vector  # eye.gaze_vector.z is always -1. We scale by length
                 self.visualizer.draw_3d_line(eye.center, end_point)
 
-                # Draw a dot at the start and end points of the gaze vector
-                self.visualizer.draw_3d_points(np.array([eye.center]), color=(0, 0, 255), size=5)
-                self.visualizer.draw_3d_points(np.array([end_point]), color=(0, 255, 0), size=5)
-
-                # Calculate and log pitch and yaw
-                pitch, yaw = np.rad2deg(eye.vector_to_angle(gaze_vector))
+                point_on_screen = eye.center + (eye.distance - 0.2) * eye.gaze_vector
+                self.visualizer.draw_3d_points(np.array([point_on_screen]), color=(0, 255, 0), size=5)
+                pitch, yaw = np.rad2deg(eye.vector_to_angle(eye.gaze_vector))
                 logger.info(f"[{key.name.lower()}] pitch: {pitch:.2f}, yaw: {yaw:.2f}")
-
         elif self.config.mode in ["MPIIFaceGaze", "ETH-XGaze"]:
-            # Similar handling for face gaze mode
             self.visualizer.draw_3d_line(face.center, face.center + length * face.gaze_vector)
             pitch, yaw = np.rad2deg(face.vector_to_angle(face.gaze_vector))
             logger.info(f"[face] pitch: {pitch:.2f}, yaw: {yaw:.2f}")
         else:
             raise ValueError
-
-    def _draw_gaze_dot_on_screen(self, face: Face) -> None:
-        Z_screen = self._estimate_distance_from_screen(face)
-
-        if self.config.mode == "MPIIGaze":
-            for key in [FacePartsName.REYE, FacePartsName.LEYE]:
-                eye = getattr(face, key.name.lower())
-                corrected_gaze_vector = eye.gaze_vector.copy()
-
-                # If the image is flipped, reverse the x-component of the gaze vector
-                if self.config.demo.use_camera:
-                    corrected_gaze_vector[0] *= -1
-
-                self.visualizer.draw_3d_line(eye.center, eye.center + Z_screen * corrected_gaze_vector)
-
-                end_point = eye.center + Z_screen * corrected_gaze_vector
-                centre_point_nda = np.array([eye.center])
-                end_point_nda = np.array([end_point])
-                colours = [(0, 0, 255), (0, 255, 0)]
-
-                self.visualizer.draw_3d_points(centre_point_nda, color=colours[0], size=5)
-                self.visualizer.draw_3d_points(end_point_nda, color=colours[1], size=5)
-
-                pitch, yaw = np.rad2deg(eye.vector_to_angle(corrected_gaze_vector))
-                logger.info(f"[{key.name.lower()}] pitch: {pitch:.2f}, yaw: {yaw:.2f}")
-
-        elif self.config.mode in ["MPIIFaceGaze", "ETH-XGaze"]:
-            gaze_point_3d = face.center + Z_screen * face.gaze_vector / face.gaze_vector[2]
-            gaze_point_2d = self._project_to_screen(gaze_point_3d)
-            # self.visualizer.draw_dot(gaze_point_2d, color=(0, 0, 255))
-        else:
-            raise ValueError
-
-    def _project_to_screen(self, point_3d) -> tuple:
-        # Convert the 3D gaze point to 2D screen coordinates using the camera matrix
-        point_2d = cv2.projectPoints(
-            point_3d, np.eye(3), np.zeros(3), self.gaze_estimator.camera.camera_matrix, self.gaze_estimator.camera.dist_coefficients
-        )[0]
-        return tuple(int(coord) for coord in point_2d.ravel())
-
-    def _estimate_distance_from_screen(self, face: Face) -> float:
-        # Known physical distance between eyes (in meters), adjust this according to your model
-        known_eye_distance = 0.063  # Average distance between eyes in meters
-
-        # Get the 3D coordinates of the eye landmarks
-        left_eye = face.landmarks[FacePartsName.LEYE.value]
-        right_eye = face.landmarks[FacePartsName.REYE.value]
-
-        # Calculate the pixel distance between the eyes in the image
-        eye_distance_pixels = np.linalg.norm(left_eye - right_eye)
-
-        # Focal length in pixels (from camera matrix)
-        focal_length = self.gaze_estimator.camera.camera_matrix[0, 0]  # fx component
-
-        # Estimate the distance from the camera to the face
-        distance = (known_eye_distance * focal_length) / eye_distance_pixels
-        logger.debug(
-            f"Estimated distance from screen: pixels: {eye_distance_pixels:.2f}, foc_len: {focal_length:.2f}, phys: {distance:.2f} meters"
-        )
-        return distance

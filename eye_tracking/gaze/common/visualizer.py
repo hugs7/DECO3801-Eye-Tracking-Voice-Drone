@@ -30,6 +30,9 @@ class Visualizer:
         return tuple(np.round(point).astype(np.int32).tolist())
 
     def draw_points(self, points: np.ndarray, color: Tuple[int, int, int] = (0, 0, 255), size: int = 3) -> None:
+        """
+        Draws points from 2D image coordinates onto the image (direct drawing).
+        """
         assert self.image is not None
         assert points.shape[1] == 2
         for pt in points:
@@ -37,6 +40,9 @@ class Visualizer:
             cv2.circle(self.image, pt, size, color, cv2.FILLED)
 
     def draw_3d_points(self, points3d: np.ndarray, color: Tuple[int, int, int] = (255, 0, 255), size=3) -> None:
+        """
+        Draw points from 3D world coordinates onto the image.
+        """
         assert self.image is not None
         assert points3d.shape[1] == 3
         points2d = self._camera.project_points(points3d)
@@ -66,3 +72,14 @@ class Visualizer:
         for pt, color in zip(axes2d, AXIS_COLORS):
             pt = self._convert_pt(pt)
             cv2.line(self.image, center, pt, color, lw, cv2.LINE_AA)
+
+    def add_text(
+        self, text: str, position: Tuple[int, int, int], color: Tuple[int, int, int] = (100, 200, 200), font_scale: float = 1
+    ) -> None:
+        assert self.image is not None
+
+        # Ensure the position is a 2D point (x, y)
+        if len(position) == 3:
+            position = (int(position[0]), int(position[1]))
+
+        cv2.putText(self.image, text, position, cv2.FONT_HERSHEY_SIMPLEX, font_scale, color, 2, cv2.LINE_AA)
