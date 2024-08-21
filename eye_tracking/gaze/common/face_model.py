@@ -8,15 +8,43 @@ from gaze.common.camera import Camera
 from gaze.common.face import Face
 
 
-@dataclasses.dataclass(frozen=True)
 class FaceModel:
-    LANDMARKS: np.ndarray
-    REYE_INDICES: np.ndarray
-    LEYE_INDICES: np.ndarray
-    MOUTH_INDICES: np.ndarray
-    NOSE_INDICES: np.ndarray
-    CHIN_INDEX: int
-    NOSE_INDEX: int
+    def __init__(
+        self,
+        reye_indices: np.ndarray,
+        leye_indices: np.ndarray,
+        mouth_indices: np.ndarray,
+        nose_indices: np.ndarray,
+        chin_index: int,
+        nose_index: int,
+    ):
+        self.LANDMARKS = None
+        self.REYE_INDICES = reye_indices
+        self.LEYE_INDICES = leye_indices
+        self.MOUTH_INDICES = mouth_indices
+        self.NOSE_INDICES = nose_indices
+        self.CHIN_INDEX = chin_index
+        self.NOSE_INDEX = nose_index
+
+    def check_landmarks(self, landmarks: np.ndarray) -> None:
+        """
+        Asserts that the landmarks array has the correct shape and that the
+        nose landmark is at the origin.
+        """
+
+        assert landmarks is not None
+        assert landmarks.shape == (478, 3)
+        assert list(landmarks[self.NOSE_INDEX]) == [0, 0, 0]
+
+    def set_landmark_calibration(self, landmarks: np.ndarray) -> None:
+        """
+        Updates the landmark calibration matrix which is used as the object
+        points when solving the PnP problem.
+        """
+        # Normalise landmarks to have the nose at the origin
+        normalised_landmarks = landmarks - landmarks[self.NOSE_INDEX]
+        self.check_landmarks(normalised_landmarks)
+        self.LANDMARKS = normalised_landmarks
 
     def estimate_head_pose(self, face: Face, camera: Camera) -> None:
         """Estimate the head pose by fitting 3D template model."""
@@ -26,6 +54,11 @@ class FaceModel:
         # The default values of rvec and tvec below mean that the
         # initial estimate of the head pose is not rotated and the
         # face is in front of the camera.
+        if self.LANDMARKS is None:
+            raise ValueError("Landmark calibration matrix is not set.")
+
+        self.check_landmarks(self.LANDMARKS)
+
         rvec = np.zeros(3, dtype=np.float32)
         tvec = np.array([0, 0, 1], dtype=np.float32)
         _, rvec, tvec = cv2.solvePnP(

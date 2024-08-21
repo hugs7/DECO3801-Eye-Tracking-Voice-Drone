@@ -15,8 +15,8 @@ def main():
 
     config = init.init_ptgaze()
 
-    demo = GazeDetector(config)
-    demo.run()
+    gaze_detector = GazeDetector(config)
+    gaze_detector.run()
 
 
 if __name__ == "__main__":

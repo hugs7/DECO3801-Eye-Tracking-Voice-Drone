@@ -107,7 +107,6 @@ class FaceModel68(FaceModel):
         NOSE_INDEX: int = 30
 
         super().__init__(
-            LANDMARKS,
             REYE_INDICES,
             LEYE_INDICES,
             MOUTH_INDICES,
