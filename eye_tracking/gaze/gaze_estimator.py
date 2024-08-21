@@ -43,6 +43,9 @@ class GazeEstimator:
     def detect_faces(self, image: np.ndarray) -> List[Face]:
         return self._landmark_estimator.detect_faces(image)
 
+    def detect_faces_raw(self, image: np.ndarray) -> List[np.ndarray]:
+        return self._landmark_estimator.detect_faces_raw(image)
+
     def estimate_gaze(self, image: np.ndarray, face: Face) -> None:
         self._face_model3d.estimate_head_pose(face, self.camera)
         self._face_model3d.compute_3d_pose(face)

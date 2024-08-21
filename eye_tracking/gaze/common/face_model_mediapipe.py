@@ -508,7 +508,6 @@ class FaceModelMediaPipe(FaceModel):
         NOSE_INDEX: int = 1
 
         super().__init__(
-            LANDMARKS,
             REYE_INDICES,
             LEYE_INDICES,
             MOUTH_INDICES,

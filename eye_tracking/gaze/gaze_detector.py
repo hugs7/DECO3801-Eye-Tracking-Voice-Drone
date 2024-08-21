@@ -1,7 +1,7 @@
 import datetime
 import logging
 import pathlib
-from typing import Optional
+from typing import Optional, Tuple
 import scipy.spatial.transform as transform
 
 import cv2
@@ -39,6 +39,11 @@ class GazeDetector:
         self.show_normalized_image = self.config.demo.show_normalized_image
         self.show_template_model = self.config.demo.show_template_model
 
+        # Calibration
+        self.calibrated = False
+        self.calibrating = False
+        self.calibration_landmarks = None
+
     def run(self) -> None:
         if self.config.demo.use_camera or self.config.demo.video_path:
             self._run_on_video()
@@ -70,14 +75,11 @@ class GazeDetector:
                 if self.stop:
                     break
 
-            ok, frame = self.cap.read()
+            ok, frame = self._read_camera()
             if not ok:
                 break
 
-            # Upscale feed
-            upscaled_frame = camera.upscale(frame, self.config.demo.upscale_dim)
-            # upscaled_frame = frame
-            self._process_image(upscaled_frame)
+            self._process_image(frame)
 
             if self.config.demo.display_on_screen:
                 cv2.imshow("frame", self.visualizer.image)
@@ -85,24 +87,41 @@ class GazeDetector:
         if self.writer:
             self.writer.release()
 
+    def _read_camera(self) -> Tuple[bool, np.ndarray]:
+        ok, frame = self.cap.read()
+        if not ok:
+            return ok, frame
+
+        # Upscale feed
+        upscaled_frame = camera.upscale(frame, self.config.demo.upscale_dim)
+        return ok, upscaled_frame
+
     def _process_image(self, image) -> None:
-        undistorted = cv2.undistort(image, self.gaze_estimator.camera.camera_matrix, self.gaze_estimator.camera.dist_coefficients)
+        undistorted = self._undistort_image(image)
 
         self.visualizer.set_image(image.copy())
-        faces = self.gaze_estimator.detect_faces(undistorted)
-        for face in faces:
-            self.gaze_estimator.estimate_gaze(undistorted, face)
-            self._draw_face_bbox(face)
-            self._draw_head_pose(face)
-            self._draw_landmarks(face)
-            self._draw_face_template_model(face)
-            self._draw_gaze_vector(face)
-            self._display_normalized_image(face)
+        if self.calibrated:
+            faces = self.gaze_estimator.detect_faces(undistorted)
+            for face in faces:
+                self.gaze_estimator.estimate_gaze(undistorted, face)
+                self._draw_face_bbox(face)
+                self._draw_head_pose(face)
+                self._draw_landmarks(face)
+                self._draw_face_template_model(face)
+                self._draw_gaze_vector(face)
+                self._display_normalized_image(face)
+
+        # if self.calibrating:
+        #     if self.calibration_landmarks is not None:
+        #         self.visualizer.draw_3d_points(self.calibration_landmarks, color=(255, 0, 0), size=1)
 
         if self.config.demo.use_camera:
             self.visualizer.image = self.visualizer.image[:, ::-1]
         if self.writer:
             self.writer.write(self.visualizer.image)
+
+    def _undistort_image(self, image: np.ndarray) -> np.ndarray:
+        return cv2.undistort(image, self.gaze_estimator.camera.camera_matrix, self.gaze_estimator.camera.dist_coefficients)
 
     def _create_capture(self) -> Optional[cv2.VideoCapture]:
         if self.config.demo.image_path:
@@ -168,9 +187,47 @@ class GazeDetector:
             self.show_normalized_image = not self.show_normalized_image
         elif key == ord("t"):
             self.show_template_model = not self.show_template_model
+        elif key == ord("c"):
+            if self.calibrating:
+                # Disable calibration
+                self.calibrating = False
+                logger.info("Setting calibrated to True")
+                self.calibrated = True
+                self.calibration_landmarks = None
+            else:
+                # Calibrate
+                logger.info("Setting calibrated to False")
+                self.calibrated = False
+                self._calibrate_landmarks()
         else:
             return False
         return True
+
+    def _calibrate_landmarks(
+        self,
+    ):
+        self.calibrating = True
+        # Read camera
+        ok, frame = self._read_camera()
+        if not ok:
+            logger.error("Failed to read camera. Calibration failed.")
+            self.calibrating = False
+            return
+
+        undistorted = self._undistort_image(frame)
+        faces = self.gaze_estimator.detect_faces_raw(undistorted)
+        if len(faces) != 1:
+            logger.info("Ensure only one face is visible in the camera feed then press 'c' to calibrate again.")
+            self.calibrating = False
+            return
+
+        face_landmarks = faces[0]
+        self.calibration_landmarks = face_landmarks
+        # Add 1 meter to the z-axis
+        self.calibration_landmarks[:, 2] += 1
+
+        self.gaze_estimator._face_model3d.set_landmark_calibration(self.calibration_landmarks)
+        logger.info("Calibration successful.")
 
     def _draw_face_bbox(self, face: Face) -> None:
         if not self.show_bbox:
