@@ -5,7 +5,6 @@ Last Updated: 21/08/2024
 """
 
 import init
-
 from gaze.gaze_detector import GazeDetector
 
 

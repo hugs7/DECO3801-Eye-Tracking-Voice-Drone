@@ -1,3 +1,9 @@
+"""
+Class to run the gaze estimation model
+Modified by: Hugo Burton
+Last Updated: 21/08/2024
+"""
+
 import logging
 from typing import List
 
