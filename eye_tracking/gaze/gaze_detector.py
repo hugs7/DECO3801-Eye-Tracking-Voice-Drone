@@ -40,6 +40,7 @@ class GazeDetector:
         self.show_landmarks = self.config.demo.show_landmarks
         self.show_normalized_image = self.config.demo.show_normalized_image
         self.show_template_model = self.config.demo.show_template_model
+        self.show_gaze_vector = self.config.demo.show_gaze_vector
 
         # Calibration
         self.calibrated = False
@@ -105,13 +106,13 @@ class GazeDetector:
         undistorted = self._undistort_image(image)
 
         self.visualizer.set_image(image.copy())
-        if self.calibrated:
-            faces = self.gaze_estimator.detect_faces(undistorted)
-            for face in faces:
+        faces = self.gaze_estimator.detect_faces(undistorted)
+        for face in faces:
+            self._draw_landmarks(face)
+            self._draw_face_bbox(face)
+            if self.calibrated:
                 self.gaze_estimator.estimate_gaze(undistorted, face)
-                self._draw_face_bbox(face)
                 self._draw_head_pose(face)
-                self._draw_landmarks(face)
                 self._draw_face_template_model(face)
                 self._draw_gaze_vector(face)
                 self._display_normalized_image(face)
@@ -193,6 +194,8 @@ class GazeDetector:
             self.show_normalized_image = not self.show_normalized_image
         elif key == ord("t"):
             self.show_template_model = not self.show_template_model
+        elif key == ord("g"):
+            self.show_gaze_vector = not self.show_gaze_vector
         elif key == ord("c"):
             # Calibrate
             logger.info("Setting calibrated to False")
@@ -283,6 +286,9 @@ class GazeDetector:
         cv2.imshow("normalized", normalized)
 
     def _draw_gaze_vector(self, face: Face) -> None:
+        if not self.show_gaze_vector:
+            return
+
         length = self.config.demo.gaze_visualization_length
 
         if self.config.mode == "MPIIGaze":
