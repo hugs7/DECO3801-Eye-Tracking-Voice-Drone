@@ -45,6 +45,10 @@ class GazeDetector:
         self.calibrated = False
         self.calibration_landmarks = None
 
+        # Point on screen
+        self.point_on_screen_smoothing_factor = 8  # Number of frames to average over
+        self.point_buffer = []
+
     def run(self) -> None:
         if self.config.demo.use_camera or self.config.demo.video_path:
             self._run_on_video()
@@ -287,10 +291,28 @@ class GazeDetector:
                 end_point = eye.center + length * eye.gaze_vector  # eye.gaze_vector.z is always -1. We scale by length
                 self.visualizer.draw_3d_line(eye.center, end_point)
 
-                point_on_screen = eye.center + (eye.distance - 0.2) * eye.gaze_vector  # Will adjust the distance offset
-                self.visualizer.draw_3d_points(np.array([point_on_screen]), color=(0, 255, 0), size=5)
                 pitch, yaw = np.rad2deg(eye.vector_to_angle(eye.gaze_vector))
                 logger.info(f"[{key.name.lower()}] pitch: {pitch:.2f}, yaw: {yaw:.2f}")
+
+            average_eye_distance = (face.reye.distance + face.leye.distance) / 2
+            average_eye_center = (face.reye.center + face.leye.center) / 2
+            average_gaze_vector = (face.reye.gaze_vector + face.leye.gaze_vector) / 2
+
+            end_point = average_eye_center + length * average_gaze_vector
+            self.visualizer.draw_3d_line(average_eye_center, end_point)
+
+            # Draw the point on the screen the user is looking at
+            point_on_screen = average_eye_center + (average_eye_distance - 0.15) * average_gaze_vector
+            point_on_screen[1] = 0
+
+            # Update buffer and calculate smoothed point
+            self.point_buffer.append(point_on_screen)
+            if len(self.point_buffer) > self.point_on_screen_smoothing_factor:
+                self.point_buffer.pop(0)  # Remove oldest point
+
+            smoothed_point = np.mean(self.point_buffer, axis=0)
+
+            self.visualizer.draw_3d_points(np.array([smoothed_point]), color=(0, 255, 0), size=5)
         elif self.config.mode in ["MPIIFaceGaze", "ETH-XGaze"]:
             self.visualizer.draw_3d_line(face.center, face.center + length * face.gaze_vector)
             pitch, yaw = np.rad2deg(face.vector_to_angle(face.gaze_vector))
