@@ -312,7 +312,7 @@ class GazeDetector:
 
             smoothed_point = np.mean(self.point_buffer, axis=0)
 
-            self.visualizer.draw_3d_points(np.array([smoothed_point]), color=(0, 255, 0), size=5)
+            self.visualizer.draw_3d_points(np.array([smoothed_point]), color=(0, 255, 0), size=10, clamp_to_screen=True)
         elif self.config.mode in ["MPIIFaceGaze", "ETH-XGaze"]:
             self.visualizer.draw_3d_line(face.center, face.center + length * face.gaze_vector)
             pitch, yaw = np.rad2deg(face.vector_to_angle(face.gaze_vector))
