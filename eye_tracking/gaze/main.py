@@ -6,7 +6,7 @@ import warnings
 import torch
 from omegaconf import DictConfig, OmegaConf
 
-from gaze.demo import Demo
+from gaze.gaze_detector import GazeDetector
 from gaze.utils import (
     check_path_all,
     download_dlib_pretrained_model,
@@ -135,5 +135,5 @@ def main():
 
     check_path_all(config)
 
-    demo = Demo(config)
-    demo.run()
+    gaze_detector = GazeDetector(config)
+    gaze_detector.run()

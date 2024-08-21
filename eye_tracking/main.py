@@ -5,7 +5,7 @@ Eye tracking driver
 
 import init
 
-from gaze.demo import Demo
+from gaze.gaze_detector import GazeDetector
 
 
 def main():
@@ -15,7 +15,7 @@ def main():
 
     config = init.init_ptgaze()
 
-    demo = Demo(config)
+    demo = GazeDetector(config)
     demo.run()
 
 

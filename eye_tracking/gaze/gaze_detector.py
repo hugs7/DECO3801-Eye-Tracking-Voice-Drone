@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 import camera
 
 
-class Demo:
+class GazeDetector:
     QUIT_KEYS = {27, ord("q")}
 
     def __init__(self, config: DictConfig):
