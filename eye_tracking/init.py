@@ -1,11 +1,9 @@
 """
 Initialises the eye_tracking package.
+Author: Hugo Burton
+Last Updated: 21/08/2024
 """
 
-from typing import Dict
-from mediapipe.python.solutions.face_mesh import FaceMesh
-
-# Pt gaze imports
 import pathlib
 from omegaconf import DictConfig, OmegaConf
 import logging

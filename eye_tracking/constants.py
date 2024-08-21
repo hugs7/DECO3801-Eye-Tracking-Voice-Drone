@@ -1,5 +1,7 @@
 """
 Constants file
+Author: Hugo Burton
+Last Updated: 21/08/2024
 """
 
 MAPPINGS_FOLDER = "mappings"
@@ -8,7 +10,6 @@ MAPPINGS_FOLDER = "mappings"
 # Landmark Mapping
 
 EXPECTED_EYE_POINT_KEYS = ["centre", "right", "top", "left", "bottom"]
-
 
 # Window
 
