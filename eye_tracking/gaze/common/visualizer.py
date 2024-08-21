@@ -44,13 +44,17 @@ class Visualizer:
             pt = self._convert_pt(pt)
             cv2.circle(self.image, pt, size, color, cv2.FILLED)
 
-    def draw_3d_points(self, points3d: np.ndarray, color: Tuple[int, int, int] = (255, 0, 255), size=3) -> None:
+    def draw_3d_points(
+        self, points3d: np.ndarray, color: Tuple[int, int, int] = (255, 0, 255), size=3, clamp_to_screen: bool = False
+    ) -> None:
         """
         Draw points from 3D world coordinates onto the image.
         """
         assert self.image is not None
         assert points3d.shape[1] == 3
         points2d = self._camera.project_points(points3d)
+        if clamp_to_screen:
+            points2d = np.clip(points2d, 0, np.array(self.image.shape[:2])[::-1])
         self.draw_points(points2d, color=color, size=size)
 
     def draw_3d_line(self, point0: np.ndarray, point1: np.ndarray, color: Tuple[int, int, int] = (255, 255, 0), lw=1) -> None:

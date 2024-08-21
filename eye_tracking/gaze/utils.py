@@ -202,3 +202,15 @@ def flip_image(image: np.ndarray) -> np.ndarray:
     """
 
     return image[:, ::-1]
+
+
+def clamp(value: float, min_value: float, max_value: float) -> float:
+    """
+    Clamp the value between the min and max values
+    :param value: The value to clamp
+    :param min_value: The minimum value
+    :param max_value: The maximum value
+    :return float: The clamped value
+    """
+
+    return max(min(value, max_value), min_value)
