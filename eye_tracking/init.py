@@ -2,17 +2,8 @@
 Initialises the eye_tracking package.
 """
 
-import os
 from typing import Dict
-import cv2
 from mediapipe.python.solutions.face_mesh import FaceMesh
-
-import constants
-import coordinate
-import landmarks
-import utils.file_helper as file_helper
-import controller
-
 
 # Pt gaze imports
 import pathlib
