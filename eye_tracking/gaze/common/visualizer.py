@@ -6,6 +6,7 @@ from scipy.spatial.transform import Rotation
 
 from gaze.common.camera import Camera
 from gaze.common.face import Face
+from gaze import utils
 
 AXIS_COLORS = [(0, 0, 255), (0, 255, 0), (255, 0, 0)]
 
@@ -18,6 +19,10 @@ class Visualizer:
 
     def set_image(self, image: np.ndarray) -> None:
         self.image = image
+
+    def flip_image(self) -> None:
+        flipped_image = utils.flip_image(self.image)
+        self.set_image(flipped_image)
 
     def draw_bbox(self, bbox: np.ndarray, color: Tuple[int, int, int] = (0, 255, 0), lw: int = 1) -> None:
         assert self.image is not None

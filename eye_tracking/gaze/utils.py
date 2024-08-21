@@ -1,3 +1,9 @@
+"""
+Utils for gaze estimation
+Modified by: Hugo Burton
+Last Updated: 21/08/2024
+"""
+
 import bz2
 import logging
 import operator
@@ -187,3 +193,12 @@ def upscale(frame: cv2.VideoCapture, upscaled_dim: Tuple[int, int]) -> cv2.Video
 
     return upscaled_frame
 
+
+def flip_image(image: np.ndarray) -> np.ndarray:
+    """
+    Flip the image
+    :param image: The image to flip
+    :return np.ndarray: The flipped image
+    """
+
+    return image[:, ::-1]
