@@ -1,5 +1,7 @@
 """
 Constants file
+Author: Hugo Burton
+Last Updated: 21/08/2024
 """
 
 MAPPINGS_FOLDER = "mappings"
@@ -8,7 +10,6 @@ MAPPINGS_FOLDER = "mappings"
 # Landmark Mapping
 
 EXPECTED_EYE_POINT_KEYS = ["centre", "right", "top", "left", "bottom"]
-
 
 # Window
 
@@ -27,7 +28,3 @@ BUTTON_WIDTH = 300
 BUTTON_HEIGHT = 40
 BUTTON_PADDING_X = 10
 BUTTON_PADDING_Y = 5
-
-# Calibration
-
-CALIBRATION_GRID_DOT_RADIUS = 30

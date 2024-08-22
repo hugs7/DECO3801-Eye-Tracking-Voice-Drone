@@ -1,12 +1,11 @@
 """
-Eye tracking driver
-02/08/2024
+Entry point for the eye tracking driver
+Author: Hugo Burton
+Last Updated: 21/08/2024
 """
 
-import cv2
-
 import init
-import loop
+from gaze.gaze_detector import GazeDetector
 
 
 def main():
@@ -14,26 +13,10 @@ def main():
     Defines entry point for the eye tracking application
     """
 
-    landmark_mapping = init.init_landmark_mapping()
+    config = init.init_ptgaze()
 
-    # Initialise variables
-    run = True
-    cam = init.camera_init()
-
-    window_width = 1280
-    window_height = 900
-
-    landmark_visibility = init.init_landmark_visibility()
-    window_dim = init.init_window(window_width, window_height, landmark_visibility)
-
-    face_mesh = init.init_face_mesh()
-
-    while run:
-        run = loop.main_loop(cam, face_mesh, landmark_mapping, window_dim, landmark_visibility)
-
-    # Clean up
-    cam.release()
-    cv2.destroyAllWindows()
+    gaze_detector = GazeDetector(config)
+    gaze_detector.run()
 
 
 if __name__ == "__main__":
