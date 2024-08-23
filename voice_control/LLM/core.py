@@ -59,6 +59,7 @@ def run_until_halt(
 	while not (agent_is_done or message != ""):
 		captured_output = ""
 		executed_entries = list()
+		
 		terminal_code = ask_llm(context, ask_fn)
 		
 		terminal_entries = extract_terminal_entries(terminal_code)
@@ -95,16 +96,17 @@ def react(
 	context_file = os.path.join(data_folder, "context.jsonl")
 	stored_context = []
 
-
+	
 	if os.path.exists(context_file) and os.path.getsize(context_file) > 0:
 		with open(context_file, 'r') as f:
 			for line in f:
 				parsed = json.loads(line)
-				print(parsed)
 				stored_context.append(parsed)
 
 	stored_context.append({"role": "user", "content": user_command})
-
+	with open(context_file, 'w') as f:
+			for entry in stored_context:
+				f.write(json.dumps(entry) + '\n')
 	# NEED TO FIX DICT/LIST
 	log(user_command, color=Fore.LIGHTGREEN_EX)
 	context.append({"role": "user", "content": user_command})
