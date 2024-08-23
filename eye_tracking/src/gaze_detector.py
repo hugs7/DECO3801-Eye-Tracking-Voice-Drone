@@ -13,9 +13,12 @@ import cv2
 import numpy as np
 from omegaconf import DictConfig
 
-from .common import Face, FacePartsName, Visualizer
-from .gaze_estimator import GazeEstimator
-from gaze import utils
+from face import Face
+from face_model_mediapipe import FaceModelMediaPipe
+from face_parts import FacePartsName
+from visualizer import Visualizer
+from gaze_estimator import GazeEstimator
+from utils import transforms
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -27,7 +30,7 @@ class GazeDetector:
     def __init__(self, config: DictConfig):
         self.config = config
         self.gaze_estimator = GazeEstimator(config)
-        face_model_3d = utils.get_3d_face_model(config)
+        face_model_3d = FaceModelMediaPipe()
         self.visualizer = Visualizer(self.gaze_estimator.camera, face_model_3d.NOSE_INDEX)
 
         self.cap = self._create_capture()
@@ -99,7 +102,7 @@ class GazeDetector:
             return ok, frame
 
         # Upscale feed
-        upscaled_frame = utils.upscale(frame, self.config.demo.upscale_dim)
+        upscaled_frame = transforms.upscale(frame, self.config.demo.upscale_dim)
         return ok, upscaled_frame
 
     def _process_image(self, image) -> None:
@@ -280,7 +283,7 @@ class GazeDetector:
         normalized = np.hstack([reye, leye])
 
         if self.config.demo.use_camera:
-            normalized = utils.flip_image(normalized)
+            normalized = transforms.flip_image(normalized)
 
         cv2.imshow("normalized", normalized)
 

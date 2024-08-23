@@ -11,11 +11,14 @@ import numpy as np
 import torch
 from omegaconf import DictConfig
 
-from gaze.common import Camera, Face, FacePartsName
-from gaze.head_pose_estimation import HeadPoseNormalizer, LandmarkEstimator
-from gaze.models import create_model
-from gaze.transforms import create_transform
-from gaze import utils
+from camera import Camera
+from face import Face
+from face_parts import FacePartsName
+from face_model_mediapipe import FaceModelMediaPipe
+from utils import transforms
+
+from head_pose_estimation import HeadPoseNormalizer, LandmarkEstimator
+from models import create_model
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +29,7 @@ class GazeEstimator:
     def __init__(self, config: DictConfig):
         self._config = config
 
-        self._face_model3d = utils.get_3d_face_model(config)
+        self._face_model3d = FaceModelMediaPipe()
 
         self.camera = Camera(config.gaze_estimator.camera_params)
         self._normalized_camera = Camera(config.gaze_estimator.normalized_camera_params)
@@ -36,7 +39,7 @@ class GazeEstimator:
             self.camera, self._normalized_camera, self._config.gaze_estimator.normalized_camera_distance
         )
         self._gaze_estimation_model = self._load_model()
-        self._transform = create_transform()
+        self._transform = transforms.create_transform()
 
     def _load_model(self) -> torch.nn.Module:
         model = create_model(self._config)
@@ -74,7 +77,7 @@ class GazeEstimator:
             normalized_head_pose = eye.normalized_head_rot2d
 
             if key == FacePartsName.REYE:
-                image = utils.flip_image(image).copy()
+                image = transforms.flip_image(image).copy()
                 normalized_head_pose *= np.array([1, -1])
 
             image = self._transform(image)

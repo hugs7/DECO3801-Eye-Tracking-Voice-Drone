@@ -4,8 +4,8 @@ import cv2
 import numpy as np
 from scipy.spatial.transform import Rotation
 
-from gaze.common.camera import Camera
-from gaze.common.face import Face
+from camera import Camera
+from face import Face
 
 
 class FaceModel:

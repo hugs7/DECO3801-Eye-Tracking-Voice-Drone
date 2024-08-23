@@ -4,9 +4,9 @@ import cv2
 import numpy as np
 from scipy.spatial.transform import Rotation
 
-from gaze.common.camera import Camera
-from gaze.common.face import Face
-from gaze import utils
+from camera import Camera
+from face import Face
+from utils import transforms
 
 AXIS_COLORS = [(0, 0, 255), (0, 255, 0), (255, 0, 0)]
 
@@ -21,7 +21,7 @@ class Visualizer:
         self.image = image
 
     def flip_image(self) -> None:
-        flipped_image = utils.flip_image(self.image)
+        flipped_image = transforms.flip_image(self.image)
         self.set_image(flipped_image)
 
     def draw_bbox(self, bbox: np.ndarray, color: Tuple[int, int, int] = (0, 255, 0), lw: int = 1) -> None:
