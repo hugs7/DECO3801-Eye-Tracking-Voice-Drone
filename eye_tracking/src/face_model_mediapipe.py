@@ -1,10 +1,16 @@
+"""
+MediaPipe 3D face model for 468 points mark-up.
+Author: Hugo Burton
+Last Updated: 21/08/2024
+"""
+
 import numpy as np
 
-from .face_model import FaceModel
+from face_model import FaceModel
 
 
-class FaceModel68(FaceModel):
-    """3D face model for Multi-PIE 68 points mark-up.
+class FaceModelMediaPipe(FaceModel):
+    """3D face model for MediaPipe 468 points mark-up.
 
     In the camera coordinate system, the X axis points to the right from
     camera, the Y axis points down, and the Z axis points forward.
@@ -22,14 +28,14 @@ class FaceModel68(FaceModel):
     system rotated 180 degrees around the Y axis.
     """
 
-    def __init__(self):
-        REYE_INDICES: np.ndarray = np.array([36, 39])
-        LEYE_INDICES: np.ndarray = np.array([42, 45])
-        MOUTH_INDICES: np.ndarray = np.array([48, 54])
-        NOSE_INDICES: np.ndarray = np.array([31, 35])
+    def __init__(self) -> None:
+        REYE_INDICES: np.ndarray = np.array([33, 133])
+        LEYE_INDICES: np.ndarray = np.array([362, 263])
+        MOUTH_INDICES: np.ndarray = np.array([78, 308])
+        NOSE_INDICES: np.ndarray = np.array([240, 460])
 
-        CHIN_INDEX: int = 8
-        NOSE_INDEX: int = 30
+        CHIN_INDEX: int = 199
+        NOSE_INDEX: int = 1
 
         super().__init__(
             REYE_INDICES,

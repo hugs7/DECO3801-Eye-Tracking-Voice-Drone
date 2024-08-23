@@ -7,12 +7,12 @@ Last Updated: 21/08/2024
 import pathlib
 from omegaconf import DictConfig, OmegaConf
 import logging
-from gaze.utils import (
+from utils.model import (
     check_path_all,
     download_mpiigaze_model,
     expanduser_all,
-    generate_dummy_camera_params,
 )
+from utils.camera import generate_dummy_camera_params
 from omegaconf import DictConfig, OmegaConf
 
 
@@ -24,13 +24,12 @@ def init_ptgaze_config() -> DictConfig:
     Custom config initialiser for ptgaze
     """
 
-    package_root = pathlib.Path(__file__).parent.resolve()
-    ptgaze_package_root = package_root / "gaze"
-    path = ptgaze_package_root / "data/configs/mpiigaze.yaml"
+    package_root = pathlib.Path(__file__).parent.parent.resolve()
+    path = package_root / "data/configs/mpiigaze.yaml"
 
     logger.info(f"Loading config from {path}")
     config = OmegaConf.load(path)
-    config.PACKAGE_ROOT = ptgaze_package_root.as_posix()
+    config.PACKAGE_ROOT = package_root.as_posix()
     logger.info(f"Pacakge root: {config.PACKAGE_ROOT}")
 
     return config

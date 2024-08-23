@@ -2,8 +2,8 @@ from typing import Optional
 
 import numpy as np
 
-from gaze.common.eye import Eye
-from gaze.common.face_parts import FaceParts, FacePartsName
+from eye import Eye
+from face_parts import FaceParts, FacePartsName
 
 
 class Face(FaceParts):

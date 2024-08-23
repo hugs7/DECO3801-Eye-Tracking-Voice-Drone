@@ -1,9 +1,11 @@
 import dataclasses
 from typing import Optional
-
 import cv2
 import numpy as np
 import yaml
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 @dataclasses.dataclass()
