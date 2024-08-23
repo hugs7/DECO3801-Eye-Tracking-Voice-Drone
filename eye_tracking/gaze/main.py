@@ -6,15 +6,6 @@ import warnings
 import torch
 from omegaconf import DictConfig, OmegaConf
 
-from gaze.gaze_detector import GazeDetector
-from gaze.utils import (
-    check_path_all,
-    download_dlib_pretrained_model,
-    download_mpiigaze_model,
-    expanduser_all,
-    generate_dummy_camera_params,
-)
-
 logger = logging.getLogger(__name__)
 
 
@@ -26,13 +17,6 @@ def parse_args() -> argparse.Namespace:
         help="Config file. When using a config file, all the other "
         "commandline arguments are ignored. "
         "See https://github.com/hysts/pytorch_mpiigaze_demo/ptgaze/data/configs/mpiigaze.yaml",
-    )
-    parser.add_argument(
-        "--face-detector",
-        type=str,
-        default="mediapipe",
-        choices=["dlib", "face_alignment_dlib", "face_alignment_sfd", "mediapipe"],
-        help="The method used to detect faces and find face landmarks " "(default: 'mediapipe')",
     )
     parser.add_argument("--device", type=str, choices=["cpu", "cuda"], help="Device used for model inference.")
     parser.add_argument("--image", type=str, help="Path to an input image file.")

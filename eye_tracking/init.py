@@ -9,7 +9,6 @@ from omegaconf import DictConfig, OmegaConf
 import logging
 from gaze.utils import (
     check_path_all,
-    download_dlib_pretrained_model,
     download_mpiigaze_model,
     expanduser_all,
     generate_dummy_camera_params,
@@ -51,9 +50,6 @@ def init_ptgaze() -> DictConfig:
 
     OmegaConf.set_readonly(config, True)
     logger.info(OmegaConf.to_yaml(config))
-
-    if config.face_detector.mode == "dlib":
-        download_dlib_pretrained_model()
 
     download_mpiigaze_model()
 
