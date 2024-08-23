@@ -1,7 +1,6 @@
 import json
 import os
 import ast
-
 system_prompt = """
 You are an assistant that exists within a python terminal. You help the user by writing python code. The user can read
 everything you type or print. You can ask the user to do things for you, especially things that you cannot do, like
