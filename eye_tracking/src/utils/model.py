@@ -15,7 +15,11 @@ logger = logging.getLogger(__name__)
 
 
 def get_ptgaze_model_dir() -> pathlib.Path:
+<<<<<<< HEAD
     package_root = pathlib.Path(__file__).parent.parent.parent.resolve()
+=======
+    package_root = pathlib.Path(__file__).parent.parent.resolve()
+>>>>>>> dd828f6 (Refactor everything)
     model_dir = package_root / "data/models/"
     model_dir.mkdir(exist_ok=True, parents=True)
     return model_dir
