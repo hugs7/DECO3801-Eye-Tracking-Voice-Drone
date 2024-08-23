@@ -75,38 +75,6 @@ def download_mpiigaze_model() -> pathlib.Path:
     return output_path
 
 
-def download_mpiifacegaze_model() -> pathlib.Path:
-    logger.debug("Called _download_mpiifacegaze_model()")
-    model_dir = get_ptgaze_model_dir()
-    output_dir = model_dir / "models/"
-    output_dir.mkdir(exist_ok=True, parents=True)
-    output_path = output_dir / "mpiifacegaze_resnet_simple.pth"
-    if not output_path.exists():
-        logger.debug("Download the pretrained model")
-        torch.hub.download_url_to_file(
-            "https://github.com/hysts/pytorch_mpiigaze_demo/releases/download/v0.1.0/mpiifacegaze_resnet_simple.pth", output_path.as_posix()
-        )
-    else:
-        logger.debug(f"The pretrained model {output_path} already exists.")
-    return output_path
-
-
-def download_ethxgaze_model() -> pathlib.Path:
-    logger.debug("Called _download_ethxgaze_model()")
-    model_dir = get_ptgaze_model_dir()
-    output_dir = model_dir / "models/"
-    output_dir.mkdir(exist_ok=True, parents=True)
-    output_path = output_dir / "eth-xgaze_resnet18.pth"
-    if not output_path.exists():
-        logger.debug("Download the pretrained model")
-        torch.hub.download_url_to_file(
-            "https://github.com/hysts/pytorch_mpiigaze_demo/releases/download/v0.2.2/eth-xgaze_resnet18.pth", output_path.as_posix()
-        )
-    else:
-        logger.debug(f"The pretrained model {output_path} already exists.")
-    return output_path
-
-
 def generate_dummy_camera_params(config: DictConfig) -> None:
     logger.debug("Called _generate_dummy_camera_params()")
     if config.demo.image_path:

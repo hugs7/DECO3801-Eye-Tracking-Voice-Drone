@@ -10,8 +10,6 @@ from gaze.gaze_detector import GazeDetector
 from gaze.utils import (
     check_path_all,
     download_dlib_pretrained_model,
-    download_ethxgaze_model,
-    download_mpiifacegaze_model,
     download_mpiigaze_model,
     expanduser_all,
     generate_dummy_camera_params,
@@ -27,15 +25,7 @@ def parse_args() -> argparse.Namespace:
         type=str,
         help="Config file. When using a config file, all the other "
         "commandline arguments are ignored. "
-        "See https://github.com/hysts/pytorch_mpiigaze_demo/ptgaze/data/configs/eth-xgaze.yaml",
-    )
-    parser.add_argument(
-        "--mode",
-        type=str,
-        choices=["mpiigaze", "mpiifacegaze", "eth-xgaze"],
-        help="With 'mpiigaze', MPIIGaze model will be used. "
-        "With 'mpiifacegaze', MPIIFaceGaze model will be used. "
-        "With 'eth-xgaze', ETH-XGaze model will be used.",
+        "See https://github.com/hysts/pytorch_mpiigaze_demo/ptgaze/data/configs/mpiigaze.yaml",
     )
     parser.add_argument(
         "--face-detector",
@@ -63,14 +53,7 @@ def parse_args() -> argparse.Namespace:
 
 def load_mode_config(args: argparse.Namespace) -> DictConfig:
     package_root = pathlib.Path(__file__).parent.resolve()
-    if args.mode == "mpiigaze":
-        path = package_root / "data/configs/mpiigaze.yaml"
-    elif args.mode == "mpiifacegaze":
-        path = package_root / "data/configs/mpiifacegaze.yaml"
-    elif args.mode == "eth-xgaze":
-        path = package_root / "data/configs/eth-xgaze.yaml"
-    else:
-        raise ValueError
+    path = package_root / "data/configs/mpiigaze.yaml"
     config = OmegaConf.load(path)
     config.PACKAGE_ROOT = package_root.as_posix()
 
@@ -125,13 +108,8 @@ def main():
 
     if config.face_detector.mode == "dlib":
         download_dlib_pretrained_model()
-    if args.mode:
-        if config.mode == "MPIIGaze":
-            download_mpiigaze_model()
-        elif config.mode == "MPIIFaceGaze":
-            download_mpiifacegaze_model()
-        elif config.mode == "ETH-XGaze":
-            download_ethxgaze_model()
+
+    download_mpiigaze_model()
 
     check_path_all(config)
 

@@ -10,8 +10,6 @@ import logging
 from gaze.utils import (
     check_path_all,
     download_dlib_pretrained_model,
-    download_ethxgaze_model,
-    download_mpiifacegaze_model,
     download_mpiigaze_model,
     expanduser_all,
     generate_dummy_camera_params,
@@ -22,21 +20,14 @@ from omegaconf import DictConfig, OmegaConf
 logger = logging.getLogger(__name__)
 
 
-def init_ptgaze_config(mode: str) -> DictConfig:
+def init_ptgaze_config() -> DictConfig:
     """
     Custom config initialiser for ptgaze
     """
 
     package_root = pathlib.Path(__file__).parent.resolve()
     ptgaze_package_root = package_root / "gaze"
-    if mode == "mpiigaze":
-        path = ptgaze_package_root / "data/configs/mpiigaze.yaml"
-    elif mode == "mpiifacegaze":
-        path = ptgaze_package_root / "data/configs/mpiifacegaze.yaml"
-    elif mode == "eth-xgaze":
-        path = ptgaze_package_root / "data/configs/eth-xgaze.yaml"
-    else:
-        raise ValueError(f"Incorrect mode selected: {mode}")
+    path = ptgaze_package_root / "data/configs/mpiigaze.yaml"
 
     logger.info(f"Loading config from {path}")
     config = OmegaConf.load(path)
@@ -52,7 +43,7 @@ def init_ptgaze() -> DictConfig:
     :return DictConfig: The ptgaze config
     """
 
-    config = init_ptgaze_config("mpiigaze")
+    config = init_ptgaze_config()
 
     expanduser_all(config)
     if config.gaze_estimator.use_dummy_camera_params:
@@ -64,12 +55,7 @@ def init_ptgaze() -> DictConfig:
     if config.face_detector.mode == "dlib":
         download_dlib_pretrained_model()
 
-    if config.mode == "MPIIGaze":
-        download_mpiigaze_model()
-    elif config.mode == "MPIIFaceGaze":
-        download_mpiifacegaze_model()
-    elif config.mode == "ETH-XGaze":
-        download_ethxgaze_model()
+    download_mpiigaze_model()
 
     check_path_all(config)
 
