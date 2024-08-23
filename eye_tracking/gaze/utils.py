@@ -38,27 +38,6 @@ def get_ptgaze_model_dir() -> pathlib.Path:
     return model_dir
 
 
-def download_dlib_pretrained_model() -> None:
-    logger.debug("Called download_dlib_pretrained_model()")
-
-    model_dir = get_ptgaze_model_dir()
-    dlib_model_dir = model_dir / "dlib"
-    dlib_model_dir.mkdir(exist_ok=True, parents=True)
-    dlib_model_path = dlib_model_dir / "shape_predictor_68_face_landmarks.dat"
-    logger.debug(f"Update config.face_detector.dlib_model_path to {dlib_model_path.as_posix()}")
-
-    if dlib_model_path.exists():
-        logger.debug(f"dlib pretrained model {dlib_model_path.as_posix()} already exists.")
-        return
-
-    logger.debug("Download the dlib pretrained model")
-    bz2_path = dlib_model_path.as_posix() + ".bz2"
-    torch.hub.download_url_to_file("http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2", bz2_path)
-    with bz2.BZ2File(bz2_path, "rb") as f_in, open(dlib_model_path, "wb") as f_out:
-        data = f_in.read()
-        f_out.write(data)
-
-
 def download_mpiigaze_model() -> pathlib.Path:
     logger.debug("Called _download_mpiigaze_model()")
     model_dir = get_ptgaze_model_dir()
@@ -115,8 +94,6 @@ def _expanduser(path: str) -> str:
 
 
 def expanduser_all(config: DictConfig) -> None:
-    if hasattr(config.face_detector, "dlib_model_path"):
-        config.face_detector.dlib_model_path = _expanduser(config.face_detector.dlib_model_path)
     config.gaze_estimator.checkpoint = _expanduser(config.gaze_estimator.checkpoint)
     config.gaze_estimator.camera_params = _expanduser(config.gaze_estimator.camera_params)
     config.gaze_estimator.normalized_camera_params = _expanduser(config.gaze_estimator.normalized_camera_params)
@@ -138,8 +115,6 @@ def _check_path(config: DictConfig, key: str) -> None:
 
 
 def check_path_all(config: DictConfig) -> None:
-    if config.face_detector.mode == "dlib":
-        _check_path(config, "face_detector.dlib_model_path")
     _check_path(config, "gaze_estimator.checkpoint")
     _check_path(config, "gaze_estimator.camera_params")
     _check_path(config, "gaze_estimator.normalized_camera_params")
