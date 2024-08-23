@@ -86,32 +86,3 @@ def load_mode_config(args: argparse.Namespace) -> DictConfig:
             config.demo.output_dir = "outputs"
 
     return config
-
-
-def main():
-    args = parse_args()
-    if args.debug:
-        logging.getLogger("ptgaze").setLevel(logging.DEBUG)
-
-    if args.config:
-        config = OmegaConf.load(args.config)
-    elif args.mode:
-        config = load_mode_config(args)
-    else:
-        raise ValueError("You need to specify one of '--mode' or '--config'.")
-    expanduser_all(config)
-    if config.gaze_estimator.use_dummy_camera_params:
-        generate_dummy_camera_params(config)
-
-    OmegaConf.set_readonly(config, True)
-    logger.info(OmegaConf.to_yaml(config))
-
-    if config.face_detector.mode == "dlib":
-        download_dlib_pretrained_model()
-
-    download_mpiigaze_model()
-
-    check_path_all(config)
-
-    gaze_detector = GazeDetector(config)
-    gaze_detector.run()
