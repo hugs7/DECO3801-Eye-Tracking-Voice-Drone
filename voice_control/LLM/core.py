@@ -6,7 +6,8 @@ from colorama import Fore
 from wrappers import AgentIsDone
 from utils import log, ask_llm
 from formatting import add_terminal_line_decorators, extract_terminal_entries
-
+import json
+import os
 
 class AgentInteractiveConsole(InteractiveConsole):
 	def runcode(self, code) -> None:
@@ -59,6 +60,7 @@ def run_until_halt(
 		captured_output = ""
 		executed_entries = list()
 		terminal_code = ask_llm(context, ask_fn)
+		
 		terminal_entries = extract_terminal_entries(terminal_code)
 		for entry_code in terminal_entries:
 			(
@@ -75,6 +77,7 @@ def run_until_halt(
 		context.append({"role": "assistant", "content": executed_code})
 		log(executed_code, color=Fore.LIGHTYELLOW_EX)
 		if captured_output != "":
+			
 			context.append({"role": "user", "content": captured_output})
 			log(captured_output, color=Fore.LIGHTCYAN_EX, end="" if captured_output[-1] == "\n" else "\n")
 	return agent_is_done, message
@@ -86,7 +89,24 @@ def react(
 		context: List[Dict[str, str]],
 		user_command: str,
 ) -> Tuple[bool, str]:
-	context.append({"role": "user", "content": user_command})
+	llm_folder = os.path.dirname(__file__)
+	voice_control = os.path.dirname(llm_folder)
+	data_folder = os.path.join(voice_control, "data")
+	context_file = os.path.join(data_folder, "context.jsonl")
+	stored_context = []
+
+
+	if os.path.exists(context_file) and os.path.getsize(context_file) > 0:
+		with open(context_file, 'r') as f:
+			for line in f:
+				parsed = json.loads(line)
+				print(parsed)
+				stored_context.append(parsed)
+
+	stored_context.append({"role": "user", "content": user_command})
+
+	# NEED TO FIX DICT/LIST
 	log(user_command, color=Fore.LIGHTGREEN_EX)
-	agent_is_done, message = run_until_halt(interactive_console, ask_fn, context)
+	context.append({"role": "user", "content": user_command})
+	agent_is_done, message = run_until_halt(interactive_console, ask_fn, stored_context)
 	return agent_is_done, message
