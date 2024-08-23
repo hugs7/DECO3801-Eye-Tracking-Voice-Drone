@@ -1,6 +1,5 @@
 import importlib
 
-import timm
 import torch
 from omegaconf import DictConfig
 
