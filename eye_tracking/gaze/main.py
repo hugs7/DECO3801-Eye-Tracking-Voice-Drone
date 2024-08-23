@@ -6,17 +6,6 @@ import warnings
 import torch
 from omegaconf import DictConfig, OmegaConf
 
-from gaze.gaze_detector import GazeDetector
-from gaze.utils import (
-    check_path_all,
-    download_dlib_pretrained_model,
-    download_ethxgaze_model,
-    download_mpiifacegaze_model,
-    download_mpiigaze_model,
-    expanduser_all,
-    generate_dummy_camera_params,
-)
-
 logger = logging.getLogger(__name__)
 
 
@@ -27,22 +16,7 @@ def parse_args() -> argparse.Namespace:
         type=str,
         help="Config file. When using a config file, all the other "
         "commandline arguments are ignored. "
-        "See https://github.com/hysts/pytorch_mpiigaze_demo/ptgaze/data/configs/eth-xgaze.yaml",
-    )
-    parser.add_argument(
-        "--mode",
-        type=str,
-        choices=["mpiigaze", "mpiifacegaze", "eth-xgaze"],
-        help="With 'mpiigaze', MPIIGaze model will be used. "
-        "With 'mpiifacegaze', MPIIFaceGaze model will be used. "
-        "With 'eth-xgaze', ETH-XGaze model will be used.",
-    )
-    parser.add_argument(
-        "--face-detector",
-        type=str,
-        default="mediapipe",
-        choices=["dlib", "face_alignment_dlib", "face_alignment_sfd", "mediapipe"],
-        help="The method used to detect faces and find face landmarks " "(default: 'mediapipe')",
+        "See https://github.com/hysts/pytorch_mpiigaze_demo/ptgaze/data/configs/mpiigaze.yaml",
     )
     parser.add_argument("--device", type=str, choices=["cpu", "cuda"], help="Device used for model inference.")
     parser.add_argument("--image", type=str, help="Path to an input image file.")
@@ -63,14 +37,7 @@ def parse_args() -> argparse.Namespace:
 
 def load_mode_config(args: argparse.Namespace) -> DictConfig:
     package_root = pathlib.Path(__file__).parent.resolve()
-    if args.mode == "mpiigaze":
-        path = package_root / "data/configs/mpiigaze.yaml"
-    elif args.mode == "mpiifacegaze":
-        path = package_root / "data/configs/mpiifacegaze.yaml"
-    elif args.mode == "eth-xgaze":
-        path = package_root / "data/configs/eth-xgaze.yaml"
-    else:
-        raise ValueError
+    path = package_root / "data/configs/mpiigaze.yaml"
     config = OmegaConf.load(path)
     config.PACKAGE_ROOT = package_root.as_posix()
 
@@ -103,37 +70,3 @@ def load_mode_config(args: argparse.Namespace) -> DictConfig:
             config.demo.output_dir = "outputs"
 
     return config
-
-
-def main():
-    args = parse_args()
-    if args.debug:
-        logging.getLogger("ptgaze").setLevel(logging.DEBUG)
-
-    if args.config:
-        config = OmegaConf.load(args.config)
-    elif args.mode:
-        config = load_mode_config(args)
-    else:
-        raise ValueError("You need to specify one of '--mode' or '--config'.")
-    expanduser_all(config)
-    if config.gaze_estimator.use_dummy_camera_params:
-        generate_dummy_camera_params(config)
-
-    OmegaConf.set_readonly(config, True)
-    logger.info(OmegaConf.to_yaml(config))
-
-    if config.face_detector.mode == "dlib":
-        download_dlib_pretrained_model()
-    if args.mode:
-        if config.mode == "MPIIGaze":
-            download_mpiigaze_model()
-        elif config.mode == "MPIIFaceGaze":
-            download_mpiifacegaze_model()
-        elif config.mode == "ETH-XGaze":
-            download_ethxgaze_model()
-
-    check_path_all(config)
-
-    gaze_detector = GazeDetector(config)
-    gaze_detector.run()
