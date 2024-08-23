@@ -87,17 +87,11 @@ class FaceModel:
     def compute_face_eye_centers(self, face: Face, mode: str) -> None:
         """Compute the centers of the face and eyes.
 
-        In the case of MPIIFaceGaze, the face center is defined as the
+        The face center is defined as the
         average coordinates of the six points at the corners of both
-        eyes and the mouth. In the case of ETH-XGaze, it's defined as
-        the average coordinates of the six points at the corners of both
-        eyes and the nose. The eye centers are defined as the average
-        coordinates of the corners of each eye.
+        eyes and the mouth.
         """
-        if mode == "ETH-XGaze":
-            face.center = face.model3d[np.concatenate([self.REYE_INDICES, self.LEYE_INDICES, self.NOSE_INDICES])].mean(axis=0)
-        else:
-            face.center = face.model3d[np.concatenate([self.REYE_INDICES, self.LEYE_INDICES, self.MOUTH_INDICES])].mean(axis=0)
+        face.center = face.model3d[np.concatenate([self.REYE_INDICES, self.LEYE_INDICES, self.MOUTH_INDICES])].mean(axis=0)
 
         # Face centre is world coordinates in 3D with units metres relative to the camera
         face.reye.center = face.model3d[self.REYE_INDICES].mean(axis=0)

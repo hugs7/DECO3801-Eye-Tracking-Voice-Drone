@@ -36,7 +36,7 @@ class GazeEstimator:
             self.camera, self._normalized_camera, self._config.gaze_estimator.normalized_camera_distance
         )
         self._gaze_estimation_model = self._load_model()
-        self._transform = create_transform(config)
+        self._transform = create_transform()
 
     def _load_model(self) -> torch.nn.Module:
         model = create_model(self._config)
@@ -57,34 +57,30 @@ class GazeEstimator:
         self._face_model3d.compute_3d_pose(face)
         self._face_model3d.compute_face_eye_centers(face, self._config.mode)
 
-        if self._config.mode == "MPIIGaze":
-            for key in self.EYE_KEYS:
-                eye = getattr(face, key.name.lower())
-                self._head_pose_normalizer.normalize(image, eye)
-            self._run_mpiigaze_model(face)
-        elif self._config.mode == "MPIIFaceGaze":
-            self._head_pose_normalizer.normalize(image, face)
-            self._run_mpiifacegaze_model(face)
-        elif self._config.mode == "ETH-XGaze":
-            self._head_pose_normalizer.normalize(image, face)
-            self._run_ethxgaze_model(face)
-        else:
-            raise ValueError
+        for key in self.EYE_KEYS:
+            eye = getattr(face, key.name.lower())
+            self._head_pose_normalizer.normalize(image, eye)
+
+        self._run_mpiigaze_model(face)
 
     @torch.no_grad()
     def _run_mpiigaze_model(self, face: Face) -> None:
         images = []
         head_poses = []
+
         for key in self.EYE_KEYS:
             eye = getattr(face, key.name.lower())
             image = eye.normalized_image
             normalized_head_pose = eye.normalized_head_rot2d
+
             if key == FacePartsName.REYE:
                 image = utils.flip_image(image).copy()
                 normalized_head_pose *= np.array([1, -1])
+
             image = self._transform(image)
             images.append(image)
             head_poses.append(normalized_head_pose)
+
         images = torch.stack(images)
         head_poses = np.array(head_poses).astype(np.float32)
         head_poses = torch.from_numpy(head_poses)
@@ -98,33 +94,9 @@ class GazeEstimator:
         for i, key in enumerate(self.EYE_KEYS):
             eye = getattr(face, key.name.lower())
             eye.normalized_gaze_angles = predictions[i]
+
             if key == FacePartsName.REYE:
                 eye.normalized_gaze_angles *= np.array([1, -1])
+
             eye.angle_to_vector()
             eye.denormalize_gaze_vector()
-
-    @torch.no_grad()
-    def _run_mpiifacegaze_model(self, face: Face) -> None:
-        image = self._transform(face.normalized_image).unsqueeze(0)
-
-        device = torch.device(self._config.device)
-        image = image.to(device)
-        prediction = self._gaze_estimation_model(image)
-        prediction = prediction.cpu().numpy()
-
-        face.normalized_gaze_angles = prediction[0]
-        face.angle_to_vector()
-        face.denormalize_gaze_vector()
-
-    @torch.no_grad()
-    def _run_ethxgaze_model(self, face: Face) -> None:
-        image = self._transform(face.normalized_image).unsqueeze(0)
-
-        device = torch.device(self._config.device)
-        image = image.to(device)
-        prediction = self._gaze_estimation_model(image)
-        prediction = prediction.cpu().numpy()
-
-        face.normalized_gaze_angles = prediction[0]
-        face.angle_to_vector()
-        face.denormalize_gaze_vector()

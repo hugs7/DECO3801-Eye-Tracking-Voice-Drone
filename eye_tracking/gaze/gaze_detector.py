@@ -271,18 +271,17 @@ class GazeDetector:
     def _display_normalized_image(self, face: Face) -> None:
         if not self.config.demo.display_on_screen:
             return
+
         if not self.show_normalized_image:
             return
-        if self.config.mode == "MPIIGaze":
-            reye = face.reye.normalized_image
-            leye = face.leye.normalized_image
-            normalized = np.hstack([reye, leye])
-        elif self.config.mode in ["MPIIFaceGaze", "ETH-XGaze"]:
-            normalized = face.normalized_image
-        else:
-            raise ValueError
+
+        reye = face.reye.normalized_image
+        leye = face.leye.normalized_image
+        normalized = np.hstack([reye, leye])
+
         if self.config.demo.use_camera:
             normalized = utils.flip_image(normalized)
+
         cv2.imshow("normalized", normalized)
 
     def _draw_gaze_vector(self, face: Face) -> None:
@@ -291,37 +290,30 @@ class GazeDetector:
 
         length = self.config.demo.gaze_visualization_length
 
-        if self.config.mode == "MPIIGaze":
-            for key in [FacePartsName.REYE, FacePartsName.LEYE]:
-                eye = getattr(face, key.name.lower())
-                end_point = eye.center + length * eye.gaze_vector  # eye.gaze_vector.z is always -1. We scale by length
-                self.visualizer.draw_3d_line(eye.center, end_point)
+        for key in [FacePartsName.REYE, FacePartsName.LEYE]:
+            eye = getattr(face, key.name.lower())
+            end_point = eye.center + length * eye.gaze_vector  # eye.gaze_vector.z is always -1. We scale by length
+            self.visualizer.draw_3d_line(eye.center, end_point)
 
-                pitch, yaw = np.rad2deg(eye.vector_to_angle(eye.gaze_vector))
-                logger.info(f"[{key.name.lower()}] pitch: {pitch:.2f}, yaw: {yaw:.2f}")
+            pitch, yaw = np.rad2deg(eye.vector_to_angle(eye.gaze_vector))
+            logger.info(f"[{key.name.lower()}] pitch: {pitch:.2f}, yaw: {yaw:.2f}")
 
-            average_eye_distance = (face.reye.distance + face.leye.distance) / 2
-            average_eye_center = (face.reye.center + face.leye.center) / 2
-            average_gaze_vector = (face.reye.gaze_vector + face.leye.gaze_vector) / 2
+        average_eye_distance = (face.reye.distance + face.leye.distance) / 2
+        average_eye_center = (face.reye.center + face.leye.center) / 2
+        average_gaze_vector = (face.reye.gaze_vector + face.leye.gaze_vector) / 2
 
-            end_point = average_eye_center + length * average_gaze_vector
-            self.visualizer.draw_3d_line(average_eye_center, end_point)
+        end_point = average_eye_center + length * average_gaze_vector
+        self.visualizer.draw_3d_line(average_eye_center, end_point)
 
-            # Draw the point on the screen the user is looking at
-            point_on_screen = average_eye_center + (average_eye_distance * 0.9) * average_gaze_vector
-            point_on_screen[1] *= 0.15  # Scale y-coordinate
+        # Draw the point on the screen the user is looking at
+        point_on_screen = average_eye_center + (average_eye_distance * 0.9) * average_gaze_vector
+        point_on_screen[1] *= 0.15  # Scale y-coordinate
 
-            # Update buffer and calculate smoothed point
-            self.point_buffer.append(point_on_screen)
-            if len(self.point_buffer) > self.point_on_screen_smoothing_factor:
-                self.point_buffer.pop(0)  # Remove oldest point
+        # Update buffer and calculate smoothed point
+        self.point_buffer.append(point_on_screen)
+        if len(self.point_buffer) > self.point_on_screen_smoothing_factor:
+            self.point_buffer.pop(0)  # Remove oldest point
 
-            smoothed_point = np.mean(self.point_buffer, axis=0)
+        smoothed_point = np.mean(self.point_buffer, axis=0)
 
-            self.visualizer.draw_3d_points(np.array([smoothed_point]), color=(0, 255, 0), size=10, clamp_to_screen=True)
-        elif self.config.mode in ["MPIIFaceGaze", "ETH-XGaze"]:
-            self.visualizer.draw_3d_line(face.center, face.center + length * face.gaze_vector)
-            pitch, yaw = np.rad2deg(face.vector_to_angle(face.gaze_vector))
-            logger.info(f"[face] pitch: {pitch:.2f}, yaw: {yaw:.2f}")
-        else:
-            raise ValueError
+        self.visualizer.draw_3d_points(np.array([smoothed_point]), color=(0, 255, 0), size=10, clamp_to_screen=True)
