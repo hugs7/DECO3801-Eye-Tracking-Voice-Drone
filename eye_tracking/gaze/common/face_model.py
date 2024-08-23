@@ -84,7 +84,7 @@ class FaceModel:
         rot = face.head_pose_rot.as_matrix()  # Has units of radians
         face.model3d = self.LANDMARKS @ rot.T + face.head_position  # This is the 3D model of the face in world coordinates
 
-    def compute_face_eye_centers(self, face: Face, mode: str) -> None:
+    def compute_face_eye_centers(self, face: Face) -> None:
         """Compute the centers of the face and eyes.
 
         The face center is defined as the

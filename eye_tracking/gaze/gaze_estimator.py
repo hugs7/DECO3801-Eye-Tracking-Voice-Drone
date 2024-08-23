@@ -55,7 +55,7 @@ class GazeEstimator:
     def estimate_gaze(self, image: np.ndarray, face: Face) -> None:
         self._face_model3d.estimate_head_pose(face, self.camera)
         self._face_model3d.compute_3d_pose(face)
-        self._face_model3d.compute_face_eye_centers(face, self._config.mode)
+        self._face_model3d.compute_face_eye_centers(face)
 
         for key in self.EYE_KEYS:
             eye = getattr(face, key.name.lower())
