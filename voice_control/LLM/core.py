@@ -107,7 +107,7 @@ def react(
 	with open(context_file, 'w') as f:
 			for entry in stored_context:
 				f.write(json.dumps(entry) + '\n')
-	# NEED TO FIX DICT/LIST
+	
 	log(user_command, color=Fore.LIGHTGREEN_EX)
 	context.append({"role": "user", "content": user_command})
 	agent_is_done, message = run_until_halt(interactive_console, ask_fn, stored_context)
