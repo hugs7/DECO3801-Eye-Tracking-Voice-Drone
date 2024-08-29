@@ -319,4 +319,4 @@ class GazeDetector:
 
         smoothed_point = np.mean(self.point_buffer, axis=0)
 
-        self.visualizer.draw_3d_points(np.array([smoothed_point]), color=(0, 255, 0), size=10, clamp_to_screen=True)
+        self.visualizer.draw_3d_points(np.array([smoothed_point]), color=(255, 0, 0), size=20, clamp_to_screen=True)
