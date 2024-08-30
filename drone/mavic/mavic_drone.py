@@ -2,11 +2,12 @@
 Defines class for Mavic drone
 """
 
-from ..drone import Drone
 from dronekit import connect, VehicleMode
+
+import constants as c
+from ..drone import Drone
 import cv2
 import time
-import pygame
 
 
 class MavicDrone(Drone):
@@ -93,18 +94,26 @@ class MavicDrone(Drone):
     def move_backward(self, cm: int) -> None:
         raise NotImplementedError
 
+    def takeoff(self, target_altitude_metres: int) -> None:
+        """
+        Takes off the drone to the specified altitude
+        :param target_altitude_metres: The target altitude in metres
+        :return: None
+        """
+        while not self._is_armed():
             print(" Waiting for arming...")
             time.sleep(1)
 
         print("Taking off!")
-        # vehicle.simple_takeoff(aTargetAltitude) # Take off to target altitude
+        self.vehicle.simple_takeoff(target_altitude_metres)
 
-        # Check that vehicle has reached takeoff altitude
         while True:
-            print(" Altitude: "), vehicle.location.global_relative_frame.alt
+            print(f"Drone altitude: {self.get_altitude()}")
+
             # Break and return from function just below target altitude.
-            if vehicle.location.global_relative_frame.alt >= aTargetAltitude * 0.95:
-                print("Reached target altitude")
+            alt = self.get_altitude()
+            if alt >= target_altitude_metres * c.ALTITUDE_THRESHOLD_MULTIPLIER:
+                print(f"Reached altitude: {alt} (of target {target_altitude_metres} m)")
                 break
             time.sleep(1)
 
