@@ -8,8 +8,8 @@ import cv2
 import constants as c
 
 import controller
-import mavic_drone
-import tello_drone
+import mavic
+import tello
 
 
 def loop(drone):
@@ -20,13 +20,12 @@ def loop(drone):
     controller.handle_input(drone)
 
     img = read_camera_feed(drone)
-
     render_drone_feed(img)
 
     cv2.waitKey(1)
 
 
-def read_camera_feed(drone: Union[mavic_drone.Drone, tello_drone.Tello], drone_type: str):
+def read_camera_feed(drone: Union[mavic.MavicDrone, tello.TelloDrone]):
     """
     Reads the camera feed from the drone
     """
