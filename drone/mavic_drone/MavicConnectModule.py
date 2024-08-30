@@ -1,40 +1,45 @@
 from dronekit import connect, VehicleMode
 import time
 import pygame
-import KeyboardTelloModule as kp
+import drone.main as main
 
 
 def arm_and_takeoff(aTargetAltitude, vehicle):
 
-    print ("Basic pre-arm checks")
+    print("Basic pre-arm checks")
     # Don't let the user try to arm until autopilot is ready
     while not vehicle.is_armable:
-        print (" Waiting for vehicle to initialise...")
+        print(" Waiting for vehicle to initialise...")
         time.sleep(1)
-        
-    print ("Arming motors")
+
+    print("Arming motors")
     # Copter should arm in GUIDED mode
-    vehicle.mode    = VehicleMode("GUIDED")
-    vehicle.armed   = True
+    vehicle.mode = VehicleMode("GUIDED")
+    vehicle.armed = True
 
     while not vehicle.armed:
-        print (" Waiting for arming...")
+        print(" Waiting for arming...")
         time.sleep(1)
 
-    print ("Taking off!")
-    #vehicle.simple_takeoff(aTargetAltitude) # Take off to target altitude
+    print("Taking off!")
+    # vehicle.simple_takeoff(aTargetAltitude) # Take off to target altitude
 
     # Check that vehicle has reached takeoff altitude
     while True:
-        print (" Altitude: "), vehicle.location.global_relative_frame.alt 
-        #Break and return from function just below target altitude.        
-        if vehicle.location.global_relative_frame.alt>=aTargetAltitude*0.95: 
-            print ("Reached target altitude")
+        print(" Altitude: "), vehicle.location.global_relative_frame.alt
+        # Break and return from function just below target altitude.
+        if vehicle.location.global_relative_frame.alt >= aTargetAltitude * 0.95:
+            print("Reached target altitude")
             break
         time.sleep(1)
 
-def getKey(command, vehicle):
-    if command == pygame.K_SPACE:
+
+def command_switcher(vehicle):
+    keyValues = main.get_key()  # Get The Return Value And Stored It On Variable
+
+    if keyValues == pygame.K_ESCAPE:
+        exit(0)
+    elif keyValues == pygame.K_SPACE:
         # Initialize the takeoff sequence to 20m
         print("Taking off..")
 
@@ -42,11 +47,12 @@ def getKey(command, vehicle):
 
         print("Take off complete")
 
-            # Hover for 10 seconds
+        # Hover for 10 seconds
         time.sleep(10)
 
         print("Now let's land")
         vehicle.mode = VehicleMode("LAND")
+
     """key_mapping = {
         pygame.K_LEFT : "LEFT",
         pygame.K_RIGHT : "RIGHT",
@@ -63,29 +69,9 @@ def getKey(command, vehicle):
     if command in key_mapping:
         return key_mapping[command]"""
 
-def main():
-    # Replace 'YOUR_PHONE_IP' with the actual IP address of your phone
-    kp.init()
-    connection_string = 'udp:192.168.69.244:14551'
-
-    print(f"Connecting to vehicle on: {connection_string}")
-
-    # Try connecting with a longer timeout
-    try:
-        vehicle = connect(connection_string, wait_ready=True, timeout=60)
-        print("Connected to vehicle!")
-    except Exception as e:
-        print(f"Failed to connect: {e}")
-    keyValues = kp.getKey() #Get The Return Value And Stored It On Variable
-    if keyValues == pygame.K_ESCAPE:
-        exit(0)
-
-if __name__ == '__main__':
-    while True:
-        main()
 
 # Close vehicle object
-#vehicle.close()
+# vehicle.close()
 """import cv2
 import socket
 
