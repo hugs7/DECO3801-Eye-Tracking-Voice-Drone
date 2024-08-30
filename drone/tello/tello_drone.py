@@ -5,6 +5,7 @@ Defines class for Tello drone
 from ..drone import Drone
 from djitellopy import tello
 import cv2
+import KeyboardTelloModule as kp
 
 import constants as c
 
@@ -22,6 +23,8 @@ class TelloDrone(Drone):
 
         print("Drone battery:", tello_drone.get_battery())
 
+        # Initialize Keyboard Input
+        kp.init()
         return tello_drone
 
     def read_camera(self) -> cv2.typing.MatLike:
