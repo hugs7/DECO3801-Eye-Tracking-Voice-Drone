@@ -49,10 +49,13 @@ def init(drone_type):
     Initialiees the drone
     """
 
-    if drone_type == c.MAVIC:
-        vehicle = mavic.MavicDrone(c.MAVIC_IP, c.MAVIC_PORT)
-    elif drone_type == c.TELLO:
-        vehicle = tello.TelloDrone()
+    match drone_type:
+        case c.MAVIC:
+            vehicle = mavic.MavicDrone(c.MAVIC_IP, c.MAVIC_PORT)
+        case c.TELLO:
+            vehicle = tello.TelloDrone()
+        case _:
+            raise ValueError(f"Invalid drone type: {drone_type}")
 
     return vehicle
 
