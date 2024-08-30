@@ -1,9 +1,12 @@
 """
-Controller
+Controller for the drone, handles the input of a drone from voice, Gaze or manual input
 """
 
+from typing import Union
 import pygame
 import time
+import tello
+import mavic
 
 
 def get_key_input():
@@ -32,7 +35,7 @@ def getKey(command):
         return key_mapping[command]
 
 
-def handle_input(drone, command):
+def handle_input(drone: Union[tello.TelloDrone, mavic.MavicDrone], command: str):
     """Handles the input of a drone from voice, Gaze or manual input
     @Param
     command - String involving either up, down, left, right, forward, backward,
