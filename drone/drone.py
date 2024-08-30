@@ -107,3 +107,12 @@ class Drone(ABC):
         :return: None
         """
         pass
+
+    # Polling methods
+    @abstractmethod
+    def get_altitude(self) -> int:
+        """
+        Gets the altitude of the drone
+        :return: The altitude of the drone
+        """
+        pass
