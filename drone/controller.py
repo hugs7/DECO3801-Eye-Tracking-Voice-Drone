@@ -8,6 +8,20 @@ import time
 import tello
 import mavic
 
+CONTROLLER_MAPPING = {
+    pygame.K_LEFT: "LEFT",
+    pygame.K_RIGHT: "RIGHT",
+    pygame.K_UP: "UP",
+    pygame.K_DOWN: "DOWN",
+    pygame.K_w: "FORWARD",
+    pygame.K_s: "BACKWARD",
+    pygame.K_l: "LAND",
+    pygame.K_SPACE: "TAKEOFF",
+    pygame.K_q: "ROTATE CW",
+    pygame.K_e: "ROTATE CCW",
+    pygame.K_z: "FLIP FORWARD",
+}
+
 
 def get_key_input():
     # Returns a key pressed by the user in the terminal
@@ -17,28 +31,16 @@ def get_key_input():
     return None
 
 
-def getKey(command):
-    key_mapping = {
-        pygame.K_LEFT: "LEFT",
-        pygame.K_RIGHT: "RIGHT",
-        pygame.K_UP: "UP",
-        pygame.K_DOWN: "DOWN",
-        pygame.K_w: "FORWARD",
-        pygame.K_s: "BACKWARD",
-        pygame.K_l: "LAND",
-        pygame.K_SPACE: "TAKEOFF",
-        pygame.K_q: "ROTATE CW",
-        pygame.K_e: "ROTATE CCW",
-        pygame.K_z: "FLIP FORWARD",
-    }
-    if command in key_mapping:
-        return key_mapping[command]
+def get_key(command):
+    if command in CONTROLLER_MAPPING:
+        return CONTROLLER_MAPPING[command]
 
 
-def handle_input(drone: Union[tello.TelloDrone, mavic.MavicDrone], command: str):
-    """Handles the input of a drone from voice, Gaze or manual input
-    @Param
-    command - String involving either up, down, left, right, forward, backward,
+def handle_input(drone: Union[tello.TelloDrone, mavic.MavicDrone], command: str) -> None:
+    """
+    Handles the input of a drone from voice, Gaze or manual input
+    :param drone: The drone object to control
+    :param command: String involving either up, down, left, right, forward, backward,
         cw(rotate clockwise), ccw (rotate counter clockwise)
     value - an int of the amount to change the drones direction by, if command is rotational
         use degrees and if a directional value use cm in direction
@@ -48,7 +50,7 @@ def handle_input(drone: Union[tello.TelloDrone, mavic.MavicDrone], command: str)
     liftSpeed = 10
     moveSpeed = 10
     rotationSpeed = 10
-    sysCom = getKey(command)
+    sysCom = get_key(command)
     print(sysCom)
 
     match sysCom:
