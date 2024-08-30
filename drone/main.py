@@ -44,31 +44,17 @@ def render_drone_feed(img: cv2.typing.MatLike) -> None:
     cv2.imshow(c.WINDOW_NAME, img)
 
 
-def drone_connect(drone_type: str):
-    """
-    Connects to the drone
-    """
-
-    if drone_type == c.MAVIC:
-        drone = mavic_drone.mavic_connect()
-    elif drone_type == c.TELLO:
-        drone = tello_drone.tello_connect()
-
-    return drone
-
-
 def init(drone_type):
     """
     Initialiees the drone
     """
 
-    drone = drone_connect(drone_type)
     if drone_type == c.MAVIC:
-        pass
+        vehicle = mavic.MavicDrone(c.MAVIC_IP, c.MAVIC_PORT)
     elif drone_type == c.TELLO:
-        tello_drone.init()
+        vehicle = tello.TelloDrone()
 
-    return drone
+    return vehicle
 
 
 def main():
