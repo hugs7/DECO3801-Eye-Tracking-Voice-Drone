@@ -1,3 +1,2 @@
-eyeGestures
 opencv-python
 mediapipe
