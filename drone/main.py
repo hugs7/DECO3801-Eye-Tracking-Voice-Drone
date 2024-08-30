@@ -20,7 +20,7 @@ def loop(drone):
     controller.handle_input(drone)
 
     img = read_camera_feed(drone)
-    # Show The Frame
+
     render_drone_feed(img)
 
     cv2.waitKey(1)
@@ -78,7 +78,7 @@ def init(drone_type):
 
 
 def main():
-    drone_type = "tello"  # / c.MAVIC
+    drone_type = c.TELLO  # / c.MAVIC
 
     drone = init(drone_type)
 
