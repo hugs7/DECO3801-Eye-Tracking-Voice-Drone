@@ -72,7 +72,7 @@ class MavicDrone(Drone):
         self.vehicle.mode = VehicleMode("GUIDED")
         self.vehicle.armed = True
 
-    def arm_and_takeoff(self, aTargetAltitude, vehicle):
+    def takeoff(self, aTargetAltitude, vehicle):
         while not self.is_armed():
             print(" Waiting for arming...")
             time.sleep(1)
