@@ -120,6 +120,17 @@ class MavicDrone(Drone):
     def land(self):
         self.__set_vehicle_mode("LAND")
 
-    def __set_vehicle_mode(self, mode: str) -> None:
-        self.vehicle.mode = VehicleMode(mode)
+    def __get_global_relative_frame(self):
+        location = self.vehicle.location
+        return location.global_relative_frame
 
+    # Polling methods
+
+    def get_altitude(self) -> int:
+        """
+        Gets the altitude of the drone
+        :return: The altitude of the drone
+        """
+        global_relative_frame = self.__get_global_relative_frame()
+        altitude = global_relative_frame.alt
+        return altitude
