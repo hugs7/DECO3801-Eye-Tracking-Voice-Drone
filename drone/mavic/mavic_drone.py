@@ -69,7 +69,7 @@ class MavicDrone(Drone):
 
         print("Arming motors")
         # Copter should arm in GUIDED mode
-        self.vehicle.mode = VehicleMode("GUIDED")
+        self.__set_vehicle_mode("GUIDED")
         self.vehicle.armed = True
 
     def takeoff(self, aTargetAltitude, vehicle):
@@ -88,3 +88,10 @@ class MavicDrone(Drone):
                 print("Reached target altitude")
                 break
             time.sleep(1)
+
+    def land(self):
+        self.__set_vehicle_mode("LAND")
+
+    def __set_vehicle_mode(self, mode: str) -> None:
+        self.vehicle.mode = VehicleMode(mode)
+
