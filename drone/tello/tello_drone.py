@@ -5,7 +5,7 @@ Defines class for Tello drone
 from ..drone import Drone
 from djitellopy import tello
 import cv2
-import KeyboardTelloModule as kp
+import pygame
 
 import constants as c
 
@@ -23,7 +23,8 @@ class TelloDrone(Drone):
         print("Drone battery:", self.drone.get_battery())
 
         # Initialize Keyboard Input
-        kp.init()
+        pygame.init()
+        self.window = pygame.display.set_mode((400, 400))
 
     def __connect(self) -> None:
         """
