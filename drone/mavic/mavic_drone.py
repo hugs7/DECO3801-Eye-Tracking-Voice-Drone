@@ -11,9 +11,9 @@ import pygame
 
 class MavicDrone(Drone):
     def __init__(self, ip: str, port: int) -> NotImplementedError:
-        self.vehicle = self.connect(ip, port)
+        self.vehicle = self.__connect(ip, port)
 
-    def connect(self, ip, port):
+    def __connect(self, ip, port):
 
         connection_string = f"udp:{ip}:{port}"
         print(f"Connecting to mavic on: {connection_string}")

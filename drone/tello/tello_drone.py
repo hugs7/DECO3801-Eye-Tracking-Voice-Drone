@@ -13,19 +13,24 @@ import constants as c
 class TelloDrone(Drone):
     def __init__(self) -> None:
         tello_drone = tello.Tello()
-        tello_drone.connect()
+        self.drone = tello_drone
+        self.__connect()
 
         # Start Camera Display Stream
-        tello_drone.streamon()
-        tello_drone.set_speed(c.TELLO_SPEED_CM_S)
+        self.drone.streamon()
+        self.drone.set_speed(c.TELLO_SPEED_CM_S)
 
-        self.drone = tello_drone
-
-        print("Drone battery:", tello_drone.get_battery())
+        print("Drone battery:", self.drone.get_battery())
 
         # Initialize Keyboard Input
         kp.init()
-        return tello_drone
+
+    def __connect(self) -> None:
+        """
+        Connects to the drone
+        """
+
+        self.drone.connect()
 
     def read_camera(self) -> cv2.typing.MatLike:
         """
