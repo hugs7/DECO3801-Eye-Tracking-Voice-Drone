@@ -72,8 +72,32 @@ class MavicDrone(Drone):
         self.__set_vehicle_mode("GUIDED")
         self.vehicle.armed = True
 
-    def takeoff(self, aTargetAltitude, vehicle):
-        while not self.is_armed():
+    def rotate_clockwise(self, degrees: int) -> None:
+        raise NotImplementedError
+
+    def rotate_counter_clockwise(self, degrees: int) -> None:
+        raise NotImplementedError
+
+    # Could change these units to metres if needed
+
+    def move_up(self, cm: int) -> None:
+        raise NotImplementedError
+
+    def move_down(self, cm: int) -> None:
+        raise NotImplementedError
+
+    def move_left(self, cm: int) -> None:
+        raise NotImplementedError
+
+    def move_right(self, cm: int) -> None:
+        raise NotImplementedError
+
+    def move_forward(self, cm: int) -> None:
+        raise NotImplementedError
+
+    def move_backward(self, cm: int) -> None:
+        raise NotImplementedError
+
             print(" Waiting for arming...")
             time.sleep(1)
 
