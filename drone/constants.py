@@ -11,3 +11,12 @@ DRONE_TYPES = [MAVIC, TELLO]
 
 # Rendered Window
 WINDOW_NAME = "Drone Capture"
+
+
+# Tello
+TELLO_SPEED_CM_S = 100
+
+
+# Mavic
+MAVIC_IP = "192.168.69.244"
+MAVIC_PORT = 14551
