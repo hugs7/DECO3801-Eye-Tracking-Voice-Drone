@@ -32,16 +32,11 @@ def read_camera_feed(drone: Union[mavic.MavicDrone, tello.TelloDrone]):
 
     output_dim = (960, 720)
 
-    if drone_type == c.MAVIC:
-        img = mavic_drone.read_camera(drone)
-    elif drone_type == c.TELLO:
-        img = tello_drone.read_camera(drone)
-
-    img = cv2.resize(img, output_dim)
-    return img
+    img = drone.read_camera()
+    img = drone.resize_frame(img, output_dim)
 
 
-def render_drone_feed(img: cv2.typing.MatLike):
+def render_drone_feed(img: cv2.typing.MatLike) -> None:
     """
     Renders the drone feed
     """

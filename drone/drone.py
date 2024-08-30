@@ -3,6 +3,8 @@ Defines abstract class for drones
 """
 
 from abc import ABC, abstractmethod
+from typing import Tuple
+import cv2
 
 
 class Drone(ABC):
@@ -21,3 +23,6 @@ class Drone(ABC):
     @abstractmethod
     def land(self):
         pass
+
+    def resize_frame(self, frame: cv2.typing.MatLike, output_dim: Tuple[int, int]) -> cv2.typing.MatLike:
+        return cv2.resize(frame, output_dim)
