@@ -14,7 +14,6 @@ class MavicDrone(Drone):
         self.vehicle = self.__connect(ip, port)
 
     def __connect(self, ip, port):
-
         connection_string = f"udp:{ip}:{port}"
         print(f"Connecting to mavic on: {connection_string}")
 
@@ -37,38 +36,34 @@ class MavicDrone(Drone):
 
         return img
 
-    def getKey(self, command):
-        key_mapping = {
-            pygame.K_LEFT: "LEFT",
-            pygame.K_RIGHT: "RIGHT",
-            pygame.K_UP: "UP",
-            pygame.K_DOWN: "DOWN",
-            pygame.K_w: "FORWARD",
-            pygame.K_s: "BACKWARD",
-            pygame.K_l: "LAND",
-            pygame.K_SPACE: "TAKEOFF",
-            pygame.K_q: "ROTATE CW",
-            pygame.K_e: "ROTATE CCW",
-            pygame.K_z: "FLIP FORWARD",
-        }
-        if command in key_mapping:
-            return key_mapping[command]
+    def __set_vehicle_mode(self, mode: str) -> None:
+        self.vehicle.mode = VehicleMode(mode)
 
-    def is_armable(self):
+    def _is_armable(self) -> bool:
+        """
+        Checks if the drone is ready to be armed
+        """
+
         return self.vehicle.is_armable
 
-    def is_armed(self):
+    def _is_armed(self) -> bool:
+        """
+        Checks if the drone is armed
+        :return: True if the drone is armed, False otherwise
+        """
         return self.vehicle.armed
 
-    def arm(self):
-        print("Basic pre-arm checks")
-        # Don't let the user try to arm until autopilot is ready
-        while not self.is_armable():
+    def arm(self) -> None:
+        """
+        Arms the drone for flight. User is not allowed to fly the drone until it is armed
+        Cannot arm until the drone's autopilot is ready.
+        """
+        print("Performing basic pre-arm checks")
+        while not self._is_armable():
             print(" Waiting for vehicle to initialise...")
             time.sleep(1)
 
         print("Arming motors")
-        # Copter should arm in GUIDED mode
         self.__set_vehicle_mode("GUIDED")
         self.vehicle.armed = True
 
