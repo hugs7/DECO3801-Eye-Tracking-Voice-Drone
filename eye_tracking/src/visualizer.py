@@ -43,6 +43,38 @@ class Visualizer:
         for pt in points:
             pt = self._convert_pt(pt)
             cv2.circle(self.image, pt, size, color, cv2.FILLED)
+    
+    def draw_bounds(self, points):
+        print (points[0][0], points[0][1])
+        color=(0, 0, 255)
+        if (points[0][0] >= 1200):
+            overlay = self.image.copy()
+            # Draw the filled rectangle on the overlay
+            cv2.rectangle(overlay, (2000,0), (1200, 1300), color, -1)
+
+            # Set the transparency level
+            alpha = 0.3  # Transparency factor (0.0 - 1.0)
+    
+            # Blend the overlay with the original image to get the semi-transparent effect
+            cv2.addWeighted(overlay, alpha, self.image, 1 - alpha, 0, self.image)
+            cv2.putText(self.image, 'Looking left', (1250, 500), cv2.FONT_HERSHEY_SIMPLEX, 1, color, 2, cv2.LINE_AA, False)
+        elif (points[0][0] <= 300):
+            overlay = self.image.copy()
+            # Draw the filled rectangle on the overlay
+            cv2.rectangle(overlay, (300, 0), (-100, 1300), color, -1)
+
+            # Set the transparency level
+            alpha = 0.3  # Transparency factor (0.0 - 1.0)
+    
+            # Blend the overlay with the original image to get the semi-transparent effect
+            cv2.addWeighted(overlay, alpha, self.image, 1 - alpha, 0, self.image)
+            cv2.putText(self.image, 'Looking right', (50, 500), cv2.FONT_HERSHEY_SIMPLEX, 1, color, 2, cv2.LINE_AA, False)
+
+
+    
+            
+        
+
 
     def draw_3d_points(
         self, points3d: np.ndarray, color: Tuple[int, int, int] = (255, 0, 255), size=3, clamp_to_screen: bool = False
@@ -57,6 +89,8 @@ class Visualizer:
             points2d = np.clip(points2d, 0, np.array(self.image.shape[:2])[::-1])
         self.draw_points(points2d, color=color, size=size)
 
+
+
     def draw_3d_line(self, point0: np.ndarray, point1: np.ndarray, color: Tuple[int, int, int] = (255, 255, 0), lw=1) -> None:
         assert self.image is not None
         assert point0.shape == point1.shape == (3,)
@@ -64,7 +98,6 @@ class Visualizer:
         points2d = self._camera.project_points(points3d)
         pt0 = self._convert_pt(points2d[0])
         pt1 = self._convert_pt(points2d[1])
-        cv2.line(self.image, pt0, pt1, color, lw, cv2.LINE_AA)
 
     def draw_model_axes(self, face: Face, length: float, lw: int = 2) -> None:
         assert self.image is not None
