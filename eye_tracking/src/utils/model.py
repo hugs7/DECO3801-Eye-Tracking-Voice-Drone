@@ -44,9 +44,12 @@ def _expanduser(path: str) -> str:
 
 
 def expanduser_all(config: DictConfig) -> None:
-    config.gaze_estimator.checkpoint = _expanduser(config.gaze_estimator.checkpoint)
-    config.gaze_estimator.camera_params = _expanduser(config.gaze_estimator.camera_params)
-    config.gaze_estimator.normalized_camera_params = _expanduser(config.gaze_estimator.normalized_camera_params)
+    config.gaze_estimator.checkpoint = _expanduser(
+        config.gaze_estimator.checkpoint)
+    config.gaze_estimator.camera_params = _expanduser(
+        config.gaze_estimator.camera_params)
+    config.gaze_estimator.normalized_camera_params = _expanduser(
+        config.gaze_estimator.normalized_camera_params)
     if hasattr(config.demo, "image_path"):
         config.demo.image_path = _expanduser(config.demo.image_path)
     if hasattr(config.demo, "video_path"):
