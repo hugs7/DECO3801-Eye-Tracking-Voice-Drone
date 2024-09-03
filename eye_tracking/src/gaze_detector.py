@@ -318,8 +318,8 @@ class GazeDetector:
             self.point_buffer.pop(0)  # Remove oldest point
 
         smoothed_point = np.mean(self.point_buffer, axis=0)
-        
-        smooothed_2d_point = self.visualizer._camera.project_points(np.array([smoothed_point]))
-        self.visualizer.draw_bounds(smooothed_2d_point)
+        smoothed_point_aarray = np.array([smoothed_point])
+        smooothed_2d_point = self.visualizer._camera.project_points(smoothed_point_aarray)
+        self.visualizer.draw_bounds(smooothed_2d_point, (0, 0, 255))
 
         self.visualizer.draw_3d_points(np.array([smoothed_point]), color=(0, 0, 255), size=20, clamp_to_screen=True)

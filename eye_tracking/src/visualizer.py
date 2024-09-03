@@ -44,37 +44,60 @@ class Visualizer:
             pt = self._convert_pt(pt)
             cv2.circle(self.image, pt, size, color, cv2.FILLED)
     
-    def draw_bounds(self, points):
-        print (points[0][0], points[0][1])
-        color=(0, 0, 255)
-        if (points[0][0] >= 1200):
-            overlay = self.image.copy()
-            # Draw the filled rectangle on the overlay
-            cv2.rectangle(overlay, (2000,0), (1200, 1300), color, -1)
-
-            # Set the transparency level
-            alpha = 0.3  # Transparency factor (0.0 - 1.0)
+    def create_opacity(self, overlay: np.ndarray, opacity: float): 
+        """
+        Blends the original image and the overlay together, with a specified transparency/opacity
+        """
+        cv2.addWeighted(overlay, opacity, self.image, 1 - opacity, 0, self.image)
     
-            # Blend the overlay with the original image to get the semi-transparent effect
-            cv2.addWeighted(overlay, alpha, self.image, 1 - alpha, 0, self.image)
-            cv2.putText(self.image, 'Looking left', (1250, 500), cv2.FONT_HERSHEY_SIMPLEX, 1, color, 2, cv2.LINE_AA, False)
-        elif (points[0][0] <= 300):
-            overlay = self.image.copy()
-            # Draw the filled rectangle on the overlay
-            cv2.rectangle(overlay, (300, 0), (-100, 1300), color, -1)
+    def draw_labelled_rectangle (self, overlay: np.ndarray, top_left: Tuple[int, int], bottom_right: Tuple[int, int], color: Tuple[int, int, int], 
+                                 alpha: float, text: str, text_org: Tuple[int, int], text_font_face: int, text_line_type: int):
+        """
+        Draws a labelled rectangle on the specified overlay
+        """
+        cv2.rectangle(overlay, top_left, bottom_right, color, -1)
+        self.create_opacity(overlay, alpha)
+        cv2.putText(self.image, text, text_org, text_font_face, 1, color, 2, text_line_type, False)
 
-            # Set the transparency level
-            alpha = 0.3  # Transparency factor (0.0 - 1.0)
-    
-            # Blend the overlay with the original image to get the semi-transparent effect
-            cv2.addWeighted(overlay, alpha, self.image, 1 - alpha, 0, self.image)
-            cv2.putText(self.image, 'Looking right', (50, 500), cv2.FONT_HERSHEY_SIMPLEX, 1, color, 2, cv2.LINE_AA, False)
+    def calculate_rectangle_boundaries(self, width_max: int) -> Tuple[int, int, int]:
+        """
+        Calculates the left/right boundaries and the width of the boundaries, based on the maximum width of the image
+        """
+        middle_width = width_max/2
+        boundary_width = int(middle_width/2)
+        left_boundary = int(middle_width + boundary_width)
+        right_boundary = int(boundary_width)
+        return (left_boundary, right_boundary, boundary_width)
 
+    def draw_bounds(self, points: np.ndarray, color: Tuple[int, int, int]):
+        """
+        Draws the left and right bounds depending where the user's gaze is
+        """
+        assert self.image is not None
 
-    
-            
-        
-
+        text_front_face = cv2.FONT_HERSHEY_SIMPLEX
+        text_line_type = cv2.LINE_AA
+        overlay = np.zeros_like(self.image, np.uint8)
+        alpha = 0.3
+        height_max = self.image.shape[0]
+        width_max = self.image.shape[1]
+        left_boundary, right_boundary, boundary_width = self.calculate_rectangle_boundaries(width_max)
+      
+        if (points[0][0] >= left_boundary):
+            top_left = (width_max, 0)
+            bottom_right = (left_boundary, height_max)
+            text = "Looking left"
+            text_org = (1250, height_max//2)
+            # text_org = (left_boundary + boundary_width, height_max//2)
+            self.draw_labelled_rectangle(overlay, top_left, bottom_right, color, alpha, text, text_org, text_front_face, text_line_type)
+           
+        elif (points[0][0] <= right_boundary):
+            top_left = (right_boundary, 0)
+            bottom_right = (0, height_max)
+            text = "Looking right"
+            text_org = (50, height_max//2)
+            # text_org = (right_boundary - boundary_width//2, height_max//2)
+            self.draw_labelled_rectangle(overlay, top_left, bottom_right, color, alpha, text, text_org, text_front_face, text_line_type)
 
     def draw_3d_points(
         self, points3d: np.ndarray, color: Tuple[int, int, int] = (255, 0, 255), size=3, clamp_to_screen: bool = False
@@ -98,6 +121,7 @@ class Visualizer:
         points2d = self._camera.project_points(points3d)
         pt0 = self._convert_pt(points2d[0])
         pt1 = self._convert_pt(points2d[1])
+        cv2.line(self.image, pt0, pt1, color, lw, cv2.LINE_AA)
 
     def draw_model_axes(self, face: Face, length: float, lw: int = 2) -> None:
         assert self.image is not None
