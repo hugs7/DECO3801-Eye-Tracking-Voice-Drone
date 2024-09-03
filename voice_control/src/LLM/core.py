@@ -91,7 +91,7 @@ def run_until_halt(
 			log(captured_output, color=Fore.LIGHTCYAN_EX, end="" if captured_output[-1] == "\n" else "\n")
 			if correct_format(captured_output):
 				break
-	return agent_is_done, message
+	return agent_is_done, message, captured_output
 
 
 def react(
@@ -120,5 +120,5 @@ def react(
 	
 	log(user_command, color=Fore.LIGHTGREEN_EX)
 	context.append({"role": "user", "content": user_command})
-	agent_is_done, message = run_until_halt(interactive_console, ask_fn, stored_context)
-	return agent_is_done, message
+	agent_is_done, message, output = run_until_halt(interactive_console, ask_fn, stored_context)
+	return agent_is_done, message, output

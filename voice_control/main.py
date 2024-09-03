@@ -26,7 +26,7 @@ def capture_voice_input():
         print("Listening...")
         
         audio = recognizer.listen(source, phrase_time_limit=5)
-        save_audio(audio)
+        #save_audio(audio)
     return audio
 
 
@@ -54,7 +54,7 @@ def process_voice_command(text):
     }
     command = text.lower()
     # Use the get method to provide a default value if the command is not found
-    result = commands.get(command, "Command Not understood. Try again.")
+    result = 
     print(result)
     return False
 
