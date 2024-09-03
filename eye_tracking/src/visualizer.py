@@ -43,21 +43,23 @@ class Visualizer:
         for pt in points:
             pt = self._convert_pt(pt)
             cv2.circle(self.image, pt, size, color, cv2.FILLED)
-    
-    def create_opacity(self, overlay: np.ndarray, opacity: float): 
+
+    def create_opacity(self, overlay: np.ndarray, opacity: float):
         """
         Blends the original image and the overlay together, with a specified transparency/opacity
         """
-        cv2.addWeighted(overlay, opacity, self.image, 1 - opacity, 0, self.image)
-    
-    def draw_labelled_rectangle (self, overlay: np.ndarray, top_left: Tuple[int, int], bottom_right: Tuple[int, int], color: Tuple[int, int, int], 
-                                 alpha: float, text: str, text_org: Tuple[int, int], text_font_face: int, text_line_type: int):
+        cv2.addWeighted(overlay, opacity, self.image,
+                        1 - opacity, 0, self.image)
+
+    def draw_labelled_rectangle(self, overlay: np.ndarray, top_left: Tuple[int, int], bottom_right: Tuple[int, int], color: Tuple[int, int, int],
+                                alpha: float, text: str, text_org: Tuple[int, int], text_font_face: int, text_line_type: int):
         """
         Draws a labelled rectangle on the specified overlay
         """
         cv2.rectangle(overlay, top_left, bottom_right, color, -1)
         self.create_opacity(overlay, alpha)
-        cv2.putText(self.image, text, text_org, text_font_face, 1, color, 2, text_line_type, False)
+        cv2.putText(self.image, text, text_org, text_font_face,
+                    1, color, 2, text_line_type, False)
 
     def calculate_rectangle_boundaries(self, width_max: int) -> Tuple[int, int, int]:
         """
@@ -81,23 +83,26 @@ class Visualizer:
         alpha = 0.3
         height_max = self.image.shape[0]
         width_max = self.image.shape[1]
-        left_boundary, right_boundary, boundary_width = self.calculate_rectangle_boundaries(width_max)
-      
+        left_boundary, right_boundary, boundary_width = self.calculate_rectangle_boundaries(
+            width_max)
+
         if (points[0][0] >= left_boundary):
             top_left = (width_max, 0)
             bottom_right = (left_boundary, height_max)
             text = "Looking left"
             text_org = (1250, height_max//2)
             # text_org = (left_boundary + boundary_width, height_max//2)
-            self.draw_labelled_rectangle(overlay, top_left, bottom_right, color, alpha, text, text_org, text_front_face, text_line_type)
-           
+            self.draw_labelled_rectangle(
+                overlay, top_left, bottom_right, color, alpha, text, text_org, text_front_face, text_line_type)
+
         elif (points[0][0] <= right_boundary):
             top_left = (right_boundary, 0)
             bottom_right = (0, height_max)
             text = "Looking right"
             text_org = (50, height_max//2)
             # text_org = (right_boundary - boundary_width//2, height_max//2)
-            self.draw_labelled_rectangle(overlay, top_left, bottom_right, color, alpha, text, text_org, text_front_face, text_line_type)
+            self.draw_labelled_rectangle(
+                overlay, top_left, bottom_right, color, alpha, text, text_org, text_front_face, text_line_type)
 
     def draw_3d_points(
         self, points3d: np.ndarray, color: Tuple[int, int, int] = (255, 0, 255), size=3, clamp_to_screen: bool = False
@@ -109,10 +114,9 @@ class Visualizer:
         assert points3d.shape[1] == 3
         points2d = self._camera.project_points(points3d)
         if clamp_to_screen:
-            points2d = np.clip(points2d, 0, np.array(self.image.shape[:2])[::-1])
+            points2d = np.clip(points2d, 0, np.array(
+                self.image.shape[:2])[::-1])
         self.draw_points(points2d, color=color, size=size)
-
-
 
     def draw_3d_line(self, point0: np.ndarray, point1: np.ndarray, color: Tuple[int, int, int] = (255, 255, 0), lw=1) -> None:
         assert self.image is not None
@@ -130,9 +134,11 @@ class Visualizer:
         assert face.head_position is not None
         assert face.landmarks is not None
         # Get the axes of the model coordinate system
-        axes3d = np.eye(3, dtype=np.float32) @ Rotation.from_euler("XYZ", [0, np.pi, 0]).as_matrix()
+        axes3d = np.eye(
+            3, dtype=np.float32) @ Rotation.from_euler("XYZ", [0, np.pi, 0]).as_matrix()
         axes3d = axes3d * length
-        axes2d = self._camera.project_points(axes3d, face.head_pose_rot.as_rotvec(), face.head_position)
+        axes2d = self._camera.project_points(
+            axes3d, face.head_pose_rot.as_rotvec(), face.head_position)
         center = face.landmarks[self._center_point_index]
         center = self._convert_pt(center)
         for pt, color in zip(axes2d, AXIS_COLORS):
@@ -148,4 +154,5 @@ class Visualizer:
         if len(position) == 3:
             position = (int(position[0]), int(position[1]))
 
-        cv2.putText(self.image, text, position, cv2.FONT_HERSHEY_SIMPLEX, font_scale, color, 2, cv2.LINE_AA)
+        cv2.putText(self.image, text, position,
+                    cv2.FONT_HERSHEY_SIMPLEX, font_scale, color, 2, cv2.LINE_AA)
