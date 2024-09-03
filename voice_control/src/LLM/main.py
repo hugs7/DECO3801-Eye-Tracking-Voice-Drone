@@ -20,12 +20,13 @@ def ask_fn(context: List[Dict[str, str]], aux: bool = False) -> str:
 	return response["choices"][0]["message"]["content"]
 
 
-def run_terminal_agent():
+def run_terminal_agent(user_input: str) -> str:
 	interactive_console = AgentInteractiveConsole(locals={"done": done, "input": proxy_input})
 	context = initial_context
-	while (user_input := input("Enter a message (or exit to quit): ")) != "exit":
+	output = ""
+	while (output == ""):
 		user_command = f">>> # User: {user_input}"
-		react(interactive_console, ask_fn, context, user_command)
+		_, _, output = react(interactive_console, ask_fn, context, user_command)
 	log("--- The simulation has ended ---", color=Fore.LIGHTRED_EX)
 
 

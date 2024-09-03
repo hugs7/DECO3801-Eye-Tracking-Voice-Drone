@@ -1,3 +1,0 @@
-openai
-tiktoken
-colorama
