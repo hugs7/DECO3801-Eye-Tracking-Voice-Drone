@@ -54,7 +54,7 @@ def process_voice_command(text):
     }
     command = text.lower()
     # Use the get method to provide a default value if the command is not found
-    result = 
+    #result = 
     print(result)
     return False
 
