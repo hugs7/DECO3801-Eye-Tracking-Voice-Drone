@@ -65,8 +65,8 @@ class Visualizer:
         """
         Calculates the left/right boundaries and the width of the boundaries, based on the maximum width of the image
         """
-        middle_width = width_max/2
-        boundary_width = int(middle_width/2)
+        middle_width = width_max / 2
+        boundary_width = int(middle_width / 2)
         left_boundary = int(middle_width + boundary_width)
         right_boundary = int(boundary_width)
         return (left_boundary, right_boundary, boundary_width)
@@ -90,7 +90,7 @@ class Visualizer:
             top_left = (width_max, 0)
             bottom_right = (left_boundary, height_max)
             text = "Looking left"
-            text_org = (1250, height_max//2)
+            text_org = (1250, height_max // 2)
             # text_org = (left_boundary + boundary_width, height_max//2)
             self.draw_labelled_rectangle(
                 overlay, top_left, bottom_right, color, alpha, text, text_org, text_front_face, text_line_type)
@@ -99,7 +99,7 @@ class Visualizer:
             top_left = (right_boundary, 0)
             bottom_right = (0, height_max)
             text = "Looking right"
-            text_org = (50, height_max//2)
+            text_org = (50, height_max // 2)
             # text_org = (right_boundary - boundary_width//2, height_max//2)
             self.draw_labelled_rectangle(
                 overlay, top_left, bottom_right, color, alpha, text, text_org, text_front_face, text_line_type)
