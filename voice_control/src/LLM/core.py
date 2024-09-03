@@ -3,9 +3,9 @@ from io import StringIO
 from typing import List, Tuple, Dict, Callable
 from code import InteractiveConsole
 from colorama import Fore
-from wrappers import AgentIsDone
-from utils import log, ask_llm
-from formatting import add_terminal_line_decorators, extract_terminal_entries
+from .wrappers import AgentIsDone
+from .utils import log, ask_llm
+from .formatting import add_terminal_line_decorators, extract_terminal_entries
 import json
 import os
 
@@ -101,7 +101,9 @@ def react(
 		user_command: str,
 ) -> Tuple[bool, str]:
 	llm_folder = os.path.dirname(__file__)
-	voice_control = os.path.dirname(llm_folder)
+	src_folder = os.path.dirname(llm_folder)
+	voice_control = os.path.dirname(src_folder)
+	
 	data_folder = os.path.join(voice_control, "data")
 	context_file = os.path.join(data_folder, "context.jsonl")
 	stored_context = []
