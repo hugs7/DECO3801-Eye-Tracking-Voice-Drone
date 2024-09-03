@@ -1,7 +1,7 @@
 import tiktoken
 from typing import List, Dict, Callable
 from colorama import Fore, Style
-from .formatting import ensure_terminal_formatting
+from formatting import ensure_terminal_formatting
 
 
 gpt_token_encoder = tiktoken.encoding_for_model("gpt-4")
