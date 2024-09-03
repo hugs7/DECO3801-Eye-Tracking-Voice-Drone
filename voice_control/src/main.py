@@ -3,6 +3,7 @@ import sounddevice as sd
 import numpy as np
 import time
 from scipy.io.wavfile import write
+from LLM.llm_main import run_terminal_agent
 
 
 recognizer = sr.Recognizer()
@@ -54,7 +55,7 @@ def process_voice_command(text):
     }
     command = text.lower()
     # Use the get method to provide a default value if the command is not found
-    #result = 
+    result = run_terminal_agent(text)
     print(result)
     return False
 
