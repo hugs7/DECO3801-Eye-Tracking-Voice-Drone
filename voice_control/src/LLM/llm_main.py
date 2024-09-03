@@ -2,10 +2,10 @@ import os
 import openai
 from colorama import Fore
 from typing import List, Dict
-from core import AgentInteractiveConsole, react
-from defaults import initial_context
-from utils import log
-from wrappers import done, proxy_input
+from .core import AgentInteractiveConsole, react
+from .defaults import initial_context
+from .utils import log
+from .wrappers import done, proxy_input
 from dotenv import load_dotenv
 
 load_dotenv()
