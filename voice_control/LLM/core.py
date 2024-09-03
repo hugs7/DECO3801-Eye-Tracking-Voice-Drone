@@ -48,6 +48,13 @@ def run_entry(
 			message,
 		)
 
+def correct_format(response: str) -> bool:
+	try:
+		eval_response = eval(response)
+		return isinstance(eval_response, list) and all(isinstance(i, tuple) for i in eval_response)
+	except:
+		return False
+
 
 def run_until_halt(
 		interactive_console: AgentInteractiveConsole,
@@ -72,15 +79,18 @@ def run_until_halt(
 			) = run_entry(interactive_console, entry_code)
 			executed_entries.append(executed_lines)
 			# As soon as there's some output, the LLM might want to react to it -> put it in context and ask again.
+			#log(captured_output, color=Fore.WHITE)
 			if agent_is_done or captured_output != "":
 				break
+
 		executed_code = "\n".join(executed_entries)
 		context.append({"role": "assistant", "content": executed_code})
 		log(executed_code, color=Fore.LIGHTYELLOW_EX)
 		if captured_output != "":
-			
 			context.append({"role": "user", "content": captured_output})
 			log(captured_output, color=Fore.LIGHTCYAN_EX, end="" if captured_output[-1] == "\n" else "\n")
+			if correct_format(captured_output):
+				break
 	return agent_is_done, message
 
 
