@@ -3,7 +3,7 @@ import sounddevice as sd
 import numpy as np
 import time
 from scipy.io.wavfile import write
-from LLM.llm_main import run_terminal_agent
+from LLM import run_terminal_agent
 
 
 recognizer = sr.Recognizer()
