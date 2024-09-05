@@ -39,3 +39,14 @@ def flip_image(image: np.ndarray) -> np.ndarray:
     """
 
     return image[:, ::-1]
+
+
+def add_2d_point(a: Tuple[int, int], b: Tuple[int, int]) -> Tuple[int, int]:
+    """
+    Add two tuples together
+    :param a: The first tuple
+    :param b: The second tuple
+    :return Tuple[int, int]: The sum of the two tuples
+    """
+
+    return a[0] + b[0], a[1] + b[1]
