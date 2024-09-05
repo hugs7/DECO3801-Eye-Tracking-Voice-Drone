@@ -49,9 +49,15 @@ class GazeDetector:
         self.calibrated = False
         self.calibration_landmarks = None
 
+        # Gaze Vector
+        self.average_eye_distance = None
+        self.average_eye_center = None
+        self.average_gaze_vector = None
+
         # Point on screen
         self.point_on_screen_smoothing_factor = 8  # Number of frames to average over
         self.point_buffer = []
+        self.smoothed_point = None
 
     def run(self) -> None:
         if self.config.demo.use_camera or self.config.demo.video_path:
@@ -118,6 +124,7 @@ class GazeDetector:
                 self._draw_head_pose(face)
                 self._draw_face_template_model(face)
                 self._draw_gaze_vector(face)
+                self._draw_gaze_point()
                 self._display_normalized_image(face)
 
         if self.config.demo.use_camera:
@@ -301,15 +308,23 @@ class GazeDetector:
             pitch, yaw = np.rad2deg(eye.vector_to_angle(eye.gaze_vector))
             logger.info(f"[{key.name.lower()}] pitch: {pitch:.2f}, yaw: {yaw:.2f}")
 
-        average_eye_distance = (face.reye.distance + face.leye.distance) / 2
-        average_eye_center = (face.reye.center + face.leye.center) / 2
-        average_gaze_vector = (face.reye.gaze_vector + face.leye.gaze_vector) / 2
+        self.average_eye_distance = (face.reye.distance + face.leye.distance) / 2
+        self.average_eye_center = (face.reye.center + face.leye.center) / 2
+        self.average_gaze_vector = (face.reye.gaze_vector + face.leye.gaze_vector) / 2
 
-        end_point = average_eye_center + length * average_gaze_vector
-        self.visualizer.draw_3d_line(average_eye_center, end_point)
+        end_point = self.average_eye_center + length * self.average_gaze_vector
+        self.visualizer.draw_3d_line(self.average_eye_center, end_point)
+
+    def _draw_gaze_point(self):
+        """
+        Projects the gaze vector onto the screen and draws a point at
+        the estimated location the user is looking at.
+        """
+        if not self.show_gaze_vector:
+            return
 
         # Draw the point on the screen the user is looking at
-        point_on_screen = average_eye_center + (average_eye_distance * 0.9) * average_gaze_vector
+        point_on_screen = self.average_eye_center + (self.average_eye_distance * 0.9) * self.average_gaze_vector
         point_on_screen[1] *= 0.15  # Scale y-coordinate
 
         # Update buffer and calculate smoothed point
@@ -317,9 +332,6 @@ class GazeDetector:
         if len(self.point_buffer) > self.point_on_screen_smoothing_factor:
             self.point_buffer.pop(0)  # Remove oldest point
 
-        smoothed_point = np.mean(self.point_buffer, axis=0)
-        smoothed_point_aarray = np.array([smoothed_point])
-        smooothed_2d_point = self.visualizer._camera.project_points(smoothed_point_aarray)
-        self.visualizer.draw_bounds(smooothed_2d_point, (0, 0, 255))
+        self.smoothed_point = np.mean(self.point_buffer, axis=0)
+        self.visualizer.draw_3d_point(self.smoothed_point, color=(0, 0, 255), size=20, clamp_to_screen=True)
 
-        self.visualizer.draw_3d_points(np.array([smoothed_point]), color=(0, 0, 255), size=20, clamp_to_screen=True)
