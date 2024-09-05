@@ -1,1 +1,1 @@
-from mavic_drone import MavicDrone
+from mavic.mavic_drone import MavicDrone

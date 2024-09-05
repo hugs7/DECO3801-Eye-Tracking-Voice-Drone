@@ -15,7 +15,8 @@ class MavicDrone(Drone):
         self.vehicle = self.__connect(ip, port)
 
     def __connect(self, ip, port):
-        connection_string = f"udp:{ip}:{port}"
+        #connection_string = f"udp:{ip}:{port}"
+        connection_string = "192.168.217.15:14550"
         print(f"Connecting to mavic on: {connection_string}")
 
         # Try connecting with a longer timeout
