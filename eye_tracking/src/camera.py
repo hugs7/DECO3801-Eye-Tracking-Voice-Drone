@@ -36,3 +36,10 @@ class Camera:
             tvec = np.zeros(3, dtype=np.float32)
         points2d, _ = cv2.projectPoints(points3d, rvec, tvec, self.camera_matrix, self.dist_coefficients)
         return points2d.reshape(-1, 2)
+
+    def project_point(self, point3d: np.ndarray, rvec: Optional[np.ndarray] = None, tvec: Optional[np.ndarray] = None) -> np.ndarray:
+        """
+        Projects a 3D world point (metres) to a 2D image point (pixels)
+        """
+        assert point3d.shape == (3,)
+        return self.project_points(point3d[np.newaxis], rvec, tvec)[0]
