@@ -8,8 +8,8 @@ import cv2
 import constants as c
 
 import controller
-import mavic
-import tello
+import mavic_drone
+import tello_drone
 
 
 def loop(drone):
@@ -25,7 +25,7 @@ def loop(drone):
     cv2.waitKey(1)
 
 
-def read_camera_feed(drone: Union[mavic.MavicDrone, tello.TelloDrone]):
+def read_camera_feed(drone: Union[mavic_drone.MavicDrone, tello_drone.TelloDrone]):
     """
     Reads the camera feed from the drone
     """
@@ -51,9 +51,9 @@ def init(drone_type):
 
     match drone_type:
         case c.MAVIC:
-            vehicle = mavic.MavicDrone(c.MAVIC_IP, c.MAVIC_PORT)
+            vehicle = mavic_drone.MavicDrone(c.MAVIC_IP, c.MAVIC_PORT)
         case c.TELLO:
-            vehicle = tello.TelloDrone()
+            vehicle = tello_drone.TelloDrone()
         case _:
             raise ValueError(f"Invalid drone type: {drone_type}")
 
@@ -61,7 +61,7 @@ def init(drone_type):
 
 
 def main():
-    drone_type = c.TELLO  # / c.MAVIC
+    drone_type = c.MAVIC #c.TELLO  # / c.MAVIC
 
     drone = init(drone_type)
 

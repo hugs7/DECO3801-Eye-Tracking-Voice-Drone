@@ -5,12 +5,12 @@ Defines class for Mavic drone
 from dronekit import connect, VehicleMode
 
 import constants as c
-from ..drone import Drone
+from abs_drone import AbstractDrone
 import cv2
 import time
 
 
-class MavicDrone(Drone):
+class MavicDrone(AbstractDrone):
     def __init__(self, ip: str, port: int) -> NotImplementedError:
         self.vehicle = self.__connect(ip, port)
 

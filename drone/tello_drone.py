@@ -2,7 +2,7 @@
 Defines class for Tello drone
 """
 
-from ..drone import Drone
+from abs_drone import AbstractDrone
 from djitellopy import tello
 import cv2
 import pygame
@@ -10,7 +10,7 @@ import pygame
 import constants as c
 
 
-class TelloDrone(Drone):
+class TelloDrone(AbstractDrone):
     def __init__(self) -> None:
         tello_drone = tello.Tello()
         self.drone = tello_drone

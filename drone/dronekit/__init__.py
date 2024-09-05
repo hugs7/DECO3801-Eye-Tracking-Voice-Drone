@@ -53,7 +53,7 @@ from past.builtins import basestring
 from pymavlink import mavutil, mavwp
 from pymavlink.dialects.v10 import ardupilotmega
 
-from dronekit.util import ErrprinterHandler
+from .util import ErrprinterHandler
 
 
 class APIException(Exception):

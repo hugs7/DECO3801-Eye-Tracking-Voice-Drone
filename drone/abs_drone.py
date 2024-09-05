@@ -7,7 +7,7 @@ from typing import Tuple
 import cv2
 
 
-class Drone(ABC):
+class AbstractDrone:
     @abstractmethod
     def __connect(self):
         pass
