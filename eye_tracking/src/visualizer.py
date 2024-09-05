@@ -107,8 +107,16 @@ class Visualizer:
             text = "Looking right"
             text_org = (50, height_max // 2)
             # text_org = (right_boundary - boundary_width//2, height_max//2)
-            self.draw_labelled_rectangle(
-                overlay, top_left, bottom_right, color, alpha, text, text_org, text_front_face, text_line_type)
+            self.draw_labelled_rectangle(overlay, top_left, bottom_right, color, alpha, text, text_org, text_front_face, text_line_type)
+
+    def draw_3d_point(self, point3d: np.ndarray, color: Tuple[int, int, int] = (255, 0, 255), size=3) -> None:
+        """
+        Draw a point from 3D world coordinates onto the image.
+        """
+        assert self.image is not None
+        assert point3d.shape == (3,)
+        point2d = self._camera.project_points(point3d)
+        self.draw_points(point2d[np.newaxis], color=color, size=size)
 
     def draw_3d_points(
         self, points3d: np.ndarray, color: Tuple[int, int, int] = (255, 0, 255), size=3, clamp_to_screen: bool = False
