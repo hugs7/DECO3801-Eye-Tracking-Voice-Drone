@@ -1,3 +1,2 @@
-dronekit
 pygame
 djitellopy
