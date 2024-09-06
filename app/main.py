@@ -9,6 +9,8 @@ from threading import Thread, Event
 import logging
 from time import sleep
 
+from thread_helper import thread_wrapper, get_function_name
+
 
 def dynamic_import(module_name: str, alias: str):
     """
@@ -35,17 +37,6 @@ drone = dynamic_import("drone", "main")
 stop_event = Event()
 
 
-def thread_wrapper(func) -> None:
-    """
-    Wrapper function to run a function in a thread.
-    Passes a stop event to the function as a signal to stop execution.
-    :param func: Function to run in a thread
-    :return: None
-    """
-    while not stop_event.is_set():
-        func(stop_event)
-
-
 def is_any_thread_alive(threads):
     return any(t.is_alive() for t in threads)
 
@@ -55,10 +46,9 @@ def main():
     logging.info(" >>> Begin")
 
     # Create threads for each of the components
+    thread_functions = [eye_tracking, voice_control, drone]
     threads = [
-        Thread(target=lambda: thread_wrapper(eye_tracking)),
-        Thread(target=lambda: thread_wrapper(voice_control)),
-        Thread(target=lambda: thread_wrapper(drone)),
+        Thread(target=lambda: thread_wrapper(stop_event, func), name=f"thread_{get_function_name(func)}") for func in thread_functions
     ]
 
     # Start all threads
