@@ -3,12 +3,12 @@ Helps with child threads
 """
 
 from typing import Optional
-from threading import Event, Thread
+from threading import Event
 
 import logging
 
 
-def thread_event_handler(stop_event: Optional[Event]) -> None:
+def thread_exit_handler(stop_event: Optional[Event]) -> None:
     """
     Helper function to handle stop event in threads.
     :param stop_event: Event to signal stop

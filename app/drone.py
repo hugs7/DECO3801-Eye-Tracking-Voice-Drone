@@ -9,7 +9,7 @@ import logging
 from typing import Optional
 from threading import Event
 
-from thread_helper import thread_event_handler
+from thread_helper import thread_exit_handler
 
 
 def loop():
@@ -24,7 +24,7 @@ def main(stop_event: Optional[Event]):
 
     while True:
         loop()
-        thread_event_handler(stop_event)
+        thread_exit_handler(stop_event)
 
 
 if __name__ == "__main__":
