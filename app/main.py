@@ -9,13 +9,13 @@ import logging
 from time import sleep
 
 if __name__ == "__main__":
-    from eye_tracking import main as eye_tracking_loop
-    from voice_control import main as voice_control_loop
-    from drone import main as drone_loop
+    from eye_tracking import main as eye_tracking
+    from voice_control import main as voice_control
+    from drone import main as drone
 else:
-    from .eye_tracking import main as eye_tracking_loop
-    from .voice_control import main as voice_control_loop
-    from .drone import main as drone_loop
+    from .eye_tracking import main as eye_tracking
+    from .voice_control import main as voice_control
+    from .drone import main as drone
 
 stop_event = Event()
 
@@ -41,9 +41,9 @@ def main():
 
     # Create threads for each of the components
     threads = [
-        Thread(target=lambda: thread_wrapper(eye_tracking_loop)),
-        Thread(target=lambda: thread_wrapper(voice_control_loop)),
-        Thread(target=lambda: thread_wrapper(drone_loop)),
+        Thread(target=lambda: thread_wrapper(eye_tracking)),
+        Thread(target=lambda: thread_wrapper(voice_control)),
+        Thread(target=lambda: thread_wrapper(drone)),
     ]
 
     # Start all threads
