@@ -5,8 +5,11 @@ Hugo Burton
 """
 
 from time import sleep
-
 import logging
+from typing import Optional
+from threading import Event
+
+from thread_helper import thread_event_handler
 
 
 def loop():
@@ -16,11 +19,12 @@ def loop():
     logging.info(" <<< End drone loop")
 
 
-def main():
+def main(stop_event: Optional[Event]):
     logging.info("Init drone module")
 
     while True:
         loop()
+        thread_event_handler(stop_event)
 
 
 if __name__ == "__main__":
