@@ -4,9 +4,13 @@ Author: Hugo Burton
 Last Updated: 23/08/2024
 """
 
-from typing import Any
-
+from typing import Tuple
+import cv2
+import numpy as np
+import logging
 import torchvision.transforms as T
+
+logger = logging.getLogger(__name__)
 
 
 def create_transform() -> T.ToTensor:
@@ -16,11 +20,6 @@ def create_transform() -> T.ToTensor:
     :return Any: The transform object
     """
     return T.ToTensor()
-
-
-import cv2
-import numpy as np
-from typing import Tuple
 
 
 def upscale(frame: cv2.VideoCapture, upscaled_dim: Tuple[int, int]) -> cv2.VideoCapture:
