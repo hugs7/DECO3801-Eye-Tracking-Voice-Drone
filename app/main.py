@@ -59,7 +59,6 @@ def main():
     for thread in threads:
         thread.start()
 
-    # Join
     for thread in threads:
         thread.join()
 
