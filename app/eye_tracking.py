@@ -19,6 +19,8 @@ def loop():
 
 
 def main():
+    logging.info("Init eye tracking module")
+
     while True:
         loop()
 

@@ -17,6 +17,8 @@ def loop():
 
 
 def main():
+    logging.info("Init voice control module")
+
     while True:
         loop()
 

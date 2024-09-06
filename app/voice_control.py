@@ -19,8 +19,10 @@ def loop():
 
 
 def main():
+    logging.info("Init voice control module")
 
-    pass
+    while True:
+        loop()
 
 
 if __name__ == "__main__":
