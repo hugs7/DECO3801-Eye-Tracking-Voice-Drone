@@ -30,3 +30,4 @@ demo:
     show_template_model: false
     upscale_dim: [1500, 843]
     gaze_vector_y_scale: 0.15
+    hitbox_width_proprtion: 0.2

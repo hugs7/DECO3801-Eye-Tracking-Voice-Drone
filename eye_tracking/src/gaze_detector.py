@@ -69,8 +69,7 @@ class GazeDetector:
         resolution_2d = self.visualizer.get_2d_resolution()
         out_height, out_width = resolution_2d
 
-        hitbox_width_proprtion = 0.2  # 20% on each side
-        hitbox_width = int(out_width * hitbox_width_proprtion)
+        hitbox_width = int(out_width * self.config.demo.hitbox_width_proprtion)
 
         # Left hit-box
         left_hitbox_top_left = (0, 0)
