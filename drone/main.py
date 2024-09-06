@@ -8,6 +8,7 @@ import cv2
 import constants as c
 import controller
 import models
+import init
 
 
 def loop(drone):
@@ -42,19 +43,11 @@ def render_drone_feed(img: cv2.typing.MatLike) -> None:
     cv2.imshow(c.WINDOW_NAME, img)
 
 
-"""
-Initialises the eye_tracking package.
-Author: Hugo Burton
-Last Updated: 21/08/2024
-"""
-
-from init import init
-
-
 def main():
     drone_type = c.TELLO  # / c.MAVIC
 
-    drone = init(drone_type)
+    config = init.init()
+    drone = init.init_drone(config)
 
     while True:
         loop(drone)

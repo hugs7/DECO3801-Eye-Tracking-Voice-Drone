@@ -6,10 +6,9 @@ Init module for the drone package.
 import pathlib
 from omegaconf import DictConfig, OmegaConf
 import logging
-from omegaconf import DictConfig, OmegaConf
 from typing import Union
-
 import models
+import constants as c
 
 logger = logging.getLogger(__name__)
 
@@ -20,19 +19,18 @@ def init_config() -> DictConfig:
     """
 
     package_root = pathlib.Path(__file__).parent.resolve()
-    path = package_root / "configs/mpiigaze.yaml"
+    path = package_root / "configs/drone_config.yaml"
 
     logger.info(f"Loading config from {path}")
     config = OmegaConf.load(path)
-    config.PACKAGE_ROOT = package_root.as_posix()
-    logger.info(f"Pacakge root: {config.PACKAGE_ROOT}")
 
     return config
 
 
-def init(drone_type) -> Union[models.MavicDrone, models.TelloDrone]:
+def init() -> DictConfig:
     """
     Initialises the drone
+    :return: The drone object
     """
 
     # === Config ===
@@ -41,17 +39,22 @@ def init(drone_type) -> Union[models.MavicDrone, models.TelloDrone]:
     OmegaConf.set_readonly(config, True)
     logger.info(OmegaConf.to_yaml(config))
 
-    # download_mpiigaze_model()
-
-    # check_path_all(config)
-
     return config
+
+
+def init_drone(config: OmegaConf) -> Union[models.TelloDrone, models.MavicDrone]:
+    """
+    Initialises the drone
+    :return: The drone object
+    """
+
+    drone_type = config.drone_type
 
     match drone_type:
         case c.MAVIC:
-            vehicle = mavic.MavicDrone(c.MAVIC_IP, c.MAVIC_PORT)
+            vehicle = models.MavicDrone(c.MAVIC_IP, c.MAVIC_PORT)
         case c.TELLO:
-            vehicle = tello.TelloDrone()
+            vehicle = models.TelloDrone()
         case _:
             raise ValueError(f"Invalid drone type: {drone_type}")
 
