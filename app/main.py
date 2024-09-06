@@ -19,31 +19,6 @@ else:
     from .drone import loop as drone_loop
 
 
-ticking_queue = Queue()
-timer_running = Event()
-
-
-def timer_job() -> None:
-    while True:
-        sleep(1)
-        ticking_queue.put(1)
-
-
-def start_timer():
-    if not timer_running.is_set():
-        thread = Thread(target=timer_job, daemon=True)
-        thread.start()
-        timer_running.set()
-
-
-def event_loop() -> None:
-    """
-    Event loop for the drone controller.
-    """
-    while not ticking_queue.empty():
-        pass
-
-
 def main():
     logging.basicConfig(level=logging.INFO)
     logging.info(" >>> Begin")
