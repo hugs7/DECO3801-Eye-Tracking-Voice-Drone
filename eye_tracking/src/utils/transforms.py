@@ -9,7 +9,12 @@ from typing import Any
 import torchvision.transforms as T
 
 
-def create_transform() -> Any:
+def create_transform() -> T.ToTensor:
+    """
+    Create a transform object instance which can
+    be used to transform images
+    :return Any: The transform object
+    """
     return T.ToTensor()
 
 
