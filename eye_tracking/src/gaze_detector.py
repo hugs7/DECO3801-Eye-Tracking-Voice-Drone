@@ -336,6 +336,9 @@ class GazeDetector:
         cv2.imshow("normalized", normalized)
 
     def _draw_gaze_vector(self, face: Face) -> None:
+        """
+        Draws the gaze vector of the user as a line in 3D space.
+        """
         if not self.show_gaze_vector:
             return
 
