@@ -28,6 +28,8 @@ class GazeDetector:
     QUIT_KEYS = {27, ord("q")}
 
     def __init__(self, config: DictConfig):
+        logger.info("Initialising Gaze Detector")
+
         self.config = config
         self.gaze_estimator = GazeEstimator(config)
         face_model_3d = FaceModelMediaPipe()
@@ -67,20 +69,25 @@ class GazeDetector:
         Initialize the left and right hit-boxes.
         :return: Dictionary of hit-boxes: {"left": (top_left, bottom_right), "right": (top_left, bottom_right)}
         """
+        logger.info("Initializing hit-boxes")
+
         resolution_2d = self.visualizer.get_2d_resolution()
         out_height, out_width = resolution_2d
 
         hitbox_width = int(out_width * self.config.demo.hitbox_width_proprtion)
+        logger.debug(f"Hit-box width: {hitbox_width}")
 
         # Left hit-box
         left_hitbox_top_left = (0, 0)
         left_hitbox_bottom_right = (hitbox_width, out_height)
         left_hitbox = {"top_left": left_hitbox_top_left, "bottom_right": left_hitbox_bottom_right}
+        logger.debug(f"Left hit-box: {left_hitbox}")
 
         # Right hit-box
         right_hitbox_top_left = (int(out_width - hitbox_width), 0)
         right_hitbox_bottom_right = (out_width, out_height)
         right_hitbox = {"top_left": right_hitbox_top_left, "bottom_right": right_hitbox_bottom_right}
+        logger.debug(f"Right hit-box: {right_hitbox}")
 
         return {"left": left_hitbox, "right": right_hitbox}
 
@@ -107,13 +114,18 @@ class GazeDetector:
             while True:
                 key_pressed = self._wait_key()
                 if self.stop:
+                    logger.info("Stopping gaze detector from user exit signal.")
                     break
+
                 if key_pressed:
                     self._process_image(image)
+
                 cv2.imshow("image", self.visualizer.image)
+
         if self.config.demo.output_dir:
             name = pathlib.Path(self.config.demo.image_path).name
             output_path = pathlib.Path(self.config.demo.output_dir) / name
+            logger.info(f"Saving output to {output_path}")
             cv2.imwrite(output_path.as_posix(), self.visualizer.image)
 
     def _run_on_video(self) -> None:
@@ -122,6 +134,10 @@ class GazeDetector:
         a camera feed or a video file.
         :return: None
         """
+        logger.info("Running gaze detector on video feed")
+        if self.config.demo.display_on_screen:
+            logger.info("Video feed will be displayed on screen")
+
         while True:
             if self.config.demo.display_on_screen:
                 self._wait_key()
@@ -136,6 +152,7 @@ class GazeDetector:
 
             if self.config.demo.display_on_screen:
                 cv2.imshow("frame", self.visualizer.image)
+
         self.cap.release()
         if self.writer:
             self.writer.release()
@@ -209,6 +226,7 @@ class GazeDetector:
             cap = cv2.VideoCapture(self.config.demo.video_path)
         else:
             raise ValueError
+
         cap.set(cv2.CAP_PROP_FRAME_WIDTH, self.gaze_estimator.camera.width)
         cap.set(cv2.CAP_PROP_FRAME_HEIGHT, self.gaze_estimator.camera.height)
         return cap

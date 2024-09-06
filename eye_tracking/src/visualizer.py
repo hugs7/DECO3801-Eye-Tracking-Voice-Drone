@@ -3,16 +3,19 @@ from typing import Optional, Tuple
 import cv2
 import numpy as np
 from scipy.spatial.transform import Rotation
+import logging
 
 from camera import Camera
 from face import Face
 from utils import transforms
 
+logger = logging.getLogger(__name__)
 AXIS_COLORS = [(0, 0, 255), (0, 255, 0), (255, 0, 0)]
 
 
 class Visualizer:
     def __init__(self, camera: Camera, center_point_index: int):
+        logger.info("Initialising Visualizer")
         self._camera = camera
         self._center_point_index = center_point_index
         self.image: Optional[np.ndarray] = None
