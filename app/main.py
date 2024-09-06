@@ -4,9 +4,7 @@ Hugo Burton
 06/09/2024
 """
 
-from time import sleep
-from queue import Queue
-from threading import Thread, Event
+from threading import Thread
 import logging
 
 if __name__ == "__main__":
