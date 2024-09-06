@@ -44,8 +44,6 @@ def render_drone_feed(img: cv2.typing.MatLike) -> None:
 
 
 def main():
-    drone_type = c.TELLO  # / c.MAVIC
-
     config = init.init()
     drone = init.init_drone(config)
 
