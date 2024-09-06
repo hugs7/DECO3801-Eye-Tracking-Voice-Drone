@@ -30,6 +30,7 @@ def upscale(frame: cv2.VideoCapture, upscaled_dim: Tuple[int, int]) -> cv2.Video
     :return cv2.VideoCapture: The upscaled frame
     """
 
+    logger.debug(f"Upscaling frame to {upscaled_dim}")
     upscaled_frame = cv2.resize(frame, upscaled_dim)
 
     return upscaled_frame
@@ -42,6 +43,7 @@ def flip_image(image: np.ndarray) -> np.ndarray:
     :return np.ndarray: The flipped image
     """
 
+    logger.debug("Flipping image")
     return image[:, ::-1]
 
 
