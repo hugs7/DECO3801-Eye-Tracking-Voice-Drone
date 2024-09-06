@@ -46,7 +46,7 @@ def render_drone_feed(img: cv2.typing.MatLike) -> None:
 
 def init(drone_type):
     """
-    Initialiees the drone
+    Initialises the drone
     """
 
     match drone_type:
