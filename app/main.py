@@ -8,13 +8,13 @@ from threading import Thread
 import logging
 
 if __name__ == "__main__":
-    from eye_tracking import loop as eye_tracking_loop
-    from voice_control import loop as voice_control_loop
-    from drone import loop as drone_loop
+    from eye_tracking import main as eye_tracking_loop
+    from voice_control import main as voice_control_loop
+    from drone import main as drone_loop
 else:
-    from .eye_tracking import loop as eye_tracking_loop
-    from .voice_control import loop as voice_control_loop
-    from .drone import loop as drone_loop
+    from .eye_tracking import main as eye_tracking_loop
+    from .voice_control import main as voice_control_loop
+    from .drone import main as drone_loop
 
 
 def main():
