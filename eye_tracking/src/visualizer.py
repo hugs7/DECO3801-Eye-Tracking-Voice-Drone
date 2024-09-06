@@ -171,3 +171,11 @@ class Visualizer:
         """
         return np.clip(point_or_points, 0, np.array(self.image.shape[:2])[::-1])
 
+    def flip_point_x(self, point: Tuple[int, int]) -> Tuple[int, int]:
+        """
+        Flip the x-coordinate of the point
+        """
+        _, res_x = self.get_2d_resolution()
+        flipped_point = point
+        flipped_point[0] = res_x - flipped_point[0]
+        return flipped_point
