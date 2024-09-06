@@ -24,6 +24,10 @@ class Visualizer:
         flipped_image = transforms.flip_image(self.image)
         self.set_image(flipped_image)
 
+    def get_2d_resolution(self) -> Tuple[int, int]:
+        assert self.image is not None
+        return self.image.shape[:2]
+
     def draw_bbox(self, bbox: np.ndarray, color: Tuple[int, int, int] = (0, 255, 0), lw: int = 1) -> None:
         assert self.image is not None
         assert bbox.shape == (2, 2)

@@ -7,7 +7,7 @@ Last Updated: 21/08/2024
 import datetime
 import logging
 import pathlib
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Dict
 
 import cv2
 import numpy as np
@@ -57,7 +57,32 @@ class GazeDetector:
         # Point on screen
         self.point_on_screen_smoothing_factor = 8  # Number of frames to average over
         self.point_buffer = []
-        self.smoothed_point = None
+        self.gaze_2d_point = None
+
+        # Hitboxes
+        self.hitboxes = None
+
+    def _init_hitboxes(self) -> Dict[str, Tuple[Tuple[int, int], Tuple[int, int]]]:
+        """
+        Initialize the left and right hit-boxes.
+        """
+        resolution_2d = self.visualizer.get_2d_resolution()
+        out_height, out_width = resolution_2d
+
+        hitbox_width_proprtion = 0.2  # 20% on each side
+        hitbox_width = int(out_width * hitbox_width_proprtion)
+
+        # Left hit-box
+        left_hitbox_top_left = (0, 0)
+        left_hitbox_bottom_right = (hitbox_width, out_height)
+        left_hitbox = {"top_left": left_hitbox_top_left, "bottom_right": left_hitbox_bottom_right}
+
+        # Right hit-box
+        right_hitbox_top_left = (int(out_width - hitbox_width), 0)
+        right_hitbox_bottom_right = (out_width, out_height)
+        right_hitbox = {"top_left": right_hitbox_top_left, "bottom_right": right_hitbox_bottom_right}
+
+        return {"left": left_hitbox, "right": right_hitbox}
 
     def run(self) -> None:
         if self.config.demo.use_camera or self.config.demo.video_path:
@@ -115,6 +140,9 @@ class GazeDetector:
         undistorted = self._undistort_image(image)
 
         self.visualizer.set_image(image.copy())
+        if self.hitboxes is None:
+            self.hitboxes = self._init_hitboxes()
+
         faces = self.gaze_estimator.detect_faces(undistorted)
         for face in faces:
             self._draw_landmarks(face)
