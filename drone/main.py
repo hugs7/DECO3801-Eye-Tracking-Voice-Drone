@@ -16,13 +16,10 @@ def loop(drone):
     """
     Defines main loop for the drone
     """
+    controller.handle_input(drone, cv2.waitKey(1))
+    #img = read_camera_feed(drone)
+    #  render_drone_feed(img)
 
-    controller.handle_input(drone)
-
-    img = read_camera_feed(drone)
-    render_drone_feed(img)
-
-    cv2.waitKey(1)
 
 
 def read_camera_feed(drone: Union[mavic_drone.MavicDrone, tello_drone.TelloDrone]):

@@ -8,7 +8,7 @@ import constants as c
 from abs_drone import AbstractDrone
 import cv2
 import time
-
+from pymavlink import mavutil
 
 class MavicDrone(AbstractDrone):
     def __init__(self, ip: str, port: int) -> NotImplementedError:
@@ -16,7 +16,7 @@ class MavicDrone(AbstractDrone):
 
     def __connect(self, ip, port):
         #connection_string = f"udp:{ip}:{port}"
-        connection_string = "192.168.217.15:14550"
+        connection_string = "192.168.217.104:14550"
         print(f"Connecting to mavic on: {connection_string}")
 
         # Try connecting with a longer timeout
@@ -61,13 +61,45 @@ class MavicDrone(AbstractDrone):
         Cannot arm until the drone's autopilot is ready.
         """
         print("Performing basic pre-arm checks")
-        while not self._is_armable():
-            print(" Waiting for vehicle to initialise...")
-            time.sleep(1)
+        #while not self._is_armable():
+        #    print(" Waiting for vehicle to initialise...")
+        #    time.sleep(1)
 
         print("Arming motors")
         self.__set_vehicle_mode("GUIDED")
         self.vehicle.armed = True
+    
+    def send_ned_velocity(self, velocity_x, velocity_y, velocity_z, duration) -> None:
+        """
+        Move vehicle in direction based on specified velocity vectors and
+        for the specified duration.
+
+        This uses the SET_POSITION_TARGET_LOCAL_NED command with a type mask enabling only 
+        velocity components 
+        (http://dev.ardupilot.com/wiki/copter-commands-in-guided-mode/#set_position_target_local_ned).
+        
+        Note that from AC3.3 the message should be re-sent every second (after about 3 seconds
+        with no message the velocity will drop back to zero). In AC3.2.1 and earlier the specified
+        velocity persists until it is canceled. The code below should work on either version 
+        (sending the message multiple times does not cause problems).
+        
+        See the above link for information on the type_mask (0=enable, 1=ignore). 
+        At time of writing, acceleration and yaw bits are ignored.
+        """
+        msg = self.vehicle.message_factory.set_position_target_local_ned_encode(
+            0,       # time_boot_ms (not used)
+            0, 0,    # target system, target component
+            mavutil.mavlink.MAV_FRAME_LOCAL_NED, # frame
+            0b0000111111000111, # type_mask (only speeds enabled)
+            0, 0, 0, # x, y, z positions (not used)
+            velocity_x, velocity_y, velocity_z, # x, y, z velocity in m/s
+            0, 0, 0, # x, y, z acceleration (not supported yet, ignored in GCS_Mavlink)
+            0, 0)    # yaw, yaw_rate (not supported yet, ignored in GCS_Mavlink) 
+
+        # send command to vehicle on 1 Hz cycle
+        for x in range(0,duration):
+            self.vehicle.send_mavlink(msg)
+            time.sleep(1)
 
     def rotate_clockwise(self, degrees: int) -> None:
         raise NotImplementedError
@@ -84,16 +116,22 @@ class MavicDrone(AbstractDrone):
         raise NotImplementedError
 
     def move_left(self, cm: int) -> None:
-        raise NotImplementedError
+        print("sending move left y axis axis \n")
+        self.send_ned_velocity(0, -1, 0, 2)
 
     def move_right(self, cm: int) -> None:
-        raise NotImplementedError
+        print("sending move right y axis axis \n")
+        self.send_ned_velocity(0, 1, 0, 2)
 
     def move_forward(self, cm: int) -> None:
-        raise NotImplementedError
-
+        """Move vehicle forward
+        """
+        print("sending move forward x axis \n")
+        self.send_ned_velocity(1, 0, 0, 2)
+        return
     def move_backward(self, cm: int) -> None:
-        raise NotImplementedError
+        print("sending move back x axis axis \n")
+        self.send_ned_velocity(-1, 0, 0, 2)
 
     def takeoff(self, target_altitude_metres: int) -> None:
         """
@@ -107,7 +145,7 @@ class MavicDrone(AbstractDrone):
 
         print("Taking off!")
         self.vehicle.simple_takeoff(target_altitude_metres)
-
+        
         while True:
             print(f"Drone altitude: {self.get_altitude()}")
 
@@ -117,6 +155,7 @@ class MavicDrone(AbstractDrone):
                 print(f"Reached altitude: {alt} (of target {target_altitude_metres} m)")
                 break
             time.sleep(1)
+        
 
     def land(self):
         self.__set_vehicle_mode("LAND")

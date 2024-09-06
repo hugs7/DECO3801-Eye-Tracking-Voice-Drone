@@ -9,34 +9,26 @@ import mavic_drone
 import tello_drone
 
 CONTROLLER_MAPPING = {
-    pygame.K_LEFT: "LEFT",
-    pygame.K_RIGHT: "RIGHT",
-    pygame.K_UP: "UP",
-    pygame.K_DOWN: "DOWN",
-    pygame.K_w: "FORWARD",
-    pygame.K_s: "BACKWARD",
-    pygame.K_l: "LAND",
-    pygame.K_SPACE: "TAKEOFF",
-    pygame.K_q: "ROTATE CW",
-    pygame.K_e: "ROTATE CCW",
-    pygame.K_z: "FLIP FORWARD",
+    81: "LEFT",         # ASCII for Left Arrow in OpenCV (cv2.waitKey())
+    83: "RIGHT",        # ASCII for Right Arrow in OpenCV (cv2.waitKey())
+    82: "UP",           # ASCII for Up Arrow in OpenCV (cv2.waitKey())
+    84: "DOWN",         # ASCII for Down Arrow in OpenCV (cv2.waitKey())
+    ord('w'): "FORWARD", # ASCII for 'w'
+    ord('s'): "BACKWARD",# ASCII for 's'
+    ord('l'): "LAND",    # ASCII for 'l'
+    ord(' '): "TAKEOFF", # ASCII for space bar
+    ord('q'): "ROTATE CW",# ASCII for 'q'
+    ord('e'): "ROTATE CCW",# ASCII for 'e'
+    ord('z'): "FLIP FORWARD",# ASCII for 'z'
 }
 
-
-def get_key_input():
-    # Returns a key pressed by the user in the terminal
-    for event in pygame.event.get():
-        if event.type == pygame.KEYDOWN:
-            return event.key
-    return None
-
-
 def get_key(command):
+    print(command)
     if command in CONTROLLER_MAPPING:
         return CONTROLLER_MAPPING[command]
 
 
-def handle_input(drone: Union[tello_drone.TelloDrone, mavic_drone.MavicDrone], command: str) -> None:
+def handle_input(drone: Union[tello_drone.TelloDrone, mavic_drone.MavicDrone], command) -> None:
     """
     Handles the input of a drone from voice, Gaze or manual input
     :param drone: The drone object to control
@@ -90,7 +82,7 @@ def handle_input(drone: Union[tello_drone.TelloDrone, mavic_drone.MavicDrone], c
             drone.move_back(50)
         case "TAKEOFF":
             # xtra = 1
-            drone.takeoff()
+            drone.takeoff(2)
         case "LAND":
             # xtra = 2
             drone.land()
