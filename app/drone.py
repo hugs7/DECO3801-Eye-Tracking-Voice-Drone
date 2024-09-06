@@ -1,5 +1,5 @@
 """
-Mock voice control module
+Mock drone module
 Hugo Burton
 06/09/2024
 """
@@ -11,13 +11,13 @@ import logging
 
 def loop():
     # Simulate work
-    logging.info(" >>> Begin voice control loop")
+    logging.info(" >>> Begin drone loop")
     sleep(1)
-    logging.info(" <<< End voice control loop")
+    logging.info(" <<< End drone loop")
 
 
 def main():
-    logging.info("Init voice control module")
+    logging.info("Init drone module")
 
     while True:
         loop()
