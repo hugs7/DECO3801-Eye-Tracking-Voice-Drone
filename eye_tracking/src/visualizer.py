@@ -58,22 +58,36 @@ class Visualizer:
 
     def draw_labelled_rectangle(
         self,
-        overlay: np.ndarray,
         top_left: Tuple[int, int],
         bottom_right: Tuple[int, int],
-        color: Tuple[int, int, int],
-        alpha: float,
+        bg_color: Tuple[int, int, int],
+        bg_alpha: float,
         text: str,
-        text_org: Tuple[int, int],
-        text_font_face: int,
-        text_line_type: int,
+        text_font_face: int = cv2.FONT_HERSHEY_SIMPLEX,
+        text_line_type: int = cv2.LINE_AA,
+        border_color: Optional[Tuple[int, int, int]] = None,
+        text_org: Optional[Tuple[int, int]] = None,
     ):
         """
         Draws a labelled rectangle on the specified overlay
         """
-        cv2.rectangle(overlay, top_left, bottom_right, color, -1)
-        self.create_opacity(overlay, alpha)
-        cv2.putText(self.image, text, text_org, text_font_face, 1, color, 2, text_line_type, False)
+        assert self.image is not None
+
+        if text_org is None:
+            # Place text in the center of the rectangle
+            text_org = ((top_left[0] + bottom_right[0]) // 2, (top_left[1] + bottom_right[1]) // 2)
+
+        overlay = np.zeros_like(self.image, np.uint8)
+        if border_color is not None:
+            cv2.rectangle(overlay, top_left, bottom_right, border_color, -1)
+
+            # Insets the rectangle to create a border effect
+            top_left = transforms.add_2d_point(top_left, (2, 2))
+            bottom_right = transforms.add_2d_point(bottom_right, (-2, -2))
+
+        cv2.rectangle(overlay, top_left, bottom_right, bg_color, -1)
+        self.create_opacity(overlay, bg_alpha)
+        cv2.putText(self.image, text, text_org, text_font_face, 1, bg_color, 2, text_line_type, False)
 
     def calculate_rectangle_boundaries(self, width_max: int) -> Tuple[int, int, int]:
         """
