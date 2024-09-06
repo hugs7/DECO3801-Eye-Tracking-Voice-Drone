@@ -8,17 +8,6 @@ from threading import Event
 import logging
 
 
-def thread_wrapper(stop_event, func) -> None:
-    """
-    Wrapper function to run a function in a thread.
-    Passes a stop event to the function as a signal to stop execution.
-    :param func: Function to run in a thread
-    :return: None
-    """
-    while not stop_event.is_set():
-        func(stop_event)
-
-
 def thread_exit_handler(stop_event: Optional[Event]) -> None:
     """
     Helper function to handle stop event in threads.
