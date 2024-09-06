@@ -52,7 +52,9 @@ class Visualizer:
         """
         Blends the original image and the overlay together, with a specified transparency/opacity
         """
-        cv2.addWeighted(overlay, opacity, self.image, 1 - opacity, 0, self.image)
+        img = np.zeros_like(self.image, np.uint8)
+        cv2.addWeighted(overlay, opacity, self.image, 1 - opacity, 0, img)
+        self.set_image(img)
 
     def draw_labelled_rectangle(
         self,
