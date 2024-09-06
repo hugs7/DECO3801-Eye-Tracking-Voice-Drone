@@ -5,7 +5,7 @@ Defines class for Mavic drone
 from dronekit import connect, VehicleMode
 
 import constants as c
-from ..drone import Drone
+from drone import Drone
 import cv2
 import time
 

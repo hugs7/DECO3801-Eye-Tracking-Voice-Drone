@@ -2,7 +2,7 @@
 Defines class for Tello drone
 """
 
-from ..drone import Drone
+from drone import Drone
 from djitellopy import tello
 import cv2
 import pygame

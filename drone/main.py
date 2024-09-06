@@ -6,10 +6,8 @@ from typing import Union
 import cv2
 
 import constants as c
-
 import controller
-import mavic
-import tello
+import models
 
 
 def loop(drone):
@@ -25,7 +23,7 @@ def loop(drone):
     cv2.waitKey(1)
 
 
-def read_camera_feed(drone: Union[mavic.MavicDrone, tello.TelloDrone]):
+def read_camera_feed(drone: Union[models.MavicDrone, models.TelloDrone]):
     """
     Reads the camera feed from the drone
     """
@@ -44,20 +42,13 @@ def render_drone_feed(img: cv2.typing.MatLike) -> None:
     cv2.imshow(c.WINDOW_NAME, img)
 
 
-def init(drone_type):
-    """
-    Initialises the drone
-    """
+"""
+Initialises the eye_tracking package.
+Author: Hugo Burton
+Last Updated: 21/08/2024
+"""
 
-    match drone_type:
-        case c.MAVIC:
-            vehicle = mavic.MavicDrone(c.MAVIC_IP, c.MAVIC_PORT)
-        case c.TELLO:
-            vehicle = tello.TelloDrone()
-        case _:
-            raise ValueError(f"Invalid drone type: {drone_type}")
-
-    return vehicle
+from init import init
 
 
 def main():
