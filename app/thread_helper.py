@@ -3,7 +3,7 @@ Helps with child threads
 """
 
 from typing import Optional
-from threading import Event
+from threading import Event, current_thread
 
 import logging
 
@@ -20,8 +20,10 @@ def thread_exit_handler(stop_event: Optional[Event]) -> None:
 
     # Module is running as a child thread
     if stop_event.is_set():
-        logging.info("Received stop signal. Exiting thread...")
+        thread = current_thread()
+        logging.info(f"Received stop signal from '{thread.name}'. Exiting thread...")
         raise SystemExit
+
 
 def get_function_name(func):
     # Use the inspect module to get the function's name
