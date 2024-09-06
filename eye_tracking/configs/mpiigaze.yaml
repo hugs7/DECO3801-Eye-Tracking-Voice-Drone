@@ -29,3 +29,4 @@ demo:
     show_normalized_image: false
     show_template_model: false
     upscale_dim: [1500, 843]
+    gaze_vector_y_scale: 0.15

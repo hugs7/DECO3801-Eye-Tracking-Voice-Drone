@@ -369,7 +369,7 @@ class GazeDetector:
 
         # Draw the point on the screen the user is looking at
         point_on_screen = self.average_eye_center + (self.average_eye_distance * 0.9) * self.average_gaze_vector
-        point_on_screen[1] *= 0.15  # Scale y-coordinate
+        point_on_screen[1] *= self.config.demo.gaze_vector_y_scale  # Scale y-coordinate
 
         # Update buffer and calculate smoothed point
         self.point_buffer.append(point_on_screen)
@@ -388,6 +388,7 @@ class GazeDetector:
 
         sides = ["left", "right"]
         base_bg_alpha = 0.05
+        bg_alpha_boost_hitbox = 0.2
         bg_color = (0, 0, 255)
 
         # Determine if user is looking in one of the hit-boxes
@@ -401,7 +402,7 @@ class GazeDetector:
             text = f"Looking {looking_hitbox}" if looking_hitbox else ""
             border = None
             if looking_hitbox:
-                bg_alpha = base_bg_alpha + 0.15
+                bg_alpha = base_bg_alpha + bg_alpha_boost_hitbox
                 border = (255, 0, 0)
             else:
                 bg_alpha = base_bg_alpha
