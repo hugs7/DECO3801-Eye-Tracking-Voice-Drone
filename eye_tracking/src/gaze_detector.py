@@ -434,16 +434,21 @@ class GazeDetector:
             return
 
         # Draw the point on the screen the user is looking at
-        point_on_screen = self.average_eye_center + (self.average_eye_distance * 0.9) * self.average_gaze_vector
-        point_on_screen[1] *= self.config.demo.gaze_vector_y_scale  # Scale y-coordinate
+        point_on_screen = (
+            self.average_eye_center
+            + (self.average_eye_distance * self.config.gaze_point.z_projection_multiplier) * self.average_gaze_vector
+        )
+        point_on_screen[1] *= self.config.gaze_point.gaze_vector_y_scale
 
         # Update buffer and calculate smoothed point
         self.point_buffer.append(point_on_screen)
-        if len(self.point_buffer) > self.point_on_screen_smoothing_factor:
-            self.point_buffer.pop(0)  # Remove oldest point
+        if len(self.point_buffer) > self.config.gaze_point.smoothing_frames:
+            self.point_buffer.pop(0)
 
         smoothed_3d_point = np.mean(self.point_buffer, axis=0)
-        self.gaze_2d_point = self.visualizer.draw_3d_point(smoothed_3d_point, color=(0, 0, 255), size=20, clamp_to_screen=True)
+        self.gaze_2d_point = self.visualizer.draw_3d_point(
+            smoothed_3d_point, color=(0, 0, 255), size=self.config.gaze_point.dot_size, clamp_to_screen=True
+        )
 
     def _draw_gaze_region(self) -> None:
         """

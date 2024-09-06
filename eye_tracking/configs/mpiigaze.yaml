@@ -12,6 +12,11 @@ gaze_estimator:
     use_dummy_camera_params: false
     normalized_camera_params: ${PACKAGE_ROOT}/normalized_camera_params/mpiigaze.yaml
     normalized_camera_distance: 0.6
+gaze_point:
+    smoothing_frames: 8
+    z_projection_multiplier: 0.9
+    gaze_vector_y_scale: 0.15
+    dot_size: 20
 demo:
     use_camera: true
     display_on_screen: true
@@ -29,5 +34,4 @@ demo:
     show_normalized_image: false
     show_template_model: false
     upscale_dim: [1500, 843]
-    gaze_vector_y_scale: 0.15
     hitbox_width_proprtion: 0.2
