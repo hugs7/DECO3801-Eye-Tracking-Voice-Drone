@@ -157,6 +157,12 @@ class GazeDetector:
 
         if self.config.demo.use_camera:
             self.visualizer.flip_image()
+            self._flip_points()
+
+        for face in faces:
+            if self.calibrated:
+                self._draw_gaze_region()
+
         if self.writer:
             self.writer.write(self.visualizer.image)
 
@@ -268,6 +274,13 @@ class GazeDetector:
         self.calibrated = True
         logger.info("Calibration successful.")
 
+    def _flip_points(self):
+        """
+        Flips the 2D gaze point along the x-axis to match the flipped image.
+        """
+        if self.gaze_2d_point is not None:
+            self.gaze_2d_point = self.visualizer.flip_point_x(self.gaze_2d_point)
+
     def _draw_face_bbox(self, face: Face) -> None:
         """
         Wrapper to draw a bounding box around the face.
@@ -360,6 +373,37 @@ class GazeDetector:
         if len(self.point_buffer) > self.point_on_screen_smoothing_factor:
             self.point_buffer.pop(0)  # Remove oldest point
 
-        self.smoothed_point = np.mean(self.point_buffer, axis=0)
-        self.visualizer.draw_3d_point(self.smoothed_point, color=(0, 0, 255), size=20, clamp_to_screen=True)
+        smoothed_3d_point = np.mean(self.point_buffer, axis=0)
+        self.gaze_2d_point = self.visualizer.draw_3d_point(smoothed_3d_point, color=(0, 0, 255), size=20, clamp_to_screen=True)
+
+    def _draw_gaze_region(self):
+        """
+        Highlights the region on the screen the user is looking at.
+        """
+        if not self.show_gaze_vector:
+            return
+
+        sides = ["left", "right"]
+        base_bg_alpha = 0.05
+        bg_color = (0, 0, 255)
+
+        # Determine if user is looking in one of the hit-boxes
+        logger.info(f"Gaze 2d Point: {self.gaze_2d_point}")
+        for side in sides:
+            looking_hitbox = None
+            side_hitbox = self.hitboxes[side]
+            if side_hitbox["top_left"][0] <= self.gaze_2d_point[0] <= side_hitbox["bottom_right"][0]:
+                looking_hitbox = side
+
+            text = f"Looking {looking_hitbox}" if looking_hitbox else ""
+            border = None
+            if looking_hitbox:
+                bg_alpha = base_bg_alpha + 0.15
+                border = (255, 0, 0)
+            else:
+                bg_alpha = base_bg_alpha
+
+            top_left = side_hitbox["top_left"]
+            bottom_right = side_hitbox["bottom_right"]
+            self.visualizer.draw_labelled_rectangle(top_left, bottom_right, bg_color, bg_alpha, text, border_color=border)
 
