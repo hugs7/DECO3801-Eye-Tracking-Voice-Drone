@@ -65,7 +65,9 @@ class Visualizer:
         text: str,
         text_font_face: int = cv2.FONT_HERSHEY_SIMPLEX,
         text_line_type: int = cv2.LINE_AA,
+        font_scale: float = 1.0,
         border_color: Optional[Tuple[int, int, int]] = None,
+        border_thickness: int = 2,
         text_org: Optional[Tuple[int, int]] = None,
     ):
         """
@@ -82,12 +84,12 @@ class Visualizer:
             cv2.rectangle(overlay, top_left, bottom_right, border_color, -1)
 
             # Insets the rectangle to create a border effect
-            top_left = transforms.add_2d_point(top_left, (2, 2))
-            bottom_right = transforms.add_2d_point(bottom_right, (-2, -2))
+            top_left = transforms.add_2d_point(top_left, (border_thickness, border_thickness))
+            bottom_right = transforms.add_2d_point(bottom_right, (-border_thickness, -border_thickness))
 
         cv2.rectangle(overlay, top_left, bottom_right, bg_color, -1)
         self.create_opacity(overlay, bg_alpha)
-        cv2.putText(self.image, text, text_org, text_font_face, 1, bg_color, 2, text_line_type, False)
+        cv2.putText(self.image, text, text_org, text_font_face, font_scale, bg_color, 2, text_line_type, False)
 
     def draw_3d_point(
         self, point3d: np.ndarray, color: Tuple[int, int, int] = (255, 0, 255), size=3, clamp_to_screen: bool = False
