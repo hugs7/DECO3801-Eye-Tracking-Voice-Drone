@@ -1,5 +1,5 @@
 """
-Constnats file. Please define in UPPER_SNAKE_CASE
+Constants file. Please define in UPPER_SNAKE_CASE
 """
 
 # Drone Types
