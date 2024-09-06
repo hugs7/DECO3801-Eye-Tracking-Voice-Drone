@@ -4,18 +4,33 @@ Hugo Burton
 06/09/2024
 """
 
+import importlib
 from threading import Thread, Event
 import logging
 from time import sleep
 
-if __name__ == "__main__":
-    from eye_tracking import main as eye_tracking
-    from voice_control import main as voice_control
-    from drone import main as drone
-else:
-    from .eye_tracking import main as eye_tracking
-    from .voice_control import main as voice_control
-    from .drone import main as drone
+
+def dynamic_import(module_name: str, alias: str):
+    """
+    Dynamically imports a module based on the current script context.
+    :param module_name: Name of the module to import
+    :param alias: Alias for the imported module
+    :return: Imported module
+    """
+    if __name__ == "__main__":
+        module = importlib.import_module(module_name)
+    else:
+        # Handle relative imports
+        module = importlib.import_module(
+            f".{module_name}", package=__package__)
+
+    return getattr(module, alias)
+
+
+eye_tracking = dynamic_import("eye_tracking", "main")
+voice_control = dynamic_import("voice_control", "main")
+drone = dynamic_import("drone", "main")
+
 
 stop_event = Event()
 
