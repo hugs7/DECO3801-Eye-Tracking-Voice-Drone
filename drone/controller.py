@@ -2,7 +2,7 @@
 Controller for the drone, handles the input of a drone from voice, Gaze or manual input
 """
 
-from typing import Union
+from typing import Union, Optional
 import pygame
 import time
 import tello
@@ -23,17 +23,24 @@ CONTROLLER_MAPPING = {
 }
 
 
-def get_key_input():
-    # Returns a key pressed by the user in the terminal
+def get_key_input() -> Optional[int]:
+    """
+    Returns a key pressed by the user in the terminal
+    :return: The key pressed by the user or None if no key was pressed in the delay cycle
+    """
     for event in pygame.event.get():
         if event.type == pygame.KEYDOWN:
             return event.key
-    return None
 
 
-def get_key(command):
-    if command in CONTROLLER_MAPPING:
-        return CONTROLLER_MAPPING[command]
+def get_to_command(key: int) -> Optional[str]:
+    """
+    Takes a key and returns the command associated with it according to the CONTROLLER_MAPPING
+    :param key: The key to get the command for
+    :return: The command associated with the key or None if the key is not in the CONTROLLER_MAPPING
+    """
+    if key in CONTROLLER_MAPPING:
+        return CONTROLLER_MAPPING[key]
 
 
 def handle_input(drone: Union[tello.TelloDrone, mavic.MavicDrone], command: str) -> None:
@@ -50,7 +57,7 @@ def handle_input(drone: Union[tello.TelloDrone, mavic.MavicDrone], command: str)
     liftSpeed = 10
     moveSpeed = 10
     rotationSpeed = 10
-    sysCom = get_key(command)
+    sysCom = get_to_command(command)
     print(sysCom)
 
     match sysCom:
