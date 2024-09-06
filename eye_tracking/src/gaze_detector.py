@@ -301,7 +301,7 @@ class GazeDetector:
 
         euler_angles = face.head_pose_rot.as_euler("XYZ", degrees=True)
         pitch, yaw, roll = face.change_coordinate_system(euler_angles)
-        logger.info(f"[head] pitch: {pitch:.2f}, yaw: {yaw:.2f}, " f"roll: {roll:.2f}, distance: {face.distance:.2f}")
+        logger.debug(f"[head] pitch: {pitch:.2f}, yaw: {yaw:.2f}, " f"roll: {roll:.2f}, distance: {face.distance:.2f}")
 
     def _draw_landmarks(self, face: Face) -> None:
         """
@@ -347,7 +347,7 @@ class GazeDetector:
             self.visualizer.draw_3d_line(eye.center, end_point)
 
             pitch, yaw = np.rad2deg(eye.vector_to_angle(eye.gaze_vector))
-            logger.info(f"[{key.name.lower()}] pitch: {pitch:.2f}, yaw: {yaw:.2f}")
+            logger.debug(f"[{key.name.lower()}] pitch: {pitch:.2f}, yaw: {yaw:.2f}")
 
         self.average_eye_distance = (face.reye.distance + face.leye.distance) / 2
         self.average_eye_center = (face.reye.center + face.leye.center) / 2
@@ -406,4 +406,3 @@ class GazeDetector:
             top_left = side_hitbox["top_left"]
             bottom_right = side_hitbox["bottom_right"]
             self.visualizer.draw_labelled_rectangle(top_left, bottom_right, bg_color, bg_alpha, text, border_color=border)
-
