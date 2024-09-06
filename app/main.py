@@ -60,7 +60,7 @@ def main():
             sleep(0.1)
     except KeyboardInterrupt:
         logging.info("Interrupted! Stopping all threads...")
-        stop_event.set()  # Signal all threads to stop
+        stop_event.set()
 
         # Ensure all threads are properly joined after signaling them to stop
         for thread in threads:
