@@ -87,7 +87,7 @@ class Visualizer:
 
     def draw_bounds(self, points: np.ndarray, color: Tuple[int, int, int]):
         """
-        Draws the left and right bounds depending where the user's gaze is
+        Draws the left and right bounds depending where the user's gaze is directed
         """
         assert self.image is not None
 
