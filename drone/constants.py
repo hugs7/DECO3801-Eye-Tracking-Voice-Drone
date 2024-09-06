@@ -2,26 +2,18 @@
 Constants file. Please define in UPPER_SNAKE_CASE
 """
 
-# Drone Types
-
+# === Drone Types ===
 MAVIC = "mavic"
 TELLO = "tello"
 DRONE_TYPES = [MAVIC, TELLO]
 
-
-# Rendered Window
+# === Rendered Window ===
 WINDOW_NAME = "Drone Capture"
 
-# Drone Controlling
+# === Drone Controlling ===
 ALTITUDE_THRESHOLD_MULTIPLIER = 0.95
 
-
-# Tello
+# === Tello ===
 TELLO_SPEED_CM_S = 100
 
-
-# Mavic
-MAVIC_IP = "192.168.69.244"
-MAVIC_PORT = 14551
-
-MAVIC_CONNECTION_TIMEOUT = 60
+# === Mavic ===
