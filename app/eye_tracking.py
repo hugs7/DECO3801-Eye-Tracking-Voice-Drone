@@ -18,7 +18,7 @@ def loop():
     """
 
     logging.info(" >>> Begin Eye Tracking loop")
-    sleep(1)
+    sleep(1.4)
     logging.info(" <<< End Eye Tracking loop")
 
 

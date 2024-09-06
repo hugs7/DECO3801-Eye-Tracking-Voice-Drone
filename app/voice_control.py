@@ -17,7 +17,7 @@ def loop():
     """
 
     logging.info(" >>> Begin voice control loop")
-    sleep(1)
+    sleep(0.9)
     logging.info(" <<< End voice control loop")
 
 
