@@ -20,7 +20,7 @@ class MavicDrone(Drone):
 
         # Try connecting with a longer timeout
         try:
-            vehicle = connect(connection_string, wait_ready=True, timeout=60)
+            vehicle = connect(connection_string, wait_ready=True, timeout=c.MAVIC_CONNECTION_TIMEOUT)
             print("Connected to vehicle!")
         except Exception as e:
             print(f"Failed to connect: {e}")
