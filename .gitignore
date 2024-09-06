@@ -4,5 +4,4 @@ node_modules
 **/.venv
 *.env
 .VSCodeCounter
-**/.env
 __pycache__
