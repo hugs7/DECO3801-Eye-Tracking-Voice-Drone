@@ -113,14 +113,19 @@ class Visualizer:
             # text_org = (right_boundary - boundary_width//2, height_max//2)
             self.draw_labelled_rectangle(overlay, top_left, bottom_right, color, alpha, text, text_org, text_front_face, text_line_type)
 
-    def draw_3d_point(self, point3d: np.ndarray, color: Tuple[int, int, int] = (255, 0, 255), size=3) -> None:
+    def draw_3d_point(
+        self, point3d: np.ndarray, color: Tuple[int, int, int] = (255, 0, 255), size=3, clamp_to_screen: bool = False
+    ) -> Tuple[int, int]:
         """
         Draw a point from 3D world coordinates onto the image.
         """
         assert self.image is not None
         assert point3d.shape == (3,)
-        point2d = self._camera.project_points(point3d)
+        point2d = self._camera.project_point(point3d)
+        if clamp_to_screen:
+            point2d = self._clamp_point(point2d)
         self.draw_points(point2d[np.newaxis], color=color, size=size)
+        return point2d
 
     def draw_3d_points(
         self, points3d: np.ndarray, color: Tuple[int, int, int] = (255, 0, 255), size=3, clamp_to_screen: bool = False
@@ -132,7 +137,7 @@ class Visualizer:
         assert points3d.shape[1] == 3
         points2d = self._camera.project_points(points3d)
         if clamp_to_screen:
-            points2d = np.clip(points2d, 0, np.array(self.image.shape[:2])[::-1])
+            points2d = self._clamp_point(points2d)
         self.draw_points(points2d, color=color, size=size)
 
     def draw_3d_line(self, point0: np.ndarray, point1: np.ndarray, color: Tuple[int, int, int] = (255, 255, 0), lw=1) -> None:
@@ -160,13 +165,9 @@ class Visualizer:
             pt = self._convert_pt(pt)
             cv2.line(self.image, center, pt, color, lw, cv2.LINE_AA)
 
-    def add_text(
-        self, text: str, position: Tuple[int, int, int], color: Tuple[int, int, int] = (100, 200, 200), font_scale: float = 1
-    ) -> None:
-        assert self.image is not None
+    def _clamp_point(self, point_or_points: np.ndarray) -> np.ndarray:
+        """
+        Clamp the point or points to the image resolution
+        """
+        return np.clip(point_or_points, 0, np.array(self.image.shape[:2])[::-1])
 
-        # Ensure the position is a 2D point (x, y)
-        if len(position) == 3:
-            position = (int(position[0]), int(position[1]))
-
-        cv2.putText(self.image, text, position, cv2.FONT_HERSHEY_SIMPLEX, font_scale, color, 2, cv2.LINE_AA)
