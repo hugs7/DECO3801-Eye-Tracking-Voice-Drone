@@ -23,8 +23,7 @@ def dynamic_import(module_name: str, alias: str):
         module = importlib.import_module(module_name)
     else:
         # Handle relative imports
-        module = importlib.import_module(
-            f".{module_name}", package=__package__)
+        module = importlib.import_module(f".{module_name}", package=__package__)
 
     return getattr(module, alias)
 
@@ -33,6 +32,7 @@ eye_tracking = dynamic_import("eye_tracking", "main")
 voice_control = dynamic_import("voice_control", "main")
 drone = dynamic_import("drone", "main")
 
+# === Globals ===
 
 stop_event = Event()
 
