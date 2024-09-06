@@ -5,8 +5,7 @@ Controller for the drone, handles the input of a drone from voice, Gaze or manua
 from typing import Union, Optional
 import pygame
 import time
-import tello
-import mavic
+import models
 
 CONTROLLER_MAPPING = {
     pygame.K_LEFT: "LEFT",
@@ -43,7 +42,7 @@ def get_to_command(key: int) -> Optional[str]:
         return CONTROLLER_MAPPING[key]
 
 
-def handle_input(drone: Union[tello.TelloDrone, mavic.MavicDrone], command: str) -> None:
+def handle_input(drone: Union[models.TelloDrone, models.MavicDrone], command: str) -> None:
     """
     Handles the input of a drone from voice, Gaze or manual input
     :param drone: The drone object to control
