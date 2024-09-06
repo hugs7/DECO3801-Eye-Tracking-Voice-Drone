@@ -9,9 +9,14 @@ from queue import Queue
 from threading import Thread, Event
 import logging
 
-from .eye_tracking import loop as eye_tracking_loop
-from .voice_control import loop as voice_control_loop
-from .drone import loop as drone_loop
+if __name__ == "__main__":
+    from eye_tracking import loop as eye_tracking_loop
+    from voice_control import loop as voice_control_loop
+    from drone import loop as drone_loop
+else:
+    from .eye_tracking import loop as eye_tracking_loop
+    from .voice_control import loop as voice_control_loop
+    from .drone import loop as drone_loop
 
 
 ticking_queue = Queue()
