@@ -25,6 +25,19 @@ def thread_exit_handler(stop_event: Optional[Event]) -> None:
         raise SystemExit
 
 
-def get_function_name(func):
-    # Use the inspect module to get the function's name
+def get_function_name(func) -> str:
+    """
+    Inspects the func to get the function's name
+    :param func: Function to inspect
+    :return: Function name
+    """
     return func.__name__
+
+
+def get_function_module(func) -> str:
+    """
+    Inspects the func to get the function's module
+    :param func: Function to inspect
+    :return: Module name
+    """
+    return func.__module__

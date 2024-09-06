@@ -9,7 +9,7 @@ from threading import Thread, Event
 import logging
 from time import sleep
 
-from thread_helper import get_function_name
+from thread_helper import get_function_module
 
 
 def dynamic_import(module_name: str, alias: str):
@@ -47,7 +47,7 @@ def main():
 
     # Create threads for each of the components
     thread_functions = [eye_tracking, voice_control, drone]
-    threads = [Thread(target=lambda: func(stop_event), name=f"thread_{get_function_name(func)}") for func in thread_functions]
+    threads = [Thread(target=lambda: func(stop_event), name=f"thread_{get_function_module(func)}") for func in thread_functions]
 
     # Start all threads
     for thread in threads:
