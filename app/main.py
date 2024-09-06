@@ -24,9 +24,9 @@ def main():
 
     # Create threads for each of the components
     threads = [
-        Thread(target=eye_tracking_loop),
-        Thread(target=voice_control_loop),
-        Thread(target=drone_loop),
+        Thread(target=lambda: thread_wrapper(eye_tracking_loop)),
+        Thread(target=lambda: thread_wrapper(voice_control_loop)),
+        Thread(target=lambda: thread_wrapper(drone_loop)),
     ]
 
     for thread in threads:
