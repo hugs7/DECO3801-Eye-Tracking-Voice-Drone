@@ -19,13 +19,13 @@ def loop(shared_data: Optional[Dict] = None, data_lock: Optional[Lock] = None):
     Drone Loop
     """
 
-    logger.info(">>> Begin drone loop")
+    logger.debug(">>> Begin drone loop")
     if not is_main_thread():
         random_num = shared_data["eye_tracking_data"]
         logger.info(f"Received random number from eye_tracking thread: {random_num}")
 
     sleep(1)
-    logger.info("<<< End drone loop")
+    logger.debug("<<< End drone loop")
 
 
 def main(stop_event: Optional[Event] = None, shared_data: Optional[Dict] = None, data_lock: Optional[Lock] = None):

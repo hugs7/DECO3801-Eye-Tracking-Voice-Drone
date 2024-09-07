@@ -20,7 +20,7 @@ def loop(shared_data: Optional[Dict] = None, data_lock: Optional[Lock] = None):
     Eye Tracking Loop
     """
 
-    logger.info(">>> Begin Eye Tracking loop")
+    logger.debug(">>> Begin Eye Tracking loop")
 
     random_num = random.randint(1, 1500)
     sleep(1.4)
@@ -29,7 +29,7 @@ def loop(shared_data: Optional[Dict] = None, data_lock: Optional[Lock] = None):
         with data_lock:
             shared_data["eye_tracking_data"] = random_num
 
-    logger.info("<<< End Eye Tracking loop")
+    logger.debug("<<< End Eye Tracking loop")
 
 
 def main(stop_event: Optional[Event] = None, shared_data: Optional[Dict] = None, data_lock: Optional[Lock] = None):

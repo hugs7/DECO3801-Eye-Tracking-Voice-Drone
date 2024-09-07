@@ -47,7 +47,7 @@ def is_any_thread_alive(threads):
 
 
 def main():
-    root_logger.info(">>> Begin")
+    root_logger.debug(">>> Begin")
 
     # Create threads for each of the components
     thread_functions = [eye_tracking, voice_control, drone]
@@ -58,6 +58,8 @@ def main():
     ]
 
     logging.getLogger("voice_control").setLevel(logging.CRITICAL + 1)
+    logging.getLogger("eye_tracking").setLevel(logging.DEBUG)
+    logging.getLogger("drone").setLevel(logging.DEBUG)
 
     # Start all threads
     for thread in threads:
@@ -69,14 +71,14 @@ def main():
             # Sleep for a short duration to prevent busy-waiting
             sleep(c.BUSY_WAIT_PERIOD_SECONDS)
     except KeyboardInterrupt:
-        root_logger.info("Interrupted! Stopping all threads...")
+        root_logger.critical("Interrupted! Stopping all threads...")
         stop_event.set()
 
         # Ensure all threads are properly joined after signaling them to stop
         for thread in threads:
             thread.join()
 
-    root_logger.info("<<< End")
+    root_logger.debug("<<< End")
 
 
 if __name__ == "__main__":
