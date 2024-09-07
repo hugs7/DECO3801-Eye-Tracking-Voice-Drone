@@ -25,4 +25,9 @@ def init_logger(level: int = logging.INFO) -> logging.Logger:
     if is_main_thread():
         logger.setLevel(level)
 
+    # Set format to include the logger name
+    console_handler = logging.StreamHandler()
+    formatter = logging.Formatter(f"%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+    console_handler.setFormatter(formatter)
+    logger.addHandler(console_handler)
     return logger
