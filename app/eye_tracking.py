@@ -22,7 +22,7 @@ def loop():
     logging.info(" <<< End Eye Tracking loop")
 
 
-def main(stop_event: Optional[Event], shared_data: Optional[Dict], data_lock: Optional[Lock]):
+def main(stop_event: Optional[Event] = None, shared_data: Optional[Dict] = None, data_lock: Optional[Lock] = None):
     logging.info("Init eye tracking module")
 
     while True:
