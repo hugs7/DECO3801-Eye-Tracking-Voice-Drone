@@ -19,9 +19,9 @@ def loop():
     Voice Control Loop
     """
 
-    logger.info(" >>> Begin voice control loop")
+    logger.info(">>> Begin voice control loop")
     sleep(0.9)
-    logger.info(" <<< End voice control loop")
+    logger.info("<<< End voice control loop")
 
 
 def main(stop_event: Optional[Event] = None, shared_data: Optional[Dict] = None, data_lock: Optional[Lock] = None):

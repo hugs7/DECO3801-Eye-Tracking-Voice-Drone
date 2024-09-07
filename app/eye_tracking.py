@@ -7,28 +7,36 @@ Hugo Burton
 from typing import Optional, Dict
 from threading import Event, Lock
 from time import sleep
+import random
 
-from thread_helper import thread_exit_handler
+from thread_helper import thread_exit_handler, is_main_thread
 from logger_helper import init_logger
 
 logger = init_logger()
 
 
-def loop():
+def loop(shared_data: Optional[Dict] = None, data_lock: Optional[Lock] = None):
     """
     Eye Tracking Loop
     """
 
-    logger.info(" >>> Begin Eye Tracking loop")
+    logger.info(">>> Begin Eye Tracking loop")
+
+    random_num = random.randint(1, 1500)
     sleep(1.4)
-    logger.info(" <<< End Eye Tracking loop")
+    logger.info(f"Set random number: {random_num}")
+    if not is_main_thread():
+        with data_lock:
+            shared_data["eye_tracking_data"] = random_num
+
+    logger.info("<<< End Eye Tracking loop")
 
 
 def main(stop_event: Optional[Event] = None, shared_data: Optional[Dict] = None, data_lock: Optional[Lock] = None):
     logger.info("Init eye tracking module")
 
     while True:
-        loop()
+        loop(shared_data, data_lock)
         thread_exit_handler(stop_event)
 
 

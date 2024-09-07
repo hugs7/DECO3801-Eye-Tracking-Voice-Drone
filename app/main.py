@@ -46,7 +46,7 @@ def is_any_thread_alive(threads):
 
 
 def main():
-    root_logger.info(" >>> Begin")
+    root_logger.info(">>> Begin")
 
     # Create threads for each of the components
     thread_functions = [eye_tracking, voice_control, drone]
@@ -73,7 +73,7 @@ def main():
         for thread in threads:
             thread.join()
 
-    root_logger.info(" <<< End")
+    root_logger.info("<<< End")
 
 
 if __name__ == "__main__":
