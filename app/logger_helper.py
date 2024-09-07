@@ -9,6 +9,7 @@ from str_helper import to_title_case
 
 RESET = "\033[0m"
 BRIGHT_RED = "\033[91m"
+CRITICAL_RED = "\033[41m"
 BRIGHT_YELLOW = "\033[93m"
 BRIGHT_BLUE = "\033[94m"
 BRIGHT_INFO = "\033[96m"
@@ -75,7 +76,7 @@ class LoggerFormatter(logging.Formatter):
             case logging.ERROR:
                 return BRIGHT_RED
             case logging.CRITICAL:
-                return BRIGHT_RED
+                return CRITICAL_RED
             case _:
                 return RESET
 
