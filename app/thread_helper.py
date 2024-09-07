@@ -7,6 +7,16 @@ from threading import Event, current_thread
 
 import logging
 
+logger = logging.getLogger(__name__)
+
+
+def is_main_thread() -> bool:
+    """
+    Checks if the current thread is the main thread
+    :return: True if the current thread is the main thread, False otherwise
+    """
+    return current_thread().name == "MainThread"
+
 
 def thread_exit_handler(stop_event: Optional[Event]) -> None:
     """
@@ -21,7 +31,7 @@ def thread_exit_handler(stop_event: Optional[Event]) -> None:
     # Module is running as a child thread
     if stop_event.is_set():
         thread = current_thread()
-        logging.info(f"Received stop signal from '{thread.name}'. Exiting thread...")
+        logger.info(f"Received stop signal from '{thread.name}'. Exiting thread...")
         raise SystemExit
 
 
