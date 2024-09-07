@@ -4,8 +4,8 @@ Hugo Burton
 06/09/2024
 """
 
-from typing import Optional
-from threading import Event
+from typing import Optional, Dict
+from threading import Event, Lock
 import logging
 from time import sleep
 
@@ -22,7 +22,7 @@ def loop():
     logging.info(" <<< End Eye Tracking loop")
 
 
-def main(stop_event: Optional[Event]):
+def main(stop_event: Optional[Event], shared_data: Optional[Dict], data_lock: Optional[Lock]):
     logging.info("Init eye tracking module")
 
     while True:

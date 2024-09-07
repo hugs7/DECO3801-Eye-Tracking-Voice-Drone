@@ -5,7 +5,7 @@ Hugo Burton
 """
 
 import importlib
-from threading import Thread, Event
+from threading import Thread, Event, Lock
 import logging
 from time import sleep
 
@@ -36,6 +36,7 @@ drone = dynamic_import("drone", "main")
 # === Globals ===
 
 stop_event = Event()
+data_lock = Lock()
 
 
 def is_any_thread_alive(threads):
@@ -48,7 +49,11 @@ def main():
 
     # Create threads for each of the components
     thread_functions = [eye_tracking, voice_control, drone]
-    threads = [Thread(target=lambda func=func: func(stop_event), name=f"thread_{get_function_module(func)}") for func in thread_functions]
+    shared_data = {f"{get_function_module(func)}_data": None for func in thread_functions}
+    threads = [
+        Thread(target=lambda func=func: func(stop_event, shared_data, data_lock), name=f"thread_{get_function_module(func)}")
+        for func in thread_functions
+    ]
 
     # Start all threads
     for thread in threads:

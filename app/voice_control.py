@@ -6,8 +6,8 @@ Hugo Burton
 
 from time import sleep
 import logging
-from typing import Optional
-from threading import Event
+from typing import Optional, Dict
+from threading import Event, Lock
 from thread_helper import thread_exit_handler
 
 
@@ -21,7 +21,7 @@ def loop():
     logging.info(" <<< End voice control loop")
 
 
-def main(stop_event: Optional[Event]):
+def main(stop_event: Optional[Event], shared_data: Optional[Dict], data_lock: Optional[Lock]):
     logging.info("Init voice control module")
 
     while True:
