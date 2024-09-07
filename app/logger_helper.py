@@ -12,6 +12,27 @@ BRIGHT_RED = "\033[91m"
 BRIGHT_YELLOW = "\033[93m"
 BRIGHT_BLUE = "\033[94m"
 BRIGHT_INFO = "\033[96m"
+GREY = "\033[90m"
+
+
+TRACE_LEVEL_NUM = 5
+TRACE_LEVEL_NAME = "TRACE"
+
+
+def add_trace_level():
+    """
+    Add the TRACE level to the logging module.
+    """
+    logging.addLevelName(TRACE_LEVEL_NUM, TRACE_LEVEL_NAME)
+
+    def trace(self, message, *args, **kwargs):
+        if self.isEnabledFor(TRACE_LEVEL_NUM):
+            self._log(TRACE_LEVEL_NUM, message, args, **kwargs)
+
+    logging.Logger.trace = trace
+
+
+add_trace_level()
 
 
 class LoggerFormatter(logging.Formatter):
@@ -28,21 +49,35 @@ class LoggerFormatter(logging.Formatter):
         record.output_name = to_title_case(record.name)
 
         # Set color based on log level
-        if record.levelno == logging.DEBUG:
-            color = BRIGHT_BLUE
-        elif record.levelno == logging.INFO:
-            color = BRIGHT_INFO
-        elif record.levelno == logging.WARNING:
-            color = BRIGHT_YELLOW
-        elif record.levelno == logging.ERROR:
-            color = BRIGHT_RED
-        elif record.levelno == logging.CRITICAL:
-            color = BRIGHT_RED
-        else:
-            color = RESET
+        color = self.get_log_colour(record.levelno)
 
         formatted_message = super().format(record)
         return f"{color}{formatted_message}{RESET}"
+
+    def get_log_colour(self, level: int) -> str:
+        """
+        Get the log colour based on the log level.
+        :param level: Log level
+        :return: Log colour
+        """
+        # Custom log levels
+        if level == TRACE_LEVEL_NUM:
+            return GREY
+
+        # Standard log levels
+        match level:
+            case logging.DEBUG:
+                return BRIGHT_BLUE
+            case logging.INFO:
+                return BRIGHT_INFO
+            case logging.WARNING:
+                return BRIGHT_YELLOW
+            case logging.ERROR:
+                return BRIGHT_RED
+            case logging.CRITICAL:
+                return BRIGHT_RED
+            case _:
+                return RESET
 
 
 def init_logger(level: int = logging.INFO) -> logging.Logger:
@@ -52,8 +87,8 @@ def init_logger(level: int = logging.INFO) -> logging.Logger:
     :return: Logger instance
     """
 
-    # Use inspect to find the caller's module
-    caller_frame = inspect.stack()[1]  # [1] gives the caller of this function
+    # [1] gives the caller of this function
+    caller_frame = inspect.stack()[1]
     caller_module = inspect.getmodule(caller_frame[0])
 
     # Use the caller's module name for the logger
@@ -90,7 +125,7 @@ def attach_formatter(logger: logging.Logger) -> None:
     :return: None
     """
 
-    formatter = LoggerFormatter("%(asctime)s\t%(output_name)-13s\t%(levelname)s\t%(message)s")
+    formatter = LoggerFormatter("%(asctime)s%(output_name)-13s%(levelname)-13s%(message)s")
 
     if not logger.handlers:
         console_handler = logging.StreamHandler()
@@ -99,3 +134,22 @@ def attach_formatter(logger: logging.Logger) -> None:
     else:
         for handler in logger.handlers:
             handler.setFormatter(formatter)
+
+
+def test_logger():
+    """
+    Test the logger helper functions
+    """
+
+    logger = init_logger(TRACE_LEVEL_NUM)
+
+    logger.trace("This is a trace message")
+    logger.debug("This is a debug message")
+    logger.info("This is an info message")
+    logger.warning("This is a warning message")
+    logger.error("This is an error message")
+    logger.critical("This is a critical message")
+
+
+if __name__ == "__main__":
+    test_logger()
