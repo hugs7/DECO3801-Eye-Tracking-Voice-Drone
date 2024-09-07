@@ -6,11 +6,13 @@ Hugo Burton
 
 import importlib
 from threading import Thread, Event, Lock
-import logging
 from time import sleep
 
 import constants as c
 from thread_helper import get_function_module
+from logger_helper import init_root_logger
+
+root_logger = init_root_logger()
 
 
 def dynamic_import(module_name: str, alias: str):
@@ -44,8 +46,7 @@ def is_any_thread_alive(threads):
 
 
 def main():
-    logging.basicConfig(level=logging.INFO)
-    logging.info(" >>> Begin")
+    root_logger.info(" >>> Begin")
 
     # Create threads for each of the components
     thread_functions = [eye_tracking, voice_control, drone]
@@ -65,14 +66,14 @@ def main():
             # Sleep for a short duration to prevent busy-waiting
             sleep(c.BUSY_WAIT_PERIOD_SECONDS)
     except KeyboardInterrupt:
-        logging.info("Interrupted! Stopping all threads...")
+        root_logger.info("Interrupted! Stopping all threads...")
         stop_event.set()
 
         # Ensure all threads are properly joined after signaling them to stop
         for thread in threads:
             thread.join()
 
-    logging.info(" <<< End")
+    root_logger.info(" <<< End")
 
 
 if __name__ == "__main__":

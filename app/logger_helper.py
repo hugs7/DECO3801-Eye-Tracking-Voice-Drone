@@ -30,4 +30,18 @@ def init_logger(level: int = logging.INFO) -> logging.Logger:
     formatter = logging.Formatter(f"%(asctime)s - %(name)s - %(levelname)s - %(message)s")
     console_handler.setFormatter(formatter)
     logger.addHandler(console_handler)
+
+    return logger
+
+
+def init_root_logger(level: int = logging.INFO) -> logging.Logger:
+    """
+    Initialise the root logger with the specified logging level.
+    :param level: Logging level
+    :return: Logger instance
+    """
+
+    logger = logging.getLogger()
+    logger.setLevel(level)
+
     return logger
