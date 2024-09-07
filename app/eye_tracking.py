@@ -6,10 +6,12 @@ Hugo Burton
 
 from typing import Optional, Dict
 from threading import Event, Lock
-import logging
 from time import sleep
 
 from thread_helper import thread_exit_handler
+from logger_helper import init_logger
+
+logger = init_logger()
 
 
 def loop():
@@ -17,13 +19,13 @@ def loop():
     Eye Tracking Loop
     """
 
-    logging.info(" >>> Begin Eye Tracking loop")
+    logger.info(" >>> Begin Eye Tracking loop")
     sleep(1.4)
-    logging.info(" <<< End Eye Tracking loop")
+    logger.info(" <<< End Eye Tracking loop")
 
 
 def main(stop_event: Optional[Event] = None, shared_data: Optional[Dict] = None, data_lock: Optional[Lock] = None):
-    logging.info("Init eye tracking module")
+    logger.info("Init eye tracking module")
 
     while True:
         loop()

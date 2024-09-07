@@ -4,23 +4,28 @@ Hugo Burton
 06/09/2024
 """
 
-from time import sleep
-import logging
 from typing import Optional, Dict
 from threading import Event, Lock
+from time import sleep
 
 from thread_helper import thread_exit_handler
+from logger_helper import init_logger
+
+logger = init_logger()
 
 
 def loop():
-    # Simulate work
-    logging.info(" >>> Begin drone loop")
+    """
+    Drone Loop
+    """
+
+    logger.info(" >>> Begin drone loop")
     sleep(1)
-    logging.info(" <<< End drone loop")
+    logger.info(" <<< End drone loop")
 
 
 def main(stop_event: Optional[Event] = None, shared_data: Optional[Dict] = None, data_lock: Optional[Lock] = None):
-    logging.info("Init drone module")
+    logger.info("Init drone module")
 
     while True:
         loop()

@@ -4,11 +4,14 @@ Hugo Burton
 06/09/2024
 """
 
-from time import sleep
-import logging
 from typing import Optional, Dict
 from threading import Event, Lock
+from time import sleep
+
 from thread_helper import thread_exit_handler
+from logger_helper import init_logger
+
+logger = init_logger()
 
 
 def loop():
@@ -16,13 +19,13 @@ def loop():
     Voice Control Loop
     """
 
-    logging.info(" >>> Begin voice control loop")
+    logger.info(" >>> Begin voice control loop")
     sleep(0.9)
-    logging.info(" <<< End voice control loop")
+    logger.info(" <<< End voice control loop")
 
 
 def main(stop_event: Optional[Event] = None, shared_data: Optional[Dict] = None, data_lock: Optional[Lock] = None):
-    logging.info("Init voice control module")
+    logger.info("Init voice control module")
 
     while True:
         loop()
