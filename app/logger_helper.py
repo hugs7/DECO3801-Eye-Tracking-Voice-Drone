@@ -154,7 +154,7 @@ def test_logger():
 def disable_logger(logger_name: str) -> None:
     """
     Disable a logger and all its handlers.
-    :param logger: Logger instance
+    :param logger_name: Logger name
     :return: None
     """
 
