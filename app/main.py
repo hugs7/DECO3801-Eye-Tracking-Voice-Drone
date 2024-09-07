@@ -5,6 +5,7 @@ Hugo Burton
 """
 
 import importlib
+import logging
 from threading import Thread, Event, Lock
 from time import sleep
 
@@ -55,6 +56,8 @@ def main():
         Thread(target=lambda func=func: func(stop_event, shared_data, data_lock), name=f"thread_{get_function_module(func)}")
         for func in thread_functions
     ]
+
+    logging.getLogger("voice_control").setLevel(logging.CRITICAL + 1)
 
     # Start all threads
     for thread in threads:
