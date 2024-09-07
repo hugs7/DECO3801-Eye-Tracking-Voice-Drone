@@ -11,7 +11,7 @@ from time import sleep
 
 import constants as c
 from thread_helper import get_function_module
-from logger_helper import init_root_logger
+from logger_helper import init_root_logger, disable_logger
 
 root_logger = init_root_logger()
 
@@ -57,7 +57,7 @@ def main():
         for func in thread_functions
     ]
 
-    logging.getLogger("voice_control").setLevel(logging.CRITICAL + 1)
+    disable_logger("voice_control")
     logging.getLogger("eye_tracking").setLevel(logging.DEBUG)
     logging.getLogger("drone").setLevel(logging.DEBUG)
 
