@@ -25,11 +25,7 @@ def init_logger(level: int = logging.INFO) -> logging.Logger:
     if is_main_thread():
         logger.setLevel(level)
 
-    # Set format to include the logger name
-    console_handler = logging.StreamHandler()
-    formatter = logging.Formatter(f"%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-    console_handler.setFormatter(formatter)
-    logger.addHandler(console_handler)
+    attach_formatter(logger)
 
     return logger
 
@@ -44,4 +40,24 @@ def init_root_logger(level: int = logging.INFO) -> logging.Logger:
     logger = logging.getLogger()
     logger.setLevel(level)
 
+    attach_formatter(logger)
+
     return logger
+
+
+def attach_formatter(logger: logging.Logger) -> None:
+    """
+    Attach a formatter to the logger.
+    :param logger: Logger instance
+    :return: None
+    """
+
+    formatter = logging.Formatter(f"%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+
+    if not logger.handlers:
+        console_handler = logging.StreamHandler()
+        console_handler.setFormatter(formatter)
+        logger.addHandler(console_handler)
+    else:
+        for handler in logger.handlers:
+            handler.setFormatter(formatter)
