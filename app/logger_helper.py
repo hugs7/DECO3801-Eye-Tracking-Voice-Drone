@@ -136,6 +136,17 @@ def attach_formatter(logger: logging.Logger) -> None:
             handler.setFormatter(formatter)
 
 
+def disable_logger(logger_name: str) -> None:
+    """
+    Disable a logger and all its handlers.
+    :param logger_name: Logger name
+    :return: None
+    """
+
+    logger = logging.getLogger(logger_name)
+    logger.setLevel(logging.CRITICAL + 1)
+
+
 def test_logger():
     """
     Test the logger helper functions
@@ -149,17 +160,6 @@ def test_logger():
     logger.warning("This is a warning message")
     logger.error("This is an error message")
     logger.critical("This is a critical message")
-
-
-def disable_logger(logger_name: str) -> None:
-    """
-    Disable a logger and all its handlers.
-    :param logger_name: Logger name
-    :return: None
-    """
-
-    logger = logging.getLogger(logger_name)
-    logger.setLevel(logging.CRITICAL + 1)
 
 
 if __name__ == "__main__":
