@@ -125,7 +125,7 @@ def attach_formatter(logger: logging.Logger) -> None:
     :return: None
     """
 
-    formatter = LoggerFormatter("%(asctime)s%(output_name)-13s%(levelname)-13s%(message)s")
+    formatter = LoggerFormatter("%(asctime)s  %(output_name)-13s %(levelname)-13s%(message)s")
 
     if not logger.handlers:
         console_handler = logging.StreamHandler()
