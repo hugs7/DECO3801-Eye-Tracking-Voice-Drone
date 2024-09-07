@@ -9,6 +9,7 @@ from threading import Thread, Event
 import logging
 from time import sleep
 
+import constants as c
 from thread_helper import get_function_module
 
 
@@ -57,7 +58,7 @@ def main():
         # Periodically check if any thread is alive
         while is_any_thread_alive(threads):
             # Sleep for a short duration to prevent busy-waiting
-            sleep(0.1)
+            sleep(c.BUSY_WAIT_PERIOD_SECONDS)
     except KeyboardInterrupt:
         logging.info("Interrupted! Stopping all threads...")
         stop_event.set()
