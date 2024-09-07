@@ -5,6 +5,25 @@ Logger helper module
 import logging
 import inspect
 from thread_helper import is_main_thread
+from str_helper import to_title_case
+
+
+
+class LoggerFormatter(logging.Formatter):
+    def __init__(self, fmt=None, datefmt=None):
+        super().__init__(fmt, datefmt)
+
+    def format(self, record: logging.LogRecord) -> str:
+        """
+        Format the log record with the output name in title case and color based on log level.
+        :param record: Log record
+        :return: Formatted log record
+        """
+        # Add a custom field for title-cased logger name
+        record.output_name = to_title_case(record.name)
+
+        formatted_message = super().format(record)
+        return formatted_message
 
 
 def init_logger(level: int = logging.INFO) -> logging.Logger:
@@ -52,7 +71,7 @@ def attach_formatter(logger: logging.Logger) -> None:
     :return: None
     """
 
-    formatter = logging.Formatter("%(asctime)s\t%(name)-13s\t%(levelname)s\t%(message)s")
+    formatter = LoggerFormatter("%(asctime)s\t%(output_name)-13s\t%(levelname)s\t%(message)s")
 
     if not logger.handlers:
         console_handler = logging.StreamHandler()
