@@ -7,6 +7,11 @@ import inspect
 from thread_helper import is_main_thread
 from str_helper import to_title_case
 
+RESET = "\033[0m"
+BRIGHT_RED = "\033[91m"
+BRIGHT_YELLOW = "\033[93m"
+BRIGHT_BLUE = "\033[94m"
+BRIGHT_INFO = "\033[96m"
 
 
 class LoggerFormatter(logging.Formatter):
@@ -22,8 +27,22 @@ class LoggerFormatter(logging.Formatter):
         # Add a custom field for title-cased logger name
         record.output_name = to_title_case(record.name)
 
+        # Set color based on log level
+        if record.levelno == logging.DEBUG:
+            color = BRIGHT_BLUE
+        elif record.levelno == logging.INFO:
+            color = BRIGHT_INFO
+        elif record.levelno == logging.WARNING:
+            color = BRIGHT_YELLOW
+        elif record.levelno == logging.ERROR:
+            color = BRIGHT_RED
+        elif record.levelno == logging.CRITICAL:
+            color = BRIGHT_RED
+        else:
+            color = RESET
+
         formatted_message = super().format(record)
-        return formatted_message
+        return f"{color}{formatted_message}{RESET}"
 
 
 def init_logger(level: int = logging.INFO) -> logging.Logger:
