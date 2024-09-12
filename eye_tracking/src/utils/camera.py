@@ -24,7 +24,8 @@ def generate_dummy_camera_params(config: DictConfig) -> None:
         w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         cap.release()
     else:
-        raise ValueError
+        raise ValueError("Either demo.image_path or demo.video_path must be set.")
+
     logger.debug(f"Frame size is ({w}, {h})")
     logger.debug(f"Close video {config.demo.video_path}")
     out_file = tempfile.NamedTemporaryFile(suffix=".yaml", delete=False)
