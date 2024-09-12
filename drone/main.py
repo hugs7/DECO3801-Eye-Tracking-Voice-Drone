@@ -16,7 +16,7 @@ def loop(drone):
     """
     Defines main loop for the drone
     """
-    controller.handle_input(drone, cv2.waitKey(1))
+    controller.handle_input(drone, cv2.waitKey(1), 2)
     #img = read_camera_feed(drone)
     #  render_drone_feed(img)
 
