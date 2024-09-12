@@ -1,4 +1,4 @@
-from ControllerGui import Controller
+from controller import Controller
 from TelloModel import TelloModel
 from Gui import DroneApp
 import tkinter as tk
