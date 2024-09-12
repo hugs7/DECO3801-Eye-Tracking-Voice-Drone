@@ -27,7 +27,7 @@ class Controller:
         self.model = droneModel
 
     def get_frame(self):
-        return self.model.get_frame()
+        return self.model.read_camera()
 
 
     def handle_input(self, command):
