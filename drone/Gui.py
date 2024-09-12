@@ -18,23 +18,9 @@ class DroneApp:
 
     def on_key_press(self, event):
         self.handle_keyboard_input(event.keysym)
-    
-    def handle_keyboard_input(self, command):
-        key_mapping = {
-        "Left": "LEFT",
-        "Right": "RIGHT",
-        "Up": "UP",
-        "Down": "DOWN",
-        "w": "FORWARD",
-        "s": "BACKWARD",
-        "l": "LAND",
-        "space": "TAKEOFF",
-        "q": "ROTATE CW",
-        "e": "ROTATE CCW",
-        "z": "FLIP FORWARD",
-        }
-        if command in key_mapping:
-            self.controller.handle_input(key_mapping[command])
+
+    def parse_input(self, command):
+        self.controller.handle_input(command)
 
     def update_video_feed(self):
         frame = self.controller.get_frame()

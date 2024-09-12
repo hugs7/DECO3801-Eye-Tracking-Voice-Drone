@@ -21,6 +21,21 @@ CONTROLLER_MAPPING = {
     pygame.K_z: "FLIP FORWARD",
 }
 
+KEY_MAPPING = {
+        "Left": "LEFT",
+        "Right": "RIGHT",
+        "Up": "UP",
+        "Down": "DOWN",
+        "w": "FORWARD",
+        "s": "BACKWARD",
+        "l": "LAND",
+        "space": "TAKEOFF",
+        "q": "ROTATE CW",
+        "e": "ROTATE CCW",
+        "z": "FLIP FORWARD",
+        }
+
+
 
 class Controller:
     def __init__(self, droneModel):
@@ -38,6 +53,9 @@ class Controller:
         value - an int of the amount to change the drones direction by, if command is rotational
             use degrees and if a directional value use cm in direction
         """
+        if command not in KEY_MAPPING:
+            return
+        command = KEY_MAPPING[command]
         lr, fb, ud, yv = 0, 0, 0, 0
         speed = 10
         liftSpeed = 10
