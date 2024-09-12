@@ -7,7 +7,7 @@ import pygame
 import time
 import mavic_drone
 import tello_drone
-
+TAKEOFF_ALTITUDE = 2
 CONTROLLER_MAPPING = {
     81: "LEFT",         
     83: "RIGHT",        
@@ -28,7 +28,7 @@ def get_key(command):
         return CONTROLLER_MAPPING[command]
 
 
-def handle_input(drone: Union[tello_drone.TelloDrone, mavic_drone.MavicDrone], command, value) -> None:
+def handle_input(drone: Union[tello_drone.TelloDrone, mavic_drone.MavicDrone], command, value=None) -> None:
     """
     Handles the input of a drone from voice, Gaze or manual input
     :param drone: The drone object to control
@@ -82,7 +82,10 @@ def handle_input(drone: Union[tello_drone.TelloDrone, mavic_drone.MavicDrone], c
             drone.move_back(value)
         case "TAKEOFF":
             # xtra = 1
-            drone.takeoff(value)
+            if value == None:
+                drone.takeoff(TAKEOFF_ALTITUDE)
+            else:
+                drone.takeoff(value)
         case "LAND":
             # xtra = 2
             drone.land()
