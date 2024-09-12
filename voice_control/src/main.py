@@ -11,13 +11,31 @@ recognizer = sr.Recognizer()
 def save_audio(audio):
     """
     Saves audio to external .wav file
+
+    Args:
+        audio: audio data
+
+    Returns:
+        None
     """
     with open("recorded_audio.wav", "wb") as f:
         f.write(audio.get_wav_data())
 
 def print_volume(indata, frames, time, status):
     """
-    Outputs the microphone volume
+    Outputs the normalized microphone volume to the console.
+
+    This function calculates the volume by computing the Euclidean norm (L2 norm) of the input audio data 
+    and multiplies it by 10 for scaling. The resulting value is printed in a formatted string with two decimal places.
+
+    Args:
+        indata (numpy.ndarray): The input audio data captured from the microphone.
+        frames (int): The number of audio frames in the data (unused in this function but typically required by audio libraries).
+        time (object): The time information related to the audio stream (unused in this function).
+        status (object): The status information of the audio input stream (unused in this function).
+
+    Returns:
+        None
     """
     volume_norm = np.linalg.norm(indata) * 10
     print(f"Microphone Volume: {volume_norm:.2f}")
@@ -25,7 +43,16 @@ def print_volume(indata, frames, time, status):
 
 def capture_voice_input():
     """
-    Captures and returns voice from mic for 5 seconds
+    Captures and returns voice input from the microphone for 5 seconds.
+
+    This function uses the `speech_recognition` library to capture audio from the microphone. 
+    It listens to the input for a maximum of 5 seconds and returns the recorded audio data.
+
+    Args:
+        None
+
+    Returns:
+        AudioData: An AudioData object containing the recorded audio input.
     """
     with sr.Microphone() as source:
         #print(f"Listening on source", source.list_microphone_names(), "\n\n", source.list_working_microphones())
