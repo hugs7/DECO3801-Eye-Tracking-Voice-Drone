@@ -9,17 +9,17 @@ import mavic_drone
 import tello_drone
 
 CONTROLLER_MAPPING = {
-    81: "LEFT",         # ASCII for Left Arrow in OpenCV (cv2.waitKey())
-    83: "RIGHT",        # ASCII for Right Arrow in OpenCV (cv2.waitKey())
-    82: "UP",           # ASCII for Up Arrow in OpenCV (cv2.waitKey())
-    84: "DOWN",         # ASCII for Down Arrow in OpenCV (cv2.waitKey())
-    ord('w'): "FORWARD", # ASCII for 'w'
-    ord('s'): "BACKWARD",# ASCII for 's'
-    ord('l'): "LAND",    # ASCII for 'l'
-    ord(' '): "TAKEOFF", # ASCII for space bar
-    ord('q'): "ROTATE CW",# ASCII for 'q'
-    ord('e'): "ROTATE CCW",# ASCII for 'e'
-    ord('z'): "FLIP FORWARD",# ASCII for 'z'
+    81: "LEFT",         
+    83: "RIGHT",        
+    82: "UP",           
+    84: "DOWN",         
+    ord('w'): "FORWARD",
+    ord('s'): "BACKWARD",
+    ord('l'): "LAND",   
+    ord(' '): "TAKEOFF",
+    ord('q'): "ROTATE CW",
+    ord('e'): "ROTATE CCW",
+    ord('z'): "FLIP FORWARD",
 }
 
 def get_key(command):
