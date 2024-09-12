@@ -59,6 +59,25 @@ class Visualizer:
         cv2.addWeighted(overlay, opacity, self.image, 1 - opacity, 0, img)
         self.set_image(img)
 
+    def calculate_text_org(
+            self,
+            text: str, 
+            text_font_face: int, 
+            font_scale: float, 
+            thickness: int, 
+            top_left: Tuple[int, int], 
+            bottom_right: Tuple[int, int],
+        ):
+        
+        (text_width, text_height), text_bottom_y = cv2.getTextSize(text, text_font_face, font_scale, thickness)
+        text_middle = text_width // 2
+        #Calculate the x_coordinate of the middle of the rectangle (i.e left-most x-coord of rectangle + middle of rectangle)
+        rectangle_middle = (bottom_right[0] - top_left[0]) // 2
+        rectangle_middle_x_coord = top_left[0] + rectangle_middle
+        rectangle_bottom_left = rectangle_middle_x_coord - text_middle #Aligns the centre of the text with the centre of the rectangle
+        text_org = (rectangle_bottom_left, (top_left[1] + bottom_right[1]) // 2)
+        return text_org
+
     def draw_labelled_rectangle(
         self,
         top_left: Tuple[int, int],
@@ -77,11 +96,7 @@ class Visualizer:
         Draws a labelled rectangle on the specified overlay
         """
         assert self.image is not None
-
-        if text_org is None:
-            # Place text in the center of the rectangle
-            text_org = ((top_left[0] + bottom_right[0]) // 2, (top_left[1] + bottom_right[1]) // 2)
-
+        text_org = self.calculate_text_org(text, text_font_face, font_scale, 2, top_left, bottom_right)        
         overlay = np.zeros_like(self.image, np.uint8)
         if border_color is not None:
             cv2.rectangle(overlay, top_left, bottom_right, border_color, -1)
