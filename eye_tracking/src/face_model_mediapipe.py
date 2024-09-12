@@ -1,5 +1,5 @@
 """
-MediaPipe 3D face model for 468 points mark-up.
+MediaPipe 3D face model for 478 points mark-up.
 Author: Hugo Burton
 Last Updated: 21/08/2024
 """
@@ -29,6 +29,8 @@ class FaceModelMediaPipe(FaceModel):
     """
 
     def __init__(self) -> None:
+        NUM_FACE_POINTS: int = 478
+
         REYE_INDICES: np.ndarray = np.array([33, 133])
         LEYE_INDICES: np.ndarray = np.array([362, 263])
         MOUTH_INDICES: np.ndarray = np.array([78, 308])
@@ -38,6 +40,7 @@ class FaceModelMediaPipe(FaceModel):
         NOSE_INDEX: int = 1
 
         super().__init__(
+            NUM_FACE_POINTS,
             REYE_INDICES,
             LEYE_INDICES,
             MOUTH_INDICES,

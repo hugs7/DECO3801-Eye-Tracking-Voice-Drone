@@ -1,5 +1,3 @@
-import dataclasses
-
 import cv2
 import numpy as np
 from scipy.spatial.transform import Rotation
@@ -11,6 +9,7 @@ from face import Face
 class FaceModel:
     def __init__(
         self,
+        num_face_points: int,
         reye_indices: np.ndarray,
         leye_indices: np.ndarray,
         mouth_indices: np.ndarray,
@@ -19,6 +18,9 @@ class FaceModel:
         nose_index: int,
     ):
         self.LANDMARKS = None
+        self.DIMENSIONS = 3
+
+        self.NUM_FACE_POINTS = num_face_points
         self.REYE_INDICES = reye_indices
         self.LEYE_INDICES = leye_indices
         self.MOUTH_INDICES = mouth_indices
@@ -33,7 +35,7 @@ class FaceModel:
         """
 
         assert landmarks is not None
-        assert landmarks.shape == (478, 3)
+        assert landmarks.shape == (self.NUM_FACE_POINTS, self.DIMENSIONS)
         assert list(landmarks[self.NOSE_INDEX]) == [0, 0, 0]
 
     def set_landmark_calibration(self, landmarks: np.ndarray) -> None:
