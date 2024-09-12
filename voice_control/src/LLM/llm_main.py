@@ -7,6 +7,8 @@ from .defaults import initial_context
 from .utils import log
 from .wrappers import done, proxy_input
 from dotenv import load_dotenv
+from constants import GPT_35_MODEL, GPT_4_MODEL
+from .formatting import remove_code_block_formatting
 
 load_dotenv()
 # Get the API key
@@ -27,9 +29,11 @@ def ask_fn(context: List[Dict[str, str]], aux: bool = False) -> str:
     Returns:
         str: The content of the response from the OpenAI API.
     """
-	model = "gpt-4o-mini"#model = "gpt-3.5-turbo" #if aux else "gpt-4o-mini"
+	model = GPT_35_MODEL if aux else GPT_4_MODEL
 	response = openai.ChatCompletion.create(model=model, temperature=0, messages=context)
-	return response["choices"][0]["message"]["content"]
+	terminal_code = response["choices"][0]["message"]["content"]
+	clean_code = remove_code_block_formatting(terminal_code)
+	return clean_code
 
 
 def run_terminal_agent(user_input) -> str:
