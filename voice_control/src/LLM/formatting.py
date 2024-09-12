@@ -10,7 +10,19 @@ def remove_terminal_line_decorators(terminal_code: str) -> str:
     Returns:
         str: The terminal code with the decorators removed.
     """
-    return "\n".join([line[4:] for line in terminal_code.splitlines()])
+    return "\n".join([line[4:] if line.startswith(('>>> ', '... ')) else line for line in terminal_code.splitlines()])
+
+def remove_code_block_formatting(code: str) -> str:
+    """
+    Removes triple backticks and language markers from the code, such as ```python and ```.
+    
+    Args:
+        code (str): The code possibly containing triple backticks.
+    
+    Returns:
+        str: The code without code block markers.
+    """
+    return code.replace("```python", "").replace("```", "").strip()
 
 
 def add_terminal_line_decorators(terminal_entry: str) -> str:
@@ -49,15 +61,17 @@ def ensure_terminal_formatting_strict(terminal_code: str, force: bool = False) -
     """
     formatted_lines = list()
     for i, line in enumerate(terminal_code.splitlines()):
-        if line == "":
+        if not line:
             continue
+
         if line[0] == "#":
             line = ">>> " + line
         if line in {">>>", "..."}:
             line += " "
+
         if force and line[:4] not in {">>> ", "... "}:
             continue
-        assert line[:4] in {">>> ", "... "}, f"Line {i} doesn't look like terminal code:\n{terminal_code}"
+
         formatted_lines.append(line)
     return "\n".join(formatted_lines)
 
@@ -96,13 +110,16 @@ def ensure_terminal_formatting(code: str, ask_fn: Callable[[List[Dict[str, str]]
 
     Returns:
         str: The formatted terminal code.
+    
+    Side Effects:
+        Sometimes, the LLM hallucinates output lines if `print` is on the last line.
     """
     try:
         return ensure_terminal_formatting_strict(code)
     except AssertionError:
         pass
     llm_formatted_code = ensure_terminal_formatting_llm(code, ask_fn)
-    # Sometimes, the LLM hallucinates output lines if `print` is on the last line.
+    
     num_code_lines = len(code.splitlines())
     llm_formatted_code = "\n".join(llm_formatted_code.splitlines()[:num_code_lines])
     return ensure_terminal_formatting_strict(llm_formatted_code, force=True)
