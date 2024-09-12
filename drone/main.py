@@ -11,7 +11,7 @@ import models
 import init
 
 
-def loop(drone):
+def loop(drone, controller):
     """
     Defines main loop for the drone
     """
@@ -43,12 +43,31 @@ def render_drone_feed(img: cv2.typing.MatLike) -> None:
     cv2.imshow(c.WINDOW_NAME, img)
 
 
+def init(drone_type):
+    """
+    Initialiees the drone
+    """
+
+    match drone_type:
+        case c.MAVIC:
+            vehicle = models.MavicDrone(c.MAVIC_IP, c.MAVIC_PORT)
+        case c.TELLO:
+            vehicle = models.TelloDrone()
+        case _:
+            raise ValueError(f"Invalid drone type: {drone_type}")
+
+    controller = controller.Controller(vehicle)
+
+    return vehicle, controller
+
+
 def main():
-    config = init.init()
-    drone = init.init_drone(config)
+    drone_type = c.TELLO  # / c.MAVIC
+
+    drone, controller = init(drone_type)
 
     while True:
-        loop(drone)
+        loop(drone, controller)
 
 
 if __name__ == "__main__":
