@@ -8,6 +8,7 @@ from .utils import log, ask_llm
 from .formatting import add_terminal_line_decorators, extract_terminal_entries
 import json
 import os
+from constants import MAX_LOOP
 
 class AgentInteractiveConsole(InteractiveConsole):
 	"""
@@ -147,13 +148,16 @@ def run_until_halt(
     """
 	agent_is_done = False
 	message = ""
-	while not (agent_is_done or message != ""):
+	loop_count = 0
+	while not (agent_is_done or message != "") and loop_count < MAX_LOOP:
 		captured_output = ""
 		executed_entries = list()
 		
 		terminal_code = ask_llm(context, ask_fn)
 		
+		
 		terminal_entries = extract_terminal_entries(terminal_code)
+		
 		for entry_code in terminal_entries:
 			(
 				agent_is_done,
@@ -175,6 +179,12 @@ def run_until_halt(
 			log(captured_output, color=Fore.LIGHTCYAN_EX, end="" if captured_output[-1] == "\n" else "\n")
 			if correct_format(captured_output):
 				break
+
+		loop_count += 1
+
+	if loop_count >= MAX_LOOP:
+		log(f"Max loop count {MAX_LOOP} reached", color=Fore.RED)
+
 	return agent_is_done, message, captured_output
 
 
@@ -228,8 +238,8 @@ def react(
 
 	stored_context.append({"role": "user", "content": user_command})
 	with open(context_file, 'w') as f:
-			for entry in stored_context:
-				f.write(json.dumps(entry) + '\n')
+		for entry in stored_context:
+			f.write(json.dumps(entry) + '\n')
 	
 	log(user_command, color=Fore.LIGHTGREEN_EX)
 	context.append({"role": "user", "content": user_command})
