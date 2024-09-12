@@ -6,11 +6,11 @@ import time
 
 
 class Controller:
-    def __init__(self, drone):
-        self.drone = drone
+    def __init__(self, droneModel):
+        self.model = droneModel
 
     def get_frame(self):
-        return self.drone.get_frame()
+        return self.model.get_frame()
 
 
     def handle_input(self, command):
@@ -33,45 +33,45 @@ class Controller:
                 # run clockwise rotation TODO add function to multiply
                 # value by correct amount for rotational movement
                 yv = rotationSpeed
-                self.drone.rotate_clockwise(90)
+                self.model.drone.rotate_clockwise(90)
             case "ROTATE CCW":
                 # run counter clockwise rotation TODO add function to multiply
                 # value by correct amount for rotational movement
                 yv = -rotationSpeed
-                self.drone.rotate_counter_clockwise(90)
+                self.model.drone.rotate_counter_clockwise(90)
             case "UP":
                 # run up directional command with value
                 ud = liftSpeed
-                self.drone.move_up(50)
+                self.model.drone.move_up(50)
             case "DOWN":
                 # run down directional command with value
                 ud = -liftSpeed
-                self.drone.move_down(50)
+                self.model.drone.move_down(50)
             case "LEFT":
                 # run left directional command with value
                 lr = -speed
-                self.drone.move_left(50)
+                self.model.drone.move_left(50)
             case "RIGHT":
                 # run right directional command with value
                 lr = speed
-                self.drone.move_right(50)
+                self.model.drone.move_right(50)
             case "FORWARD":
                 # run forward directional command with value
                 fb = moveSpeed
-                self.drone.move_forward(50)
+                self.model.drone.move_forward(50)
             case "BACKWARD":
                 # run back directional command with value
                 fb = -moveSpeed
-                self.drone.move_back(50)
+                self.model.drone.move_back(50)
             case "TAKEOFF":
                 # xtra = 1
-                self.drone.takeoff()
+                self.model.drone.takeoff()
             case "LAND":
                 # xtra = 2
-                self.drone.land()
+                self.model.drone.land()
             case "FLIP FORWARD":
                 # xtra = 3
-                self.drone.flip_forward()
+                self.model.drone.flip_forward()
         # drone.send_rc_control(lr, fb, ud, yv)
         time.sleep(0.1)  # Ensure value is correctly calculated above
         # drone.send_rc_control(0,0,0,0)

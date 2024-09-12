@@ -9,7 +9,7 @@ class DroneApp:
 
         self.root.title("Drone App")
 
-        self.canvas = Canvas(self._root, width = 640, height = 480)
+        self.canvas = Canvas(self.root, width = 640, height = 480)
         self.canvas.pack(expand=True)
 
         self.update_video_feed()
