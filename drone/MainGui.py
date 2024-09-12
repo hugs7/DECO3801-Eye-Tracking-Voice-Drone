@@ -19,4 +19,6 @@ def main():
     app = DroneApp(root, controller)
     root.mainloop()
 
+main()
+
 

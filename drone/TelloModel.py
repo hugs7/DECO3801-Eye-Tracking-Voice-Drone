@@ -8,6 +8,6 @@ class TelloModel:
         self.drone.streamon()
 
     def get_frame(self):
-        frame = self.tello.get_frame_read().frame
+        frame = self.drone.get_frame_read().frame
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         return frame
