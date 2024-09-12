@@ -38,7 +38,7 @@ class LandmarkEstimator:
         if self.mode == "mediapipe":
             return self._detect_faces_raw(image)
         else:
-            raise ValueError
+            raise ValueError(f"Invalid mode {self.mode}")
 
     def _detect_faces_raw(self, image: np.ndarray) -> List[np.ndarray]:
         """
