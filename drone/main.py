@@ -4,10 +4,12 @@ Main file for the drone
 
 from typing import Union
 import cv2
+import tkinter as tk
 
 import constants as c
-import controller
+from controller import Controller
 import models
+from Gui import DroneApp
 import init
 
 
@@ -45,7 +47,7 @@ def render_drone_feed(img: cv2.typing.MatLike) -> None:
 
 def init(drone_type):
     """
-    Initialiees the drone
+    Initialies the drone
     """
 
     match drone_type:
@@ -56,18 +58,19 @@ def init(drone_type):
         case _:
             raise ValueError(f"Invalid drone type: {drone_type}")
 
-    controller = controller.Controller(vehicle)
+    controller = Controller(vehicle)
 
-    return vehicle, controller
+    return controller
 
 
 def main():
     drone_type = c.TELLO  # / c.MAVIC
 
-    drone, controller = init(drone_type)
+    controller = init(drone_type)
 
-    while True:
-        loop(drone, controller)
+    root = tk.Tk()
+    DroneApp(root, controller)
+    root.mainloop()
 
 
 if __name__ == "__main__":
