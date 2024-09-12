@@ -4,11 +4,11 @@ import numpy as np
 import time
 from scipy.io.wavfile import write
 from LLM import run_terminal_agent
+from constants import AUDIO_PHRASE_TIME_LIMIT, MAX_VOLUME_THRESHOLD
 
+recogniser = sr.Recognizer()
 
-recognizer = sr.Recognizer()
-
-def save_audio(audio):
+def save_audio(audio: sr.AudioData):
     """
     Saves audio to external .wav file
 
@@ -18,10 +18,10 @@ def save_audio(audio):
     Returns:
         None
     """
-    with open("recorded_audio.wav", "wb") as f:
+    with open("voice_control\\recordings\\recorded_audio.wav", "wb") as f:
         f.write(audio.get_wav_data())
 
-def print_volume(indata, frames, time, status):
+def print_volume(indata: np.ndarray, frames: int, time: any, status: any):
     """
     Outputs the normalized microphone volume to the console.
 
@@ -37,11 +37,11 @@ def print_volume(indata, frames, time, status):
     Returns:
         None
     """
-    volume_norm = np.linalg.norm(indata) * 10
+    volume_norm = np.linalg.norm(indata) * MAX_VOLUME_THRESHOLD
     print(f"Microphone Volume: {volume_norm:.2f}")
 
 
-def capture_voice_input():
+def capture_voice_input() -> sr.AudioData:
     """
     Captures and returns voice input from the microphone for 5 seconds.
 
@@ -58,17 +58,17 @@ def capture_voice_input():
         #print(f"Listening on source", source.list_microphone_names(), "\n\n", source.list_working_microphones())
         print("Listening...")
         
-        audio = recognizer.listen(source, phrase_time_limit=5)
-        #save_audio(audio)
+        audio = recogniser.listen(source, phrase_time_limit=AUDIO_PHRASE_TIME_LIMIT)
+        save_audio(audio)
     return audio
 
 
-def convert_voice_to_text(audio):
+def convert_voice_to_text(audio: sr.AudioData):
     """
     Takes in the recorded audio and converts it into text.
     """
     try:
-        text = recognizer.recognize_google(audio)
+        text = recogniser.recognize_google(audio)
         print(text)
     except sr.UnknownValueError:
         text = ""
@@ -80,7 +80,7 @@ def convert_voice_to_text(audio):
     return text
 
 
-def process_voice_command(text):
+def process_voice_command(text: str):
     """
     Takes in the voice in text form and sends it to LLM and returns the converted drone command.
     """
@@ -96,7 +96,7 @@ def process_voice_command(text):
     # Call the LLM to convert text
     result = run_terminal_agent(text)
     print(result)
-    return False
+    
 
 
 def main():
