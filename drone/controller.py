@@ -6,6 +6,7 @@ from typing import Union, Optional
 import pygame
 import time
 import models
+import cv2
 
 CONTROLLER_MAPPING = {
     pygame.K_LEFT: "LEFT",
@@ -42,7 +43,9 @@ class Controller:
         self.model = droneModel
 
     def get_frame(self):
-        return self.model.read_camera()
+        frame = self.model.read_camera()
+        return cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    
 
 
     def handle_input(self, command):
