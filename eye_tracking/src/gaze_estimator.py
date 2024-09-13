@@ -42,6 +42,10 @@ class GazeEstimator:
         self._transform = transforms.create_transform()
 
     def _load_model(self) -> torch.nn.Module:
+        """
+        Load the gaze estimation model from checkpoint
+        :return: Gaze estimation model
+        """
         model = create_model(self._config)
         checkpoint = torch.load(self._config.gaze_estimator.checkpoint, map_location="cpu")
         model.load_state_dict(checkpoint["model"])
@@ -50,12 +54,27 @@ class GazeEstimator:
         return model
 
     def detect_faces(self, image: np.ndarray) -> List[Face]:
+        """
+        Detect faces in the image and return a list of Face objects
+        :param image: RGB image
+        :return: List of Face objects
+        """
         return self._landmark_estimator.detect_faces(image)
 
     def detect_faces_raw(self, image: np.ndarray) -> List[np.ndarray]:
+        """
+        Detect faces in the image and return a list of raw landmarks
+        :param image: RGB image
+        :return: List of raw landmarks
+        """
         return self._landmark_estimator.detect_faces_raw(image)
 
     def estimate_gaze(self, image: np.ndarray, face: Face) -> None:
+        """
+        Estimate gaze for the given face
+        :param image: RGB image
+        :param face: Face object
+        """
         self._face_model3d.estimate_head_pose(face, self.camera)
         self._face_model3d.compute_3d_pose(face)
         self._face_model3d.compute_face_eye_centers(face)
@@ -68,6 +87,11 @@ class GazeEstimator:
 
     @torch.no_grad()
     def _run_mpiigaze_model(self, face: Face) -> None:
+        """
+        Run the MPIIGaze model to estimate gaze
+        :param face: Face object
+        """
+
         images = []
         head_poses = []
 

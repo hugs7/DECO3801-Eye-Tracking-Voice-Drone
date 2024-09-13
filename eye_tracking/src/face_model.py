@@ -32,6 +32,8 @@ class FaceModel:
         """
         Asserts that the landmarks array has the correct shape and that the
         nose landmark is at the origin.
+        :param landmarks: 3D landmarks
+        :return: None
         """
 
         assert landmarks is not None
@@ -42,6 +44,8 @@ class FaceModel:
         """
         Updates the landmark calibration matrix which is used as the object
         points when solving the PnP problem.
+        :param landmarks: 3D landmarks
+        :return: None
         """
         # Normalise landmarks to have the nose at the origin
         normalised_landmarks = landmarks - landmarks[self.NOSE_INDEX]
@@ -49,13 +53,20 @@ class FaceModel:
         self.LANDMARKS = normalised_landmarks
 
     def estimate_head_pose(self, face: Face, camera: Camera) -> None:
-        """Estimate the head pose by fitting 3D template model."""
-        # If the number of the template points is small, cv2.solvePnP
-        # becomes unstable, so set the default value for rvec and tvec
-        # and set useExtrinsicGuess to True.
-        # The default values of rvec and tvec below mean that the
-        # initial estimate of the head pose is not rotated and the
-        # face is in front of the camera.
+        """
+        Estimate the head pose by fitting 3D template model.
+
+        (If the number of the template points is small, cv2.solvePnP
+        becomes unstable, so set the default value for rvec and tvec
+        and set useExtrinsicGuess to True.
+        The default values of rvec and tvec below mean that the
+        initial estimate of the head pose is not rotated and the
+        face is in front of the camera.)
+
+        :param face: Face object
+        :param camera: Camera object
+        :return: None
+        """
         if self.LANDMARKS is None:
             raise ValueError("Landmark calibration matrix is not set.")
 
@@ -82,16 +93,23 @@ class FaceModel:
         face.leye.head_pose_rot = rot
 
     def compute_3d_pose(self, face: Face) -> None:
-        """Compute the transformed model."""
+        """
+        Compute the transformed model.
+        :param face: Face object
+        :return: None
+        """
         rot = face.head_pose_rot.as_matrix()  # Has units of radians
         face.model3d = self.LANDMARKS @ rot.T + face.head_position  # This is the 3D model of the face in world coordinates
 
     def compute_face_eye_centers(self, face: Face) -> None:
-        """Compute the centers of the face and eyes.
+        """
+        Compute the centers of the face and eyes.
 
         The face center is defined as the
         average coordinates of the six points at the corners of both
         eyes and the mouth.
+        :param face: Face object
+        :return: None
         """
         face.center = face.model3d[np.concatenate([self.REYE_INDICES, self.LEYE_INDICES, self.MOUTH_INDICES])].mean(axis=0)
 

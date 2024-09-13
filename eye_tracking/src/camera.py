@@ -18,6 +18,11 @@ class Camera:
     camera_params_path: dataclasses.InitVar[str] = None
 
     def __post_init__(self, camera_params_path):
+        """
+        Initialises the camera object with the camera parameters
+        :param camera_params_path: Path to the camera parameters file
+        """
+
         with open(camera_params_path) as f:
             data = yaml.safe_load(f)
         self.width = data["image_width"]
@@ -28,6 +33,10 @@ class Camera:
     def project_points(self, points3d: np.ndarray, rvec: Optional[np.ndarray] = None, tvec: Optional[np.ndarray] = None) -> np.ndarray:
         """
         Projects 3D world points (metres) to 2D image points (pixels)
+        :param points3d: 3D world points (metres)
+        :param rvec: Rotation vector
+        :param tvec: Translation vector
+        :return: 2D image points (pixels)
         """
         assert points3d.shape[1] == 3
         if rvec is None:
@@ -40,6 +49,10 @@ class Camera:
     def project_point(self, point3d: np.ndarray, rvec: Optional[np.ndarray] = None, tvec: Optional[np.ndarray] = None) -> np.ndarray:
         """
         Projects a 3D world point (metres) to a 2D image point (pixels)
+        :param point3d: 3D world point (metres)
+        :param rvec: Rotation vector
+        :param tvec: Translation vector
+        :return: 2D image point (pixels)
         """
         assert point3d.shape == (3,)
         return self.project_points(point3d[np.newaxis], rvec, tvec)[0]

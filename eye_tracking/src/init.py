@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 def init_ptgaze_config() -> DictConfig:
     """
     Custom config initialiser for ptgaze
+    :return DictConfig: The ptgaze config
     """
 
     package_root = pathlib.Path(__file__).parent.parent.resolve()
