@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import Canvas
 from PIL import Image, ImageTk
+import os
 
 class DroneApp:
     WIDTH = 640
@@ -15,7 +16,10 @@ class DroneApp:
         self.canvas = Canvas(self.root, width = self.WIDTH, height = self.HEIGHT)
         self.canvas.pack(expand=True)
 
-        base_image = Image.open("drone\assets\loadingScreen.png")
+        #module_dir = os.path.pardir(__file__)
+        #print(module_dir)
+        l#oading_screen = os.path.join(module_dir, "assets/loadingScreen.png")
+        base_image = Image.open("assets/loadingScreen.png")
         base_image = base_image.resize((self.WIDTH, self.HEIGHT), Image.ANTIALIAS)  # Resize the image to fit the canvas
         base_image = ImageTk.PhotoImage(base_image)
 
@@ -27,10 +31,7 @@ class DroneApp:
         self.root.bind('<KeyPress>', self.on_key_press)
 
     def on_key_press(self, event):
-        self.controller.parse_input(event.keysym)
-
-    def parse_input(self, command):
-        self.controller.handle_input(command)
+        self.controller.handle_input(event.keysym)
 
     def update_video_feed(self):
         frame = self.controller.get_frame()
