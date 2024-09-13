@@ -9,11 +9,10 @@ from .wrappers import done, proxy_input
 from dotenv import load_dotenv
 from constants import GPT_35_MODEL, GPT_4_MODEL
 from .formatting import remove_code_block_formatting
+import logging
 
-load_dotenv()
-# Get the API key
-openai.api_key = os.getenv("OPENAI_API_KEY")
-assert openai.api_key is not None, "Please assign a valid OpenAI API key to the environment variable OPENAI_API_KEY."
+
+logger = logging.getLogger(__name__)
 
 
 def ask_fn(context: List[Dict[str, str]], aux: bool = False) -> str:
@@ -73,7 +72,7 @@ def run_terminal_agent(user_input) -> str:
                              context, user_command)
         return output
 
-    log("--- The simulation has ended ---", color=Fore.LIGHTRED_EX)
+    logger.info("--- The simulation has ended ---", color=Fore.LIGHTRED_EX)
 
 
 if __name__ == "__main__":
