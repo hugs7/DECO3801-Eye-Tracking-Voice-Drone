@@ -9,13 +9,13 @@ import mavic_drone
 import tello_drone
 TAKEOFF_ALTITUDE = 2
 CONTROLLER_MAPPING = {
-    ord('a'): "LEFT",         
-    ord('d'): "RIGHT",        
-    82: "UP",           
-    84: "DOWN",         
+    ord('a'): "LEFT",
+    ord('d'): "RIGHT",
+    82: "UP",
+    84: "DOWN",
     ord('w'): "FORWARD",
     ord('s'): "BACKWARD",
-    ord('l'): "LAND",   
+    ord('l'): "LAND",
     ord(' '): "TAKEOFF",
     ord('q'): "ROTATE CW",
     ord('e'): "ROTATE CCW",
