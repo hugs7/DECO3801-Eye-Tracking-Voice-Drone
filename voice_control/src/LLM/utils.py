@@ -64,8 +64,12 @@ def limit_context_length(context: List[Dict[str, str]]):
     Returns:
         None
     """
+	original_length = len(context)
 	while context_token_len(context) > MAX_TOKENS:
 		context.pop(1)
+	if len(context) < original_length:
+		log(f"Warning: Context truncated. Only the most recent {len(context)} messages are being used.", color=Fore.YELLOW)
+		log("Older messages have been removed to fit within the token limit.", color=Fore.YELLOW)
 
 
 def ask_llm(context: List[Dict[str, str]], ask_fn: Callable[[List[Dict[str, str]], bool], str]) -> str:
