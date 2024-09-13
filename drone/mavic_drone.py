@@ -9,20 +9,25 @@ from abs_drone import AbstractDrone
 import cv2
 import time
 from pymavlink import mavutil
+import socket
 
 class MavicDrone(AbstractDrone):
-    def __init__(self, ip: str, port: int) -> NotImplementedError:
-        self.vehicle = self.__connect(ip, port)
-
+    def __init__(self) -> NotImplementedError:
+        ip = self.fetch_ip()
+        self.vehicle = self.__connect(ip, c.MAVIC_PORT)
+    def fetch_ip(self):
+        hostname = socket.gethostname()
+        ip = socket.gethostbyname(hostname)
+        return ip
     def __connect(self, ip, port):
-        #connection_string = f"udp:{ip}:{port}"
-        connection_string = "192.168.217.104:14550"
+        connection_string = f"{ip}:{port}"
         print(f"Connecting to mavic on: {connection_string}")
 
         # Try connecting with a longer timeout
         try:
             vehicle = connect(connection_string, wait_ready=True, timeout=60)
             print("Connected to vehicle!")
+            self.arm()
         except Exception as e:
             print(f"Failed to connect: {e}")
             exit(1)
@@ -110,28 +115,30 @@ class MavicDrone(AbstractDrone):
     # Could change these units to metres if needed
 
     def move_up(self, cm: int) -> None:
-        raise NotImplementedError
+        print("moving up")
+        self.send_ned_velocity(0, 0, 1, 2)
 
     def move_down(self, cm: int) -> None:
-        raise NotImplementedError
+        print("moving down")
+        self.send_ned_velocity(0, 0, -1, 2)
 
     def move_left(self, cm: int) -> None:
         print("sending move left y axis axis \n")
-        self.send_ned_velocity(0, -1, 0, 2)
+        self.send_ned_velocity(-1, 0, 0, 2)
 
     def move_right(self, cm: int) -> None:
         print("sending move right y axis axis \n")
-        self.send_ned_velocity(0, 1, 0, 2)
+        self.send_ned_velocity(1, 0, 0, 2)
 
     def move_forward(self, cm: int) -> None:
         """Move vehicle forward
         """
         print("sending move forward x axis \n")
-        self.send_ned_velocity(1, 0, 0, 2)
+        self.send_ned_velocity(0, -1, 0, 2)
         return
-    def move_backward(self, cm: int) -> None:
+    def move_back(self, cm: int) -> None:
         print("sending move back x axis axis \n")
-        self.send_ned_velocity(-1, 0, 0, 2)
+        self.send_ned_velocity(0, 1, 0, 2)
 
     def takeoff(self, target_altitude_metres: int) -> None:
         """

@@ -2,7 +2,7 @@
 Main file for the drone
 """
 
-from typing import Union
+from typing import Union 
 import cv2
 
 import constants as c
@@ -16,7 +16,11 @@ def loop(drone):
     """
     Defines main loop for the drone
     """
-    controller.handle_input(drone, cv2.waitKey(1), 2)
+    command = input()
+    print("input is %s", command)
+    command.strip()
+    command = ord(command)
+    controller.handle_input(drone, command)
     #img = read_camera_feed(drone)
     #  render_drone_feed(img)
 
@@ -48,7 +52,7 @@ def init(drone_type):
 
     match drone_type:
         case c.MAVIC:
-            vehicle = mavic_drone.MavicDrone(c.MAVIC_IP, c.MAVIC_PORT)
+            vehicle = mavic_drone.MavicDrone()
         case c.TELLO:
             vehicle = tello_drone.TelloDrone()
         case _:

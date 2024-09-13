@@ -1,2 +1,3 @@
 pygame
 djitellopy
+python-dotenv

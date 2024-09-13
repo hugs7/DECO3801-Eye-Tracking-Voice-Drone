@@ -9,8 +9,8 @@ import mavic_drone
 import tello_drone
 TAKEOFF_ALTITUDE = 2
 CONTROLLER_MAPPING = {
-    81: "LEFT",         
-    83: "RIGHT",        
+    ord('a'): "LEFT",         
+    ord('d'): "RIGHT",        
     82: "UP",           
     84: "DOWN",         
     ord('w'): "FORWARD",
@@ -23,7 +23,8 @@ CONTROLLER_MAPPING = {
 }
 
 def get_key(command):
-    print(command)
+    if command != -1:
+        print(command)
     if command in CONTROLLER_MAPPING:
         return CONTROLLER_MAPPING[command]
 
@@ -43,7 +44,10 @@ def handle_input(drone: Union[tello_drone.TelloDrone, mavic_drone.MavicDrone], c
     moveSpeed = 10
     rotationSpeed = 10
     sysCom = get_key(command)
-    print(sysCom)
+    if sysCom:
+        print(sysCom)
+    if value == None:
+        value = 1
 
     match sysCom:
         case "ROTATE CW":
