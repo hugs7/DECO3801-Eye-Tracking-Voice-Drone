@@ -1,12 +1,20 @@
+"""
+Main module for the voice control program.
+"""
+
+import logging
 import speech_recognition as sr
-import sounddevice as sd
 import numpy as np
-import time
-from scipy.io.wavfile import write
+
+import init
 from LLM import run_terminal_agent
 from constants import AUDIO_PHRASE_TIME_LIMIT, MAX_VOLUME_THRESHOLD
 
+# Globals
+
 recogniser = sr.Recognizer()
+logger = logging.getLogger(__name__)
+
 
 def save_audio(audio: sr.AudioData):
     """
@@ -20,6 +28,7 @@ def save_audio(audio: sr.AudioData):
     """
     with open("voice_control\\recordings\\recorded_audio.wav", "wb") as f:
         f.write(audio.get_wav_data())
+
 
 def print_volume(indata: np.ndarray, frames: int, time: any, status: any):
     """
@@ -55,10 +64,11 @@ def capture_voice_input() -> sr.AudioData:
         AudioData: An AudioData object containing the recorded audio input.
     """
     with sr.Microphone() as source:
-        #print(f"Listening on source", source.list_microphone_names(), "\n\n", source.list_working_microphones())
+        # print(f"Listening on source", source.list_microphone_names(), "\n\n", source.list_working_microphones())
         print("Listening...")
-        
-        audio = recogniser.listen(source, phrase_time_limit=AUDIO_PHRASE_TIME_LIMIT)
+
+        audio = recogniser.listen(
+            source, phrase_time_limit=AUDIO_PHRASE_TIME_LIMIT)
         save_audio(audio)
     return audio
 
@@ -73,7 +83,7 @@ def convert_voice_to_text(audio: sr.AudioData):
     except sr.UnknownValueError:
         text = ""
         print("Not understood")
-        #return
+        # return
     except sr.RequestError as e:
         text = ""
         print("Error; {0}".format(e))
@@ -90,23 +100,26 @@ def process_voice_command(text: str):
         "up": "Up",
         "down": "Down",
         "forward": "Forward",
-        "back" : "Back"
+        "back": "Back"
     }
     command = text.lower()
     # Call the LLM to convert text
     result = run_terminal_agent(text)
     print(result)
-    
 
 
 def main():
-    #end_program = False
-    #while not end_program:
+    """
+    The main function that runs the voice control program.
+    """
+
+    config = init.init_config()
+
     audio = capture_voice_input()
     text = convert_voice_to_text(audio)
     end_program = process_voice_command(text)
-    print(end_program)
-    #time.sleep(1)
+    logger(end_program)
+
 
 if __name__ == "__main__":
     main()
