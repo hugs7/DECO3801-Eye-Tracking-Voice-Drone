@@ -2,7 +2,7 @@
 Defines class for Mavic drone
 """
 
-from dronekit import connect, VehicleMode
+# from dronekit import connect, VehicleMode
 
 import constants as c
 from .drone import Drone
@@ -20,7 +20,8 @@ class MavicDrone(Drone):
 
         # Try connecting with a longer timeout
         try:
-            vehicle = connect(connection_string, wait_ready=True, timeout=c.MAVIC_CONNECTION_TIMEOUT)
+            # vehicle = connect(connection_string, wait_ready=True, timeout=60)
+            vehicle = None
             print("Connected to vehicle!")
         except Exception as e:
             print(f"Failed to connect: {e}")
@@ -38,7 +39,8 @@ class MavicDrone(Drone):
         return img
 
     def __set_vehicle_mode(self, mode: str) -> None:
-        self.vehicle.mode = VehicleMode(mode)
+        # self.vehicle.mode = VehicleMode(mode)
+        self.vehicle.mode = None
 
     def _is_armable(self) -> bool:
         """
