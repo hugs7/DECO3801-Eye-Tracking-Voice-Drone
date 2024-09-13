@@ -11,19 +11,22 @@ import os
 from file_handler import get_context_file, get_data_folder
 from constants import MAX_LOOP
 
+
 class AgentInteractiveConsole(InteractiveConsole):
-	"""
+    """
     A custom interactive console for executing code within an agent's environment.
 
     This class extends the standard `InteractiveConsole` and overrides the `runcode` method
-    to handle specific exceptions such as `SystemExit` and `AgentIsDone`. The rest of the exceptions
-    are caught and displayed using the built-in traceback display mechanism.
+    to handle specific exceptions such as `SystemExit` and `AgentIsDone`. Other exceptions are
+    caught and displayed using the built-in traceback display mechanism.
 
     Methods:
-        runcode(code): Executes the given code in the console's local environment and handles exceptions.
+        runcode(code):
+            Executes the given code in the console's local environment and handles exceptions.
     """
-	def runcode(self, code) -> None:
-		"""
+
+    def runcode(self, code) -> None:
+        """
         Executes the provided code within the console's local namespace.
 
         This method attempts to execute the provided code. If a `SystemExit` or `AgentIsDone`
@@ -39,22 +42,22 @@ class AgentInteractiveConsole(InteractiveConsole):
         Returns:
             None
         """
-		try:
-			exec(code, self.locals)
-		except (SystemExit, AgentIsDone):
-			raise
-		except:
-			self.showtraceback()
+        try:
+            exec(code, self.locals)
+        except (SystemExit, AgentIsDone):
+            raise
+        except:
+            self.showtraceback()
 
 
 def run_entry(
-		interactive_console: AgentInteractiveConsole, entry_code: str
+        interactive_console: AgentInteractiveConsole, entry_code: str
 ) -> Tuple[bool, str, str, str]:
-	"""
+    """
     Executes a given code entry in the agent's interactive console and captures the output.
 
     This function takes an interactive console and a block of code (as a string), executes
-    the code line by line, and captures any output from stdout and stderr. It also handles 
+    the code line by line, and captures any output from stdout and stderr. It also handles
     the special case where the agent indicates it is done via an `AgentIsDone` exception.
 
     Args:
@@ -71,38 +74,40 @@ def run_entry(
     Exceptions:
         AgentIsDone: If raised during code execution, the `agent_is_done` flag is set to `True`.
     """
-	interactive_console.resetbuffer()
-	message = ""
-	agent_is_done = False
-	executed_lines = []
-	with StringIO() as redirected_stdout_stderr:
-		with contextlib.redirect_stdout(redirected_stdout_stderr):
-			with contextlib.redirect_stderr(redirected_stdout_stderr):
-				try:
-					more_input = False
-					for line in entry_code.splitlines():
-						executed_lines.append(line)
-						more_input = interactive_console.push(line)
-						if not more_input:
-							break
-					if more_input:
-						interactive_console.push("")
-				except AgentIsDone:
-					agent_is_done = True
-		executed_lines = add_terminal_line_decorators("\n".join(executed_lines))
-		return (
-			agent_is_done,
-			redirected_stdout_stderr.getvalue(),
-			executed_lines,
-			message,
-		)
+    interactive_console.resetbuffer()
+    message = ""
+    agent_is_done = False
+    executed_lines = []
+    with StringIO() as redirected_stdout_stderr:
+        with contextlib.redirect_stdout(redirected_stdout_stderr):
+            with contextlib.redirect_stderr(redirected_stdout_stderr):
+                try:
+                    more_input = False
+                    for line in entry_code.splitlines():
+                        executed_lines.append(line)
+                        more_input = interactive_console.push(line)
+                        if not more_input:
+                            break
+                    if more_input:
+                        interactive_console.push("")
+                except AgentIsDone:
+                    agent_is_done = True
+        executed_lines = add_terminal_line_decorators(
+            "\n".join(executed_lines))
+        return (
+            agent_is_done,
+            redirected_stdout_stderr.getvalue(),
+            executed_lines,
+            message,
+        )
+
 
 def correct_format(response: str) -> bool:
-	"""
+    """
     Checks if the given string can be safely evaluated into a list of tuples.
 
-    This function attempts to evaluate the provided string using `eval()` and verifies whether 
-    the result is a list where every element is a tuple. If the evaluation fails or the result 
+    This function attempts to evaluate the provided string using `eval()` and verifies whether
+    the result is a list where every element is a tuple. If the evaluation fails or the result
     does not match the expected format, it returns `False`.
 
     Args:
@@ -114,19 +119,19 @@ def correct_format(response: str) -> bool:
     Exceptions:
         Any exceptions raised during evaluation will be caught, and the function will return `False`.
     """
-	try:
-		eval_response = eval(response)
-		return isinstance(eval_response, list) and all(isinstance(i, tuple) for i in eval_response)
-	except:
-		return False
+    try:
+        eval_response = eval(response)
+        return isinstance(eval_response, list) and all(isinstance(i, tuple) for i in eval_response)
+    except:
+        return False
 
 
 def run_until_halt(
-		interactive_console: AgentInteractiveConsole,
-		ask_fn: Callable[[List[Dict[str, str]], bool], str],
-		context: List[Dict[str, str]],
+        interactive_console: AgentInteractiveConsole,
+        ask_fn: Callable[[List[Dict[str, str]], bool], str],
+        context: List[Dict[str, str]],
 ) -> Tuple[bool, str]:
-	"""
+    """
     Continuously executes code provided by a language model until an agent signals completion or a valid output is produced.
 
     This function loops, requesting code from an LLM through `ask_fn`, and executes it in the provided `interactive_console`.
@@ -139,7 +144,7 @@ def run_until_halt(
         context (List[Dict[str, str]]): The conversation context between the user and the assistant, updated throughout execution.
 
     Returns:
-        Tuple[bool, str]: A tuple containing:
+        Tuple[bool, str]:
             - bool: A flag indicating if the agent has completed its task (`True` if `AgentIsDone` was raised).
             - str: The last captured output from the execution, which will either be valid or signal that execution has stopped.
 
@@ -147,54 +152,55 @@ def run_until_halt(
         - The function queries the LLM for code, executes it in the `interactive_console`, and logs the output.
         - It continues execution until either the agent signals it is done or valid output is received.
     """
-	agent_is_done = False
-	message = ""
-	loop_count = 0
-	while not (agent_is_done or message != "") and loop_count < MAX_LOOP:
-		captured_output = ""
-		executed_entries = list()
-		
-		terminal_code = ask_llm(context, ask_fn)
-		
-		terminal_entries = extract_terminal_entries(terminal_code)
-		
-		for entry_code in terminal_entries:
-			(
-				agent_is_done,
-				captured_output,
-				executed_lines,
-				message,
-			) = run_entry(interactive_console, entry_code)
-			executed_entries.append(executed_lines)
-			# As soon as there's some output, the LLM might want to react to it -> put it in context and ask again.
-			#log(captured_output, color=Fore.WHITE)
-			if agent_is_done or captured_output != "":
-				break
+    agent_is_done = False
+    message = ""
+    loop_count = 0
+    while not (agent_is_done or message != "") and loop_count < MAX_LOOP:
+        captured_output = ""
+        executed_entries = list()
 
-		executed_code = "\n".join(executed_entries)
-		context.append({"role": "assistant", "content": executed_code})
-		log(executed_code, color=Fore.LIGHTYELLOW_EX)
-		if captured_output != "":
-			context.append({"role": "user", "content": captured_output})
-			log(captured_output, color=Fore.LIGHTCYAN_EX, end="" if captured_output[-1] == "\n" else "\n")
-			if correct_format(captured_output):
-				break
+        terminal_code = ask_llm(context, ask_fn)
 
-		loop_count += 1
+        terminal_entries = extract_terminal_entries(terminal_code)
 
-	if loop_count >= MAX_LOOP:
-		log(f"Max loop count {MAX_LOOP} reached", color=Fore.RED)
+        for entry_code in terminal_entries:
+            (
+                agent_is_done,
+                captured_output,
+                executed_lines,
+                message,
+            ) = run_entry(interactive_console, entry_code)
+            executed_entries.append(executed_lines)
+            # As soon as there's some output, the LLM might want to react to it -> put it in context and ask again.
+            # log(captured_output, color=Fore.WHITE)
+            if agent_is_done or captured_output != "":
+                break
 
-	return agent_is_done, message, captured_output
+        executed_code = "\n".join(executed_entries)
+        context.append({"role": "assistant", "content": executed_code})
+        log(executed_code, color=Fore.LIGHTYELLOW_EX)
+        if captured_output != "":
+            context.append({"role": "user", "content": captured_output})
+            log(captured_output, color=Fore.LIGHTCYAN_EX,
+                end="" if captured_output[-1] == "\n" else "\n")
+            if correct_format(captured_output):
+                break
+
+        loop_count += 1
+
+    if loop_count >= MAX_LOOP:
+        log(f"Max loop count {MAX_LOOP} reached", color=Fore.RED)
+
+    return agent_is_done, message, captured_output
 
 
 def react(
-		interactive_console: AgentInteractiveConsole,
-		ask_fn: Callable[[List[Dict[str, str]], bool], str],
-		context: List[Dict[str, str]],
-		user_command: str,
+        interactive_console: AgentInteractiveConsole,
+        ask_fn: Callable[[List[Dict[str, str]], bool], str],
+        context: List[Dict[str, str]],
+        user_command: str,
 ) -> Tuple[bool, str]:
-	"""
+    """
     Handles user commands by updating context, saving it, and interacting with the LLM until a task is completed or output is produced.
 
     This function processes a user command, stores it in a context file, and then appends it to the provided `context`.
@@ -208,7 +214,7 @@ def react(
         user_command (str): The command provided by the user to be processed.
 
     Returns:
-        Tuple[bool, str]: A tuple containing:
+        Tuple[bool, str]:
             - bool: A flag indicating whether the agent has completed its task (`True` if `AgentIsDone` was raised).
             - str: The last message from the agent or an empty string if there is no specific message.
             - str: The final output produced by the execution, if available.
@@ -221,22 +227,22 @@ def react(
     Side effects:
         - Modifies the context file by appending the user command and the ongoing conversation context.
     """
-	context_file = get_context_file()
-	stored_context = []
+    context_file = get_context_file()
+    stored_context = []
 
-	
-	if os.path.exists(context_file) and os.path.getsize(context_file) > 0:
-		with open(context_file, 'r') as f:
-			for line in f:
-				parsed = json.loads(line)
-				stored_context.append(parsed)
+    if os.path.exists(context_file) and os.path.getsize(context_file) > 0:
+        with open(context_file, 'r') as f:
+            for line in f:
+                parsed = json.loads(line)
+                stored_context.append(parsed)
 
-	stored_context.append({"role": "user", "content": user_command})
-	with open(context_file, 'w') as f:
-		for entry in stored_context:
-			f.write(json.dumps(entry) + '\n')
-	
-	log(user_command, color=Fore.LIGHTGREEN_EX)
-	context.append({"role": "user", "content": user_command})
-	agent_is_done, message, output = run_until_halt(interactive_console, ask_fn, stored_context)
-	return agent_is_done, message, output
+    stored_context.append({"role": "user", "content": user_command})
+    with open(context_file, 'w') as f:
+        for entry in stored_context:
+            f.write(json.dumps(entry) + '\n')
+
+    log(user_command, color=Fore.LIGHTGREEN_EX)
+    context.append({"role": "user", "content": user_command})
+    agent_is_done, message, output = run_until_halt(
+        interactive_console, ask_fn, stored_context)
+    return agent_is_done, message, output
