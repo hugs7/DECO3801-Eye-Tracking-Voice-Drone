@@ -4,6 +4,10 @@ File handling functions for the voice control project.
 
 import os
 import site
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 
 def get_project_root() -> str:
@@ -14,7 +18,9 @@ def get_project_root() -> str:
         str: The path to the root folder of the project (one level above the 'voice_control' folder).
     """
 
-    return site.getsitepackages()[0]
+    project_root = site.getsitepackages()[0]
+    logger.info(f"Project root: {project_root}")
+    return project_root
 
 
 def get_package_folder() -> str:
@@ -25,7 +31,9 @@ def get_package_folder() -> str:
         str: The path to the 'voice_control' folder.
     """
     project_root = get_project_root()
-    return os.path.join(project_root, "voice_control")
+    package_folder = os.path.join(project_root, "voice_control")
+    logger.info(f"Package folder: {package_folder}")
+    return package_folder
 
 
 def get_data_folder() -> str:
@@ -36,7 +44,9 @@ def get_data_folder() -> str:
         str: The path to the 'data' folder.
     """
     voice_control_folder = get_package_folder()
-    return os.path.join(voice_control_folder, "data")
+    data_folder = os.path.join(voice_control_folder, "data")
+    logger.info(f"Data folder: {data_folder}")
+    return data_folder
 
 
 def get_context_file() -> str:
@@ -60,4 +70,11 @@ def file_exists(file_path: str) -> bool:
     Returns:
         bool: True if the file exists, False otherwise.
     """
-    return os.path.exists(file_path)
+
+    exists = os.path.exists(file_path)
+    if (exists):
+        logger.debug(f"File exists: {file_path}")
+    else:
+        logger.debug(f"File does not exist: {file_path}")
+
+    return exists
