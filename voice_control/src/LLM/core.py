@@ -8,6 +8,7 @@ from .utils import log, ask_llm
 from .formatting import add_terminal_line_decorators, extract_terminal_entries
 import json
 import os
+from file_handler import get_context_file, get_data_folder
 from constants import MAX_LOOP
 
 class AgentInteractiveConsole(InteractiveConsole):
@@ -155,7 +156,6 @@ def run_until_halt(
 		
 		terminal_code = ask_llm(context, ask_fn)
 		
-		
 		terminal_entries = extract_terminal_entries(terminal_code)
 		
 		for entry_code in terminal_entries:
@@ -221,12 +221,7 @@ def react(
     Side effects:
         - Modifies the context file by appending the user command and the ongoing conversation context.
     """
-	llm_folder = os.path.dirname(__file__)
-	src_folder = os.path.dirname(llm_folder)
-	voice_control = os.path.dirname(src_folder)
-	
-	data_folder = os.path.join(voice_control, "data")
-	context_file = os.path.join(data_folder, "context.jsonl")
+	context_file = get_context_file()
 	stored_context = []
 
 	
