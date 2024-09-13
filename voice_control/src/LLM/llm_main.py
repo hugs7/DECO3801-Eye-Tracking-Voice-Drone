@@ -3,7 +3,7 @@ import openai
 from colorama import Fore
 from typing import List, Dict
 from .core import AgentInteractiveConsole, react
-from .defaults import initial_context
+from .defaults import init_context
 from .utils import log
 from .wrappers import done, proxy_input
 from dotenv import load_dotenv
@@ -60,7 +60,7 @@ def run_terminal_agent(user_input) -> str:
         - Executes code in an `AgentInteractiveConsole` based on user input and LLM-generated responses.
     """
 	interactive_console = AgentInteractiveConsole(locals={"done": done, "input": proxy_input})
-	context = initial_context
+	context = init_context()
 	if (user_input == ""):
 		while (user_input := input("Enter a message (or exit to quit): ")) != "exit":
 			user_command = f">>> # User: {user_input}"

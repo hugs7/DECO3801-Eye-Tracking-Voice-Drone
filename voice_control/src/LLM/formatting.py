@@ -1,4 +1,5 @@
 from typing import List, Dict, Callable
+from constants import ELLIPSIS, CONTINUATION_PROMPT, PYTHON_PROMPT, PYTHON_SHELL
 
 def remove_terminal_line_decorators(terminal_code: str) -> str:
     """
@@ -10,7 +11,7 @@ def remove_terminal_line_decorators(terminal_code: str) -> str:
     Returns:
         str: The terminal code with the decorators removed.
     """
-    return "\n".join([line[4:] if line.startswith(('>>> ', '... ')) else line for line in terminal_code.splitlines()])
+    return "\n".join([line[4:] if line.startswith((PYTHON_PROMPT, CONTINUATION_PROMPT)) else line for line in terminal_code.splitlines()])
 
 def remove_code_block_formatting(code: str) -> str:
     """
@@ -38,7 +39,7 @@ def add_terminal_line_decorators(terminal_entry: str) -> str:
     """
     decorated_lines = list()
     for i, line in enumerate(terminal_entry.splitlines()):
-        decoration = ">>> " if i == 0 else "... "
+        decoration = PYTHON_PROMPT if i == 0 else CONTINUATION_PROMPT
         decorated_lines.append(decoration + line)
     return "\n".join(decorated_lines)
 
@@ -65,11 +66,12 @@ def ensure_terminal_formatting_strict(terminal_code: str, force: bool = False) -
             continue
 
         if line[0] == "#":
-            line = ">>> " + line
-        if line in {">>>", "..."}:
+            line = PYTHON_PROMPT + line
+
+        if line in {PYTHON_SHELL, ELLIPSIS}:
             line += " "
 
-        if force and line[:4] not in {">>> ", "... "}:
+        if force and line[:len(CONTINUATION_PROMPT)] not in {PYTHON_PROMPT, CONTINUATION_PROMPT}:
             continue
 
         formatted_lines.append(line)
@@ -136,6 +138,9 @@ def extract_terminal_entries(terminal_code: str) -> List[str]:
     Returns:
         List[str]: A list of extracted and cleaned code entries.
     """
-    entries = terminal_code.split("\n>>> ")
-    entries = entries[0:1] + [">>> " + e for e in entries[1:]]
+    
+    entries = terminal_code.split("\n" + PYTHON_PROMPT)
+    first_entry = entries[0:1] 
+    remaining_entries = entries[1:]
+    entries = first_entry + [PYTHON_PROMPT + e for e in remaining_entries]
     return [remove_terminal_line_decorators(e) for e in entries]
