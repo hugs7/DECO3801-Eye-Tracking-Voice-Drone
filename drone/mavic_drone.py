@@ -65,10 +65,6 @@ class MavicDrone(AbstractDrone):
         Arms the drone for flight. User is not allowed to fly the drone until it is armed
         Cannot arm until the drone's autopilot is ready.
         """
-        print("Performing basic pre-arm checks")
-        #while not self._is_armable():
-        #    print(" Waiting for vehicle to initialise...")
-        #    time.sleep(1)
 
         print("Arming motors")
         self.__set_vehicle_mode("GUIDED")
@@ -116,29 +112,29 @@ class MavicDrone(AbstractDrone):
 
     def move_up(self, cm: int) -> None:
         print("moving up")
-        self.send_ned_velocity(0, 0, 1, 2)
+        self.send_ned_velocity(0, 0, cm, 2)
 
     def move_down(self, cm: int) -> None:
         print("moving down")
-        self.send_ned_velocity(0, 0, -1, 2)
+        self.send_ned_velocity(0, 0, 0 - cm, 2)
 
     def move_left(self, cm: int) -> None:
         print("sending move left y axis axis \n")
-        self.send_ned_velocity(-1, 0, 0, 2)
+        self.send_ned_velocity(0 - cm, 0, 0, 2)
 
     def move_right(self, cm: int) -> None:
         print("sending move right y axis axis \n")
-        self.send_ned_velocity(1, 0, 0, 2)
+        self.send_ned_velocity(cm, 0, 0, 2)
 
     def move_forward(self, cm: int) -> None:
         """Move vehicle forward
         """
         print("sending move forward x axis \n")
-        self.send_ned_velocity(0, -1, 0, 2)
+        self.send_ned_velocity(0, 0 - cm, 0, 2)
         return
     def move_back(self, cm: int) -> None:
         print("sending move back x axis axis \n")
-        self.send_ned_velocity(0, 1, 0, 2)
+        self.send_ned_velocity(0, cm, 0, 2)
 
     def takeoff(self, target_altitude_metres: int) -> None:
         """
