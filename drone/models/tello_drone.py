@@ -5,7 +5,6 @@ Defines class for Tello drone
 from .drone import Drone
 from djitellopy import tello
 import cv2
-import pygame
 
 import constants as c
 
@@ -14,7 +13,7 @@ class TelloDrone(Drone):
     def __init__(self) -> None:
         tello_drone = tello.Tello()
         self.drone = tello_drone
-        self.__connect()
+        self._connect()
 
         # Start Camera Display Stream
         self.drone.streamon()
@@ -22,13 +21,7 @@ class TelloDrone(Drone):
 
         print("Drone battery:", self.drone.get_battery())
 
-        # Initialize Keyboard Input
-        pygame.init()
-        self.window = pygame.display.set_mode((400, 400))
-
-        self.polling_flag = False
-
-    def __connect(self) -> None:
+    def _connect(self) -> None:
         """
         Connects to the drone
         """
@@ -42,7 +35,9 @@ class TelloDrone(Drone):
 
         frame_read = self.drone.get_frame_read()
         img = frame_read.frame
+
         return img
+
 
 
     def set_video_resolution(self, resolution: str):

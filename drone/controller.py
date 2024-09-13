@@ -5,7 +5,6 @@ Controller for the drone, handles the input of a drone from voice, Gaze or manua
 from typing import Union, Optional
 import pygame
 import time
-import models
 import cv2
 
 CONTROLLER_MAPPING = {
