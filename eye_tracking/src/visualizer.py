@@ -21,17 +21,37 @@ class Visualizer:
         self.image: Optional[np.ndarray] = None
 
     def set_image(self, image: np.ndarray) -> None:
+        """
+        Binds the image to the visualizer state
+        :param image: The image to be bound
+        :return: None
+        """
         self.image = image
 
     def flip_image(self) -> None:
+        """
+        Flips the image horizontally
+        :return: None
+        """
         flipped_image = transforms.flip_image(self.image)
         self.set_image(flipped_image)
 
     def get_2d_resolution(self) -> Tuple[int, int]:
+        """
+        Returns the resolution of the 2D image
+        :return: The resolution of the 2D image
+        """
         assert self.image is not None
         return self.image.shape[:2]
 
     def draw_bbox(self, bbox: np.ndarray, color: Tuple[int, int, int] = (0, 255, 0), lw: int = 1) -> None:
+        """
+        Draws a bounding box on the image
+        :param bbox: The bounding box to be drawn
+        :param color: The colour of the bounding box
+        :param lw: The line width of the bounding box
+        :return: None
+        """
         assert self.image is not None
         assert bbox.shape == (2, 2)
         bbox = np.round(bbox).astype(np.int32).tolist()
@@ -39,12 +59,23 @@ class Visualizer:
 
     @staticmethod
     def _convert_pt(point: np.ndarray) -> Tuple[int, int]:
+        """
+        Converts the point to a tuple of integers
+        :param point: The point to be converted
+        :return: The point as a tuple of integers
+        """
+
         return tuple(np.round(point).astype(np.int32).tolist())
 
     def draw_points(self, points: np.ndarray, color: Tuple[int, int, int] = (0, 0, 255), size: int = 3) -> None:
         """
         Draws points from 2D image coordinates onto the image (direct drawing).
+        :param points: The points to be drawn
+        :param color: The colour of the points
+        :param size: The size of the points
+        :return: None
         """
+
         assert self.image is not None
         assert points.shape[1] == 2
         for pt in points:
@@ -147,7 +178,13 @@ class Visualizer:
     ) -> Tuple[int, int]:
         """
         Draw a point from 3D world coordinates onto the image.
+        :param point3d: The 3D point to be drawn
+        :param color: The colour of the point. Default is magenta
+        :param size: The size of the point. Default is 3
+        :param clamp_to_screen: Whether to clamp the point to the screen. Default is False
+        :return: The 2D point
         """
+
         assert self.image is not None
         assert point3d.shape == (3,)
         point2d = self._camera.project_point(point3d)
@@ -161,7 +198,13 @@ class Visualizer:
     ) -> None:
         """
         Draw points from 3D world coordinates onto the image.
+        :param points3d: The 3D points to be drawn
+        :param color: The colour of the points. Default is magenta
+        :param size: The size of the points. Default is 3
+        :param clamp_to_screen: Whether to clamp the points to the screen. Default is False
+        :return: None
         """
+
         assert self.image is not None
         assert points3d.shape[1] == 3
         points2d = self._camera.project_points(points3d)
@@ -170,6 +213,15 @@ class Visualizer:
         self.draw_points(points2d, color=color, size=size)
 
     def draw_3d_line(self, point0: np.ndarray, point1: np.ndarray, color: Tuple[int, int, int] = (255, 255, 0), lw=1) -> None:
+        """
+        Draw a line from 3D world coordinates onto the image.
+        :param point0: The start point of the line
+        :param point1: The end point of the line
+        :param color: The colour of the line. Default is yellow
+        :param lw: The line width. Default is 1
+        :return: None
+        """
+
         assert self.image is not None
         assert point0.shape == point1.shape == (3,)
         points3d = np.vstack([point0, point1])
@@ -179,6 +231,14 @@ class Visualizer:
         cv2.line(self.image, pt0, pt1, color, lw, cv2.LINE_AA)
 
     def draw_model_axes(self, face: Face, length: float, lw: int = 2) -> None:
+        """
+        Draw the axes of the model coordinate system onto the image.
+        :param face: The face object
+        :param length: The length of the axes
+        :param lw: The line width. Default is 2
+        :return: None
+        """
+
         assert self.image is not None
         assert face is not None
         assert face.head_pose_rot is not None
@@ -197,13 +257,19 @@ class Visualizer:
     def _clamp_point(self, point_or_points: np.ndarray) -> np.ndarray:
         """
         Clamp the point or points to the image resolution
+        :param point_or_points: The point or points to be clamped
+        :return: The clamped point or points
         """
+
         return np.clip(point_or_points, 0, np.array(self.image.shape[:2])[::-1])
 
     def flip_point_x(self, point: Tuple[int, int]) -> Tuple[int, int]:
         """
         Flip the x-coordinate of the point
+        :param point: The point to be flipped
+        :return: The flipped point
         """
+
         _, res_x = self.get_2d_resolution()
         flipped_point = point
         flipped_point[0] = res_x - flipped_point[0]
