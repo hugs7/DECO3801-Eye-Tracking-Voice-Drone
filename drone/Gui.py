@@ -15,7 +15,7 @@ class DroneApp:
         self.canvas = Canvas(self.root, width = self.WIDTH, height = self.HEIGHT)
         self.canvas.pack(expand=True)
 
-        base_image = Image.open("../assets/loadingScreeen.png")
+        base_image = Image.open("./assets/loadingScreeen.png")
         base_image = base_image.resize((self.WIDTH, self.HEIGHT), Image.ANTIALIAS)  # Resize the image to fit the canvas
         base_image = ImageTk.PhotoImage(base_image)
 
