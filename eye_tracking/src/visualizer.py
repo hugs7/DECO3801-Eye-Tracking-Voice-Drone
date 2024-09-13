@@ -54,10 +54,47 @@ class Visualizer:
     def create_opacity(self, overlay: np.ndarray, opacity: float):
         """
         Blends the original image and the overlay together, with a specified transparency/opacity
+        :param overlay: The overlay to be blended with the original image
+        :param opacity: The transparency of the overlay
+        :return: None
         """
+
         img = np.zeros_like(self.image, np.uint8)
         cv2.addWeighted(overlay, opacity, self.image, 1 - opacity, 0, img)
         self.set_image(img)
+
+    def calculate_text_org(
+        self,
+        text: str,
+        text_font_face: int,
+        font_scale: float,
+        thickness: int,
+        top_left: Tuple[int, int],
+        bottom_right: Tuple[int, int],
+    ):
+        """
+        Calculates the origin of the text to be drawn in the centre of the rectangle
+        :param text: The text to be drawn
+        :param text_font_face: The font face of the text
+        :param font_scale: The scale of the font
+        :param thickness: The thickness of the text
+        :param top_left: The top left corner of the rectangle
+        :param bottom_right: The bottom right corner of the rectangle
+        :return: The origin of the text
+        """
+
+        (text_width, text_height), text_bottom_y = cv2.getTextSize(text, text_font_face, font_scale, thickness)
+        text_middle = text_width // 2
+
+        # Calculate the x_coordinate of the middle of the rectangle (i.e left-most x-coord of rectangle + middle of rectangle)
+        rectangle_middle = (bottom_right[0] - top_left[0]) // 2
+        rectangle_middle_x_coord = top_left[0] + rectangle_middle
+
+        # Aligns the centre of the text with the centre of the rectangle
+        rectangle_bottom_left = rectangle_middle_x_coord - text_middle
+        text_org = (rectangle_bottom_left, (top_left[1] + bottom_right[1]) // 2)
+
+        return text_org
 
     def draw_labelled_rectangle(
         self,
@@ -75,12 +112,23 @@ class Visualizer:
     ):
         """
         Draws a labelled rectangle on the specified overlay
+        :param top_left: The top left corner of the rectangle
+        :param bottom_right: The bottom right corner of the rectangle
+        :param bg_color: The background colour of the rectangle
+        :param bg_alpha: The transparency of the rectangle
+        :param text: The text to be displayed
+        :param text_font_face: The font face of the text
+        :param text_line_type: The line type of the text
+        :param font_scale: The scale of the font
+        :param border_color: The colour of the border
+        :param border_thickness: The thickness of the border
+        :param text_org: The origin of the text
+        :return: None
         """
-        assert self.image is not None
 
+        assert self.image is not None
         if text_org is None:
-            # Place text in the center of the rectangle
-            text_org = ((top_left[0] + bottom_right[0]) // 2, (top_left[1] + bottom_right[1]) // 2)
+            text_org = self.calculate_text_org(text, text_font_face, font_scale, 2, top_left, bottom_right)
 
         overlay = np.zeros_like(self.image, np.uint8)
         if border_color is not None:
