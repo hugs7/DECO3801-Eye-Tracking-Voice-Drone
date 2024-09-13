@@ -26,17 +26,25 @@ class FaceParts:
 
     @property
     def distance(self) -> float:
+        """
+        Computes distance from the camera to the face part
+        :return: Distance in meters
+        """
         return np.linalg.norm(self.center)
 
     def angle_to_vector(self) -> None:
+        """
+        Converts normalized gaze angles to a gaze vector
+        """
+
         pitch, yaw = self.normalized_gaze_angles
-        self.normalized_gaze_vector = -np.array([
-            np.cos(pitch) * np.sin(yaw),
-            np.sin(pitch),
-            np.cos(pitch) * np.cos(yaw)
-        ])
+        self.normalized_gaze_vector = -np.array([np.cos(pitch) * np.sin(yaw), np.sin(pitch), np.cos(pitch) * np.cos(yaw)])
 
     def denormalize_gaze_vector(self) -> None:
+        """
+        Denormalizes the gaze vector
+        """
+
         normalizing_rot = self.normalizing_rot.as_matrix()
         # Here gaze vector is a row vector, and rotation matrices are
         # orthogonal, so multiplying the rotation matrix from the right is
@@ -46,7 +54,13 @@ class FaceParts:
 
     @staticmethod
     def vector_to_angle(vector: np.ndarray) -> np.ndarray:
-        assert vector.shape == (3, )
+        """
+        Converts a gaze vector to pitch and yaw angles
+        :param vector: Gaze vector
+        :return: Pitch and yaw angles
+        """
+
+        assert vector.shape == (3,)
         x, y, z = vector
         pitch = np.arcsin(-y)
         yaw = np.arctan2(-x, -z)
