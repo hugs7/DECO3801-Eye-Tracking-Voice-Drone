@@ -2,10 +2,10 @@ import tiktoken
 from typing import List, Dict, Callable
 from colorama import Fore, Style
 from .formatting import ensure_terminal_formatting
+from constants import MAX_TOKENS, GPT_4
 
+gpt_token_encoder = tiktoken.encoding_for_model(GPT_4)
 
-gpt_token_encoder = tiktoken.encoding_for_model("gpt-4")
-max_tokens = 8_000
 
 
 def log(text: str, color: str = Fore.WHITE, end="\n"):
@@ -64,7 +64,7 @@ def limit_context_length(context: List[Dict[str, str]]):
     Returns:
         None
     """
-	while context_token_len(context) > max_tokens:
+	while context_token_len(context) > MAX_TOKENS:
 		context.pop(1)
 
 
