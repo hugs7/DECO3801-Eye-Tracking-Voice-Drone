@@ -12,7 +12,7 @@ from .formatting import remove_code_block_formatting
 
 load_dotenv()
 # Get the API key
-openai.api_key = os.getenv("OPEN_API_KEY")
+openai.api_key = os.getenv("OPENAI_API_KEY")
 assert openai.api_key is not None, "Please assign a valid OpenAI API key to the environment variable OPENAI_API_KEY."
 
 
