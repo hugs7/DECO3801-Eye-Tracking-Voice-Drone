@@ -15,7 +15,7 @@ class DroneApp:
         self.canvas = Canvas(self.root, width = self.WIDTH, height = self.HEIGHT)
         self.canvas.pack(expand=True)
 
-        base_image = Image.open("./assets/loadingScreeen.png")
+        base_image = Image.open("drone\assets\loadingScreen.png")
         base_image = base_image.resize((self.WIDTH, self.HEIGHT), Image.ANTIALIAS)  # Resize the image to fit the canvas
         base_image = ImageTk.PhotoImage(base_image)
 
@@ -27,7 +27,7 @@ class DroneApp:
         self.root.bind('<KeyPress>', self.on_key_press)
 
     def on_key_press(self, event):
-        self.controller.handle_keyboard_input(event.keysym)
+        self.controller.parse_input(event.keysym)
 
     def parse_input(self, command):
         self.controller.handle_input(command)
@@ -35,7 +35,7 @@ class DroneApp:
     def update_video_feed(self):
         frame = self.controller.get_frame()
 
-        if frame is not None:
+        if frame is not None:        
             # Convert the image from OpenCV format to PIL format
             image = Image.fromarray(frame)
             image = ImageTk.PhotoImage(image)
@@ -46,7 +46,7 @@ class DroneApp:
             # Save image so it isn't garbage collected
             self.canvas.image = image
 
-        self.root.after(12, self.update_video_feed)  # 30 FPSish
+        self.root.after(33, self.update_video_feed)  # 30 FPSish
     
 
         
