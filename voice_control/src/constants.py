@@ -1,3 +1,7 @@
+"""
+Constants File
+"""
+
 AUDIO_PHRASE_TIME_LIMIT = 5
 MAX_VOLUME_THRESHOLD = 10
 GPT_4 = 'gpt-4'
