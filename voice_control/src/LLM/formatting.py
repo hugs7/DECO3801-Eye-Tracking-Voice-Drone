@@ -1,6 +1,7 @@
 from typing import List, Dict, Callable
 from constants import ELLIPSIS, CONTINUATION_PROMPT, PYTHON_PROMPT, PYTHON_SHELL
 
+
 def remove_terminal_line_decorators(terminal_code: str) -> str:
     """
     Removes terminal line decorators (e.g., '>>> ' and '... ') from the given terminal code.
@@ -13,13 +14,14 @@ def remove_terminal_line_decorators(terminal_code: str) -> str:
     """
     return "\n".join([line[4:] if line.startswith((PYTHON_PROMPT, CONTINUATION_PROMPT)) else line for line in terminal_code.splitlines()])
 
+
 def remove_code_block_formatting(code: str) -> str:
     """
     Removes triple backticks and language markers from the code, such as ```python and ```.
-    
+
     Args:
         code (str): The code possibly containing triple backticks.
-    
+
     Returns:
         str: The code without code block markers.
     """
@@ -112,7 +114,7 @@ def ensure_terminal_formatting(code: str, ask_fn: Callable[[List[Dict[str, str]]
 
     Returns:
         str: The formatted terminal code.
-    
+
     Side Effects:
         Sometimes, the LLM hallucinates output lines if `print` is on the last line.
     """
@@ -121,9 +123,10 @@ def ensure_terminal_formatting(code: str, ask_fn: Callable[[List[Dict[str, str]]
     except AssertionError:
         pass
     llm_formatted_code = ensure_terminal_formatting_llm(code, ask_fn)
-    
+
     num_code_lines = len(code.splitlines())
-    llm_formatted_code = "\n".join(llm_formatted_code.splitlines()[:num_code_lines])
+    llm_formatted_code = "\n".join(
+        llm_formatted_code.splitlines()[:num_code_lines])
     return ensure_terminal_formatting_strict(llm_formatted_code, force=True)
 
 
@@ -138,9 +141,9 @@ def extract_terminal_entries(terminal_code: str) -> List[str]:
     Returns:
         List[str]: A list of extracted and cleaned code entries.
     """
-    
+
     entries = terminal_code.split("\n" + PYTHON_PROMPT)
-    first_entry = entries[0:1] 
+    first_entry = entries[0:1]
     remaining_entries = entries[1:]
     entries = first_entry + [PYTHON_PROMPT + e for e in remaining_entries]
     return [remove_terminal_line_decorators(e) for e in entries]

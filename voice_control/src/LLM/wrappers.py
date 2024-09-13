@@ -4,14 +4,14 @@ real_stdout = sys.stdout
 
 
 class AgentIsDone(Exception):
-	pass
+    pass
 
 
 def done():
-	raise AgentIsDone
+    raise AgentIsDone
 
 
 def proxy_input(text: str) -> str:
-	real_stdout.write(text)
-	real_stdout.flush()
-	return input(text)
+    real_stdout.write(text)
+    real_stdout.flush()
+    return input(text)
