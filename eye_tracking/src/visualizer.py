@@ -127,7 +127,9 @@ class Visualizer:
         """
 
         assert self.image is not None
-        text_org = self.calculate_text_org(text, text_font_face, font_scale, 2, top_left, bottom_right)
+        if text_org is None:
+            text_org = self.calculate_text_org(text, text_font_face, font_scale, 2, top_left, bottom_right)
+
         overlay = np.zeros_like(self.image, np.uint8)
         if border_color is not None:
             cv2.rectangle(overlay, top_left, bottom_right, border_color, -1)
