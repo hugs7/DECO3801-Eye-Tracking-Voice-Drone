@@ -9,7 +9,7 @@ import cv2
 
 class Drone(ABC):
     @abstractmethod
-    def _connect(self):
+    def connect(self):
         pass
 
     @abstractmethod

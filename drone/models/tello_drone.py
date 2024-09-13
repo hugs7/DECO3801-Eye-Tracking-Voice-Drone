@@ -13,7 +13,7 @@ class TelloDrone(Drone):
     def __init__(self) -> None:
         tello_drone = tello.Tello()
         self.drone = tello_drone
-        self._connect()
+        self.connect()
 
         # Start Camera Display Stream
         self.drone.streamon()
@@ -21,7 +21,7 @@ class TelloDrone(Drone):
 
         print("Drone battery:", self.drone.get_battery())
 
-    def _connect(self) -> None:
+    def connect(self) -> None:
         """
         Connects to the drone
         """
