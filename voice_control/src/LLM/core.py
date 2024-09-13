@@ -1,3 +1,7 @@
+"""
+Core functionality for interacting with the language model and executing code in the agent's environment.
+"""
+
 import contextlib
 from io import StringIO
 from typing import List, Tuple, Dict, Callable
@@ -8,8 +12,11 @@ from .utils import log, ask_llm
 from .formatting import add_terminal_line_decorators, extract_terminal_entries
 import json
 import os
-from file_handler import get_context_file, get_data_folder
+from file_handler import get_context_file
 from constants import MAX_LOOP
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class AgentInteractiveConsole(InteractiveConsole):
@@ -172,24 +179,24 @@ def run_until_halt(
             ) = run_entry(interactive_console, entry_code)
             executed_entries.append(executed_lines)
             # As soon as there's some output, the LLM might want to react to it -> put it in context and ask again.
-            # log(captured_output, color=Fore.WHITE)
+            logger.info(captured_output)
             if agent_is_done or captured_output != "":
                 break
 
         executed_code = "\n".join(executed_entries)
         context.append({"role": "assistant", "content": executed_code})
-        log(executed_code, color=Fore.LIGHTYELLOW_EX)
+        logger.info(executed_code)
         if captured_output != "":
             context.append({"role": "user", "content": captured_output})
-            log(captured_output, color=Fore.LIGHTCYAN_EX,
-                end="" if captured_output[-1] == "\n" else "\n")
+            logger.info(captured_output,
+                        end="" if captured_output[-1] == "\n" else "\n")
             if correct_format(captured_output):
                 break
 
         loop_count += 1
 
     if loop_count >= MAX_LOOP:
-        log(f"Max loop count {MAX_LOOP} reached", color=Fore.RED)
+        logger.warn(f"Max loop count {MAX_LOOP} reached")
 
     return agent_is_done, message, captured_output
 
@@ -241,7 +248,7 @@ def react(
         for entry in stored_context:
             f.write(json.dumps(entry) + '\n')
 
-    log(user_command, color=Fore.LIGHTGREEN_EX)
+    logger.info(user_command, color=Fore.LIGHTGREEN_EX)
     context.append({"role": "user", "content": user_command})
     agent_is_done, message, output = run_until_halt(
         interactive_console, ask_fn, stored_context)

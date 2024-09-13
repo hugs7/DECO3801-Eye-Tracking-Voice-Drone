@@ -3,26 +3,10 @@ from typing import List, Dict, Callable
 from colorama import Fore, Style
 from .formatting import ensure_terminal_formatting
 from constants import MAX_TOKENS, GPT_4
+import logging
 
 gpt_token_encoder = tiktoken.encoding_for_model(GPT_4)
-
-
-def log(text: str, color: str = Fore.WHITE, end="\n"):
-    """
-    Logs a message to the console with optional color formatting.
-
-    This function prints the provided `text` to the console, using a specified color and ending character.
-    The color is reset to default after each message, ensuring that subsequent outputs are not affected.
-
-    Args:
-        text (str): The message to log to the console.
-        color (str, optional): The color of the text using `colorama.Fore` constants. Defaults to white (`Fore.WHITE`).
-        end (str, optional): The string appended at the end of the message. Defaults to a newline (`\n`).
-
-    Returns:
-        None
-    """
-    print(f"{color}{text}{Style.RESET_ALL}", end=end)
+logger = logging.getLogger(__name__)
 
 
 def context_token_len(context: List[Dict[str, str]]) -> int:
@@ -68,10 +52,10 @@ def limit_context_length(context: List[Dict[str, str]]):
     while context_token_len(context) > MAX_TOKENS:
         context.pop(1)
     if len(context) < original_length:
-        log(
-            f"Warning: Context truncated. Only the most recent {len(context)} messages are being used.", color=Fore.YELLOW)
-        log("Older messages have been removed to fit within the token limit.",
-            color=Fore.YELLOW)
+        logger.info(
+            f"Warning: Context truncated. Only the most recent {len(context)} messages are being used.")
+        logger.info(
+            "Older messages have been removed to fit within the token limit.")
 
 
 def ask_llm(context: List[Dict[str, str]], ask_fn: Callable[[List[Dict[str, str]], bool], str]) -> str:
