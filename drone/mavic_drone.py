@@ -133,7 +133,7 @@ class MavicDrone(AbstractDrone):
         self.send_ned_velocity(0, 0 - cm, 0, 2)
         return
     def move_back(self, cm: int) -> None:
-        print("sending move back x axis axis \n")
+        print("sending move backward x axis \n")
         self.send_ned_velocity(0, cm, 0, 2)
 
     def takeoff(self, target_altitude_metres: int) -> None:
