@@ -18,8 +18,8 @@ def main(stop_event: Optional[Event] = None, shared_data: Optional[Dict] = None,
 
     config = init.init_ptgaze()
 
-    gaze_detector = GazeDetector(config)
-    gaze_detector.run(shared_data, data_lock)
+    gaze_detector = GazeDetector(config, stop_event, shared_data, data_lock)
+    gaze_detector.run()
 
 
 if __name__ == "__main__":

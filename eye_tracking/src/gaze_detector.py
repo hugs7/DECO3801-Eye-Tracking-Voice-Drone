@@ -8,7 +8,7 @@ import datetime
 import logging
 import pathlib
 from typing import Optional, Tuple, Dict
-from threading import Lock
+from threading import Event, Lock
 
 import cv2
 import numpy as np
@@ -28,8 +28,38 @@ logger = logging.getLogger(__name__)
 class GazeDetector:
     QUIT_KEYS = {27, ord("q")}
 
-    def __init__(self, config: DictConfig):
+    def __init__(self, config: DictConfig, stop_event: Optional[Event] = None, shared_data: Optional[Dict] = None, data_lock: Optional[Lock] = None):
+        """
+        Args:
+            config: Configuration object
+            stop_event: Event object to stop the gaze detector
+            shared_data: Shared data dictionary
+            data_lock: Lock object for shared data
+
+        Returns:
+            None
+        """
+
         logger.info("Initialising Gaze Detector")
+
+        required_args = [stop_event, shared_data, data_lock]
+        self.running_in_thread = any(required_args)
+
+        if self.running_in_thread:
+            # If running in thread mode, all or none of the required args must be provided
+            if not all(required_args):
+                raise ValueError(
+                    "All or none of stop_event, shared_data, data_lock must be provided.")
+
+            logger.info("Running in thread mode")
+            self.stop_event = stop_event
+            self.shared_data = shared_data
+            self.data_lock = data_lock
+
+            # Lazily import thread helpers only if running in thread mode
+            from app.thread_helper import thread_exit_handler, is_main_thread
+        else:
+            logger.info("Running in main mode")
 
         self.config = config
         self.gaze_estimator = GazeEstimator(config)
@@ -97,13 +127,9 @@ class GazeDetector:
 
         return {"left": left_hitbox, "right": right_hitbox}
 
-    def run(self, shared_data: Optional[Dict] = None, data_lock: Optional[Lock] = None) -> None:
+    def run(self) -> None:
         """
         Wraps the main loop for the gaze detector based on config settings.
-
-        Args:
-            shared_data: Shared data dictionary
-            data_lock: Lock object for shared data
 
         Returns:
             None
