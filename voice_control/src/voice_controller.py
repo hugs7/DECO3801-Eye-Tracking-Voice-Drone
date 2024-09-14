@@ -2,8 +2,9 @@
 Controller for voice processing
 """
 
-from typing import Optional, Dict
+from typing import Optional, Dict, List
 from threading import Event, Lock
+import json
 
 import speech_recognition as sr
 
@@ -73,12 +74,14 @@ class VoiceController:
             self.process_voice_command(user_audio)
         else:
             run = True
-
             while run:
+                logger.info(" >>> Begin voice control loop")
                 run = self.audio_loop()
 
                 if self.running_in_thread:
                     self.thread_exit_handler(self.stop_event)
+
+                logger.info(" <<< End voice control loop")
 
     def audio_loop(self) -> bool:
         """
@@ -95,16 +98,31 @@ class VoiceController:
 
         return True  # For now
 
-    def process_voice_command(self, user_audio: sr.AudioData) -> None:
+    def process_voice_command(self, user_audio: sr.AudioData) -> Optional[List[Dict[str, int]]]:
         """
         Takes in the voice in text form and sends it to LLM and returns the converted drone command.
+        If running in thread mode, the result is stored in shared_data to send to the drone controller.
+        If the command cannot be parsed, returns (and if applicable sets the shared data to) None.
 
         Args:
             user_audio {sr.AudioData}: The audio data from the user.
 
         Returns:
-            None
+            Optional[list[dict[str, int]]]: The drone command as a dictionary of the form [{"command": int}] or None if the command is invalid.
         """
         text = self.audio_recogniser.convert_voice_to_text(user_audio)
         result = run_terminal_agent(text)
         logger.info(result)
+
+        # Parse the result into a dictionary
+        try:
+            result_dict = json.loads(result)
+        except json.JSONDecodeError:
+            logger.error("Failed to parse result into dictionary.")
+            result_dict = None
+
+        if self.running_in_thread:
+            with self.data_lock:
+                self.shared_data["voice_control"]["voice_command"] = result_dict
+
+        return result_dict
