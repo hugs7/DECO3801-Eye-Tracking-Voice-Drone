@@ -109,6 +109,9 @@ class AudioRecogniser:
             f"Loading audio from {file_handler.relative_path(most_recent_audio_file)}")
         with open(most_recent_audio_file, c.READ_BINARY_MODE) as f:
             audio = sr.AudioData(f.read(), c.MAX_VOLUME_THRESHOLD, 1)
+
+        logger.info(f"Audio loaded.")
+
         return audio
 
     def convert_voice_to_text(self, audio: sr.AudioData):
@@ -117,14 +120,13 @@ class AudioRecogniser:
         """
         logger.info("Converting audio to text...")
 
+        text = None
         try:
             text = self.recogniser.recognize_google(audio)
             logger.info(f"You said: '{text}'")
         except sr.UnknownValueError:
-            text = ""
             logger.warning("Not understood")
-            # return
         except sr.RequestError as e:
-            text = ""
             logger.error(e)
+
         return text
