@@ -15,6 +15,7 @@ import os
 from file_handler import get_context_file
 from constants import MAX_LOOP
 import logging
+import str_helper
 
 logger = logging.getLogger(__name__)
 
@@ -179,24 +180,23 @@ def run_until_halt(
             ) = run_entry(interactive_console, entry_code)
             executed_entries.append(executed_lines)
             # As soon as there's some output, the LLM might want to react to it -> put it in context and ask again.
-            logger.info(captured_output)
+            logger.info(f"Captured output: {str_helper.trim(captured_output)}")
             if agent_is_done or captured_output != "":
                 break
 
         executed_code = "\n".join(executed_entries)
         context.append({"role": "assistant", "content": executed_code})
-        logger.info(executed_code)
+        logger.info(f"Executed code: {str_helper.trim(executed_code)}")
         if captured_output != "":
             context.append({"role": "user", "content": captured_output})
-            log_msg = f"{captured_output}{"\n" if captured_output[-1] != "\n" else ""}"
-            logger.info(log_msg)
+            logger.info(f"Captured output: {str_helper.trim(captured_output)}")
             if correct_format(captured_output):
                 break
 
         loop_count += 1
 
     if loop_count >= MAX_LOOP:
-        logger.warn(f"Max loop count {MAX_LOOP} reached")
+        logger.warning(f"Max loop count {MAX_LOOP} reached")
 
     return agent_is_done, message, captured_output
 
