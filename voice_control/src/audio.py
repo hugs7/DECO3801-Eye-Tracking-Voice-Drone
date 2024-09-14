@@ -90,7 +90,7 @@ class AudioRecogniser:
             logger.info("Listening for wake word...")
 
             while True:
-                audio = self.listen_for_audio(source, False)
+                audio = self.listen_for_audio(source, False, None)
                 if self._detect_wake_word(audio):
                     logger.info("Wake word detected, listening for commands...")
                     return self._listen_until_silence(source)
@@ -111,7 +111,7 @@ class AudioRecogniser:
         # Adjust for ambient noise to improve speech detection
         self.recogniser.adjust_for_ambient_noise(source)
         try:
-            audio = self.listen_for_audio(source, True)
+            audio = self.listen_for_audio(source, True, self.config.listen_timeout)
             self.play_sound_effect("accept")
             self.save_audio(audio)
             return audio
@@ -120,12 +120,14 @@ class AudioRecogniser:
             self.play_sound_effect("reject")
             return None
 
-    def listen_for_audio(self, source: Optional[sr.Microphone] = None, save: bool = False) -> sr.AudioData:
+    def listen_for_audio(self, source: Optional[sr.Microphone] = None, save: bool = False, timeout: Optional[int] = None) -> sr.AudioData:
         """
         Listens for audio input from the microphone.
 
         Args:
             source (sr.Microphone): The microphone input source. If None, a new microphone source is created.
+            save (bool): Whether to save the recorded audio to a file.
+            timeout (int): The maximum time to listen for audio input.
 
         Returns:
             AudioData: The recorded audio input.
@@ -133,7 +135,7 @@ class AudioRecogniser:
 
         def listen_callback(source: sr.Microphone) -> sr.AudioData:
             logger.info("    >>> Listening for audio...")
-            audio = self.recogniser.listen(source, timeout=self.config.listen_timeout, phrase_time_limit=self.config.phrase_time_limit)
+            audio = self.recogniser.listen(source, timeout, phrase_time_limit=self.config.phrase_time_limit)
             logger.info("    <<< Finished listening.")
             return audio
 
@@ -175,7 +177,7 @@ class AudioRecogniser:
             text = self.recogniser.recognize_google(audio)
             logger.info(f"You said: '{text}'")
         except sr.UnknownValueError:
-            logger.warning("Not understood")
+            logger.debug("No speech detected.")
         except sr.RequestError as e:
             logger.error(e)
 
