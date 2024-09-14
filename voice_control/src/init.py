@@ -7,12 +7,13 @@ from omegaconf import DictConfig, OmegaConf
 import os
 import pathlib
 from dotenv import load_dotenv
+import logging
 
 import constants as c
 from logger_helper import init_logger
 import file_handler
 
-logger = init_logger()
+logger = init_logger(logging.DEBUG)
 
 
 def init_config() -> DictConfig:
@@ -23,14 +24,14 @@ def init_config() -> DictConfig:
 
     package_root = pathlib.Path(file_handler.get_package_folder()).resolve()
     config_path = package_root / "configs/config.yaml"
-    logger.info(f"Config path: {config_path}")
+    logger.debug(f"Config path: {config_path}")
     if not file_handler.file_exists(config_path):
         raise FileNotFoundError("Configuration file not found.")
 
     logger.info(f"Loading config from {config_path}")
     config = OmegaConf.load(config_path)
     config.PACKAGE_ROOT = package_root.as_posix()
-    logger.info(f"Pacakge root: {config.PACKAGE_ROOT}")
+    logger.debug(f"Pacakge root: {config.PACKAGE_ROOT}")
 
     return config
 
