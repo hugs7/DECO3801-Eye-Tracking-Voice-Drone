@@ -6,6 +6,7 @@ import openai
 from omegaconf import DictConfig, OmegaConf
 import logging
 import os
+import pathlib
 from dotenv import load_dotenv
 
 import constants as c
@@ -14,13 +15,20 @@ import file_handler
 logger = logging.getLogger(__name__)
 
 
+def init_logger(level=logging.INFO):
+    print(f"Setting log level to {level}")
+    log_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    logging.basicConfig(level=level, log_format=log_format)
+
+
 def init_config() -> DictConfig:
     """
     Initializes the configuration for the voice control program.
     :return: The configuration object.
     """
 
-    package_root = file_handler.get_package_folder()
+    package_root = pathlib.Path(file_handler.get_package_folder()).resolve()
+    logger.info(f"Package root: {package_root}")
     config_path = package_root / "configs/config.yaml"
     if not file_handler.file_exists(config_path):
         raise FileNotFoundError("Configuration file not found.")
@@ -63,7 +71,12 @@ def init() -> DictConfig:
     :return: The configuration object.
     """
 
+    init_logger()
     config = init_config()
+
+    if config.log_level:
+        # Overriding the log level from the configuration
+        init_logger(config.log_level)
 
     OmegaConf.set_readonly(config, True)
     logger.info(OmegaConf.to_yaml(config))
