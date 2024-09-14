@@ -10,7 +10,7 @@ from time import sleep
 from omegaconf import OmegaConf
 
 from thread_helper import thread_loop_handler, is_main_thread
-from logger_helper import init_logger
+from common.logger_helper import init_logger
 
 logger = init_logger()
 
