@@ -1,7 +1,8 @@
+.vscode
 **/data
-**/.vscode
 node_modules
 **/.venv
-**/__pycache__
-**/.VSCodeCounter
 *.env
+.VSCodeCounter
+__pycache__
+.idea
