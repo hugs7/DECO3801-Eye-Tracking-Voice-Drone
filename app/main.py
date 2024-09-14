@@ -63,10 +63,6 @@ def main():
         for func in thread_functions
     ]
 
-    disable_logger("voice_control")
-    logging.getLogger("eye_tracking").setLevel(logging.DEBUG)
-    logging.getLogger("drone").setLevel(logging.DEBUG)
-
     # Start all threads
     for thread in threads:
         thread.start()
