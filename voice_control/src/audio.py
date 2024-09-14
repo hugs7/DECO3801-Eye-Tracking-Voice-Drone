@@ -118,12 +118,12 @@ class AudioRecogniser:
 
         try:
             text = self.recogniser.recognize_google(audio)
-            print(text)
+            logger.info(f"You said: '{text}'")
         except sr.UnknownValueError:
             text = ""
-            print("Not understood")
+            logger.warning("Not understood")
             # return
         except sr.RequestError as e:
             text = ""
-            print("Error; {0}".format(e))
+            logger.error("Error; {0}".format(e))
         return text

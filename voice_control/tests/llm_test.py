@@ -1,6 +1,11 @@
 from transformers import pipeline
 import warnings
 
+import logging
+
+logger = logging.getLogger(__name__)
+
+
 def main():
     warnings.filterwarnings("ignore")
     # Load a pipeline for text generation using GPT-2
@@ -9,7 +14,8 @@ def main():
     prompt = f"Simplify and shorten the the drone movement into direction and distance example (50m left): {command}"
     result = generator(prompt, max_length=50, num_return_sequences=1)
 
-    print(result[0]['generated_text'])
+    logger.info(result[0]['generated_text'])
+
 
 if __name__ == "__main__":
     main()
