@@ -13,4 +13,6 @@ def to_title_case(text: str) -> str:
     Returns:
         str: The text in title case.
     """
+
+    text = text.replace("_", " ")
     return text.title()
