@@ -22,7 +22,7 @@ def init_config() -> DictConfig:
     :return: The configuration object.
     """
 
-    package_root = pathlib.Path(file_handler.get_package_folder()).resolve()
+    package_root = file_handler.get_package_folder()
     config_path = package_root / "configs/config.yaml"
     logger.debug(f"Config path: {config_path}")
     if not file_handler.file_exists(config_path):
