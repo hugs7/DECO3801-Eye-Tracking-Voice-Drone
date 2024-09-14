@@ -47,9 +47,9 @@ def main_loop(shared_data: OmegaConf):
 
     # Read shared eye gaze
     eye_tracking_data = shared_data.eye_tracking
-    gaze_size = safe_get(eye_tracking_data, "gaze_size")
+    gaze_side = safe_get(eye_tracking_data, "gaze_side")
 
-    root_logger.info(f"Received gaze size: {gaze_size}")
+    root_logger.info(f"Received gaze size: {gaze_side}")
 
 
 def main():
