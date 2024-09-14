@@ -17,6 +17,25 @@ class AudioRecogniser:
     def __init__(self):
         self.recogniser = sr.Recognizer()
 
+    def log_volume(indata: np.ndarray, frames: int, time: any, status: any):
+        """
+        Outputs the normalized microphone volume to the console.
+
+        This function calculates the volume by computing the Euclidean norm (L2 norm) of the input audio data 
+        and multiplies it by 10 for scaling. The resulting value is printed in a formatted string with two decimal places.
+
+        Args:
+            indata (numpy.ndarray): The input audio data captured from the microphone.
+            frames (int): The number of audio frames in the data (unused in this function but typically required by audio libraries).
+            time (object): The time information related to the audio stream (unused in this function).
+            status (object): The status information of the audio input stream (unused in this function).
+
+        Returns:
+            None
+        """
+        volume_norm = np.linalg.norm(indata) * c.MAX_VOLUME_THRESHOLD
+        logger.info(f"Microphone Volume: {volume_norm:.2f}")
+
     def save_audio(self, audio: sr.AudioData):
         """
         Saves audio to external .wav file
@@ -39,25 +58,6 @@ class AudioRecogniser:
             f.write(audio.get_wav_data())
 
         logger.info(f"Audio saved to {recording_save_path}")
-
-    def print_volume(indata: np.ndarray, frames: int, time: any, status: any):
-        """
-        Outputs the normalized microphone volume to the console.
-
-        This function calculates the volume by computing the Euclidean norm (L2 norm) of the input audio data 
-        and multiplies it by 10 for scaling. The resulting value is printed in a formatted string with two decimal places.
-
-        Args:
-            indata (numpy.ndarray): The input audio data captured from the microphone.
-            frames (int): The number of audio frames in the data (unused in this function but typically required by audio libraries).
-            time (object): The time information related to the audio stream (unused in this function).
-            status (object): The status information of the audio input stream (unused in this function).
-
-        Returns:
-            None
-        """
-        volume_norm = np.linalg.norm(indata) * c.MAX_VOLUME_THRESHOLD
-        logger.info(f"Microphone Volume: {volume_norm:.2f}")
 
     def capture_voice_input(self) -> sr.AudioData:
         """
