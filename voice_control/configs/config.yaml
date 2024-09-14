@@ -8,6 +8,12 @@ audio:
     wake_command: "Hey Drone"
     listen_timeout: 60
     phrase_time_limit: 10
+    sound_effects:
+        enable: True
+        files:
+            wake: "sounds/wake.wav"
+            accept: "sounds/accept.wav"
+            reject: "sounds/reject.wav"
 llm:
     model: gpt-4o-mini
     temperature: 0
