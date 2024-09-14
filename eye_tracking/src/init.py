@@ -6,7 +6,7 @@ Last Updated: 21/08/2024
 
 import pathlib
 from omegaconf import DictConfig, OmegaConf
-import logging
+from common.logger_helper import init_logger
 
 from .utils.model import (
     check_path_all,
@@ -16,7 +16,7 @@ from .utils.model import (
 from .utils.camera import generate_dummy_camera_params
 
 
-logger = logging.getLogger(__name__)
+logger = init_logger()
 
 
 def init_ptgaze_config() -> DictConfig:
