@@ -61,6 +61,8 @@ class AudioRecogniser:
         """
 
         command = self.convert_voice_to_text(audio)
+        if not command:
+            return False
 
         wake_word_detected = self.wake_command.lower() in command.lower()
 
