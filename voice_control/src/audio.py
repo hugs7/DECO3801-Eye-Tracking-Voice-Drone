@@ -113,6 +113,8 @@ class AudioRecogniser:
         """
         Takes in the recorded audio and converts it into text.
         """
+        logger.info("Converting audio to text...")
+
         try:
             text = self.recogniser.recognize_google(audio)
             print(text)
