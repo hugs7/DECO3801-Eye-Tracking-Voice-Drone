@@ -5,6 +5,7 @@ File handling functions for the voice control project.
 from logger_helper import init_logger
 import os
 import pathlib
+from typing import Optional
 
 
 logger = init_logger()
@@ -109,3 +110,25 @@ def create_folder_if_not_exists(folder_path: pathlib.Path):
         logger.info(f"Folder created: {folder_path}")
     else:
         logger.debug(f"Folder already exists: {folder_path}")
+
+
+def list_files_in_folder(folder_path: pathlib.Path, file_types: Optional[list[str]] = None) -> list[pathlib.Path]:
+    """
+    Lists all files in the specified folder.
+
+    Args:
+        folder_path (pathlib.Path): The path to the folder to list files from.
+        file_type (Optional[list[str]]): A list of file types to filter the files by. Defaults to None.
+
+    Returns:
+        list[pathlib.Path]: A list of paths to the files in the folder.
+    """
+
+    if file_types is None:
+        file_types = [".*"]
+
+    files = [f for f in folder_path.iterdir() if f.is_file() and any(
+        f.name.endswith(file_type) for file_type in file_types)]
+
+    logger.debug(f"Files in folder: {folder_path} - {files}")
+    return files
