@@ -4,7 +4,7 @@ Logger helper module
 
 import logging
 import inspect
-from str_helper import to_title_case
+from .str_helper import to_title_case
 
 RESET = "\033[0m"
 BRIGHT_RED = "\033[91m"

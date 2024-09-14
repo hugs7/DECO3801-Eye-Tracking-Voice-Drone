@@ -5,13 +5,12 @@ Initialisation module
 import openai
 from omegaconf import DictConfig, OmegaConf
 import os
-import pathlib
 from dotenv import load_dotenv
 import logging
 
-import constants as c
-from logger_helper import init_logger
-import file_handler
+from . import constants as c
+from .logger_helper import init_logger
+from . import file_handler
 
 logger = init_logger(logging.DEBUG)
 

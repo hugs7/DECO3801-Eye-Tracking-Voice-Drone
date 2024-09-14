@@ -2,12 +2,12 @@
 Main module for the voice control program.
 """
 
-import init
 from typing import Optional, Dict
 from threading import Event, Lock
 
-from voice_controller import VoiceController
-from logger_helper import init_root_logger
+from . import init
+from .voice_controller import VoiceController
+from .logger_helper import init_root_logger
 
 root_logger = init_root_logger()
 

@@ -2,13 +2,13 @@
 Module for audio processing.
 """
 
-from logger_helper import init_logger
 import speech_recognition as sr
 import numpy as np
 
-import constants as c
-import file_handler
-import date
+from .logger_helper import init_logger
+from . import constants as c
+from . import file_handler
+from . import date
 
 logger = init_logger()
 

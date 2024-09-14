@@ -2,10 +2,11 @@
 File handling functions for the voice control project.
 """
 
-from logger_helper import init_logger
 import os
 import pathlib
 from typing import Optional
+
+from .logger_helper import init_logger
 
 
 logger = init_logger()

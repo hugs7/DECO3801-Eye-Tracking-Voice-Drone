@@ -8,9 +8,9 @@ import ast
 
 import speech_recognition as sr
 
-from logger_helper import init_logger
-from audio import AudioRecogniser
-from LLM import run_terminal_agent
+from .logger_helper import init_logger
+from .audio import AudioRecogniser
+from .LLM import run_terminal_agent
 
 logger = init_logger()
 
