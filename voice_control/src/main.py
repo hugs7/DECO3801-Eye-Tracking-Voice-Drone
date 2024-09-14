@@ -1,5 +1,5 @@
 """
-Main module for the voice control program.
+Entry point for the voice control module.
 """
 
 from typing import Optional
