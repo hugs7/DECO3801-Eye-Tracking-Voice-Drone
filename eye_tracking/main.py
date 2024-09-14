@@ -1,5 +1,5 @@
 """
-Serves as entry point for the voice_control package when running standalone.
+Serves as entry point for eye_tracking package when running standalone.
 """
 
 from src import main
