@@ -33,7 +33,7 @@ def get_package_folder() -> pathlib.Path:
     """
     project_root = get_project_root()
     package_folder = project_root / "voice_control"
-    logger.trace(f"Package folder: {package_folder}")
+    logger.trace(f"Package folder: {relative_path(package_folder)}")
     return package_folder
 
 
@@ -47,7 +47,7 @@ def get_data_folder() -> pathlib.Path:
     voice_control_folder = get_package_folder()
     data_folder = voice_control_folder / "data"
     create_folder_if_not_exists(data_folder)
-    logger.trace(f"Data folder: {data_folder}")
+    logger.trace(f"Data folder: {relative_path(data_folder)}")
     return data_folder
 
 
@@ -61,7 +61,7 @@ def get_recordings_folder() -> pathlib.Path:
     package_root = get_package_folder()
     recordings_folder = package_root / "recordings"
     create_folder_if_not_exists(recordings_folder)
-    logger.info(f"Recordings folder: {recordings_folder}")
+    logger.info(f"Recordings folder: {relative_path(recordings_folder)}")
     return recordings_folder
 
 
@@ -131,3 +131,20 @@ def list_files_in_folder(folder_path: pathlib.Path, file_types: Optional[list[st
 
     logger.debug(f"Files in folder: {folder_path} - {files}")
     return files
+
+
+def relative_path(file_path: pathlib.Path) -> pathlib.Path:
+    """
+    Returns the relative path of the file from the project root.
+
+    Args:
+        file_path (pathlib.Path): The path to the file.
+
+    Returns:
+        pathlib.Path: The relative path of the file from the project root.
+    """
+
+    project_root = get_project_root()
+    relative_path = file_path.relative_to(project_root)
+
+    return relative_path

@@ -105,7 +105,8 @@ class AudioRecogniser:
         most_recent_audio_file = sorted(
             audio_files, key=lambda x: x.stat().st_ctime, reverse=True)[0]
 
-        logger.info(f"Loading audio from {most_recent_audio_file}")
+        logger.info(
+            f"Loading audio from {file_handler.relative_path(most_recent_audio_file)}")
         with open(most_recent_audio_file, c.READ_BINARY_MODE) as f:
             audio = sr.AudioData(f.read(), c.MAX_VOLUME_THRESHOLD, 1)
         return audio
