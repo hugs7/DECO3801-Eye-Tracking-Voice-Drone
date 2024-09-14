@@ -600,11 +600,16 @@ class GazeDetector:
 
         # Determine if user is looking in one of the hit-boxes
         logger.info(f"Gaze 2d Point: {self.gaze_2d_point}")
+
+        # Set only when looking at a hitbox
+        gaze_side = None
+
         for side in sides:
             looking_hitbox = None
             side_hitbox = self.hitboxes[side]
             if side_hitbox["top_left"][0] <= self.gaze_2d_point[0] <= side_hitbox["bottom_right"][0]:
                 looking_hitbox = side
+                gaze_side = side
 
             text = f"Looking {looking_hitbox}" if looking_hitbox else ""
             border = None
@@ -618,3 +623,10 @@ class GazeDetector:
             bottom_right = side_hitbox["bottom_right"]
             self.visualizer.draw_labelled_rectangle(
                 top_left, bottom_right, bg_color, bg_alpha, text, border_color=border)
+
+        if not self.is_main_thread():
+            logger.info(f"Setting gaze side to {gaze_side} in shared data.")
+            with self.data_lock:
+                self.shared_data["eye_tracking"]["gaze_side"] = gaze_side
+
+            logger.debug("Shared data updated.")
