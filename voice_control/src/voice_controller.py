@@ -88,15 +88,20 @@ class VoiceController:
     def audio_loop(self) -> bool:
         """
         The main loop for the voice control program. Captures the user's voice and processes it.
+        Depending upon config, either uses the microphone or the keyboard for input.
 
         Returns:
             bool: True if the loop should continue, False otherwise.
         """
 
-        user_audio = self.audio_recogniser.capture_voice_input()
+        if self.config.voice_control.detect_voice:
+            user_audio = self.audio_recogniser.capture_voice_input()
+            text = self.audio_recogniser.convert_voice_to_text(user_audio)
+        else:
+            text = input("Enter command: ")
 
-        text = self.audio_recogniser.convert_voice_to_text(user_audio)
-        self.process_voice_command(text)
+        if self.config.voice_control.send_to_llm:
+            self.process_voice_command(text)
 
         return True  # For now
 
