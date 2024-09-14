@@ -124,24 +124,29 @@ class AudioRecogniser:
         """
         return self.listen_for_wake_word()
 
-    def log_volume(indata: np.ndarray, frames: int, time: any, status: any):
+    def convert_voice_to_text(self, audio: sr.AudioData) -> Optional[str]:
         """
-        Outputs the normalized microphone volume to the console.
-
-        This function calculates the volume by computing the Euclidean norm (L2 norm) of the input audio data
-        and multiplies it by 10 for scaling. The resulting value is printed in a formatted string with two decimal places.
+        Takes in the recorded audio and converts it into text.
 
         Args:
-            indata (numpy.ndarray): The input audio data captured from the microphone.
-            frames (int): The number of audio frames in the data (unused in this function but typically required by audio libraries).
-            time (object): The time information related to the audio stream (unused in this function).
-            status (object): The status information of the audio input stream (unused in this function).
+            audio (AudioData): The recorded audio input.
 
         Returns:
-            None
+            str: The text output from the audio input.
         """
-        volume_norm = np.linalg.norm(indata) * c.MAX_VOLUME_THRESHOLD
-        logger.info(f"Microphone Volume: {volume_norm:.2f}")
+
+        text = None
+        logger.info("Converting audio to text...")
+
+        try:
+            text = self.recogniser.recognize_google(audio)
+            logger.info(f"You said: '{text}'")
+        except sr.UnknownValueError:
+            logger.warning("Not understood")
+        except sr.RequestError as e:
+            logger.error(e)
+
+        return text
 
     def save_audio(self, audio: sr.AudioData) -> None:
         """
@@ -191,27 +196,41 @@ class AudioRecogniser:
 
         most_recent_audio_file = sorted(audio_files, key=lambda x: x.stat().st_ctime, reverse=True)[0]
 
-        logger.debug(f"Loading audio from {file_handler.relative_path(most_recent_audio_file)}")
-        most_recent_audio_file = str(most_recent_audio_file)
-        with sr.AudioFile(most_recent_audio_file) as source:
+        audio = self.load_audio_file(str(most_recent_audio_file))
+        return audio
+
+    def load_audio_file(self, file_path: str) -> sr.AudioData:
+        """
+        Loads audio file from specified path.
+
+        Args:
+            file_path: path to audio file as string
+
+        Returns:
+            AudioData: An AudioData object containing the recorded audio input.
+        """
+        logger.info(f"Loading audio from {file_path}")
+        with sr.AudioFile(file_path) as source:
             audio = self.recogniser.record(source)
 
         logger.debug(f"Audio loaded.")
         return audio
 
-    def convert_voice_to_text(self, audio: sr.AudioData):
+    def log_volume(indata: np.ndarray, frames: int, time: any, status: any):
         """
-        Takes in the recorded audio and converts it into text.
+        Outputs the normalized microphone volume to the console.
+
+        This function calculates the volume by computing the Euclidean norm (L2 norm) of the input audio data
+        and multiplies it by 10 for scaling. The resulting value is printed in a formatted string with two decimal places.
+
+        Args:
+            indata (numpy.ndarray): The input audio data captured from the microphone.
+            frames (int): The number of audio frames in the data (unused in this function but typically required by audio libraries).
+            time (object): The time information related to the audio stream (unused in this function).
+            status (object): The status information of the audio input stream (unused in this function).
+
+        Returns:
+            None
         """
-        logger.info("Converting audio to text...")
-
-        text = None
-        try:
-            text = self.recogniser.recognize_google(audio)
-            logger.info(f"You said: '{text}'")
-        except sr.UnknownValueError:
-            logger.warning("Not understood")
-        except sr.RequestError as e:
-            logger.error(e)
-
-        return text
+        volume_norm = np.linalg.norm(indata) * c.MAX_VOLUME_THRESHOLD
+        logger.info(f"Microphone Volume: {volume_norm:.2f}")
