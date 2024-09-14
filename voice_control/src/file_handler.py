@@ -2,12 +2,12 @@
 File handling functions for the voice control project.
 """
 
-import logging
+from logger_helper import init_logger
 import os
 import pathlib
 
 
-logger = logging.getLogger(__name__)
+logger = init_logger()
 
 
 def get_project_root() -> str:

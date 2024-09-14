@@ -4,16 +4,15 @@ Initialisation module
 
 import openai
 from omegaconf import DictConfig, OmegaConf
-import logging
 import os
 import pathlib
 from dotenv import load_dotenv
 
 import constants as c
-import logger_helper
+from logger_helper import init_logger
 import file_handler
 
-logger = logging.getLogger(__name__)
+logger = init_logger()
 
 
 def init_config() -> DictConfig:
@@ -66,12 +65,11 @@ def init() -> DictConfig:
     :return: The configuration object.
     """
 
-    logger_helper.init_logger()
     config = init_config()
 
     if config.voice_control.log_level:
         # Overriding the log level from the configuration
-        logger_helper.init_logger(config.voice_control.log_level)
+        init_logger(config.voice_control.log_level)
 
     OmegaConf.set_readonly(config, True)
     logger.info(OmegaConf.to_yaml(config))

@@ -2,11 +2,11 @@
 Module for date and time related functions
 """
 
-import logging
+from logger_helper import init_logger
 from datetime import datetime
 
 
-logger = logging.getLogger(__name__)
+logger = init_logger()
 
 
 def timestamp(format="%Y-%m-%d %H:%M:%S") -> str:
