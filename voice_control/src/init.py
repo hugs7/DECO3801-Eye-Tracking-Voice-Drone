@@ -71,10 +71,6 @@ def init() -> DictConfig:
 
     config = init_config()
 
-    if config.log_level:
-        # Overriding the log level from the configuration
-        init_logger(config.log_level)
-
     OmegaConf.set_readonly(config, True)
     logger.info(OmegaConf.to_yaml(config))
 
