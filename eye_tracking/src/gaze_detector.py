@@ -287,6 +287,15 @@ class GazeDetector:
         if self.config.demo.image_path:
             return None
         if self.config.demo.use_camera:
+            # Determine if there is a camera to use
+            if not cv2.VideoCapture(0).isOpened():
+                logger.error("No camera available.")
+                if self.running_in_thread:
+                    self.stop_event.set()
+                    self.thread_exit_handler(self.stop_event)
+                else:
+                    raise ValueError("No camera available.")
+
             cap = cv2.VideoCapture(0)
         elif self.config.demo.video_path:
             cap = cv2.VideoCapture(self.config.demo.video_path)
