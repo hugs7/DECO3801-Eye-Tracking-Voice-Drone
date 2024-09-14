@@ -13,7 +13,7 @@ import date
 logger = logging.getLogger(__name__)
 
 
-class AudioProcessor:
+class AudioRecogniser:
     def __init__(self):
         self.recogniser = sr.Recognizer()
 
