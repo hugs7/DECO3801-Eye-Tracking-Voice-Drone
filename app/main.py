@@ -7,6 +7,7 @@ Hugo Burton
 import logging
 from threading import Thread, Event, Lock
 from time import sleep
+from typing import List
 
 from omegaconf import OmegaConf
 
@@ -30,7 +31,7 @@ stop_event = Event()
 data_lock = Lock()
 
 
-def is_any_thread_alive(threads):
+def is_any_thread_alive(threads: List[Thread]):
     return any(t.is_alive() for t in threads)
 
 
