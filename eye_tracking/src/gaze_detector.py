@@ -58,6 +58,10 @@ class GazeDetector:
 
             # Lazily import thread helpers only if running in thread mode
             from app.thread_helper import thread_exit_handler, is_main_thread
+
+            # Bind to class attributes so we can access them in class methods
+            self.thread_exit_handler = thread_exit_handler
+            self.is_main_thread = is_main_thread
         else:
             logger.info("Running in main mode")
 
@@ -182,6 +186,7 @@ class GazeDetector:
             logger.info("Video feed will be displayed on screen")
 
         while True:
+            logger.debug(" >>> Begin eye tracking loop")
             if self.config.demo.display_on_screen:
                 self._wait_key()
                 if self.stop:
@@ -195,6 +200,10 @@ class GazeDetector:
 
             if self.config.demo.display_on_screen:
                 cv2.imshow("frame", self.visualizer.image)
+
+            self.thread_exit_handler(self.stop_event)
+
+            logger.debug(" <<< End eye tracking loop")
 
         self.cap.release()
         if self.writer:
