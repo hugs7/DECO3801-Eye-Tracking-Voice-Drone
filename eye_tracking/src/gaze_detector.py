@@ -201,7 +201,8 @@ class GazeDetector:
             if self.config.demo.display_on_screen:
                 cv2.imshow("frame", self.visualizer.image)
 
-            self.thread_exit_handler(self.stop_event)
+            if self.running_in_thread:
+                self.thread_exit_handler(self.stop_event)
 
             logger.debug(" <<< End eye tracking loop")
 
