@@ -81,6 +81,33 @@ class AudioRecogniser:
             self.save_audio(audio)
         return audio
 
+    def load_audio(self) -> sr.AudioData:
+        """
+        Loads most recent audio file from recordings folder if available.
+
+        Args:
+            None
+
+        Returns:
+            AudioData: An AudioData object containing the recorded audio input.
+        """
+
+        recordings_folder = file_handler.get_recordings_folder()
+        audio_files = file_handler.list_files_in_folder(
+            recordings_folder, c.AUDIO_FILE_EXTENSIONS)
+
+        if not audio_files:
+            raise FileNotFoundError(
+                "No audio files found in the recordings folder.")
+
+        most_recent_audio_file = sorted(
+            audio_files, key=lambda x: x.stat().st_ctime, reverse=True)[0]
+        logger.info(f"Loading audio from {most_recent_audio_file}")
+
+        with open(most_recent_audio_file, c.READ_BINARY_MODE) as f:
+            audio = self.recogniser.record(f)
+        return audio
+
     def convert_voice_to_text(self, audio: sr.AudioData):
         """
         Takes in the recorded audio and converts it into text.

@@ -39,7 +39,11 @@ def main():
 
     audio_processor = audio.AudioRecogniser()
 
-    user_audio = audio_processor.capture_voice_input()
+    if config.voice_control.use_existing_recording:
+        user_audio = audio_processor.load_audio()
+    else:
+        user_audio = audio_processor.capture_voice_input()
+
     text = audio_processor.convert_voice_to_text(user_audio)
     end_program = process_voice_command(text)
 

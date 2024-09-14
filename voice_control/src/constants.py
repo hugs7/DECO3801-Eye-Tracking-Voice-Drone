@@ -22,6 +22,7 @@ PYTHON_SHELL = '>>>'
 # File Handling
 
 WRITE_BINARY_MODE = 'wb'
+READ_BINARY_MODE = 'rb'
 
 # Audio
 AUDIO_FILE_EXTENSIONS = ['.wav']
