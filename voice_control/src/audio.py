@@ -57,7 +57,7 @@ class AudioRecogniser:
             None
         """
         volume_norm = np.linalg.norm(indata) * c.MAX_VOLUME_THRESHOLD
-        print(f"Microphone Volume: {volume_norm:.2f}")
+        logger.info(f"Microphone Volume: {volume_norm:.2f}")
 
     def capture_voice_input(self) -> sr.AudioData:
         """
