@@ -20,7 +20,7 @@ def get_project_root() -> pathlib.Path:
     """
 
     project_root = pathlib.Path(__file__).parent.parent.parent.resolve()
-    logger.info(f"Project root: {project_root}")
+    logger.trace(f"Project root: {project_root}")
     return project_root
 
 
@@ -33,7 +33,7 @@ def get_package_folder() -> pathlib.Path:
     """
     project_root = get_project_root()
     package_folder = project_root / "voice_control"
-    logger.info(f"Package folder: {package_folder}")
+    logger.trace(f"Package folder: {package_folder}")
     return package_folder
 
 
@@ -47,7 +47,7 @@ def get_data_folder() -> pathlib.Path:
     voice_control_folder = get_package_folder()
     data_folder = voice_control_folder / "data"
     create_folder_if_not_exists(data_folder)
-    logger.info(f"Data folder: {data_folder}")
+    logger.trace(f"Data folder: {data_folder}")
     return data_folder
 
 
