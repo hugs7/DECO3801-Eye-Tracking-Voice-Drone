@@ -62,7 +62,7 @@ def main():
     # Create threads for each of the components
     thread_functions = [eye_tracking, voice_control, drone]
     shared_data = {
-        f"{get_function_module(func)}_data": None for func in thread_functions}
+        get_function_module(func): None for func in thread_functions}
     threads = [
         Thread(target=lambda func=func: func(stop_event, shared_data,
                data_lock), name=f"thread_{get_function_module(func)}")
