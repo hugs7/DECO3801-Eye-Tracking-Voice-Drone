@@ -42,8 +42,12 @@ class LoggerFormatter(logging.Formatter):
     def format(self, record: logging.LogRecord) -> str:
         """
         Format the log record with the output name in title case and color based on log level.
-        :param record: Log record
-        :return: Formatted log record
+
+        Args:
+            record: Log record
+
+        Returns:
+            Formatted log record
         """
         # Add a custom field for title-cased logger name
         record.output_name = to_title_case(record.name)
@@ -57,8 +61,12 @@ class LoggerFormatter(logging.Formatter):
     def get_log_colour(self, level: int) -> str:
         """
         Get the log colour based on the log level.
-        :param level: Log level
-        :return: Log colour
+
+        Args:
+            level: Log level
+
+        Returns:
+            Log colour
         """
         # Custom log levels
         if level == TRACE_LEVEL_NUM:
@@ -83,8 +91,12 @@ class LoggerFormatter(logging.Formatter):
 def init_logger(level: int = logging.INFO) -> logging.Logger:
     """
     Initialise a named logger with the specified logging level.
-    :param level: Logging level
-    :return: Logger instance
+
+    Args:
+        level: Logging level
+
+    Returns:
+        Logger instance
     """
 
     # [1] gives the caller of this function
@@ -109,8 +121,12 @@ def init_logger(level: int = logging.INFO) -> logging.Logger:
 def init_root_logger(level: int = logging.INFO) -> logging.Logger:
     """
     Initialise the root logger with the specified logging level.
-    :param level: Logging level
-    :return: Logger instance
+
+    Args:
+        level: Logging level
+
+    Returns:
+        Logger instance
     """
 
     logger = logging.getLogger()
@@ -124,8 +140,12 @@ def init_root_logger(level: int = logging.INFO) -> logging.Logger:
 def attach_formatter(logger: logging.Logger) -> None:
     """
     Attach a formatter to the logger.
-    :param logger: Logger instance
-    :return: None
+
+    Args:
+        logger: Logger instance
+
+    Returns:
+        None
     """
 
     formatter = LoggerFormatter(
@@ -143,8 +163,12 @@ def attach_formatter(logger: logging.Logger) -> None:
 def disable_logger(logger_name: str) -> None:
     """
     Disable a logger and all its handlers.
-    :param logger_name: Logger name
-    :return: None
+
+    Args:
+        logger_name: Logger name
+
+    Returns:
+        None
     """
 
     logger = logging.getLogger(logger_name)

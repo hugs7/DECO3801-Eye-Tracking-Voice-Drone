@@ -33,7 +33,8 @@ class GazeDetector:
         self.config = config
         self.gaze_estimator = GazeEstimator(config)
         face_model_3d = FaceModelMediaPipe()
-        self.visualizer = Visualizer(self.gaze_estimator.camera, face_model_3d.NOSE_INDEX)
+        self.visualizer = Visualizer(
+            self.gaze_estimator.camera, face_model_3d.NOSE_INDEX)
 
         self.cap = self._create_capture()
         self.output_dir = self._create_output_dir()
@@ -67,7 +68,9 @@ class GazeDetector:
     def _init_hitboxes(self) -> Dict[str, Tuple[Tuple[int, int], Tuple[int, int]]]:
         """
         Initialize the left and right hit-boxes.
-        :return: Dictionary of hit-boxes: {"left": (top_left, bottom_right), "right": (top_left, bottom_right)}
+
+        Returns:
+            Dictionary of hit-boxes: {"left": (top_left, bottom_right), "right": (top_left, bottom_right)}
         """
         logger.info("Initializing hit-boxes")
 
@@ -80,13 +83,15 @@ class GazeDetector:
         # Left hit-box
         left_hitbox_top_left = (0, 0)
         left_hitbox_bottom_right = (hitbox_width, out_height)
-        left_hitbox = {"top_left": left_hitbox_top_left, "bottom_right": left_hitbox_bottom_right}
+        left_hitbox = {"top_left": left_hitbox_top_left,
+                       "bottom_right": left_hitbox_bottom_right}
         logger.debug(f"Left hit-box: {left_hitbox}")
 
         # Right hit-box
         right_hitbox_top_left = (int(out_width - hitbox_width), 0)
         right_hitbox_bottom_right = (out_width, out_height)
-        right_hitbox = {"top_left": right_hitbox_top_left, "bottom_right": right_hitbox_bottom_right}
+        right_hitbox = {"top_left": right_hitbox_top_left,
+                        "bottom_right": right_hitbox_bottom_right}
         logger.debug(f"Right hit-box: {right_hitbox}")
 
         return {"left": left_hitbox, "right": right_hitbox}
@@ -94,7 +99,9 @@ class GazeDetector:
     def run(self) -> None:
         """
         Wraps the main loop for the gaze detector based on config settings.
-        :return: None
+
+        Returns:
+            None
         """
         if self.config.demo.use_camera or self.config.demo.video_path:
             self._run_on_video()
@@ -106,7 +113,9 @@ class GazeDetector:
     def _run_on_image(self):
         """
         Runs the gaze detector on a single image or frame.
-        :return: None
+
+        Returns:
+            None
         """
         image = cv2.imread(self.config.demo.image_path)
         self._process_image(image)
@@ -114,7 +123,8 @@ class GazeDetector:
             while True:
                 key_pressed = self._wait_key()
                 if self.stop:
-                    logger.info("Stopping gaze detector from user exit signal.")
+                    logger.info(
+                        "Stopping gaze detector from user exit signal.")
                     break
 
                 if key_pressed:
@@ -132,7 +142,9 @@ class GazeDetector:
         """
         Run the gaze detector on a video feed. Can be
         a camera feed or a video file.
-        :return: None
+
+        Returns:
+            None
         """
         logger.info("Running gaze detector on video feed")
         if self.config.demo.display_on_screen:
@@ -160,21 +172,28 @@ class GazeDetector:
     def _read_camera(self) -> Tuple[bool, np.ndarray]:
         """
         Read the camera feed and upscale the frame.
-        :return: Tuple of boolean and frame
+
+        Returns:
+            Tuple of boolean and frame
         """
         ok, frame = self.cap.read()
         if not ok:
             return ok, frame
 
         # Upscale feed
-        upscaled_frame = transforms.upscale(frame, self.config.demo.upscale_dim)
+        upscaled_frame = transforms.upscale(
+            frame, self.config.demo.upscale_dim)
         return ok, upscaled_frame
 
     def _process_image(self, image) -> None:
         """
         Process the image to detect faces and estimate gaze.
-        :param image: Image to process
-        :return: None
+
+        Args:
+            image: Image to process
+
+        Returns:
+            None
         """
         undistorted = self._undistort_image(image)
 
@@ -208,15 +227,21 @@ class GazeDetector:
     def _undistort_image(self, image: np.ndarray) -> np.ndarray:
         """
         Undistort the image using the camera matrix and distortion coefficients.
-        :param image: Image to undistort
-        :return: Undistorted image
+
+        Args:
+            image: Image to undistort
+
+        Returns:
+            Undistorted image
         """
         return cv2.undistort(image, self.gaze_estimator.camera.camera_matrix, self.gaze_estimator.camera.dist_coefficients)
 
     def _create_capture(self) -> Optional[cv2.VideoCapture]:
         """
         Create a capture object for the camera or video file.
-        :return: VideoCapture object or None
+
+        Returns:
+            VideoCapture object or None
         """
         if self.config.demo.image_path:
             return None
@@ -234,7 +259,9 @@ class GazeDetector:
     def _create_output_dir(self) -> Optional[pathlib.Path]:
         """
         Create the output directory if specified in the config.
-        :return: Path object or None
+
+        Returns:
+            Path object or None
         """
 
         if not self.config.demo.output_dir:
@@ -247,7 +274,9 @@ class GazeDetector:
     def _create_timestamp() -> str:
         """
         Create a timestamp in the format YYYYMMDD_HHMMSS.
-        :return: Timestamp string
+
+        Returns:
+            Timestamp string
         """
         dt = datetime.datetime.now()
         return dt.strftime("%Y%m%d_%H%M%S")
@@ -255,7 +284,9 @@ class GazeDetector:
     def _create_video_writer(self) -> Optional[cv2.VideoWriter]:
         """
         Create a video writer object if the user has specified an output directory.
-        :return: VideoWriter object or None
+
+        Returns:
+            VideoWriter object or None
         """
         if self.config.demo.image_path:
             return None
@@ -276,7 +307,8 @@ class GazeDetector:
         else:
             raise ValueError
         output_path = self.output_dir / output_name
-        writer = cv2.VideoWriter(output_path.as_posix(), fourcc, 30, (self.gaze_estimator.camera.width, self.gaze_estimator.camera.height))
+        writer = cv2.VideoWriter(output_path.as_posix(
+        ), fourcc, 30, (self.gaze_estimator.camera.width, self.gaze_estimator.camera.height))
         if writer is None:
             raise RuntimeError
         return writer
@@ -284,7 +316,9 @@ class GazeDetector:
     def _wait_key(self) -> bool:
         """
         Controller for the gaze detector.
-        :return: True if a recognised key is pressed, False otherwise
+
+        Returns:
+            True if a recognised key is pressed, False otherwise
         """
 
         key = cv2.waitKey(self.config.demo.wait_time) & 0xFF
@@ -314,7 +348,9 @@ class GazeDetector:
     def _calibrate_landmarks(self) -> None:
         """
         Calibrate the face landmarks for gaze estimation.
-        :return: None
+
+        Returns:
+            None
         """
 
         # Read camera
@@ -326,7 +362,8 @@ class GazeDetector:
         undistorted = self._undistort_image(frame)
         faces = self.gaze_estimator.detect_faces_raw(undistorted)
         if len(faces) != 1:
-            logger.info("Ensure only one face is visible in the camera feed then press 'c' to calibrate again.")
+            logger.info(
+                "Ensure only one face is visible in the camera feed then press 'c' to calibrate again.")
             return
 
         face_landmarks = faces[0]
@@ -334,7 +371,8 @@ class GazeDetector:
         # Add 1 meter to the z-axis ??
         self.calibration_landmarks[:, 2] += 1
 
-        self.gaze_estimator._face_model3d.set_landmark_calibration(self.calibration_landmarks)
+        self.gaze_estimator._face_model3d.set_landmark_calibration(
+            self.calibration_landmarks)
 
         self.calibrated = True
         logger.info("Calibration successful.")
@@ -342,16 +380,23 @@ class GazeDetector:
     def _flip_points(self) -> None:
         """
         Flips the 2D gaze point along the x-axis to match the flipped image.
-        :return: None
+
+        Returns:
+            None
         """
         if self.gaze_2d_point is not None:
-            self.gaze_2d_point = self.visualizer.flip_point_x(self.gaze_2d_point)
+            self.gaze_2d_point = self.visualizer.flip_point_x(
+                self.gaze_2d_point)
 
     def _draw_face_bbox(self, face: Face) -> None:
         """
         Wrapper to draw a bounding box around the face.
-        :param face: Face object
-        :return: None
+
+        Args:
+            face: Face object
+
+        Returns:
+            None
         """
 
         if not self.show_bbox:
@@ -361,8 +406,12 @@ class GazeDetector:
     def _draw_head_pose(self, face: Face) -> None:
         """
         Draws the head pose of the user as a set of axes.
-        :param face: Face object
-        :return: None
+
+        Args:
+            face: Face object
+
+        Returns:
+            None
         """
 
         if not self.show_head_pose:
@@ -373,33 +422,48 @@ class GazeDetector:
 
         euler_angles = face.head_pose_rot.as_euler("XYZ", degrees=True)
         pitch, yaw, roll = face.change_coordinate_system(euler_angles)
-        logger.debug(f"[head] pitch: {pitch:.2f}, yaw: {yaw:.2f}, " f"roll: {roll:.2f}, distance: {face.distance:.2f}")
+        logger.debug(
+            f"[head] pitch: {pitch:.2f}, yaw: {yaw:.2f}, " f"roll: {roll:.2f}, distance: {face.distance:.2f}")
 
     def _draw_landmarks(self, face: Face) -> None:
         """
         Landmarks are 2D points in the upscaled image (pixels).
-        :param face: Face object
-        :return: None
+
+        Args:
+            face: Face object
+
+        Returns:
+            None
         """
         if not self.show_landmarks:
             return
-        self.visualizer.draw_points(face.landmarks, color=(0, 255, 255), size=1)
+        self.visualizer.draw_points(
+            face.landmarks, color=(0, 255, 255), size=1)
 
     def _draw_face_template_model(self, face: Face) -> None:
         """
         Face Template Model is the 3D model of the face in world coordinates (metres)
-        :param face: Face object
-        :return: None
+
+        Args:
+            face: Face object
+
+        Returns:
+            None
         """
         if not self.show_template_model:
             return
-        self.visualizer.draw_3d_points(face.model3d, color=(255, 0, 525), size=1)
+        self.visualizer.draw_3d_points(
+            face.model3d, color=(255, 0, 525), size=1)
 
     def _display_normalized_image(self, face: Face) -> None:
         """
         Display the normalized eye images side by side.
-        :param face: Face object
-        :return: None
+
+        Args:
+            face: Face object
+
+        Returns:
+            None
         """
         if not self.config.demo.display_on_screen:
             return
@@ -419,8 +483,12 @@ class GazeDetector:
     def _draw_gaze_vector(self, face: Face) -> None:
         """
         Draws the gaze vector of the user as a line in 3D space.
-        :param face: Face object
-        :return: None
+
+        Args:
+            face: Face object
+
+        Returns:
+            None
         """
         if not self.show_gaze_vector:
             return
@@ -429,15 +497,19 @@ class GazeDetector:
 
         for key in [FacePartsName.REYE, FacePartsName.LEYE]:
             eye = getattr(face, key.name.lower())
-            end_point = eye.center + length * eye.gaze_vector  # eye.gaze_vector.z is always -1. We scale by length
+            # eye.gaze_vector.z is always -1. We scale by length
+            end_point = eye.center + length * eye.gaze_vector
             self.visualizer.draw_3d_line(eye.center, end_point)
 
             pitch, yaw = np.rad2deg(eye.vector_to_angle(eye.gaze_vector))
-            logger.debug(f"[{key.name.lower()}] pitch: {pitch:.2f}, yaw: {yaw:.2f}")
+            logger.debug(
+                f"[{key.name.lower()}] pitch: {pitch:.2f}, yaw: {yaw:.2f}")
 
-        self.average_eye_distance = (face.reye.distance + face.leye.distance) / 2
+        self.average_eye_distance = (
+            face.reye.distance + face.leye.distance) / 2
         self.average_eye_center = (face.reye.center + face.leye.center) / 2
-        self.average_gaze_vector = (face.reye.gaze_vector + face.leye.gaze_vector) / 2
+        self.average_gaze_vector = (
+            face.reye.gaze_vector + face.leye.gaze_vector) / 2
 
         end_point = self.average_eye_center + length * self.average_gaze_vector
         self.visualizer.draw_3d_line(self.average_eye_center, end_point)
@@ -446,7 +518,9 @@ class GazeDetector:
         """
         Projects the gaze vector onto the screen and draws a point at
         the estimated location the user is looking at.
-        :return: None
+
+        Returns:
+            None
         """
         if not self.show_gaze_vector:
             return
@@ -454,7 +528,8 @@ class GazeDetector:
         # Draw the point on the screen the user is looking at
         point_on_screen = (
             self.average_eye_center
-            + (self.average_eye_distance * self.config.gaze_point.z_projection_multiplier) * self.average_gaze_vector
+            + (self.average_eye_distance *
+               self.config.gaze_point.z_projection_multiplier) * self.average_gaze_vector
         )
         point_on_screen[1] *= self.config.gaze_point.gaze_vector_y_scale
 
@@ -471,7 +546,9 @@ class GazeDetector:
     def _draw_gaze_region(self) -> None:
         """
         Highlights the region on the screen the user is looking at.
-        :return: None
+
+        Returns:
+            None
         """
         if not self.show_gaze_vector:
             return
@@ -499,4 +576,5 @@ class GazeDetector:
 
             top_left = side_hitbox["top_left"]
             bottom_right = side_hitbox["bottom_right"]
-            self.visualizer.draw_labelled_rectangle(top_left, bottom_right, bg_color, bg_alpha, text, border_color=border)
+            self.visualizer.draw_labelled_rectangle(
+                top_left, bottom_right, bg_color, bg_alpha, text, border_color=border)

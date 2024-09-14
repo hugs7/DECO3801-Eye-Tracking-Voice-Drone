@@ -13,7 +13,9 @@ logger = logging.getLogger(__name__)
 def is_main_thread() -> bool:
     """
     Checks if the current thread is the main thread
-    :return: True if the current thread is the main thread, False otherwise
+
+    Returns:
+        True if the current thread is the main thread, False otherwise
     """
     return current_thread().name == "MainThread"
 
@@ -21,8 +23,12 @@ def is_main_thread() -> bool:
 def thread_exit_handler(stop_event: Optional[Event]) -> None:
     """
     Helper function to handle stop event in threads.
-    :param stop_event: Event to signal stop
-    :return: None
+
+    Args:
+        stop_event: Event to signal stop
+
+    Returns:
+        None
     """
     if stop_event is None:
         # Module is running independently (main thread)
@@ -31,15 +37,20 @@ def thread_exit_handler(stop_event: Optional[Event]) -> None:
     # Module is running as a child thread
     if stop_event.is_set():
         thread = current_thread()
-        logger.critical(f"Received stop signal from '{thread.name}'. Exiting thread...")
+        logger.critical(
+            f"Received stop signal from '{thread.name}'. Exiting thread...")
         raise SystemExit
 
 
 def get_function_name(func) -> str:
     """
     Inspects the func to get the function's name
-    :param func: Function to inspect
-    :return: Function name
+
+    Args:
+        func: Function to inspect
+
+    Returns:
+        Function name
     """
     return func.__name__
 
@@ -47,7 +58,11 @@ def get_function_name(func) -> str:
 def get_function_module(func) -> str:
     """
     Inspects the func to get the function's module
-    :param func: Function to inspect
-    :return: Module name
+
+    Args:
+        func: Function to inspect
+
+    Returns:
+        Module name
     """
     return func.__module__

@@ -23,15 +23,21 @@ class Visualizer:
     def set_image(self, image: np.ndarray) -> None:
         """
         Binds the image to the visualizer state
-        :param image: The image to be bound
-        :return: None
+        
+        Args:
+            image: The image to be bound
+
+        Returns:
+            None
         """
         self.image = image
 
     def flip_image(self) -> None:
         """
         Flips the image horizontally
-        :return: None
+
+        Returns:
+            None
         """
         flipped_image = transforms.flip_image(self.image)
         self.set_image(flipped_image)
@@ -39,7 +45,9 @@ class Visualizer:
     def get_2d_resolution(self) -> Tuple[int, int]:
         """
         Returns the resolution of the 2D image
-        :return: The resolution of the 2D image
+
+        Returns:
+            The resolution of the 2D image
         """
         assert self.image is not None
         return self.image.shape[:2]
@@ -47,10 +55,14 @@ class Visualizer:
     def draw_bbox(self, bbox: np.ndarray, color: Tuple[int, int, int] = (0, 255, 0), lw: int = 1) -> None:
         """
         Draws a bounding box on the image
-        :param bbox: The bounding box to be drawn
-        :param color: The colour of the bounding box
-        :param lw: The line width of the bounding box
-        :return: None
+        
+        Args:
+            bbox: The bounding box to be drawn
+            color: The colour of the bounding box
+            lw: The line width of the bounding box
+
+        Returns:
+            None
         """
         assert self.image is not None
         assert bbox.shape == (2, 2)
@@ -61,8 +73,12 @@ class Visualizer:
     def _convert_pt(point: np.ndarray) -> Tuple[int, int]:
         """
         Converts the point to a tuple of integers
-        :param point: The point to be converted
-        :return: The point as a tuple of integers
+        
+        Args:
+            point: The point to be converted
+
+        Returns:
+            The point as a tuple of integers
         """
 
         return tuple(np.round(point).astype(np.int32).tolist())
@@ -70,10 +86,14 @@ class Visualizer:
     def draw_points(self, points: np.ndarray, color: Tuple[int, int, int] = (0, 0, 255), size: int = 3) -> None:
         """
         Draws points from 2D image coordinates onto the image (direct drawing).
-        :param points: The points to be drawn
-        :param color: The colour of the points
-        :param size: The size of the points
-        :return: None
+        
+        Args:
+            points: The points to be drawn
+            color: The colour of the points
+            size: The size of the points
+
+        Returns:
+            None
         """
 
         assert self.image is not None
@@ -85,9 +105,13 @@ class Visualizer:
     def create_opacity(self, overlay: np.ndarray, opacity: float):
         """
         Blends the original image and the overlay together, with a specified transparency/opacity
-        :param overlay: The overlay to be blended with the original image
-        :param opacity: The transparency of the overlay
-        :return: None
+        
+        Args:
+            overlay: The overlay to be blended with the original image
+            opacity: The transparency of the overlay
+
+        Returns:
+            None
         """
 
         img = np.zeros_like(self.image, np.uint8)
@@ -105,16 +129,21 @@ class Visualizer:
     ):
         """
         Calculates the origin of the text to be drawn in the centre of the rectangle
-        :param text: The text to be drawn
-        :param text_font_face: The font face of the text
-        :param font_scale: The scale of the font
-        :param thickness: The thickness of the text
-        :param top_left: The top left corner of the rectangle
-        :param bottom_right: The bottom right corner of the rectangle
-        :return: The origin of the text
+        
+        Args:
+            text: The text to be drawn
+            text_font_face: The font face of the text
+            font_scale: The scale of the font
+            thickness: The thickness of the text
+            top_left: The top left corner of the rectangle
+            bottom_right: The bottom right corner of the rectangle
+
+        Returns:
+            The origin of the text
         """
 
-        (text_width, text_height), text_bottom_y = cv2.getTextSize(text, text_font_face, font_scale, thickness)
+        (text_width, text_height), text_bottom_y = cv2.getTextSize(
+            text, text_font_face, font_scale, thickness)
         text_middle = text_width // 2
 
         # Calculate the x_coordinate of the middle of the rectangle (i.e left-most x-coord of rectangle + middle of rectangle)
@@ -123,7 +152,8 @@ class Visualizer:
 
         # Aligns the centre of the text with the centre of the rectangle
         rectangle_bottom_left = rectangle_middle_x_coord - text_middle
-        text_org = (rectangle_bottom_left, (top_left[1] + bottom_right[1]) // 2)
+        text_org = (rectangle_bottom_left,
+                    (top_left[1] + bottom_right[1]) // 2)
 
         return text_org
 
@@ -143,46 +173,58 @@ class Visualizer:
     ):
         """
         Draws a labelled rectangle on the specified overlay
-        :param top_left: The top left corner of the rectangle
-        :param bottom_right: The bottom right corner of the rectangle
-        :param bg_color: The background colour of the rectangle
-        :param bg_alpha: The transparency of the rectangle
-        :param text: The text to be displayed
-        :param text_font_face: The font face of the text
-        :param text_line_type: The line type of the text
-        :param font_scale: The scale of the font
-        :param border_color: The colour of the border
-        :param border_thickness: The thickness of the border
-        :param text_org: The origin of the text
-        :return: None
+        
+        Args:
+            top_left: The top left corner of the rectangle
+            bottom_right: The bottom right corner of the rectangle
+            bg_color: The background colour of the rectangle
+            bg_alpha: The transparency of the rectangle
+            text: The text to be displayed
+            text_font_face: The font face of the text
+            text_line_type: The line type of the text
+            font_scale: The scale of the font
+            border_color: The colour of the border
+            border_thickness: The thickness of the border
+            text_org: The origin of the text
+
+        Returns:
+            None
         """
 
         assert self.image is not None
         if text_org is None:
-            text_org = self.calculate_text_org(text, text_font_face, font_scale, 2, top_left, bottom_right)
+            text_org = self.calculate_text_org(
+                text, text_font_face, font_scale, 2, top_left, bottom_right)
 
         overlay = np.zeros_like(self.image, np.uint8)
         if border_color is not None:
             cv2.rectangle(overlay, top_left, bottom_right, border_color, -1)
 
             # Insets the rectangle to create a border effect
-            top_left = transforms.add_2d_point(top_left, (border_thickness, border_thickness))
-            bottom_right = transforms.add_2d_point(bottom_right, (-border_thickness, -border_thickness))
+            top_left = transforms.add_2d_point(
+                top_left, (border_thickness, border_thickness))
+            bottom_right = transforms.add_2d_point(
+                bottom_right, (-border_thickness, -border_thickness))
 
         cv2.rectangle(overlay, top_left, bottom_right, bg_color, -1)
         self.create_opacity(overlay, bg_alpha)
-        cv2.putText(self.image, text, text_org, text_font_face, font_scale, bg_color, 2, text_line_type, False)
+        cv2.putText(self.image, text, text_org, text_font_face,
+                    font_scale, bg_color, 2, text_line_type, False)
 
     def draw_3d_point(
         self, point3d: np.ndarray, color: Tuple[int, int, int] = (255, 0, 255), size=3, clamp_to_screen: bool = False
     ) -> Tuple[int, int]:
         """
         Draw a point from 3D world coordinates onto the image.
-        :param point3d: The 3D point to be drawn
-        :param color: The colour of the point. Default is magenta
-        :param size: The size of the point. Default is 3
-        :param clamp_to_screen: Whether to clamp the point to the screen. Default is False
-        :return: The 2D point
+        
+        Args:
+            point3d: The 3D point to be drawn
+            color: The colour of the point. Default is magenta
+            size: The size of the point. Default is 3
+            clamp_to_screen: Whether to clamp the point to the screen. Default is False
+
+        Returns:
+            The 2D point
         """
 
         assert self.image is not None
@@ -198,11 +240,15 @@ class Visualizer:
     ) -> None:
         """
         Draw points from 3D world coordinates onto the image.
-        :param points3d: The 3D points to be drawn
-        :param color: The colour of the points. Default is magenta
-        :param size: The size of the points. Default is 3
-        :param clamp_to_screen: Whether to clamp the points to the screen. Default is False
-        :return: None
+        
+        Args:
+            points3d: The 3D points to be drawn
+            color: The colour of the points. Default is magenta
+            size: The size of the points. Default is 3
+            clamp_to_screen: Whether to clamp the points to the screen. Default is False
+
+        Returns:
+            None
         """
 
         assert self.image is not None
@@ -215,11 +261,15 @@ class Visualizer:
     def draw_3d_line(self, point0: np.ndarray, point1: np.ndarray, color: Tuple[int, int, int] = (255, 255, 0), lw=1) -> None:
         """
         Draw a line from 3D world coordinates onto the image.
-        :param point0: The start point of the line
-        :param point1: The end point of the line
-        :param color: The colour of the line. Default is yellow
-        :param lw: The line width. Default is 1
-        :return: None
+        
+        Args:
+            point0: The start point of the line
+            point1: The end point of the line
+            color: The colour of the line. Default is yellow
+            lw: The line width. Default is 1
+
+        Returns:
+            None
         """
 
         assert self.image is not None
@@ -233,10 +283,14 @@ class Visualizer:
     def draw_model_axes(self, face: Face, length: float, lw: int = 2) -> None:
         """
         Draw the axes of the model coordinate system onto the image.
-        :param face: The face object
-        :param length: The length of the axes
-        :param lw: The line width. Default is 2
-        :return: None
+        
+        Args:
+            face: The face object
+            length: The length of the axes
+            lw: The line width. Default is 2
+
+        Returns:
+            None
         """
 
         assert self.image is not None
@@ -245,9 +299,11 @@ class Visualizer:
         assert face.head_position is not None
         assert face.landmarks is not None
         # Get the axes of the model coordinate system
-        axes3d = np.eye(3, dtype=np.float32) @ Rotation.from_euler("XYZ", [0, np.pi, 0]).as_matrix()
+        axes3d = np.eye(
+            3, dtype=np.float32) @ Rotation.from_euler("XYZ", [0, np.pi, 0]).as_matrix()
         axes3d = axes3d * length
-        axes2d = self._camera.project_points(axes3d, face.head_pose_rot.as_rotvec(), face.head_position)
+        axes2d = self._camera.project_points(
+            axes3d, face.head_pose_rot.as_rotvec(), face.head_position)
         center = face.landmarks[self._center_point_index]
         center = self._convert_pt(center)
         for pt, color in zip(axes2d, AXIS_COLORS):
@@ -257,8 +313,12 @@ class Visualizer:
     def _clamp_point(self, point_or_points: np.ndarray) -> np.ndarray:
         """
         Clamp the point or points to the image resolution
-        :param point_or_points: The point or points to be clamped
-        :return: The clamped point or points
+        
+        Args:
+            point_or_points: The point or points to be clamped
+
+        Returns:
+            The clamped point or points
         """
 
         return np.clip(point_or_points, 0, np.array(self.image.shape[:2])[::-1])
@@ -266,8 +326,12 @@ class Visualizer:
     def flip_point_x(self, point: Tuple[int, int]) -> Tuple[int, int]:
         """
         Flip the x-coordinate of the point
-        :param point: The point to be flipped
-        :return: The flipped point
+        
+        Args:
+            point: The point to be flipped
+
+        Returns:
+            The flipped point
         """
 
         _, res_x = self.get_2d_resolution()

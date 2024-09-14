@@ -32,8 +32,11 @@ class FaceModel:
         """
         Asserts that the landmarks array has the correct shape and that the
         nose landmark is at the origin.
-        :param landmarks: 3D landmarks
-        :return: None
+        Args:
+            landmarks: 3D landmarks
+
+        Returns:
+            None
         """
 
         assert landmarks is not None
@@ -44,8 +47,11 @@ class FaceModel:
         """
         Updates the landmark calibration matrix which is used as the object
         points when solving the PnP problem.
-        :param landmarks: 3D landmarks
-        :return: None
+        Args:
+            landmarks: 3D landmarks
+
+        Returns:
+            None
         """
         # Normalise landmarks to have the nose at the origin
         normalised_landmarks = landmarks - landmarks[self.NOSE_INDEX]
@@ -63,9 +69,13 @@ class FaceModel:
         initial estimate of the head pose is not rotated and the
         face is in front of the camera.)
 
-        :param face: Face object
-        :param camera: Camera object
-        :return: None
+        Args:
+            face: Face object
+        Args:
+            camera: Camera object
+
+        Returns:
+            None
         """
         if self.LANDMARKS is None:
             raise ValueError("Landmark calibration matrix is not set.")
@@ -76,7 +86,8 @@ class FaceModel:
         tvec = np.array([0, 0, 1], dtype=np.float32)
         _, rvec, tvec = cv2.solvePnP(
             self.LANDMARKS,
-            face.landmarks,  # This is in the 2D upscaled image 1280x900. Face is not normalised to have offset 0,0 at the nose.
+            # This is in the 2D upscaled image 1280x900. Face is not normalised to have offset 0,0 at the nose.
+            face.landmarks,
             camera.camera_matrix,  # From sample params
             camera.dist_coefficients,  # No distortion coefficients
             rvec,
@@ -86,20 +97,27 @@ class FaceModel:
         )
         # Rvec is radians of each axis rotated relative to the camera
         # Tvec is the 3D position of the head in metres (in world coords) relative to the camera
-        rot = Rotation.from_rotvec(rvec)  # Convert the rotation vector to a rotation matrix
+        # Convert the rotation vector to a rotation matrix
+        rot = Rotation.from_rotvec(rvec)
         face.head_pose_rot = rot
-        face.head_position = tvec  # 3D position of the head in world coordinates relative to the camera
+        # 3D position of the head in world coordinates relative to the camera
+        face.head_position = tvec
         face.reye.head_pose_rot = rot
         face.leye.head_pose_rot = rot
 
     def compute_3d_pose(self, face: Face) -> None:
         """
         Compute the transformed model.
-        :param face: Face object
-        :return: None
+
+        Args:
+            face: Face object
+
+        Returns:
+            None
         """
         rot = face.head_pose_rot.as_matrix()  # Has units of radians
-        face.model3d = self.LANDMARKS @ rot.T + face.head_position  # This is the 3D model of the face in world coordinates
+        # This is the 3D model of the face in world coordinates
+        face.model3d = self.LANDMARKS @ rot.T + face.head_position
 
     def compute_face_eye_centers(self, face: Face) -> None:
         """
@@ -108,10 +126,14 @@ class FaceModel:
         The face center is defined as the
         average coordinates of the six points at the corners of both
         eyes and the mouth.
-        :param face: Face object
-        :return: None
+        Args:
+            face: Face object
+
+        Returns:
+            None
         """
-        face.center = face.model3d[np.concatenate([self.REYE_INDICES, self.LEYE_INDICES, self.MOUTH_INDICES])].mean(axis=0)
+        face.center = face.model3d[np.concatenate(
+            [self.REYE_INDICES, self.LEYE_INDICES, self.MOUTH_INDICES])].mean(axis=0)
 
         # Face centre is world coordinates in 3D with units metres relative to the camera
         face.reye.center = face.model3d[self.REYE_INDICES].mean(axis=0)
