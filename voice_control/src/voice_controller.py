@@ -17,7 +17,9 @@ logger = init_logger()
 
 
 class VoiceController:
-    def __init__(self, config, stop_event: Optional[Event] = None, shared_data: Optional[OmegaConf] = None, data_lock: Optional[Lock] = None):
+    def __init__(
+        self, config, stop_event: Optional[Event] = None, shared_data: Optional[OmegaConf] = None, data_lock: Optional[Lock] = None
+    ):
         """
         Initialises the voice controller.
 
@@ -44,8 +46,7 @@ class VoiceController:
         if self.running_in_thread:
             # If running in thread mode, all or none of the required args must be provided
             if not all(required_args):
-                raise ValueError(
-                    "All or none of stop_event, shared_data, data_lock must be provided.")
+                raise ValueError("All or none of stop_event, shared_data, data_lock must be provided.")
 
             logger.info("Running in thread mode")
             self.stop_event = stop_event
@@ -53,11 +54,10 @@ class VoiceController:
             self.data_lock = data_lock
 
             # Lazily import thread helpers only if running in thread mode
-            from app.thread_helper import thread_exit_handler, is_main_thread
+            from app.thread_helper import thread_exit_handler
 
-            # Bind to class attributes so we can access them in class methods
+            # Bind to class attributes so we can access later in class methods
             self.thread_exit_handler = thread_exit_handler
-            self.is_main_thread = is_main_thread
         else:
             logger.info("Running in main mode")
 
@@ -109,8 +109,8 @@ class VoiceController:
             user_audio {sr.AudioData}: The audio data from the user.
 
         Returns:
-            Optional[list[tuple[str, int]]]: The drone command as a dictionary of the form 
-                                             [()"command": int), ...] or None if the command 
+            Optional[list[tuple[str, int]]]: The drone command as a dictionary of the form
+                                             [()"command": int), ...] or None if the command
                                              is invalid.
         """
         text = self.audio_recogniser.convert_voice_to_text(user_audio)
@@ -124,8 +124,7 @@ class VoiceController:
         except Exception:
             logger.error("Failed to parse result into dictionary.")
 
-        logger.info(
-            f"Voice command: {parsed_commands} of type {type(parsed_commands)}")
+        logger.info(f"Voice command: {parsed_commands} of type {type(parsed_commands)}")
 
         if self.running_in_thread:
             logger.info(f"Setting voice command to {parsed_commands}")
