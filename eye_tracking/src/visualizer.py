@@ -44,7 +44,9 @@ class Visualizer:
     def get_2d_resolution(self) -> Tuple[int, int]:
         """
         Returns the resolution of the 2D image
-        :return: The resolution of the 2D image
+
+        Returns:
+                The resolution of the 2D image
         """
         assert self.image is not None
         return self.image.shape[:2]
@@ -71,7 +73,9 @@ class Visualizer:
         Converts the point to a tuple of integers
         Args:
             point: The point to be converted
-        :return: The point as a tuple of integers
+
+        Returns:
+                The point as a tuple of integers
         """
 
         return tuple(np.round(point).astype(np.int32).tolist())
@@ -127,7 +131,9 @@ class Visualizer:
             thickness: The thickness of the text
             top_left: The top left corner of the rectangle
             bottom_right: The bottom right corner of the rectangle
-        :return: The origin of the text
+
+        Returns:
+                The origin of the text
         """
 
         (text_width, text_height), text_bottom_y = cv2.getTextSize(
@@ -211,7 +217,9 @@ class Visualizer:
             color: The colour of the point. Default is magenta
             size: The size of the point. Default is 3
             clamp_to_screen: Whether to clamp the point to the screen. Default is False
-        :return: The 2D point
+
+        Returns:
+                The 2D point
         """
 
         assert self.image is not None
@@ -299,7 +307,9 @@ class Visualizer:
         Clamp the point or points to the image resolution
         Args:
             point_or_points: The point or points to be clamped
-        :return: The clamped point or points
+
+        Returns:
+                The clamped point or points
         """
 
         return np.clip(point_or_points, 0, np.array(self.image.shape[:2])[::-1])
@@ -309,7 +319,9 @@ class Visualizer:
         Flip the x-coordinate of the point
         Args:
             point: The point to be flipped
-        :return: The flipped point
+
+        Returns:
+                The flipped point
         """
 
         _, res_x = self.get_2d_resolution()

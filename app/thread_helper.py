@@ -13,7 +13,9 @@ logger = logging.getLogger(__name__)
 def is_main_thread() -> bool:
     """
     Checks if the current thread is the main thread
-    :return: True if the current thread is the main thread, False otherwise
+
+    Returns:
+        True if the current thread is the main thread, False otherwise
     """
     return current_thread().name == "MainThread"
 
@@ -44,7 +46,9 @@ def get_function_name(func) -> str:
     Inspects the func to get the function's name
     Args:
         func: Function to inspect
-    :return: Function name
+
+    Returns:
+        Function name
     """
     return func.__name__
 
@@ -54,6 +58,8 @@ def get_function_module(func) -> str:
     Inspects the func to get the function's module
     Args:
         func: Function to inspect
-    :return: Module name
+
+    Returns:
+        Module name
     """
     return func.__module__

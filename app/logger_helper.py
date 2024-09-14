@@ -44,7 +44,9 @@ class LoggerFormatter(logging.Formatter):
         Format the log record with the output name in title case and color based on log level.
         Args:
             record: Log record
-        :return: Formatted log record
+
+        Returns:
+                Formatted log record
         """
         # Add a custom field for title-cased logger name
         record.output_name = to_title_case(record.name)
@@ -60,7 +62,9 @@ class LoggerFormatter(logging.Formatter):
         Get the log colour based on the log level.
         Args:
             level: Log level
-        :return: Log colour
+
+        Returns:
+                Log colour
         """
         # Custom log levels
         if level == TRACE_LEVEL_NUM:
@@ -87,7 +91,9 @@ def init_logger(level: int = logging.INFO) -> logging.Logger:
     Initialise a named logger with the specified logging level.
     Args:
         level: Logging level
-    :return: Logger instance
+
+    Returns:
+        Logger instance
     """
 
     # [1] gives the caller of this function
@@ -114,7 +120,9 @@ def init_root_logger(level: int = logging.INFO) -> logging.Logger:
     Initialise the root logger with the specified logging level.
     Args:
         level: Logging level
-    :return: Logger instance
+
+    Returns:
+        Logger instance
     """
 
     logger = logging.getLogger()

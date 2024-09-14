@@ -45,7 +45,9 @@ class GazeEstimator:
     def _load_model(self) -> torch.nn.Module:
         """
         Load the gaze estimation model from checkpoint
-        :return: Gaze estimation model
+
+        Returns:
+                Gaze estimation model
         """
         model = create_model(self._config)
         checkpoint = torch.load(
@@ -60,7 +62,9 @@ class GazeEstimator:
         Detect faces in the image and return a list of Face objects
         Args:
             image: RGB image
-        :return: List of Face objects
+
+        Returns:
+                List of Face objects
         """
         return self._landmark_estimator.detect_faces(image)
 
@@ -69,7 +73,9 @@ class GazeEstimator:
         Detect faces in the image and return a list of raw landmarks
         Args:
             image: RGB image
-        :return: List of raw landmarks
+
+        Returns:
+                List of raw landmarks
         """
         return self._landmark_estimator.detect_faces_raw(image)
 

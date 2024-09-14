@@ -28,7 +28,9 @@ class FaceParts:
     def distance(self) -> float:
         """
         Computes distance from the camera to the face part
-        :return: Distance in meters
+
+        Returns:
+                Distance in meters
         """
         return np.linalg.norm(self.center)
 
@@ -60,7 +62,9 @@ class FaceParts:
         Converts a gaze vector to pitch and yaw angles
         Args:
             vector: Gaze vector
-        :return: Pitch and yaw angles
+
+        Returns:
+                Pitch and yaw angles
         """
 
         assert vector.shape == (3,)

@@ -21,7 +21,9 @@ class LandmarkEstimator:
         Calculated landmarks scaled to the image size with a bounding box
         Args:
             image: RGB image
-        :return: List of faces
+
+        Returns:
+                List of faces
         """
 
         h, w = image.shape[:2]
@@ -47,7 +49,9 @@ class LandmarkEstimator:
         Returns landmarks as they come from the mediapipe model (not scaled to the image size)
         Args:
             image: RGB image
-        :return: List of faces landmarks
+
+        Returns:
+                List of faces landmarks
         """
         predictions = self.detector.process(self._get_bgr_frame(image))
         faces_landmarks = []

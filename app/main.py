@@ -22,7 +22,9 @@ def dynamic_import(module_name: str, alias: str):
     Args:
         module_name: Name of the module to import
         alias: Alias for the imported module
-    :return: Imported module
+
+    Returns:
+        Imported module
     """
     if __name__ == "__main__":
         module = importlib.import_module(module_name)

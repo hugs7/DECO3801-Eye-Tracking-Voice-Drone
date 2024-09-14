@@ -68,7 +68,9 @@ class GazeDetector:
     def _init_hitboxes(self) -> Dict[str, Tuple[Tuple[int, int], Tuple[int, int]]]:
         """
         Initialize the left and right hit-boxes.
-        :return: Dictionary of hit-boxes: {"left": (top_left, bottom_right), "right": (top_left, bottom_right)}
+        
+        Returns:
+        	Dictionary of hit-boxes: {"left": (top_left, bottom_right), "right": (top_left, bottom_right)}
         """
         logger.info("Initializing hit-boxes")
 
@@ -168,7 +170,9 @@ class GazeDetector:
     def _read_camera(self) -> Tuple[bool, np.ndarray]:
         """
         Read the camera feed and upscale the frame.
-        :return: Tuple of boolean and frame
+        
+        Returns:
+        	Tuple of boolean and frame
         """
         ok, frame = self.cap.read()
         if not ok:
@@ -222,14 +226,18 @@ class GazeDetector:
         Undistort the image using the camera matrix and distortion coefficients.
         Args:
             image: Image to undistort
-        :return: Undistorted image
+        
+        Returns:
+        	Undistorted image
         """
         return cv2.undistort(image, self.gaze_estimator.camera.camera_matrix, self.gaze_estimator.camera.dist_coefficients)
 
     def _create_capture(self) -> Optional[cv2.VideoCapture]:
         """
         Create a capture object for the camera or video file.
-        :return: VideoCapture object or None
+        
+        Returns:
+        	VideoCapture object or None
         """
         if self.config.demo.image_path:
             return None
@@ -247,7 +255,9 @@ class GazeDetector:
     def _create_output_dir(self) -> Optional[pathlib.Path]:
         """
         Create the output directory if specified in the config.
-        :return: Path object or None
+        
+        Returns:
+        	Path object or None
         """
 
         if not self.config.demo.output_dir:
@@ -260,7 +270,9 @@ class GazeDetector:
     def _create_timestamp() -> str:
         """
         Create a timestamp in the format YYYYMMDD_HHMMSS.
-        :return: Timestamp string
+        
+        Returns:
+        	Timestamp string
         """
         dt = datetime.datetime.now()
         return dt.strftime("%Y%m%d_%H%M%S")
@@ -268,7 +280,9 @@ class GazeDetector:
     def _create_video_writer(self) -> Optional[cv2.VideoWriter]:
         """
         Create a video writer object if the user has specified an output directory.
-        :return: VideoWriter object or None
+        
+        Returns:
+        	VideoWriter object or None
         """
         if self.config.demo.image_path:
             return None
@@ -298,7 +312,9 @@ class GazeDetector:
     def _wait_key(self) -> bool:
         """
         Controller for the gaze detector.
-        :return: True if a recognised key is pressed, False otherwise
+        
+        Returns:
+        	True if a recognised key is pressed, False otherwise
         """
 
         key = cv2.waitKey(self.config.demo.wait_time) & 0xFF

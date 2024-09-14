@@ -40,7 +40,9 @@ class Camera:
             points3d: 3D world points (metres)
             rvec: Rotation vector
             tvec: Translation vector
-        :return: 2D image points (pixels)
+
+        Returns:
+                2D image points (pixels)
         """
         assert points3d.shape[1] == 3
         if rvec is None:
@@ -58,7 +60,9 @@ class Camera:
             point3d: 3D world point (metres)
             rvec: Rotation vector
             tvec: Translation vector
-        :return: 2D image point (pixels)
+
+        Returns:
+                2D image point (pixels)
         """
         assert point3d.shape == (3,)
         return self.project_points(point3d[np.newaxis], rvec, tvec)[0]

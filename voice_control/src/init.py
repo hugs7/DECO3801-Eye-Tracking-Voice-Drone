@@ -19,7 +19,9 @@ logger = init_logger(logging.DEBUG)
 def init_config() -> DictConfig:
     """
     Initializes the configuration for the voice control program.
-    :return: The configuration object.
+
+    Returns:
+        The configuration object.
     """
 
     package_root = file_handler.get_package_folder()
@@ -65,7 +67,9 @@ def init_openai():
 def init() -> DictConfig:
     """
     Initialises the voice control program.
-    :return: The configuration object.
+
+    Returns:
+        The configuration object.
     """
 
     config = init_config()
