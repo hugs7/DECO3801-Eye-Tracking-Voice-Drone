@@ -98,7 +98,10 @@ def init_logger(level: int = logging.INFO) -> logging.Logger:
     if is_main_thread():
         logger.setLevel(level)
 
-    attach_formatter(logger)
+    logger.propagate = False
+
+    if not logger.hasHandlers():
+        attach_formatter(logger)
 
     return logger
 
@@ -125,7 +128,8 @@ def attach_formatter(logger: logging.Logger) -> None:
     :return: None
     """
 
-    formatter = LoggerFormatter("%(asctime)s  %(output_name)-13s %(levelname)-13s%(message)s")
+    formatter = LoggerFormatter(
+        "%(asctime)s  %(output_name)-13s %(levelname)-13s%(message)s")
 
     if not logger.handlers:
         console_handler = logging.StreamHandler()
