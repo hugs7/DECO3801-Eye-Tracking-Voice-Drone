@@ -7,7 +7,7 @@ audio:
     save_recordings: True
     wake_command: "Ok Drone"
     listen_timeout: 60
-    phrase_time_limit: 10
+    phrase_time_limit: 4
     sound_effects:
         enable: True
         files:
