@@ -6,7 +6,8 @@
             "type": "debugpy",
             "request": "launch",
             "program": "app/main.py",
-            "console": "integratedTerminal"
+            "console": "integratedTerminal",
+            "justMyCode": true
         },
         {
             "name": "Eye Tracking",
