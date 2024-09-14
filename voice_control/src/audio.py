@@ -74,7 +74,13 @@ class AudioRecogniser:
             AudioData: An AudioData object containing the recorded audio input.
         """
         with sr.Microphone() as source:
-            logger.debug(f"Listening on source", source.list_microphone_names(), "\n\n", source.list_working_microphones())
+            working_microphones = source.list_working_microphones()
+            logger.debug(f"Microphones: %s", working_microphones)
+
+            if len(working_microphones) == 0:
+                logger.error("No working microphones found.")
+                return None
+
             logger.info("Listening...")
 
             audio = self.recogniser.listen(source, phrase_time_limit=c.AUDIO_PHRASE_TIME_LIMIT)
