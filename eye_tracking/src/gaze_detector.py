@@ -21,7 +21,7 @@ from .visualizer import Visualizer
 from .gaze_estimator import GazeEstimator
 from .utils import transforms
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 
