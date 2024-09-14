@@ -91,6 +91,7 @@ class AudioRecogniser:
         Returns:
             AudioData: An AudioData object containing the recorded audio input.
         """
+        logger.info("Loading audio...")
 
         recordings_folder = file_handler.get_recordings_folder()
         audio_files = file_handler.list_files_in_folder(
@@ -102,10 +103,10 @@ class AudioRecogniser:
 
         most_recent_audio_file = sorted(
             audio_files, key=lambda x: x.stat().st_ctime, reverse=True)[0]
-        logger.info(f"Loading audio from {most_recent_audio_file}")
 
+        logger.info(f"Loading audio from {most_recent_audio_file}")
         with open(most_recent_audio_file, c.READ_BINARY_MODE) as f:
-            audio = self.recogniser.record(f)
+            audio = sr.AudioData(f.read(), c.MAX_VOLUME_THRESHOLD, 1)
         return audio
 
     def convert_voice_to_text(self, audio: sr.AudioData):
