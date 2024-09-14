@@ -6,7 +6,6 @@ import contextlib
 from io import StringIO
 from typing import List, Tuple, Dict, Callable
 from code import InteractiveConsole
-from colorama import Fore
 from .wrappers import AgentIsDone
 from .utils import ask_llm
 from .formatting import add_terminal_line_decorators, extract_terminal_entries

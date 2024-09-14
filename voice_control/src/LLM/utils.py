@@ -1,6 +1,5 @@
 import tiktoken
 from typing import List, Dict, Callable
-from colorama import Fore, Style
 from .formatting import ensure_terminal_formatting
 import logging
 
@@ -15,11 +14,11 @@ def context_token_len(context: List[Dict[str, str]]) -> int:
     Calculates the total number of tokens used in the given context for a conversation.
 
     This function iterates over a list of messages, represented as dictionaries with 'role' and 'content' keys,
-    and computes the total number of tokens required to represent the entire context. Each message adds a 
+    and computes the total number of tokens required to represent the entire context. Each message adds a
     set number of tokens for formatting, in addition to the number of tokens required by the message content.
 
     Args:
-        context (List[Dict[str, str]]): A list of dictionaries where each dictionary represents a message in the conversation. 
+        context (List[Dict[str, str]]): A list of dictionaries where each dictionary represents a message in the conversation.
                                         Each message contains 'role' (e.g., 'user', 'assistant') and 'content' (the message text).
 
     Returns:
@@ -39,7 +38,7 @@ def limit_context_length(context: List[Dict[str, str]]):
     Trims the conversation context to ensure the total number of tokens does not exceed the maximum limit.
 
     This function continuously removes the earliest message (excluding the first one) from the conversation
-    context until the total token count falls below the maximum token limit. The first message is retained to 
+    context until the total token count falls below the maximum token limit. The first message is retained to
     preserve the original context or system instructions.
 
     Args:
@@ -53,10 +52,8 @@ def limit_context_length(context: List[Dict[str, str]]):
     while context_token_len(context) > MAX_TOKENS:
         context.pop(1)
     if len(context) < original_length:
-        logger.info(
-            f"Warning: Context truncated. Only the most recent {len(context)} messages are being used.")
-        logger.info(
-            "Older messages have been removed to fit within the token limit.")
+        logger.info(f"Warning: Context truncated. Only the most recent {len(context)} messages are being used.")
+        logger.info("Older messages have been removed to fit within the token limit.")
 
 
 def ask_llm(context: List[Dict[str, str]], ask_fn: Callable[[List[Dict[str, str]], bool], str]) -> str:
@@ -64,13 +61,13 @@ def ask_llm(context: List[Dict[str, str]], ask_fn: Callable[[List[Dict[str, str]
     Queries a language model (LLM) using the given conversation context and formats the response as terminal-style code.
 
     This function limits the context length to ensure it does not exceed the token limit, then sends the context
-    to the LLM via the provided `ask_fn`. The returned response is stripped of extra whitespace and is passed through 
+    to the LLM via the provided `ask_fn`. The returned response is stripped of extra whitespace and is passed through
     a function to ensure it adheres to terminal-style formatting.
 
     Args:
         context (List[Dict[str, str]]): A list of dictionaries representing the conversation history, where each message
                                         is stored with 'role' and 'content' keys.
-        ask_fn (Callable[[List[Dict[str, str]], bool], str]): A callable function that interacts with the LLM, taking the 
+        ask_fn (Callable[[List[Dict[str, str]], bool], str]): A callable function that interacts with the LLM, taking the
                                                               current context and returning a string response.
 
     Returns:
