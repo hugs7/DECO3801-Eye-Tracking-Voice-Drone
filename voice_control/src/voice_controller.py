@@ -2,9 +2,9 @@
 Controller for voice processing
 """
 
-from typing import Optional, Dict, List
+from typing import Optional, Dict, Tuple, List
 from threading import Event, Lock
-import json
+import ast
 
 import speech_recognition as sr
 
@@ -98,7 +98,7 @@ class VoiceController:
 
         return True  # For now
 
-    def process_voice_command(self, user_audio: sr.AudioData) -> Optional[List[Dict[str, int]]]:
+    def process_voice_command(self, user_audio: sr.AudioData) -> Optional[List[Tuple[str, int]]]:
         """
         Takes in the voice in text form and sends it to LLM and returns the converted drone command.
         If running in thread mode, the result is stored in shared_data to send to the drone controller.
@@ -108,21 +108,26 @@ class VoiceController:
             user_audio {sr.AudioData}: The audio data from the user.
 
         Returns:
-            Optional[list[dict[str, int]]]: The drone command as a dictionary of the form [{"command": int}] or None if the command is invalid.
+            Optional[list[tuple[str, int]]]: The drone command as a dictionary of the form 
+                                             [()"command": int), ...] or None if the command 
+                                             is invalid.
         """
         text = self.audio_recogniser.convert_voice_to_text(user_audio)
         result = run_terminal_agent(text)
-        logger.info(result)
+        logger.info(f"Result: '{result}' of type {type(result)}")
 
-        # Parse the result into a dictionary
+        # Parse the result into a list of tuples
+        parsed_commands = None
         try:
-            result_dict = json.loads(result)
-        except json.JSONDecodeError:
+            parsed_commands = ast.literal_eval(result)
+        except Exception:
             logger.error("Failed to parse result into dictionary.")
-            result_dict = None
 
         if self.running_in_thread:
+            logger.info(f"Setting voice command to {parsed_commands}")
             with self.data_lock:
-                self.shared_data["voice_control"]["voice_command"] = result_dict
+                self.shared_data["voice_control"]["voice_command"] = parsed_commands
 
-        return result_dict
+            logger.debug("Voice command set in shared data.")
+
+        return parsed_commands
