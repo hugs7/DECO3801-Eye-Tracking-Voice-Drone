@@ -25,18 +25,18 @@ def init_context() -> list[dict]:
     if os.path.exists(context_path) and os.path.getsize(context_path) > 0:
         with open(context_path, "r") as f:
             initial_context = [json.loads(line) for line in f]
-        with open(initial_path, 'w') as f:
+        with open(initial_path, "w") as f:
             for entry in initial_context:
                 f.write(json.dumps(entry) + "\n")
     else:
         system_prompt_path = data_folder / "system_prompt.txt"
-        with open(system_prompt_path, 'r') as f:
-            system_prompt = f.read().strip().replace('\n', ' ')
+        with open(system_prompt_path, "r") as f:
+            system_prompt = f.read().strip().replace("\n", " ")
 
         initial_context = [{"role": "system", "content": system_prompt}]
         with open(initial_path, "r") as f:
             initial_context.extend(json.loads(line) for line in f)
-        with open(context_path, 'w') as f:
+        with open(context_path, "w") as f:
             for entry in initial_context:
                 f.write(json.dumps(entry) + "\n")
 
