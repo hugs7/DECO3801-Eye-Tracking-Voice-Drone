@@ -18,13 +18,21 @@
             "console": "integratedTerminal"
         },
         {
-            "name": "Voice Control",
+            "name": "Voice Control (Module)",
             "type": "debugpy",
             "request": "launch",
             "program": "-m",
             "args": ["voice_control.src.main"],
             "console": "integratedTerminal",
             "justMyCode": false
+        },
+        {
+            "name": "Voice Control (Local)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "voice_control/main.py",
+            "console": "integratedTerminal",
+            "justMyCode": true
         }
     ]
 }
