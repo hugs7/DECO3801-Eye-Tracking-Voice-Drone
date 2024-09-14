@@ -14,3 +14,7 @@ CONTINUATION_PROMPT = '... '
 PYTHON_PROMPT = '>>> '
 PYTHON_SHELL = '>>>'
 MAX_TOKENS = 8_000
+
+# File Handling
+
+WRITE_BINARY_MODE = 'wb'
