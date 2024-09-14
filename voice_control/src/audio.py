@@ -27,8 +27,7 @@ class AudioRecogniser:
         Returns:
             None
         """
-        package_root = file_handler.get_package_folder()
-        recording_folder = package_root / "recordings"
+        recording_folder = file_handler.get_recordings_folder()
         file_handler.create_folder_if_not_exists(recording_folder)
 
         timestamp = date.timestamp_filename_safe()
