@@ -123,6 +123,9 @@ class VoiceController:
         except Exception:
             logger.error("Failed to parse result into dictionary.")
 
+        logger.info(
+            f"Voice command: {parsed_commands} of type {type(parsed_commands)}")
+
         if self.running_in_thread:
             logger.info(f"Setting voice command to {parsed_commands}")
             with self.data_lock:
