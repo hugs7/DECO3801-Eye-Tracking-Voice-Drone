@@ -99,7 +99,9 @@ class GazeDetector:
     def run(self) -> None:
         """
         Wraps the main loop for the gaze detector based on config settings.
-        :return: None
+
+        Returns:
+            None
         """
         if self.config.demo.use_camera or self.config.demo.video_path:
             self._run_on_video()
