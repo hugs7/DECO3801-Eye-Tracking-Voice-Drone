@@ -10,12 +10,12 @@ import pathlib
 logger = init_logger()
 
 
-def get_project_root() -> str:
+def get_project_root() -> pathlib.Path:
     """
     Returns the root folder of the project, assuming 'voice_control' is part of the directory structure.
 
     Returns:
-        str: The path to the root folder of the project (one level above the 'voice_control' folder).
+        pathlib.Path: The path to the root folder of the project.
     """
 
     project_root = pathlib.Path(__file__).parent.parent.parent.resolve()
@@ -24,49 +24,49 @@ def get_project_root() -> str:
     return project_root
 
 
-def get_package_folder() -> str:
+def get_package_folder() -> pathlib.Path:
     """
     Returns the path to the 'voice_control' folder.
 
     Returns:
-        str: The path to the 'voice_control' folder.
+        pathlib.Path: The path to the 'voice_control' folder.
     """
     project_root = get_project_root()
-    package_folder = os.path.join(project_root, "voice_control")
+    package_folder = project_root / "voice_control"
     logger.info(f"Package folder: {package_folder}")
     return package_folder
 
 
-def get_data_folder() -> str:
+def get_data_folder() -> pathlib.Path:
     """
     Returns the path to the 'data' folder inside the 'voice_control' folder.
 
     Returns:
-        str: The path to the 'data' folder.
+        pathlib.Path: The path to the 'data' folder.
     """
     voice_control_folder = get_package_folder()
-    data_folder = os.path.join(voice_control_folder, "data")
+    data_folder = voice_control_folder / "data"
     logger.info(f"Data folder: {data_folder}")
     return data_folder
 
 
-def get_context_file() -> str:
+def get_context_file() -> pathlib.Path:
     """
     Returns the full path to the 'context.jsonl' file in the 'data' folder inside 'voice_control'.
 
     Returns:
-        str: The full path to the 'context.jsonl' file.
+        pathlib.Path: The path to the 'context.jsonl' file.
     """
     data_folder = get_data_folder()
-    return os.path.join(data_folder, "context.jsonl")
+    return data_folder / "context.jsonl"
 
 
-def file_exists(file_path: str) -> bool:
+def file_exists(file_path: pathlib.Path) -> bool:
     """
     Checks if a file exists at the specified path.
 
     Args:
-        file_path (str): The path to the file to check.
+        file_path (pathlib.Path): The path to the file to check.
 
     Returns:
         bool: True if the file exists, False otherwise.
@@ -81,12 +81,12 @@ def file_exists(file_path: str) -> bool:
     return exists
 
 
-def create_folder_if_not_exists(folder_path: str):
+def create_folder_if_not_exists(folder_path: pathlib.Path):
     """
     Creates a folder at the specified path if it does not already exist.
 
     Args:
-        folder_path (str): The path to the folder to create.
+        folder_path (pathlib.Path): The path to the folder to create.
     """
 
     if not os.path.exists(folder_path):
