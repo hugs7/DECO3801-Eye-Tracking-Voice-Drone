@@ -20,7 +20,7 @@ def init_context() -> list[dict]:
 
     data_folder = get_data_folder()
     context_path = get_context_file()
-    initial_path = os.path.join(data_folder, "initial.jsonl")
+    initial_path = data_folder / "initial.jsonl"
 
     if os.path.exists(context_path) and os.path.getsize(context_path) > 0:
         with open(context_path, "r") as f:
@@ -29,7 +29,7 @@ def init_context() -> list[dict]:
             for entry in initial_context:
                 f.write(json.dumps(entry) + "\n")
     else:
-        system_prompt_path = os.path.join(data_folder, "system_prompt.txt")
+        system_prompt_path = data_folder / "system_prompt.txt"
         with open(system_prompt_path, 'r') as f:
             system_prompt = f.read().strip().replace('\n', ' ')
 

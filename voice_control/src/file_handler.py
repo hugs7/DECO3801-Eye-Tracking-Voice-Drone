@@ -46,8 +46,23 @@ def get_data_folder() -> pathlib.Path:
     """
     voice_control_folder = get_package_folder()
     data_folder = voice_control_folder / "data"
+    create_folder_if_not_exists(data_folder)
     logger.info(f"Data folder: {data_folder}")
     return data_folder
+
+
+def get_recordings_folder() -> pathlib.Path:
+    """
+    Returns the path to the 'recordings' folder inside the 'voice_control' folder.
+
+    Returns:
+        pathlib.Path: The path to the 'recordings' folder.
+    """
+    package_root = get_package_folder()
+    recordings_folder = package_root / "recordings"
+    create_folder_if_not_exists(recordings_folder)
+    logger.info(f"Recordings folder: {recordings_folder}")
+    return recordings_folder
 
 
 def get_context_file() -> pathlib.Path:
