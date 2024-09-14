@@ -70,7 +70,7 @@ class GazeDetector:
         Initialize the left and right hit-boxes.
 
         Returns:
-                Dictionary of hit-boxes: {"left": (top_left, bottom_right), "right": (top_left, bottom_right)}
+            Dictionary of hit-boxes: {"left": (top_left, bottom_right), "right": (top_left, bottom_right)}
         """
         logger.info("Initializing hit-boxes")
 
@@ -172,7 +172,7 @@ class GazeDetector:
         Read the camera feed and upscale the frame.
 
         Returns:
-                Tuple of boolean and frame
+            Tuple of boolean and frame
         """
         ok, frame = self.cap.read()
         if not ok:
@@ -228,7 +228,7 @@ class GazeDetector:
             image: Image to undistort
 
         Returns:
-                Undistorted image
+            Undistorted image
         """
         return cv2.undistort(image, self.gaze_estimator.camera.camera_matrix, self.gaze_estimator.camera.dist_coefficients)
 
@@ -237,7 +237,7 @@ class GazeDetector:
         Create a capture object for the camera or video file.
 
         Returns:
-                VideoCapture object or None
+            VideoCapture object or None
         """
         if self.config.demo.image_path:
             return None
@@ -257,7 +257,7 @@ class GazeDetector:
         Create the output directory if specified in the config.
 
         Returns:
-                Path object or None
+            Path object or None
         """
 
         if not self.config.demo.output_dir:
@@ -272,7 +272,7 @@ class GazeDetector:
         Create a timestamp in the format YYYYMMDD_HHMMSS.
 
         Returns:
-                Timestamp string
+            Timestamp string
         """
         dt = datetime.datetime.now()
         return dt.strftime("%Y%m%d_%H%M%S")
@@ -282,7 +282,7 @@ class GazeDetector:
         Create a video writer object if the user has specified an output directory.
 
         Returns:
-                VideoWriter object or None
+            VideoWriter object or None
         """
         if self.config.demo.image_path:
             return None
@@ -314,7 +314,7 @@ class GazeDetector:
         Controller for the gaze detector.
 
         Returns:
-                True if a recognised key is pressed, False otherwise
+            True if a recognised key is pressed, False otherwise
         """
 
         key = cv2.waitKey(self.config.demo.wait_time) & 0xFF
