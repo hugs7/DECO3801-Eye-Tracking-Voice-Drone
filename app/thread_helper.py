@@ -22,7 +22,8 @@ def is_main_thread() -> bool:
 
 def thread_loop_handler(stop_event: Optional[Event]) -> None:
     """
-    Helper function to handle stop event in threads.
+    Helper function to handle stop event in threads. Tells the interpreter
+    to exit the thread loop if the stop event is set.
 
     Args:
         stop_event: Event to signal stop
@@ -43,7 +44,7 @@ def thread_loop_handler(stop_event: Optional[Event]) -> None:
 
 def thread_exit(stop_event: Optional[Event]) -> None:
     """
-    Helper function to handle stop event in threads.
+    Exits the thread and handles the stop event.
 
     Args:
         stop_event: Event to signal stop
@@ -57,10 +58,8 @@ def thread_exit(stop_event: Optional[Event]) -> None:
         return
 
     # Module is running as a child thread
-    if stop_event.is_set():
-        thread = current_thread()
-        logger.critical(f"Received stop signal from '{thread.name}'. Exiting thread...")
-        raise SystemExit
+    stop_event.set()
+    thread_loop_handler(stop_event)
 
 
 def get_function_name(func) -> str:
