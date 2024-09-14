@@ -4,9 +4,10 @@ Hugo Burton
 06/09/2024
 """
 
-from typing import Optional, Dict
+from typing import Optional
 from threading import Event, Lock
 from time import sleep
+from omegaconf import OmegaConf
 
 from thread_helper import thread_exit_handler
 from logger_helper import init_logger
@@ -24,7 +25,7 @@ def loop():
     logger.debug("<<< End voice control loop")
 
 
-def main(stop_event: Optional[Event] = None, shared_data: Optional[Dict] = None, data_lock: Optional[Lock] = None):
+def main(stop_event: Optional[Event] = None, shared_data: Optional[OmegaConf] = None, data_lock: Optional[Lock] = None):
     logger.info("Init voice control module")
 
     while True:

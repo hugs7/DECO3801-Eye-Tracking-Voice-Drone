@@ -4,14 +4,15 @@ Author: Hugo Burton
 Last Updated: 21/08/2024
 """
 
-from typing import Optional, Dict
+from typing import Optional
 from threading import Event, Lock
+from omegaconf import OmegaConf
 
 from . import init
 from .gaze_detector import GazeDetector
 
 
-def main(stop_event: Optional[Event] = None, shared_data: Optional[Dict] = None, data_lock: Optional[Lock] = None):
+def main(stop_event: Optional[Event] = None, shared_data: Optional[OmegaConf] = None, data_lock: Optional[Lock] = None):
     """
     Defines entry point for the eye tracking application
 

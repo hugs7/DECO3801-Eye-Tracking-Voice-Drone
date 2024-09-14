@@ -2,9 +2,10 @@
 Controller for voice processing
 """
 
-from typing import Optional, Dict, Tuple, List
+from typing import Optional, Tuple, List
 from threading import Event, Lock
 import ast
+from omegaconf import OmegaConf
 
 import speech_recognition as sr
 
@@ -16,7 +17,7 @@ logger = init_logger()
 
 
 class VoiceController:
-    def __init__(self, config, stop_event: Optional[Event] = None, shared_data: Optional[Dict] = None, data_lock: Optional[Lock] = None):
+    def __init__(self, config, stop_event: Optional[Event] = None, shared_data: Optional[OmegaConf] = None, data_lock: Optional[Lock] = None):
         """
         Initialises the voice controller.
 

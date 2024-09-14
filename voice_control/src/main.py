@@ -2,8 +2,9 @@
 Main module for the voice control program.
 """
 
-from typing import Optional, Dict
+from typing import Optional
 from threading import Event, Lock
+from omegaconf import OmegaConf
 
 from . import init
 from .voice_controller import VoiceController
@@ -12,7 +13,7 @@ from .logger_helper import init_root_logger
 root_logger = init_root_logger()
 
 
-def main(stop_event: Optional[Event] = None, shared_data: Optional[Dict] = None, data_lock: Optional[Lock] = None):
+def main(stop_event: Optional[Event] = None, shared_data: Optional[OmegaConf] = None, data_lock: Optional[Lock] = None):
     """
     The main function that runs the voice control program.
 

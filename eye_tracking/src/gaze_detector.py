@@ -12,7 +12,7 @@ from threading import Event, Lock
 
 import cv2
 import numpy as np
-from omegaconf import DictConfig
+from omegaconf import DictConfig, OmegaConf
 
 from .face import Face
 from .face_model_mediapipe import FaceModelMediaPipe
@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 class GazeDetector:
     QUIT_KEYS = {27, ord("q")}
 
-    def __init__(self, config: DictConfig, stop_event: Optional[Event] = None, shared_data: Optional[Dict] = None, data_lock: Optional[Lock] = None):
+    def __init__(self, config: DictConfig, stop_event: Optional[Event] = None, shared_data: Optional[OmegaConf] = None, data_lock: Optional[Lock] = None):
         """
         Args:
             config: Configuration object
