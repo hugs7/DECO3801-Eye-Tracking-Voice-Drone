@@ -97,8 +97,8 @@ class AudioRecogniser:
             recordings_folder, c.AUDIO_FILE_EXTENSIONS)
 
         if not audio_files:
-            raise FileNotFoundError(
-                "No audio files found in the recordings folder.")
+            logger.info("No audio files found. Listening for new audio...")
+            return self.capture_voice_input()
 
         most_recent_audio_file = sorted(
             audio_files, key=lambda x: x.stat().st_ctime, reverse=True)[0]
