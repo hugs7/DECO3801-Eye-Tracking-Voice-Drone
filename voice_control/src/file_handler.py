@@ -78,3 +78,18 @@ def file_exists(file_path: str) -> bool:
         logger.debug(f"File does not exist: {file_path}")
 
     return exists
+
+
+def create_folder_if_not_exists(folder_path: str):
+    """
+    Creates a folder at the specified path if it does not already exist.
+
+    Args:
+        folder_path (str): The path to the folder to create.
+    """
+
+    if not os.path.exists(folder_path):
+        os.makedirs(folder_path)
+        logger.info(f"Folder created: {folder_path}")
+    else:
+        logger.debug(f"Folder already exists: {folder_path}")
