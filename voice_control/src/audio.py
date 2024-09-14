@@ -2,9 +2,13 @@
 Module for audio processing.
 """
 
-from typing import Optional
-import speech_recognition as sr
+from typing import Optional, Dict
 import numpy as np
+import pathlib
+
+import speech_recognition as sr
+from pydub import AudioSegment
+from pydub.playback import play
 from omegaconf import OmegaConf
 
 from common.logger_helper import init_logger
@@ -22,8 +26,44 @@ class AudioRecogniser:
         self.config = audio_config
 
         self.wake_command = self.config.wake_command
+        self.enable_sound_effects = self.config.sound_effects.enable
+        self.sound_effects: Dict[str, AudioSegment] = {}
 
-    def detect_wake_word(self, audio: sr.AudioData) -> bool:
+        self.__load_sounds()
+
+    def __load_sounds(self):
+        """
+        Load sound files for wake word detection and other audio processing.
+
+        Args:
+            None
+
+        Returns:
+            None
+        """
+        assets_folder = file_handler.get_assets_folder()
+        sound_effects_map = self.config.sound_effects.files
+
+        for sound_name, sound_file in sound_effects_map.items():
+            sound_file_path: pathlib.Path = assets_folder / sound_file
+            if sound_file_path.exists():
+                str_file_path = str(sound_file_path)
+                logger.debug(f"Loading sound file: {str_file_path}")
+                try:
+                    extension = file_handler.get_file_extension(sound_file_path, True)
+                    logger.debug(f"Audio format: {extension}")
+                    segment = AudioSegment.from_file(str_file_path, format=extension)
+                except Exception as e:
+                    logger.error(f"Error loading sound file: {sound_file_path}. Check you have ffmpeg installed and on $PATH.")
+                    logger.error("In CMD: 'where ffmpeg' should return the path to ffmpeg.exe")
+                    logger.error(e)
+                    segment = None
+                self.sound_effects[sound_name] = segment
+            else:
+                logger.error(f"Sound file not found: {sound_file_path}")
+                self.sound_effects[sound_name] = None
+
+    def _detect_wake_word(self, audio: sr.AudioData) -> bool:
         """
         Detects the wake word (defined in config) in the audio data.
 
@@ -43,7 +83,7 @@ class AudioRecogniser:
 
         return wake_word_detected
 
-    def listen_for_wake_word(self):
+    def _listen_for_wake_word(self):
         """
         Listens continuously for the wake word defined in config.
         Once the wake word is detected, it listens continuously until the user stops speaking.
@@ -60,11 +100,11 @@ class AudioRecogniser:
 
             while True:
                 audio = self.listen_for_audio(source, False)
-                if self.detect_wake_word(audio):
+                if self._detect_wake_word(audio):
                     logger.info("Wake word detected, listening for commands...")
-                    return self.listen_until_silence(source)
+                    return self._listen_until_silence(source)
 
-    def listen_until_silence(self, source: sr.Microphone):
+    def _listen_until_silence(self, source: sr.Microphone):
         """
         Listens to the user's voice until they stop speaking.
         Uses a combination of timeouts and silence detection to end listening.
@@ -122,7 +162,7 @@ class AudioRecogniser:
         Returns:
             AudioData: The recorded audio input.
         """
-        return self.listen_for_wake_word()
+        return self._listen_for_wake_word()
 
     def convert_voice_to_text(self, audio: sr.AudioData) -> Optional[str]:
         """
@@ -215,6 +255,27 @@ class AudioRecogniser:
 
         logger.debug(f"Audio loaded.")
         return audio
+
+    def play_sound_effect(self, sound_name: str):
+        """
+        Plays a sound effect from the sound_effects folder.
+
+        Args:
+            sound_name (str): The name of the sound effect to play.
+
+        Returns:
+            None
+        """
+        if not self.enable_sound_effects:
+            logger.debug("Sound effects disabled.")
+            return
+
+        sound = self.sound_effects.get(sound_name)
+        if sound:
+            logger.info(f"Playing sound effect: {sound_name}")
+            play(sound)
+        else:
+            logger.error(f"Sound effect not found: {sound_name}")
 
     def log_volume(indata: np.ndarray, frames: int, time: any, status: any):
         """
