@@ -6,9 +6,10 @@ import logging
 
 import init
 from LLM import run_terminal_agent
+import logger_helper
 import audio
 
-logger = logging.getLogger(__name__)
+root_logger = logger_helper.init_root_logger()
 
 
 def process_voice_command(text: str):
@@ -42,7 +43,7 @@ def main():
     text = audio_processor.convert_voice_to_text(user_audio)
     end_program = process_voice_command(text)
 
-    logger(end_program)
+    root_logger(end_program)
 
 
 if __name__ == "__main__":
