@@ -215,6 +215,10 @@ class GazeDetector:
         if self.writer:
             self.writer.release()
 
+        if self.running_in_thread:
+            # Exit parent thread
+            self.thread_exit(self.stop_event)
+
     def _read_camera(self) -> Tuple[bool, np.ndarray]:
         """
         Read the camera feed and upscale the frame.
