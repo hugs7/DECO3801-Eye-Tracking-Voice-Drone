@@ -16,6 +16,7 @@ from omegaconf import OmegaConf
 import constants as c
 from thread_helper import get_function_module
 from logger_helper import init_root_logger, disable_logger
+from conf_helper import safe_get
 
 root_logger = init_root_logger()
 
@@ -58,6 +59,24 @@ def is_any_thread_alive(threads):
     return any(t.is_alive() for t in threads)
 
 
+def main_loop(shared_data: OmegaConf):
+    """
+    Main loop in parent thread.
+
+    Args:
+        shared_data: Shared data between threads
+
+    Returns:
+        None
+    """
+
+    # Read shared eye gaze
+    eye_tracking_data = shared_data.eye_tracking
+    gaze_size = safe_get(eye_tracking_data, "gaze_size")
+
+    root_logger.info(f"Received gaze size: {gaze_size}")
+
+
 def main():
     root_logger.debug(">>> Begin")
 
@@ -82,6 +101,8 @@ def main():
     try:
         # Periodically check if any thread is alive
         while is_any_thread_alive(threads):
+            main_loop(shared_data)
+
             # Sleep for a short duration to prevent busy-waiting
             sleep(c.BUSY_WAIT_PERIOD_SECONDS)
     except KeyboardInterrupt:
