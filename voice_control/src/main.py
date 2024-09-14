@@ -6,9 +6,8 @@ import init
 from typing import Optional, Dict
 from threading import Event, Lock
 
-from voice_control.src.voice_controller import VoiceController
+from voice_controller import VoiceController
 from logger_helper import init_root_logger
-import audio
 
 root_logger = init_root_logger()
 
