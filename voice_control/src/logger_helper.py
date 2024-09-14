@@ -94,6 +94,8 @@ def init_logger(level: int = logging.INFO) -> logging.Logger:
     logger_name = caller_module.__name__ if caller_module else "__main__"
     logger = logging.getLogger(logger_name)
 
+    logger.setLevel(level)
+
     attach_formatter(logger)
 
     return logger

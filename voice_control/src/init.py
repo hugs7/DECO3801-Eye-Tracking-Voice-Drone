@@ -16,12 +16,6 @@ import file_handler
 logger = logging.getLogger(__name__)
 
 
-def init_logger(level=logging.INFO):
-    print(f"Setting log level to {level}")
-    log_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-    logging.basicConfig(level=level, log_format=log_format)
-
-
 def init_config() -> DictConfig:
     """
     Initializes the configuration for the voice control program.
@@ -77,7 +71,7 @@ def init() -> DictConfig:
 
     if config.log_level:
         # Overriding the log level from the configuration
-        init_logger(config.log_level)
+        logger_helper.init_logger(config.log_level)
 
     OmegaConf.set_readonly(config, True)
     logger.info(OmegaConf.to_yaml(config))
