@@ -105,13 +105,13 @@ class AudioRecogniser:
         most_recent_audio_file = sorted(
             audio_files, key=lambda x: x.stat().st_ctime, reverse=True)[0]
 
-        logger.info(
+        logger.debug(
             f"Loading audio from {file_handler.relative_path(most_recent_audio_file)}")
-        with open(most_recent_audio_file, c.READ_BINARY_MODE) as f:
-            audio = sr.AudioData(f.read(), c.MAX_VOLUME_THRESHOLD, 1)
+        most_recent_audio_file = str(most_recent_audio_file)
+        with sr.AudioFile(most_recent_audio_file) as source:
+            audio = self.recogniser.record(source)
 
-        logger.info(f"Audio loaded.")
-
+        logger.debug(f"Audio loaded.")
         return audio
 
     def convert_voice_to_text(self, audio: sr.AudioData):
