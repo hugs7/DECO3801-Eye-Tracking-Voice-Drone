@@ -5,7 +5,8 @@ Module for audio processing.
 import speech_recognition as sr
 import numpy as np
 
-from .logger_helper import init_logger
+from common.logger_helper import init_logger
+
 from . import constants as c
 from . import file_handler
 from . import date
@@ -21,7 +22,7 @@ class AudioRecogniser:
         """
         Outputs the normalized microphone volume to the console.
 
-        This function calculates the volume by computing the Euclidean norm (L2 norm) of the input audio data 
+        This function calculates the volume by computing the Euclidean norm (L2 norm) of the input audio data
         and multiplies it by 10 for scaling. The resulting value is printed in a formatted string with two decimal places.
 
         Args:
@@ -63,7 +64,7 @@ class AudioRecogniser:
         """
         Captures and returns voice input from the microphone for 5 seconds.
 
-        This function uses the `speech_recognition` library to capture audio from the microphone. 
+        This function uses the `speech_recognition` library to capture audio from the microphone.
         It listens to the input for a maximum of 5 seconds and returns the recorded audio data.
 
         Args:
@@ -73,12 +74,10 @@ class AudioRecogniser:
             AudioData: An AudioData object containing the recorded audio input.
         """
         with sr.Microphone() as source:
-            logger.debug(f"Listening on source", source.list_microphone_names(
-            ), "\n\n", source.list_working_microphones())
+            logger.debug(f"Listening on source", source.list_microphone_names(), "\n\n", source.list_working_microphones())
             logger.info("Listening...")
 
-            audio = self.recogniser.listen(
-                source, phrase_time_limit=c.AUDIO_PHRASE_TIME_LIMIT)
+            audio = self.recogniser.listen(source, phrase_time_limit=c.AUDIO_PHRASE_TIME_LIMIT)
             self.save_audio(audio)
         return audio
 
@@ -95,18 +94,15 @@ class AudioRecogniser:
         logger.info("Loading audio...")
 
         recordings_folder = file_handler.get_recordings_folder()
-        audio_files = file_handler.list_files_in_folder(
-            recordings_folder, c.AUDIO_FILE_EXTENSIONS)
+        audio_files = file_handler.list_files_in_folder(recordings_folder, c.AUDIO_FILE_EXTENSIONS)
 
         if not audio_files:
             logger.info("No audio files found. Listening for new audio...")
             return self.capture_voice_input()
 
-        most_recent_audio_file = sorted(
-            audio_files, key=lambda x: x.stat().st_ctime, reverse=True)[0]
+        most_recent_audio_file = sorted(audio_files, key=lambda x: x.stat().st_ctime, reverse=True)[0]
 
-        logger.debug(
-            f"Loading audio from {file_handler.relative_path(most_recent_audio_file)}")
+        logger.debug(f"Loading audio from {file_handler.relative_path(most_recent_audio_file)}")
         most_recent_audio_file = str(most_recent_audio_file)
         with sr.AudioFile(most_recent_audio_file) as source:
             audio = self.recogniser.record(source)

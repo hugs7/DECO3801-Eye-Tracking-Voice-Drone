@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 import logging
 
 from . import constants as c
-from .logger_helper import init_logger
+from common.logger_helper import init_logger
 from . import file_handler
 
 logger = init_logger(logging.DEBUG)
@@ -29,8 +29,7 @@ def init_config() -> DictConfig:
     if not file_handler.file_exists(config_path):
         raise FileNotFoundError("Configuration file not found.")
 
-    logger.info(
-        f"Loading config from {file_handler.relative_path(config_path)}")
+    logger.info(f"Loading config from {file_handler.relative_path(config_path)}")
     config = OmegaConf.load(config_path)
     config.PACKAGE_ROOT = package_root.as_posix()
     logger.debug(f"Pacakge root: {config.PACKAGE_ROOT}")
@@ -57,8 +56,7 @@ def init_openai():
 
     api_key = os.getenv(c.OPENAI_API_KEY_CONFIG_KEY)
     if api_key is None:
-        raise Exception(
-            f"Please assign a valid OpenAI API key to the environment variable {c.OPENAI_API_KEY_CONFIG_KEY}.")
+        raise Exception(f"Please assign a valid OpenAI API key to the environment variable {c.OPENAI_API_KEY_CONFIG_KEY}.")
 
     openai.api_key = api_key
 
