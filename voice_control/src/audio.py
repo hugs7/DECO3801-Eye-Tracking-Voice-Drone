@@ -133,6 +133,9 @@ class AudioRecogniser:
             AudioData: The recorded audio input.
         """
 
+        if timeout is None:
+            logger.debug("No timeout set. Listening indefinitely.")
+
         def listen_callback(source: sr.Microphone) -> sr.AudioData:
             logger.info("    >>> Listening for audio...")
             audio = self.recogniser.listen(source, timeout, phrase_time_limit=self.config.phrase_time_limit)
