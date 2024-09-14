@@ -27,7 +27,7 @@ def process_voice_command(text: str):
     command = text.lower()
     # Call the LLM to convert text
     result = run_terminal_agent(text)
-    print(result)
+    root_logger.info(result)
 
 
 def main():

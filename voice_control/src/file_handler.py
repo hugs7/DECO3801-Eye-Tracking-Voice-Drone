@@ -20,7 +20,6 @@ def get_project_root() -> pathlib.Path:
     """
 
     project_root = pathlib.Path(__file__).parent.parent.parent.resolve()
-    print(project_root)
     logger.info(f"Project root: {project_root}")
     return project_root
 
