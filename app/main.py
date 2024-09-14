@@ -4,14 +4,13 @@ Hugo Burton
 06/09/2024
 """
 
-import importlib
 import logging
 from threading import Thread, Event, Lock
 from time import sleep
-import os
-import sys
 
 from omegaconf import OmegaConf
+
+from import_helper import dynamic_import
 
 import constants as c
 from thread_helper import get_function_module
@@ -19,29 +18,6 @@ from common.logger_helper import init_root_logger, disable_logger
 from conf_helper import safe_get
 
 root_logger = init_root_logger()
-
-
-def dynamic_import(module_path: str, alias: str):
-    """
-    Dynamically imports a module based on the given path.
-
-    Args:
-        module_path: Relative path to the module to import
-        alias: Alias for the imported module's main function
-
-    Returns:
-        Imported module's function
-    """
-    # Go up one directory from app/main.py to project root
-    project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-
-    # Adjust the system path to include project root
-    sys.path.insert(0, project_root)
-
-    # Dynamically import the module
-    module = importlib.import_module(module_path)
-
-    return getattr(module, alias)
 
 
 eye_tracking = dynamic_import("eye_tracking.src.main", "main")
