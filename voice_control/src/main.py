@@ -37,7 +37,7 @@ def main():
     logger.info("Initialising voice control program.")
     config = init.init_config()
 
-    audio_processor = audio.AudioProcessor()
+    audio_processor = audio.AudioRecogniser()
 
     user_audio = audio_processor.capture_voice_input()
     text = audio_processor.convert_voice_to_text(user_audio)
