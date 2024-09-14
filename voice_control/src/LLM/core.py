@@ -248,7 +248,7 @@ def react(
         for entry in stored_context:
             f.write(json.dumps(entry) + '\n')
 
-    logger.info(user_command, color=Fore.LIGHTGREEN_EX)
+    logger.info(user_command)
     context.append({"role": "user", "content": user_command})
     agent_is_done, message, output = run_until_halt(
         interactive_console, ask_fn, stored_context)
