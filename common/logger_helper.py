@@ -2,6 +2,7 @@
 Logger helper module
 """
 
+from typing import Optional
 import logging
 import inspect
 from omegaconf import OmegaConf
@@ -108,6 +109,51 @@ def get_logger_config() -> OmegaConf:
     return logger_config
 
 
+def get_caller_module_name(caller_frame: inspect.FrameInfo) -> str:
+    """
+    Get the full name of the caller's module.
+
+    Args:
+        caller_frame: Caller's frame
+
+    Returns:
+        Caller's module name
+    """
+    caller_module = inspect.getmodule(caller_frame[0])
+    return caller_module.__name__
+
+
+def get_log_level() -> Optional[int]:
+    """
+    Get the logging level based on the caller's module name.
+
+    Returns:
+        Logging level
+    """
+
+    loggers = logger_config.loggers
+
+    caller_frame = inspect.stack()[2]
+    caller_name = get_caller_module_name(caller_frame)
+    top_level_module = caller_name.split(".")[0]
+
+    level = None
+    if top_level_module in loggers:
+        # Override the logging level with the specified level
+        level = loggers[top_level_module]
+        if level == False:
+            # Disable the logger
+            level = logging.CRITICAL + 1
+        else:
+            # Parse the logging level
+            level_mapping = logging.getLevelNamesMapping()
+            level = level_mapping[level]
+            if level is None:
+                raise ValueError(f"Invalid logging level: {level} for module: {top_level_module}")
+
+    return level
+
+
 def init_logger(level: int = logging.INFO) -> logging.Logger:
     """
     Initialise a named logger with the specified logging level.
@@ -119,53 +165,18 @@ def init_logger(level: int = logging.INFO) -> logging.Logger:
         Logger instance
     """
 
-    logger_config = get_logger_config()
-    loggers = logger_config.loggers
-
     # [1] gives the caller of this function
     caller_frame = inspect.stack()[1]
-    caller_module = inspect.getmodule(caller_frame[0])
+    caller_name = get_caller_module_name(caller_frame)
 
     # Use the caller's module name for the logger
-    logger_name = caller_module.__name__ if caller_module else "__main__"
+    logger_name = caller_name if caller_name != "__main__" else "Global"
     logger = logging.getLogger(logger_name)
 
-    top_level_module = caller_module.__name__.split(".")[0]
-    if top_level_module in loggers:
-        # Override the logging level with the specified level
-        level = loggers[top_level_module]
-        if level == False:
-            # Disable the logger
-            level = logging.CRITICAL + 1
-        else:
-            # Parse the logging level
-            level = logging.getLevelName(level)
-
-        logger.setLevel(level)
-    elif is_main_thread():
-        logger.setLevel(level)
+    level = get_log_level() or level
+    logger.setLevel(level)
 
     logger.propagate = False
-
-    if not logger.hasHandlers():
-        attach_formatter(logger)
-
-    return logger
-
-
-def init_root_logger(level: int = logging.INFO) -> logging.Logger:
-    """
-    Initialise the root logger with the specified logging level.
-
-    Args:
-        level: Logging level
-
-    Returns:
-        Logger instance
-    """
-
-    logger = logging.getLogger()
-    logger.setLevel(level)
 
     if not logger.hasHandlers():
         attach_formatter(logger)
@@ -227,3 +238,5 @@ def test_logger():
 
 if __name__ == "__main__":
     test_logger()
+
+logger_config = get_logger_config()

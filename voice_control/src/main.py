@@ -13,12 +13,12 @@ sys.path.insert(0, project_root)
 
 from omegaconf import OmegaConf
 
-from common.logger_helper import init_root_logger
+from common.logger_helper import init_logger
 
 from . import init
 from .voice_controller import VoiceController
 
-root_logger = init_root_logger()
+logger = init_logger()
 
 
 def main(stop_event: Optional[Event] = None, shared_data: Optional[OmegaConf] = None, data_lock: Optional[Lock] = None):
@@ -40,7 +40,7 @@ def main(stop_event: Optional[Event] = None, shared_data: Optional[OmegaConf] = 
     voice_procesor = VoiceController(config, stop_event, shared_data, data_lock)
     voice_procesor.run()
 
-    root_logger.info("Done.")
+    logger.info("Done.")
 
 
 if __name__ == "__main__":

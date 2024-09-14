@@ -4,7 +4,6 @@ Hugo Burton
 06/09/2024
 """
 
-import logging
 from threading import Thread, Event, Lock
 from time import sleep
 from typing import List
@@ -15,10 +14,10 @@ from import_helper import dynamic_import
 
 import constants as c
 from thread_helper import get_function_module
-from common.logger_helper import init_root_logger, disable_logger
+from common.logger_helper import init_logger
 from conf_helper import safe_get
 
-root_logger = init_root_logger()
+logger = init_logger()
 
 
 eye_tracking = dynamic_import("eye_tracking.src.main", "main")
@@ -51,11 +50,11 @@ def main_loop(shared_data: OmegaConf):
     gaze_side = safe_get(eye_tracking_data, "gaze_side")
 
     if gaze_side is not None:
-        root_logger.info(f"Received gaze side: {gaze_side}")
+        logger.info(f"Received gaze side: {gaze_side}")
 
 
 def main():
-    root_logger.debug(">>> Begin")
+    logger.info(">>> Begin")
 
     # Create threads for each of the components
     thread_functions = [eye_tracking, voice_control, drone]
@@ -77,14 +76,14 @@ def main():
             # Sleep for a short duration to prevent busy-waiting
             sleep(c.BUSY_WAIT_PERIOD_SECONDS)
     except KeyboardInterrupt:
-        root_logger.critical("Interrupted! Stopping all threads...")
+        logger.critical("Interrupted! Stopping all threads...")
         stop_event.set()
 
         # Ensure all threads are properly joined after signaling them to stop
         for thread in threads:
             thread.join()
 
-    root_logger.debug("<<< End")
+    logger.debug("<<< End")
 
 
 if __name__ == "__main__":
