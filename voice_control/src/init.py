@@ -24,11 +24,12 @@ def init_config() -> DictConfig:
 
     package_root = file_handler.get_package_folder()
     config_path = package_root / "configs/config.yaml"
-    logger.debug(f"Config path: {config_path}")
+    logger.debug(f"Config path: {file_handler.relative_path(config_path)}")
     if not file_handler.file_exists(config_path):
         raise FileNotFoundError("Configuration file not found.")
 
-    logger.info(f"Loading config from {config_path}")
+    logger.info(
+        f"Loading config from {file_handler.relative_path(config_path)}")
     config = OmegaConf.load(config_path)
     config.PACKAGE_ROOT = package_root.as_posix()
     logger.debug(f"Pacakge root: {config.PACKAGE_ROOT}")
