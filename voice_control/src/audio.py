@@ -78,7 +78,7 @@ class AudioRecogniser:
         # Adjust for ambient noise to improve speech detection
         self.recogniser.adjust_for_ambient_noise(source)
         try:
-            audio = self.recogniser.listen(source, timeout=None, phrase_time_limit=None)
+            audio = self.recogniser.listen(source, timeout=self.config.listen_timeout, phrase_time_limit=self.config.phrase_time_limit)
             logger.info("Finished listening, processing audio...")
             self.save_audio(audio)
             return audio

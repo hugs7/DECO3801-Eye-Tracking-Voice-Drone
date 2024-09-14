@@ -6,6 +6,8 @@ voice_control:
 audio:
     save_recordings: True
     wake_command: "Hey Drone"
+    listen_timeout: 60
+    phrase_time_limit: 10
 llm:
     model: gpt-4o-mini
     temperature: 0
