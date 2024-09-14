@@ -19,15 +19,18 @@ root_logger = init_root_logger()
 def dynamic_import(module_name: str, alias: str):
     """
     Dynamically imports a module based on the current script context.
-    :param module_name: Name of the module to import
-    :param alias: Alias for the imported module
+    Args:
+        module_name: Name of the module to import
+    Args:
+        alias: Alias for the imported module
     :return: Imported module
     """
     if __name__ == "__main__":
         module = importlib.import_module(module_name)
     else:
         # Handle relative imports
-        module = importlib.import_module(f".{module_name}", package=__package__)
+        module = importlib.import_module(
+            f".{module_name}", package=__package__)
 
     return getattr(module, alias)
 
@@ -51,9 +54,11 @@ def main():
 
     # Create threads for each of the components
     thread_functions = [eye_tracking, voice_control, drone]
-    shared_data = {f"{get_function_module(func)}_data": None for func in thread_functions}
+    shared_data = {
+        f"{get_function_module(func)}_data": None for func in thread_functions}
     threads = [
-        Thread(target=lambda func=func: func(stop_event, shared_data, data_lock), name=f"thread_{get_function_module(func)}")
+        Thread(target=lambda func=func: func(stop_event, shared_data,
+               data_lock), name=f"thread_{get_function_module(func)}")
         for func in thread_functions
     ]
 

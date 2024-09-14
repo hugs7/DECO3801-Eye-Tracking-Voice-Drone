@@ -25,8 +25,10 @@ def create_transform() -> T.ToTensor:
 def upscale(frame: cv2.VideoCapture, upscaled_dim: Tuple[int, int]) -> cv2.VideoCapture:
     """
     Upscale the frame
-    :param frame: The frame to upscale
-    :param upscaled_dim: The dimensions to upscale to (width, height)
+    Args:
+        frame: The frame to upscale
+    Args:
+        upscaled_dim: The dimensions to upscale to (width, height)
     :return cv2.VideoCapture: The upscaled frame
     """
 
@@ -39,7 +41,8 @@ def upscale(frame: cv2.VideoCapture, upscaled_dim: Tuple[int, int]) -> cv2.Video
 def flip_image(image: np.ndarray) -> np.ndarray:
     """
     Flip the image
-    :param image: The image to flip
+    Args:
+        image: The image to flip
     :return np.ndarray: The flipped image
     """
 
@@ -50,8 +53,10 @@ def flip_image(image: np.ndarray) -> np.ndarray:
 def add_2d_point(a: Tuple[int, int], b: Tuple[int, int]) -> Tuple[int, int]:
     """
     Add two tuples together
-    :param a: The first tuple
-    :param b: The second tuple
+    Args:
+        a: The first tuple
+    Args:
+        b: The second tuple
     :return Tuple[int, int]: The sum of the two tuples
     """
 

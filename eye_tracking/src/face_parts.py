@@ -38,7 +38,9 @@ class FaceParts:
         """
 
         pitch, yaw = self.normalized_gaze_angles
-        self.normalized_gaze_vector = -np.array([np.cos(pitch) * np.sin(yaw), np.sin(pitch), np.cos(pitch) * np.cos(yaw)])
+        self.normalized_gaze_vector = - \
+            np.array([np.cos(pitch) * np.sin(yaw),
+                     np.sin(pitch), np.cos(pitch) * np.cos(yaw)])
 
     def denormalize_gaze_vector(self) -> None:
         """
@@ -56,7 +58,8 @@ class FaceParts:
     def vector_to_angle(vector: np.ndarray) -> np.ndarray:
         """
         Converts a gaze vector to pitch and yaw angles
-        :param vector: Gaze vector
+        Args:
+            vector: Gaze vector
         :return: Pitch and yaw angles
         """
 

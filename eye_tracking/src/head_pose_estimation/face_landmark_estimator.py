@@ -19,7 +19,8 @@ class LandmarkEstimator:
     def detect_faces(self, image: np.ndarray) -> List[Face]:
         """
         Calculated landmarks scaled to the image size with a bounding box
-        :param image: RGB image
+        Args:
+            image: RGB image
         :return: List of faces
         """
 
@@ -28,7 +29,8 @@ class LandmarkEstimator:
         detected = []
         if faces_landmarks:
             for face in faces_landmarks:
-                pts = np.array([(pt[0] * w, pt[1] * h) for pt in face], dtype=np.float64)
+                pts = np.array([(pt[0] * w, pt[1] * h)
+                               for pt in face], dtype=np.float64)
                 bbox = np.vstack([pts.min(axis=0), pts.max(axis=0)])
                 bbox = np.round(bbox).astype(np.int32)
                 detected.append(Face(bbox, pts))
@@ -43,14 +45,16 @@ class LandmarkEstimator:
     def _detect_faces_raw(self, image: np.ndarray) -> List[np.ndarray]:
         """
         Returns landmarks as they come from the mediapipe model (not scaled to the image size)
-        :param image: RGB image
+        Args:
+            image: RGB image
         :return: List of faces landmarks
         """
         predictions = self.detector.process(self._get_bgr_frame(image))
         faces_landmarks = []
         if predictions.multi_face_landmarks:
             for prediction in predictions.multi_face_landmarks:
-                pts = np.array([(pt.x, pt.y, pt.z) for pt in prediction.landmark], dtype=np.float64)
+                pts = np.array([(pt.x, pt.y, pt.z)
+                               for pt in prediction.landmark], dtype=np.float64)
                 faces_landmarks.append(pts)
 
         return faces_landmarks

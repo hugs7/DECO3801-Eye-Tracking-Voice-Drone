@@ -182,7 +182,8 @@ class GazeDetector:
     def _process_image(self, image) -> None:
         """
         Process the image to detect faces and estimate gaze.
-        :param image: Image to process
+        Args:
+            image: Image to process
 
         Returns:
                 None
@@ -219,7 +220,8 @@ class GazeDetector:
     def _undistort_image(self, image: np.ndarray) -> np.ndarray:
         """
         Undistort the image using the camera matrix and distortion coefficients.
-        :param image: Image to undistort
+        Args:
+            image: Image to undistort
         :return: Undistorted image
         """
         return cv2.undistort(image, self.gaze_estimator.camera.camera_matrix, self.gaze_estimator.camera.dist_coefficients)
@@ -369,7 +371,8 @@ class GazeDetector:
     def _draw_face_bbox(self, face: Face) -> None:
         """
         Wrapper to draw a bounding box around the face.
-        :param face: Face object
+        Args:
+            face: Face object
 
         Returns:
                 None
@@ -382,7 +385,8 @@ class GazeDetector:
     def _draw_head_pose(self, face: Face) -> None:
         """
         Draws the head pose of the user as a set of axes.
-        :param face: Face object
+        Args:
+            face: Face object
 
         Returns:
                 None
@@ -402,7 +406,8 @@ class GazeDetector:
     def _draw_landmarks(self, face: Face) -> None:
         """
         Landmarks are 2D points in the upscaled image (pixels).
-        :param face: Face object
+        Args:
+            face: Face object
 
         Returns:
                 None
@@ -415,7 +420,8 @@ class GazeDetector:
     def _draw_face_template_model(self, face: Face) -> None:
         """
         Face Template Model is the 3D model of the face in world coordinates (metres)
-        :param face: Face object
+        Args:
+            face: Face object
 
         Returns:
                 None
@@ -428,7 +434,8 @@ class GazeDetector:
     def _display_normalized_image(self, face: Face) -> None:
         """
         Display the normalized eye images side by side.
-        :param face: Face object
+        Args:
+            face: Face object
 
         Returns:
                 None
@@ -451,7 +458,8 @@ class GazeDetector:
     def _draw_gaze_vector(self, face: Face) -> None:
         """
         Draws the gaze vector of the user as a line in 3D space.
-        :param face: Face object
+        Args:
+            face: Face object
 
         Returns:
                 None

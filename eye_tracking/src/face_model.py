@@ -32,7 +32,8 @@ class FaceModel:
         """
         Asserts that the landmarks array has the correct shape and that the
         nose landmark is at the origin.
-        :param landmarks: 3D landmarks
+        Args:
+            landmarks: 3D landmarks
 
         Returns:
                 None
@@ -46,7 +47,8 @@ class FaceModel:
         """
         Updates the landmark calibration matrix which is used as the object
         points when solving the PnP problem.
-        :param landmarks: 3D landmarks
+        Args:
+            landmarks: 3D landmarks
 
         Returns:
                 None
@@ -67,8 +69,10 @@ class FaceModel:
         initial estimate of the head pose is not rotated and the
         face is in front of the camera.)
 
-        :param face: Face object
-        :param camera: Camera object
+        Args:
+            face: Face object
+        Args:
+            camera: Camera object
 
         Returns:
                 None
@@ -104,7 +108,8 @@ class FaceModel:
     def compute_3d_pose(self, face: Face) -> None:
         """
         Compute the transformed model.
-        :param face: Face object
+        Args:
+            face: Face object
 
         Returns:
                 None
@@ -120,7 +125,8 @@ class FaceModel:
         The face center is defined as the
         average coordinates of the six points at the corners of both
         eyes and the mouth.
-        :param face: Face object
+        Args:
+            face: Face object
 
         Returns:
                 None

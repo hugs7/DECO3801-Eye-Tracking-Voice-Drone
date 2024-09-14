@@ -6,7 +6,8 @@ String helper functions
 def to_title_case(s: str) -> str:
     """
     Convert a string to title case.
-    :param s: String
+    Args:
+        s: String
     :return: Title case string
     """
     # Replace _ with space

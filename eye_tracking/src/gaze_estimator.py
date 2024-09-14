@@ -32,7 +32,8 @@ class GazeEstimator:
         self._face_model3d = FaceModelMediaPipe()
 
         self.camera = Camera(config.gaze_estimator.camera_params)
-        self._normalized_camera = Camera(config.gaze_estimator.normalized_camera_params)
+        self._normalized_camera = Camera(
+            config.gaze_estimator.normalized_camera_params)
 
         self._landmark_estimator = LandmarkEstimator(config)
         self._head_pose_normalizer = HeadPoseNormalizer(
@@ -47,7 +48,8 @@ class GazeEstimator:
         :return: Gaze estimation model
         """
         model = create_model(self._config)
-        checkpoint = torch.load(self._config.gaze_estimator.checkpoint, map_location="cpu")
+        checkpoint = torch.load(
+            self._config.gaze_estimator.checkpoint, map_location="cpu")
         model.load_state_dict(checkpoint["model"])
         model.to(torch.device(self._config.device))
         model.eval()
@@ -56,7 +58,8 @@ class GazeEstimator:
     def detect_faces(self, image: np.ndarray) -> List[Face]:
         """
         Detect faces in the image and return a list of Face objects
-        :param image: RGB image
+        Args:
+            image: RGB image
         :return: List of Face objects
         """
         return self._landmark_estimator.detect_faces(image)
@@ -64,7 +67,8 @@ class GazeEstimator:
     def detect_faces_raw(self, image: np.ndarray) -> List[np.ndarray]:
         """
         Detect faces in the image and return a list of raw landmarks
-        :param image: RGB image
+        Args:
+            image: RGB image
         :return: List of raw landmarks
         """
         return self._landmark_estimator.detect_faces_raw(image)
@@ -72,8 +76,10 @@ class GazeEstimator:
     def estimate_gaze(self, image: np.ndarray, face: Face) -> None:
         """
         Estimate gaze for the given face
-        :param image: RGB image
-        :param face: Face object
+        Args:
+            image: RGB image
+        Args:
+            face: Face object
         """
         self._face_model3d.estimate_head_pose(face, self.camera)
         self._face_model3d.compute_3d_pose(face)
@@ -89,7 +95,8 @@ class GazeEstimator:
     def _run_mpiigaze_model(self, face: Face) -> None:
         """
         Run the MPIIGaze model to estimate gaze
-        :param face: Face object
+        Args:
+            face: Face object
         """
 
         images = []
