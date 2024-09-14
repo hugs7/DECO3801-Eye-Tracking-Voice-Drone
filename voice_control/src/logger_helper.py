@@ -95,8 +95,10 @@ def init_logger(level: int = logging.INFO) -> logging.Logger:
     logger = logging.getLogger(logger_name)
 
     logger.setLevel(level)
+    logger.propagate = False
 
-    attach_formatter(logger)
+    if not logger.hasHandlers():
+        attach_formatter(logger)
 
     return logger
 
