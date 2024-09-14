@@ -28,7 +28,13 @@ logger = logging.getLogger(__name__)
 class GazeDetector:
     QUIT_KEYS = {27, ord("q")}
 
-    def __init__(self, config: DictConfig, stop_event: Optional[Event] = None, shared_data: Optional[OmegaConf] = None, data_lock: Optional[Lock] = None):
+    def __init__(
+        self,
+        config: DictConfig,
+        stop_event: Optional[Event] = None,
+        shared_data: Optional[OmegaConf] = None,
+        data_lock: Optional[Lock] = None,
+    ):
         """
         Args:
             config: Configuration object
@@ -48,8 +54,7 @@ class GazeDetector:
         if self.running_in_thread:
             # If running in thread mode, all or none of the required args must be provided
             if not all(required_args):
-                raise ValueError(
-                    "All or none of stop_event, shared_data, data_lock must be provided.")
+                raise ValueError("All or none of stop_event, shared_data, data_lock must be provided.")
 
             logger.info("Running in thread mode")
             self.stop_event = stop_event
@@ -57,19 +62,17 @@ class GazeDetector:
             self.data_lock = data_lock
 
             # Lazily import thread helpers only if running in thread mode
-            from app.thread_helper import thread_exit_handler, is_main_thread
+            from app.thread_helper import thread_exit_handler
 
             # Bind to class attributes so we can access them in class methods
             self.thread_exit_handler = thread_exit_handler
-            self.is_main_thread = is_main_thread
         else:
             logger.info("Running in main mode")
 
         self.config = config
         self.gaze_estimator = GazeEstimator(config)
         face_model_3d = FaceModelMediaPipe()
-        self.visualizer = Visualizer(
-            self.gaze_estimator.camera, face_model_3d.NOSE_INDEX)
+        self.visualizer = Visualizer(self.gaze_estimator.camera, face_model_3d.NOSE_INDEX)
 
         self.cap = self._create_capture()
         self.output_dir = self._create_output_dir()
@@ -118,15 +121,13 @@ class GazeDetector:
         # Left hit-box
         left_hitbox_top_left = (0, 0)
         left_hitbox_bottom_right = (hitbox_width, out_height)
-        left_hitbox = {"top_left": left_hitbox_top_left,
-                       "bottom_right": left_hitbox_bottom_right}
+        left_hitbox = {"top_left": left_hitbox_top_left, "bottom_right": left_hitbox_bottom_right}
         logger.debug(f"Left hit-box: {left_hitbox}")
 
         # Right hit-box
         right_hitbox_top_left = (int(out_width - hitbox_width), 0)
         right_hitbox_bottom_right = (out_width, out_height)
-        right_hitbox = {"top_left": right_hitbox_top_left,
-                        "bottom_right": right_hitbox_bottom_right}
+        right_hitbox = {"top_left": right_hitbox_top_left, "bottom_right": right_hitbox_bottom_right}
         logger.debug(f"Right hit-box: {right_hitbox}")
 
         return {"left": left_hitbox, "right": right_hitbox}
@@ -158,8 +159,7 @@ class GazeDetector:
             while True:
                 key_pressed = self._wait_key()
                 if self.stop:
-                    logger.info(
-                        "Stopping gaze detector from user exit signal.")
+                    logger.info("Stopping gaze detector from user exit signal.")
                     break
 
                 if key_pressed:
@@ -222,8 +222,7 @@ class GazeDetector:
             return ok, frame
 
         # Upscale feed
-        upscaled_frame = transforms.upscale(
-            frame, self.config.demo.upscale_dim)
+        upscaled_frame = transforms.upscale(frame, self.config.demo.upscale_dim)
         return ok, upscaled_frame
 
     def _process_image(self, image) -> None:
@@ -357,8 +356,7 @@ class GazeDetector:
         else:
             raise ValueError
         output_path = self.output_dir / output_name
-        writer = cv2.VideoWriter(output_path.as_posix(
-        ), fourcc, 30, (self.gaze_estimator.camera.width, self.gaze_estimator.camera.height))
+        writer = cv2.VideoWriter(output_path.as_posix(), fourcc, 30, (self.gaze_estimator.camera.width, self.gaze_estimator.camera.height))
         if writer is None:
             raise RuntimeError
         return writer
@@ -412,8 +410,7 @@ class GazeDetector:
         undistorted = self._undistort_image(frame)
         faces = self.gaze_estimator.detect_faces_raw(undistorted)
         if len(faces) != 1:
-            logger.info(
-                "Ensure only one face is visible in the camera feed then press 'c' to calibrate again.")
+            logger.info("Ensure only one face is visible in the camera feed then press 'c' to calibrate again.")
             return
 
         face_landmarks = faces[0]
@@ -421,8 +418,7 @@ class GazeDetector:
         # Add 1 meter to the z-axis ??
         self.calibration_landmarks[:, 2] += 1
 
-        self.gaze_estimator._face_model3d.set_landmark_calibration(
-            self.calibration_landmarks)
+        self.gaze_estimator._face_model3d.set_landmark_calibration(self.calibration_landmarks)
 
         self.calibrated = True
         logger.info("Calibration successful.")
@@ -435,8 +431,7 @@ class GazeDetector:
             None
         """
         if self.gaze_2d_point is not None:
-            self.gaze_2d_point = self.visualizer.flip_point_x(
-                self.gaze_2d_point)
+            self.gaze_2d_point = self.visualizer.flip_point_x(self.gaze_2d_point)
 
     def _draw_face_bbox(self, face: Face) -> None:
         """
@@ -472,8 +467,7 @@ class GazeDetector:
 
         euler_angles = face.head_pose_rot.as_euler("XYZ", degrees=True)
         pitch, yaw, roll = face.change_coordinate_system(euler_angles)
-        logger.debug(
-            f"[head] pitch: {pitch:.2f}, yaw: {yaw:.2f}, " f"roll: {roll:.2f}, distance: {face.distance:.2f}")
+        logger.debug(f"[head] pitch: {pitch:.2f}, yaw: {yaw:.2f}, " f"roll: {roll:.2f}, distance: {face.distance:.2f}")
 
     def _draw_landmarks(self, face: Face) -> None:
         """
@@ -487,8 +481,7 @@ class GazeDetector:
         """
         if not self.show_landmarks:
             return
-        self.visualizer.draw_points(
-            face.landmarks, color=(0, 255, 255), size=1)
+        self.visualizer.draw_points(face.landmarks, color=(0, 255, 255), size=1)
 
     def _draw_face_template_model(self, face: Face) -> None:
         """
@@ -502,8 +495,7 @@ class GazeDetector:
         """
         if not self.show_template_model:
             return
-        self.visualizer.draw_3d_points(
-            face.model3d, color=(255, 0, 525), size=1)
+        self.visualizer.draw_3d_points(face.model3d, color=(255, 0, 525), size=1)
 
     def _display_normalized_image(self, face: Face) -> None:
         """
@@ -552,14 +544,11 @@ class GazeDetector:
             self.visualizer.draw_3d_line(eye.center, end_point)
 
             pitch, yaw = np.rad2deg(eye.vector_to_angle(eye.gaze_vector))
-            logger.debug(
-                f"[{key.name.lower()}] pitch: {pitch:.2f}, yaw: {yaw:.2f}")
+            logger.debug(f"[{key.name.lower()}] pitch: {pitch:.2f}, yaw: {yaw:.2f}")
 
-        self.average_eye_distance = (
-            face.reye.distance + face.leye.distance) / 2
+        self.average_eye_distance = (face.reye.distance + face.leye.distance) / 2
         self.average_eye_center = (face.reye.center + face.leye.center) / 2
-        self.average_gaze_vector = (
-            face.reye.gaze_vector + face.leye.gaze_vector) / 2
+        self.average_gaze_vector = (face.reye.gaze_vector + face.leye.gaze_vector) / 2
 
         end_point = self.average_eye_center + length * self.average_gaze_vector
         self.visualizer.draw_3d_line(self.average_eye_center, end_point)
@@ -578,8 +567,7 @@ class GazeDetector:
         # Draw the point on the screen the user is looking at
         point_on_screen = (
             self.average_eye_center
-            + (self.average_eye_distance *
-               self.config.gaze_point.z_projection_multiplier) * self.average_gaze_vector
+            + (self.average_eye_distance * self.config.gaze_point.z_projection_multiplier) * self.average_gaze_vector
         )
         point_on_screen[1] *= self.config.gaze_point.gaze_vector_y_scale
 
@@ -631,10 +619,9 @@ class GazeDetector:
 
             top_left = side_hitbox["top_left"]
             bottom_right = side_hitbox["bottom_right"]
-            self.visualizer.draw_labelled_rectangle(
-                top_left, bottom_right, bg_color, bg_alpha, text, border_color=border)
+            self.visualizer.draw_labelled_rectangle(top_left, bottom_right, bg_color, bg_alpha, text, border_color=border)
 
-        if not self.is_main_thread():
+        if self.running_in_thread():
             logger.info(f"Setting gaze side to {gaze_side} in shared data.")
             with self.data_lock:
                 self.shared_data.eye_tracking.gaze_side = gaze_side
