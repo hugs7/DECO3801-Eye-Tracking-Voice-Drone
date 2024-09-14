@@ -8,6 +8,7 @@ audio:
     wake_command: "Ok Drone"
     listen_timeout: 60
     phrase_time_limit: 4
+    ambient_noise_duration: 0.5
     sound_effects:
         enable: True
         files:

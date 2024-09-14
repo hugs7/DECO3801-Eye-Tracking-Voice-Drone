@@ -109,7 +109,7 @@ class AudioRecogniser:
         logger.info("Listening for user input...")
 
         # Adjust for ambient noise to improve speech detection
-        self.recogniser.adjust_for_ambient_noise(source)
+        self.recogniser.adjust_for_ambient_noise(source, self.config.ambient_noise_duration)
         try:
             audio = self.listen_for_audio(source, True, self.config.listen_timeout)
             self.play_sound_effect("accept")
