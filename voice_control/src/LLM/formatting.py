@@ -16,7 +16,9 @@ def remove_terminal_line_decorators(terminal_code: str) -> str:
     Returns:
         str: The terminal code with the decorators removed.
     """
-    return "\n".join([line[4:] if line.startswith((PYTHON_PROMPT, CONTINUATION_PROMPT)) else line for line in terminal_code.splitlines()])
+    terminal_trimmed = "\n".join([line[4:] if line.startswith(
+        (PYTHON_PROMPT, CONTINUATION_PROMPT)) else line for line in terminal_code.splitlines()])
+    return terminal_trimmed.strip()
 
 
 def remove_code_block_formatting(code: str) -> str:
@@ -147,7 +149,7 @@ def extract_terminal_entries(terminal_code: str) -> List[str]:
     """
 
     entries = terminal_code.split("\n" + PYTHON_PROMPT)
-    first_entry = entries[0:1]
-    remaining_entries = entries[1:]
-    entries = first_entry + [PYTHON_PROMPT + e for e in remaining_entries]
+    entries = [PYTHON_PROMPT + e if i >
+               0 else e for i, e in enumerate(entries)]
+
     return [remove_terminal_line_decorators(e) for e in entries]
