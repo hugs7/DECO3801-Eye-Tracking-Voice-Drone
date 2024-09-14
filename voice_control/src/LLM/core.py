@@ -188,8 +188,8 @@ def run_until_halt(
         logger.info(executed_code)
         if captured_output != "":
             context.append({"role": "user", "content": captured_output})
-            logger.info(captured_output,
-                        end="" if captured_output[-1] == "\n" else "\n")
+            log_msg = f"{captured_output}{"\n" if captured_output[-1] != "\n" else ""}"
+            logger.info(log_msg)
             if correct_format(captured_output):
                 break
 
