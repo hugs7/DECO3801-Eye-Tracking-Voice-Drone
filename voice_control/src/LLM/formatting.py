@@ -3,7 +3,7 @@ Module for formatting code and terminal entries.
 """
 
 from typing import List, Dict, Callable
-from constants import ELLIPSIS, CONTINUATION_PROMPT, PYTHON_PROMPT, PYTHON_SHELL
+from ..constants import PYTHON_PROMPT, CONTINUATION_PROMPT, PYTHON_SHELL, ELLIPSIS
 
 
 def remove_terminal_line_decorators(terminal_code: str) -> str:
