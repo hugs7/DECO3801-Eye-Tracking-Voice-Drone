@@ -39,7 +39,7 @@ class VoiceController:
         self.config = config
 
         self.recogniser = sr.Recognizer()
-        self.audio_recogniser = AudioRecogniser()
+        self.audio_recogniser = AudioRecogniser(config.audio)
 
         required_args = [stop_event, shared_data, data_lock]
         self.running_in_thread = any(required_args)

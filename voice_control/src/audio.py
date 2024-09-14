@@ -4,6 +4,7 @@ Module for audio processing.
 
 import speech_recognition as sr
 import numpy as np
+from omegaconf import OmegaConf
 
 from common.logger_helper import init_logger
 
@@ -15,8 +16,83 @@ logger = init_logger()
 
 
 class AudioRecogniser:
-    def __init__(self):
+    def __init__(self, audio_config: OmegaConf):
         self.recogniser = sr.Recognizer()
+        self.audio_config = audio_config
+
+    def detect_wake_word(self, audio: sr.AudioData) -> bool:
+        """
+        Detects the wake word ("Hey Drone") in the audio data.
+
+        Args:
+            audio (sr.AudioData): The audio data to check for the wake word.
+
+        Returns:
+            bool: True if the wake word is detected, False otherwise.
+        """
+
+        command = self.convert_voice_to_text(audio)
+
+        wake_word_detected = "hey drone" in command.lower()
+
+        if wake_word_detected:
+            logger.info("Wake word detected: 'Hey Drone'")
+
+        return wake_word_detected
+
+    def listen_for_wake_word(self):
+        """
+        Listens continuously for the wake word "Hey Drone".
+        Once the wake word is detected, it listens continuously until the user stops speaking.
+
+        Args:
+            None
+
+        Returns:
+            AudioData: AudioData object containing the recorded audio after wake word is detected.
+        """
+        with sr.Microphone() as source:
+            logger.info("Listening for wake word...")
+
+            while True:
+                audio = self.recogniser.listen(source)
+                if self.detect_wake_word(audio):
+                    logger.info("Wake word detected, listening for commands...")
+                    return self.listen_until_silence(source)
+
+    def listen_until_silence(self, source: sr.Microphone):
+        """
+        Listens to the user's voice until they stop speaking.
+        Uses a combination of timeouts and silence detection to end listening.
+
+        Args:
+            source (sr.Microphone): The microphone input source.
+
+        Returns:
+            AudioData: The recorded audio input.
+        """
+        logger.info("Listening for user input...")
+
+        # Adjust for ambient noise to improve speech detection
+        self.recogniser.adjust_for_ambient_noise(source)
+        try:
+            audio = self.recogniser.listen(source, timeout=None, phrase_time_limit=None)
+            logger.info("Finished listening, processing audio...")
+            self.save_audio(audio)
+            return audio
+        except sr.WaitTimeoutError:
+            logger.warning("Listening timed out.")
+            return None
+
+    def capture_voice_input(self):
+        """
+        Captures voice input after detecting the wake word.
+        Listens for "Hey Drone" and then records the user's input.
+
+        Returns:
+            AudioData: The recorded audio input.
+        """
+        return self.listen_for_wake_word()
 
     def log_volume(indata: np.ndarray, frames: int, time: any, status: any):
         """
@@ -37,7 +113,7 @@ class AudioRecogniser:
         volume_norm = np.linalg.norm(indata) * c.MAX_VOLUME_THRESHOLD
         logger.info(f"Microphone Volume: {volume_norm:.2f}")
 
-    def save_audio(self, audio: sr.AudioData):
+    def save_audio(self, audio: sr.AudioData) -> None:
         """
         Saves audio to external .wav file
 
@@ -47,6 +123,10 @@ class AudioRecogniser:
         Returns:
             None
         """
+        if not self.audio_config.save_recordings:
+            logger.debug("Saving audio disabled.")
+            return
+
         recording_folder = file_handler.get_recordings_folder()
         file_handler.create_folder_if_not_exists(recording_folder)
 
@@ -59,33 +139,6 @@ class AudioRecogniser:
             f.write(audio.get_wav_data())
 
         logger.info(f"Audio saved to {recording_save_path}")
-
-    def capture_voice_input(self) -> sr.AudioData:
-        """
-        Captures and returns voice input from the microphone for 5 seconds.
-
-        This function uses the `speech_recognition` library to capture audio from the microphone.
-        It listens to the input for a maximum of 5 seconds and returns the recorded audio data.
-
-        Args:
-            None
-
-        Returns:
-            AudioData: An AudioData object containing the recorded audio input.
-        """
-        with sr.Microphone() as source:
-            working_microphones = source.list_working_microphones()
-            logger.debug(f"Microphones: %s", working_microphones)
-
-            if len(working_microphones) == 0:
-                logger.error("No working microphones found.")
-                return None
-
-            logger.info("Listening...")
-
-            audio = self.recogniser.listen(source, phrase_time_limit=c.AUDIO_PHRASE_TIME_LIMIT)
-            self.save_audio(audio)
-        return audio
 
     def load_audio(self) -> sr.AudioData:
         """
