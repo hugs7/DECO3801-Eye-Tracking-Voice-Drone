@@ -2,10 +2,8 @@
 Constants File
 """
 
-# AI Model
+# AI Models
 GPT_4 = "gpt-4"
-GPT_4_MODEL = "gpt-4o-mini"
-GPT_35_MODEL = "gpt-3.5-turbo"
 
 MAX_TOKENS = 8_000
 
