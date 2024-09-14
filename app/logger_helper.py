@@ -132,7 +132,8 @@ def init_root_logger(level: int = logging.INFO) -> logging.Logger:
     logger = logging.getLogger()
     logger.setLevel(level)
 
-    attach_formatter(logger)
+    if not logger.hasHandlers():
+        attach_formatter(logger)
 
     return logger
 

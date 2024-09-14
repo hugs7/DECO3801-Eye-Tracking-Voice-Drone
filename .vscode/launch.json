@@ -5,8 +5,7 @@
             "name": "App Multithreadding",
             "type": "debugpy",
             "request": "launch",
-            "program": "-m",
-            "args": ["app.main"],
+            "program": "app/main.py",
             "console": "integratedTerminal"
         },
         {
