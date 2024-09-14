@@ -5,6 +5,7 @@ voice_control:
     send_to_llm: False
 audio:
     save_recordings: True
+    wake_command: "Hey Drone"
 llm:
     model: gpt-4o-mini
     temperature: 0

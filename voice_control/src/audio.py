@@ -18,11 +18,13 @@ logger = init_logger()
 class AudioRecogniser:
     def __init__(self, audio_config: OmegaConf):
         self.recogniser = sr.Recognizer()
-        self.audio_config = audio_config
+        self.config = audio_config
+
+        self.wake_command = self.config.wake_command
 
     def detect_wake_word(self, audio: sr.AudioData) -> bool:
         """
-        Detects the wake word ("Hey Drone") in the audio data.
+        Detects the wake word (defined in config) in the audio data.
 
         Args:
             audio (sr.AudioData): The audio data to check for the wake word.
@@ -33,16 +35,16 @@ class AudioRecogniser:
 
         command = self.convert_voice_to_text(audio)
 
-        wake_word_detected = "hey drone" in command.lower()
+        wake_word_detected = self.wake_command.lower() in command.lower()
 
         if wake_word_detected:
-            logger.info("Wake word detected: 'Hey Drone'")
+            logger.info(f"Wake word detected: '{self.wake_command}'")
 
         return wake_word_detected
 
     def listen_for_wake_word(self):
         """
-        Listens continuously for the wake word "Hey Drone".
+        Listens continuously for the wake word defined in config.
         Once the wake word is detected, it listens continuously until the user stops speaking.
 
         Args:
@@ -123,7 +125,7 @@ class AudioRecogniser:
         Returns:
             None
         """
-        if not self.audio_config.save_recordings:
+        if not self.config.save_recordings:
             logger.debug("Saving audio disabled.")
             return
 
