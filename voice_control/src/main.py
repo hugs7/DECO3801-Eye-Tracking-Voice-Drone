@@ -3,31 +3,25 @@ Main module for the voice control program.
 """
 
 import init
-from LLM import run_terminal_agent
-import logger_helper
+from typing import Optional, Dict
+from threading import Event, Lock
+
+from voice_control.src.voice_controller import VoiceController
+from logger_helper import init_root_logger
 import audio
 
-root_logger = logger_helper.init_root_logger()
+root_logger = init_root_logger()
 
 
-def process_voice_command(text: str):
-    """
-    Takes in the voice in text form and sends it to LLM and returns the converted drone command.
-
-    Args:
-        text: The voice command in text form.
-
-    Returns:
-        None
-    """
-    # Call the LLM to convert text
-    result = run_terminal_agent(text)
-    root_logger.info(result)
-
-
-def main():
+def main(stop_event: Optional[Event] = None, shared_data: Optional[Dict] = None, data_lock: Optional[Lock] = None):
     """
     The main function that runs the voice control program.
+
+    Args:
+        (Only provided if running as a child thread)
+        stop_event: Event to signal stop
+        shared_data: Shared data between threads
+        data_lock: Lock for shared data
 
     Returns:
         None
@@ -35,15 +29,9 @@ def main():
 
     config = init.init()
 
-    audio_processor = audio.AudioRecogniser()
-
-    if config.voice_control.use_existing_recording:
-        user_audio = audio_processor.load_audio()
-    else:
-        user_audio = audio_processor.capture_voice_input()
-
-    text = audio_processor.convert_voice_to_text(user_audio)
-    process_voice_command(text)
+    voice_procesor = VoiceController(
+        config, stop_event, shared_data, data_lock)
+    voice_procesor.run()
 
     root_logger.info("Done.")
 
