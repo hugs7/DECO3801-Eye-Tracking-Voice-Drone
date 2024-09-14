@@ -34,8 +34,7 @@ def main():
     The main function that runs the voice control program.
     """
 
-    logger.info("Initialising voice control program.")
-    config = init.init_config()
+    config = init.init()
 
     audio_processor = audio.AudioRecogniser()
 
