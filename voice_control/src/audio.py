@@ -68,6 +68,9 @@ class AudioRecogniser:
 
         if wake_word_detected:
             logger.info(f"Wake word detected: '{self.wake_command}'")
+            self.play_sound_effect("wake")
+        else:
+            logger.info(f"Not the wake word: '{command}'")
 
         return wake_word_detected
 
@@ -109,10 +112,12 @@ class AudioRecogniser:
         self.recogniser.adjust_for_ambient_noise(source)
         try:
             audio = self.listen_for_audio(source, True)
+            self.play_sound_effect("accept")
             self.save_audio(audio)
             return audio
         except sr.WaitTimeoutError:
             logger.warning("Listening timed out.")
+            self.play_sound_effect("reject")
             return None
 
     def listen_for_audio(self, source: Optional[sr.Microphone] = None, save: bool = False) -> sr.AudioData:
