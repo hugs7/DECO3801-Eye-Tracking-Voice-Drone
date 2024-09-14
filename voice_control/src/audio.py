@@ -2,6 +2,7 @@
 Module for audio processing.
 """
 
+from typing import Optional
 import speech_recognition as sr
 import numpy as np
 from omegaconf import OmegaConf
@@ -53,11 +54,12 @@ class AudioRecogniser:
         Returns:
             AudioData: AudioData object containing the recorded audio after wake word is detected.
         """
+
         with sr.Microphone() as source:
             logger.info("Listening for wake word...")
 
             while True:
-                audio = self.recogniser.listen(source)
+                audio = self.listen_for_audio(source, False)
                 if self.detect_wake_word(audio):
                     logger.info("Wake word detected, listening for commands...")
                     return self.listen_until_silence(source)
@@ -78,13 +80,35 @@ class AudioRecogniser:
         # Adjust for ambient noise to improve speech detection
         self.recogniser.adjust_for_ambient_noise(source)
         try:
-            audio = self.recogniser.listen(source, timeout=self.config.listen_timeout, phrase_time_limit=self.config.phrase_time_limit)
-            logger.info("Finished listening, processing audio...")
+            audio = self.listen_for_audio(source, True)
             self.save_audio(audio)
             return audio
         except sr.WaitTimeoutError:
             logger.warning("Listening timed out.")
             return None
+
+    def listen_for_audio(self, source: Optional[sr.Microphone] = None, save: bool = False) -> sr.AudioData:
+        """
+        Listens for audio input from the microphone.
+
+        Args:
+            source (sr.Microphone): The microphone input source. If None, a new microphone source is created.
+
+        Returns:
+            AudioData: The recorded audio input.
+        """
+
+        if source is None:
+            source = sr.Microphone()
+
+        with source as source:
+            logger.info("    >>> Listening for audio...")
+            audio = self.recogniser.listen(source, timeout=self.config.listen_timeout, phrase_time_limit=self.config.phrase_time_limit)
+            logger.info("    <<< Finished listening.")
+
+        if save:
+            self.save_audio(audio)
+        return audio
 
     def capture_voice_input(self):
         """
