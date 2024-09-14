@@ -7,13 +7,13 @@ Last Updated: 21/08/2024
 import pathlib
 from omegaconf import DictConfig, OmegaConf
 import logging
-from utils.model import (
+
+from .utils.model import (
     check_path_all,
     download_mpiigaze_model,
     expanduser_all,
 )
-from utils.camera import generate_dummy_camera_params
-from omegaconf import DictConfig, OmegaConf
+from .utils.camera import generate_dummy_camera_params
 
 
 logger = logging.getLogger(__name__)

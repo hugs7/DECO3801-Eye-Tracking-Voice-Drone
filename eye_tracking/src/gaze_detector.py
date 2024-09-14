@@ -14,12 +14,12 @@ import cv2
 import numpy as np
 from omegaconf import DictConfig
 
-from face import Face
-from face_model_mediapipe import FaceModelMediaPipe
-from face_parts import FacePartsName
-from visualizer import Visualizer
-from gaze_estimator import GazeEstimator
-from utils import transforms
+from .face import Face
+from .face_model_mediapipe import FaceModelMediaPipe
+from .face_parts import FacePartsName
+from .visualizer import Visualizer
+from .gaze_estimator import GazeEstimator
+from .utils import transforms
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
