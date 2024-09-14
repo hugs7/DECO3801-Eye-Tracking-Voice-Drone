@@ -122,7 +122,9 @@ def attach_formatter(logger: logging.Logger) -> None:
     """
     Attach a formatter to the logger.
     :param logger: Logger instance
-    :return: None
+
+    Returns:
+        None
     """
 
     formatter = LoggerFormatter(
@@ -141,7 +143,9 @@ def disable_logger(logger_name: str) -> None:
     """
     Disable a logger and all its handlers.
     :param logger_name: Logger name
-    :return: None
+
+    Returns:
+        None
     """
 
     logger = logging.getLogger(logger_name)

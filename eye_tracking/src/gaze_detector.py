@@ -109,7 +109,9 @@ class GazeDetector:
     def _run_on_image(self):
         """
         Runs the gaze detector on a single image or frame.
-        :return: None
+
+        Returns:
+                None
         """
         image = cv2.imread(self.config.demo.image_path)
         self._process_image(image)
@@ -136,7 +138,9 @@ class GazeDetector:
         """
         Run the gaze detector on a video feed. Can be
         a camera feed or a video file.
-        :return: None
+
+        Returns:
+                None
         """
         logger.info("Running gaze detector on video feed")
         if self.config.demo.display_on_screen:
@@ -179,7 +183,9 @@ class GazeDetector:
         """
         Process the image to detect faces and estimate gaze.
         :param image: Image to process
-        :return: None
+
+        Returns:
+                None
         """
         undistorted = self._undistort_image(image)
 
@@ -320,7 +326,9 @@ class GazeDetector:
     def _calibrate_landmarks(self) -> None:
         """
         Calibrate the face landmarks for gaze estimation.
-        :return: None
+
+        Returns:
+                None
         """
 
         # Read camera
@@ -350,7 +358,9 @@ class GazeDetector:
     def _flip_points(self) -> None:
         """
         Flips the 2D gaze point along the x-axis to match the flipped image.
-        :return: None
+
+        Returns:
+                None
         """
         if self.gaze_2d_point is not None:
             self.gaze_2d_point = self.visualizer.flip_point_x(
@@ -360,7 +370,9 @@ class GazeDetector:
         """
         Wrapper to draw a bounding box around the face.
         :param face: Face object
-        :return: None
+
+        Returns:
+                None
         """
 
         if not self.show_bbox:
@@ -371,7 +383,9 @@ class GazeDetector:
         """
         Draws the head pose of the user as a set of axes.
         :param face: Face object
-        :return: None
+
+        Returns:
+                None
         """
 
         if not self.show_head_pose:
@@ -389,7 +403,9 @@ class GazeDetector:
         """
         Landmarks are 2D points in the upscaled image (pixels).
         :param face: Face object
-        :return: None
+
+        Returns:
+                None
         """
         if not self.show_landmarks:
             return
@@ -400,7 +416,9 @@ class GazeDetector:
         """
         Face Template Model is the 3D model of the face in world coordinates (metres)
         :param face: Face object
-        :return: None
+
+        Returns:
+                None
         """
         if not self.show_template_model:
             return
@@ -411,7 +429,9 @@ class GazeDetector:
         """
         Display the normalized eye images side by side.
         :param face: Face object
-        :return: None
+
+        Returns:
+                None
         """
         if not self.config.demo.display_on_screen:
             return
@@ -432,7 +452,9 @@ class GazeDetector:
         """
         Draws the gaze vector of the user as a line in 3D space.
         :param face: Face object
-        :return: None
+
+        Returns:
+                None
         """
         if not self.show_gaze_vector:
             return
@@ -462,7 +484,9 @@ class GazeDetector:
         """
         Projects the gaze vector onto the screen and draws a point at
         the estimated location the user is looking at.
-        :return: None
+
+        Returns:
+                None
         """
         if not self.show_gaze_vector:
             return
@@ -488,7 +512,9 @@ class GazeDetector:
     def _draw_gaze_region(self) -> None:
         """
         Highlights the region on the screen the user is looking at.
-        :return: None
+
+        Returns:
+                None
         """
         if not self.show_gaze_vector:
             return

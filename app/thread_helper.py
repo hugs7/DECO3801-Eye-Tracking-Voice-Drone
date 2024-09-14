@@ -22,7 +22,9 @@ def thread_exit_handler(stop_event: Optional[Event]) -> None:
     """
     Helper function to handle stop event in threads.
     :param stop_event: Event to signal stop
-    :return: None
+
+    Returns:
+        None
     """
     if stop_event is None:
         # Module is running independently (main thread)
@@ -31,7 +33,8 @@ def thread_exit_handler(stop_event: Optional[Event]) -> None:
     # Module is running as a child thread
     if stop_event.is_set():
         thread = current_thread()
-        logger.critical(f"Received stop signal from '{thread.name}'. Exiting thread...")
+        logger.critical(
+            f"Received stop signal from '{thread.name}'. Exiting thread...")
         raise SystemExit
 
 
