@@ -2,8 +2,8 @@ import cv2
 import numpy as np
 from scipy.spatial.transform import Rotation
 
-from camera import Camera
-from face_parts import FaceParts, FacePartsName
+from ..camera import Camera
+from ..face_parts import FaceParts, FacePartsName
 
 
 def _normalize_vector(vector: np.ndarray) -> np.ndarray:
@@ -17,7 +17,8 @@ class HeadPoseNormalizer:
         self.normalized_distance = normalized_distance
 
     def normalize(self, image: np.ndarray, eye_or_face: FaceParts) -> None:
-        eye_or_face.normalizing_rot = self._compute_normalizing_rotation(eye_or_face.center, eye_or_face.head_pose_rot)
+        eye_or_face.normalizing_rot = self._compute_normalizing_rotation(
+            eye_or_face.center, eye_or_face.head_pose_rot)
         self._normalize_image(image, eye_or_face)
         self._normalize_head_pose(eye_or_face)
 
@@ -30,10 +31,12 @@ class HeadPoseNormalizer:
 
         projection_matrix = normalized_camera_matrix @ conversion_matrix @ camera_matrix_inv
 
-        normalized_image = cv2.warpPerspective(image, projection_matrix, (self.normalized_camera.width, self.normalized_camera.height))
+        normalized_image = cv2.warpPerspective(
+            image, projection_matrix, (self.normalized_camera.width, self.normalized_camera.height))
 
         if eye_or_face.name in {FacePartsName.REYE, FacePartsName.LEYE}:
-            normalized_image = cv2.cvtColor(normalized_image, cv2.COLOR_BGR2GRAY)
+            normalized_image = cv2.cvtColor(
+                normalized_image, cv2.COLOR_BGR2GRAY)
             normalized_image = cv2.equalizeHist(normalized_image)
         eye_or_face.normalized_image = normalized_image
 

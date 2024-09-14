@@ -11,14 +11,14 @@ import numpy as np
 import torch
 from omegaconf import DictConfig
 
-from camera import Camera
-from face import Face
-from face_parts import FacePartsName
-from face_model_mediapipe import FaceModelMediaPipe
-from utils import transforms
+from .camera import Camera
+from .face import Face
+from .face_parts import FacePartsName
+from .face_model_mediapipe import FaceModelMediaPipe
+from .utils import transforms
 
-from head_pose_estimation import HeadPoseNormalizer, LandmarkEstimator
-from models import create_model
+from .head_pose_estimation import HeadPoseNormalizer, LandmarkEstimator
+from .models import create_model
 
 logger = logging.getLogger(__name__)
 

@@ -4,11 +4,11 @@ Author: Hugo Burton
 Last Updated: 21/08/2024
 """
 
-import init
 from typing import Optional, Dict
 from threading import Event, Lock
 
-from gaze_detector import GazeDetector
+from . import init
+from .gaze_detector import GazeDetector
 
 
 def main(stop_event: Optional[Event] = None, shared_data: Optional[Dict] = None, data_lock: Optional[Lock] = None):

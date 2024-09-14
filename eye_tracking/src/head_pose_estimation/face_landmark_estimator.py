@@ -4,7 +4,7 @@ import mediapipe
 import numpy as np
 from omegaconf import DictConfig
 
-from face import Face
+from ..face import Face
 
 
 class LandmarkEstimator:
