@@ -42,6 +42,7 @@ def load_environment_variables():
     """
 
     load_dotenv()
+    init_openai()
 
 
 def init_openai():
@@ -76,6 +77,5 @@ def init() -> DictConfig:
     logger.info(OmegaConf.to_yaml(config))
 
     load_environment_variables()
-    init_openai()
 
     return config
