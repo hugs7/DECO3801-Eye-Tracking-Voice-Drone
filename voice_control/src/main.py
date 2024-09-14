@@ -42,6 +42,7 @@ def main():
     user_audio = audio_processor.capture_voice_input()
     text = audio_processor.convert_voice_to_text(user_audio)
     end_program = process_voice_command(text)
+
     logger(end_program)
 
 
