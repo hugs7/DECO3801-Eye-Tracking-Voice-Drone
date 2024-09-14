@@ -104,7 +104,7 @@ def run_entry(
             "\n".join(executed_lines))
         return (
             agent_is_done,
-            redirected_stdout_stderr.getvalue(),
+            redirected_stdout_stderr.getvalue().strip(),
             executed_lines,
             message,
         )
