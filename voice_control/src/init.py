@@ -10,6 +10,7 @@ import pathlib
 from dotenv import load_dotenv
 
 import constants as c
+import logger_helper
 import file_handler
 
 logger = logging.getLogger(__name__)
@@ -71,7 +72,7 @@ def init() -> DictConfig:
     :return: The configuration object.
     """
 
-    init_logger()
+    logger_helper.init_logger()
     config = init_config()
 
     if config.log_level:
