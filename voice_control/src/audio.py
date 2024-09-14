@@ -46,22 +46,8 @@ class AudioRecogniser:
 
         for sound_name, sound_file in sound_effects_map.items():
             sound_file_path: pathlib.Path = assets_folder / sound_file
-            if sound_file_path.exists():
-                str_file_path = str(sound_file_path)
-                logger.debug(f"Loading sound file: {str_file_path}")
-                try:
-                    extension = file_handler.get_file_extension(sound_file_path, True)
-                    logger.debug(f"Audio format: {extension}")
-                    segment = AudioSegment.from_file(str_file_path, format=extension)
-                except Exception as e:
-                    logger.error(f"Error loading sound file: {sound_file_path}. Check you have ffmpeg installed and on $PATH.")
-                    logger.error("In CMD: 'where ffmpeg' should return the path to ffmpeg.exe")
-                    logger.error(e)
-                    segment = None
-                self.sound_effects[sound_name] = segment
-            else:
-                logger.error(f"Sound file not found: {sound_file_path}")
-                self.sound_effects[sound_name] = None
+            segment = self.load_audio_segment(sound_file_path)
+            self.sound_effects[sound_name] = segment
 
     def _detect_wake_word(self, audio: sr.AudioData) -> bool:
         """
@@ -255,6 +241,33 @@ class AudioRecogniser:
 
         logger.debug(f"Audio loaded.")
         return audio
+
+    def load_audio_segment(self, file_path: pathlib.Path) -> AudioSegment:
+        """
+        Loads audio file from specified path.
+
+        Args:
+            file_path: path to audio file as pathlib.Path
+
+        Returns:
+            AudioSegment: An AudioSegment object containing the recorded audio input.
+        """
+
+        if not file_path.exists():
+            logger.error("Sound file not found: %s", file_path)
+            return None
+
+        str_file_path = str(file_path)
+        logger.debug("Loading sound file: %s", file_path)
+        try:
+            extension = file_handler.get_file_extension(file_path, True)
+            logger.debug(f"Audio format: {extension}")
+            segment = AudioSegment.from_file(str_file_path, format=extension)
+        except Exception as e:
+            logger.error("Error loading sound file: %s. Check you have ffmpeg installed and on $PATH.", str_file_path)
+            logger.error("In CMD: 'where ffmpeg' should return the path to ffmpeg.exe")
+            logger.error(e)
+            segment = None
 
     def play_sound_effect(self, sound_name: str):
         """
