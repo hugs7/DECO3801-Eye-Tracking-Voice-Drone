@@ -45,9 +45,9 @@ def main():
         user_audio = audio_processor.capture_voice_input()
 
     text = audio_processor.convert_voice_to_text(user_audio)
-    end_program = process_voice_command(text)
+    process_voice_command(text)
 
-    root_logger.info(end_program)
+    root_logger.info("Done.")
 
 
 if __name__ == "__main__":
