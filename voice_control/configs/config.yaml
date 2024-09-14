@@ -11,9 +11,9 @@ audio:
     sound_effects:
         enable: True
         files:
-            wake: "sounds/wake.wav"
-            accept: "sounds/accept.wav"
-            reject: "sounds/reject.wav"
+            wake: "sounds/wake.mp3"
+            accept: "sounds/accept.mp3"
+            reject: "sounds/reject.mp3"
 llm:
     model: gpt-4o-mini
     temperature: 0
