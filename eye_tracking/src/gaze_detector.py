@@ -62,10 +62,11 @@ class GazeDetector:
             self.data_lock = data_lock
 
             # Lazily import thread helpers only if running in thread mode
-            from app.thread_helper import thread_loop_handler
+            from app.thread_helper import thread_loop_handler, thread_exit
 
             # Bind to class attributes so we can access them in class methods
             self.thread_loop_handler = thread_loop_handler
+            self.thread_exit = thread_exit
         else:
             logger.info("Running in main mode")
 
@@ -172,6 +173,10 @@ class GazeDetector:
             output_path = pathlib.Path(self.config.demo.output_dir) / name
             logger.info(f"Saving output to {output_path}")
             cv2.imwrite(output_path.as_posix(), self.visualizer.image)
+
+        if self.running_in_thread:
+            # Exit parent thread
+            self.thread_exit(self.stop_event)
 
     def _run_on_video(self) -> None:
         """
@@ -290,8 +295,7 @@ class GazeDetector:
             if not cv2.VideoCapture(0).isOpened():
                 logger.error("No camera available.")
                 if self.running_in_thread:
-                    self.stop_event.set()
-                    self.thread_loop_handler(self.stop_event)
+                    self.thread_exit(self.stop_event)
                 else:
                     raise ValueError("No camera available.")
 
