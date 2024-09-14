@@ -4,6 +4,10 @@ Logger helper module
 
 import logging
 import inspect
+from omegaconf import OmegaConf
+
+from . import file_handler
+
 from app.thread_helper import is_main_thread
 from app.str_helper import to_title_case
 
@@ -88,6 +92,22 @@ class LoggerFormatter(logging.Formatter):
                 return RESET
 
 
+def get_logger_config() -> OmegaConf:
+    """
+    Get the logger configuration.
+
+    Returns:
+        Logger configuration
+    """
+    configs_folder = file_handler.get_common_folder() / "configs"
+    config_path = configs_folder / "logger.yaml"
+    if not config_path.exists():
+        raise FileNotFoundError(f"Logger configuration file not found: {config_path}")
+
+    logger_config = OmegaConf.load(config_path)
+    return logger_config
+
+
 def init_logger(level: int = logging.INFO) -> logging.Logger:
     """
     Initialise a named logger with the specified logging level.
@@ -99,6 +119,9 @@ def init_logger(level: int = logging.INFO) -> logging.Logger:
         Logger instance
     """
 
+    logger_config = get_logger_config()
+    loggers = logger_config.loggers
+
     # [1] gives the caller of this function
     caller_frame = inspect.stack()[1]
     caller_module = inspect.getmodule(caller_frame[0])
@@ -107,7 +130,19 @@ def init_logger(level: int = logging.INFO) -> logging.Logger:
     logger_name = caller_module.__name__ if caller_module else "__main__"
     logger = logging.getLogger(logger_name)
 
-    if is_main_thread():
+    top_level_module = caller_module.__name__.split(".")[0]
+    if top_level_module in loggers:
+        # Override the logging level with the specified level
+        level = loggers[top_level_module]
+        if level == False:
+            # Disable the logger
+            level = logging.CRITICAL + 1
+        else:
+            # Parse the logging level
+            level = logging.getLevelName(level)
+
+        logger.setLevel(level)
+    elif is_main_thread():
         logger.setLevel(level)
 
     logger.propagate = False
