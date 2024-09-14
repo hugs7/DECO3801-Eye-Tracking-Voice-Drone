@@ -1,12 +1,9 @@
-import os
 import openai
 from colorama import Fore
 from typing import List, Dict
 from .core import AgentInteractiveConsole, react
 from .defaults import init_context
-from .utils import log
 from .wrappers import done, proxy_input
-from dotenv import load_dotenv
 from constants import GPT_35_MODEL, GPT_4_MODEL
 from .formatting import remove_code_block_formatting
 import logging
