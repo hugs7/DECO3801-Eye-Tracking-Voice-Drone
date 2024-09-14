@@ -2,8 +2,9 @@ import tiktoken
 from typing import List, Dict, Callable
 from colorama import Fore, Style
 from .formatting import ensure_terminal_formatting
-from constants import MAX_TOKENS, GPT_4
 import logging
+
+from ..constants import MAX_TOKENS, GPT_4
 
 gpt_token_encoder = tiktoken.encoding_for_model(GPT_4)
 logger = logging.getLogger(__name__)
