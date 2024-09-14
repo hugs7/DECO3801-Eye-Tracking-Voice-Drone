@@ -2,7 +2,7 @@
 Logger helper module
 """
 
-from typing import Optional
+from typing import Optional, Union
 import logging
 import inspect
 from omegaconf import OmegaConf
@@ -123,9 +123,29 @@ def get_caller_module_name(caller_frame: inspect.FrameInfo) -> str:
     return caller_module.__name__
 
 
-def get_log_level() -> Optional[int]:
+def map_log_level(level: str) -> int:
+    """
+    Map the log level string to the corresponding logging level.
+
+    Args:
+        level: Log level string
+
+    Returns:
+        Logging level
+    """
+    level_mapping = logging.getLevelNamesMapping()
+    log_level = level_mapping[level.upper()]
+    if log_level is None:
+        raise ValueError(f"Invalid logging level: {level}")
+    return log_level
+
+
+def get_log_level(level: Union[int, str]) -> Optional[int]:
     """
     Get the logging level based on the caller's module name.
+
+    Args:
+        level: Logging level
 
     Returns:
         Logging level
@@ -137,24 +157,27 @@ def get_log_level() -> Optional[int]:
     caller_name = get_caller_module_name(caller_frame)
     top_level_module = caller_name.split(".")[0]
 
-    level = None
+    log_level = None
     if top_level_module in loggers:
         # Override the logging level with the specified level
-        level = loggers[top_level_module]
-        if level == False:
+        log_level = loggers[top_level_module]
+        if log_level == False:
             # Disable the logger
-            level = logging.CRITICAL + 1
+            log_level = logging.CRITICAL + 1
         else:
             # Parse the logging level
-            level_mapping = logging.getLevelNamesMapping()
-            level = level_mapping[level]
-            if level is None:
-                raise ValueError(f"Invalid logging level: {level} for module: {top_level_module}")
+            log_level = map_log_level(log_level)
 
-    return level
+    if log_level is None:
+        if type(level) == int:
+            log_level = level
+        elif type(level) == str:
+            log_level = map_log_level(level)
+
+    return log_level
 
 
-def init_logger(level: int = logging.INFO) -> logging.Logger:
+def init_logger(level: Union[int, str] = logging.INFO) -> logging.Logger:
     """
     Initialise a named logger with the specified logging level.
 
@@ -173,7 +196,7 @@ def init_logger(level: int = logging.INFO) -> logging.Logger:
     logger_name = caller_name if caller_name != "__main__" else "Global"
     logger = logging.getLogger(logger_name)
 
-    level = get_log_level() or level
+    level = get_log_level(level)
     logger.setLevel(level)
 
     logger.propagate = False
