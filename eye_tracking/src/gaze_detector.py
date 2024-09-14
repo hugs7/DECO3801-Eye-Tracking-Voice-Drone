@@ -621,7 +621,7 @@ class GazeDetector:
             bottom_right = side_hitbox["bottom_right"]
             self.visualizer.draw_labelled_rectangle(top_left, bottom_right, bg_color, bg_alpha, text, border_color=border)
 
-        if self.running_in_thread():
+        if self.running_in_thread:
             logger.info(f"Setting gaze side to {gaze_side} in shared data.")
             with self.data_lock:
                 self.shared_data.eye_tracking.gaze_side = gaze_side
