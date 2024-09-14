@@ -23,8 +23,8 @@ def init_config() -> DictConfig:
     """
 
     package_root = pathlib.Path(file_handler.get_package_folder()).resolve()
-    logger.info(f"Package root: {package_root}")
     config_path = package_root / "configs/config.yaml"
+    logger.info(f"Config path: {config_path}")
     if not file_handler.file_exists(config_path):
         raise FileNotFoundError("Configuration file not found.")
 
