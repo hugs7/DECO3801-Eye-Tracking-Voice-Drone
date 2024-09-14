@@ -19,6 +19,7 @@ class LandmarkEstimator:
     def detect_faces(self, image: np.ndarray) -> List[Face]:
         """
         Calculated landmarks scaled to the image size with a bounding box
+
         Args:
             image: RGB image
 
@@ -47,6 +48,7 @@ class LandmarkEstimator:
     def _detect_faces_raw(self, image: np.ndarray) -> List[np.ndarray]:
         """
         Returns landmarks as they come from the mediapipe model (not scaled to the image size)
+
         Args:
             image: RGB image
 

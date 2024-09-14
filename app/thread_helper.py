@@ -23,6 +23,7 @@ def is_main_thread() -> bool:
 def thread_exit_handler(stop_event: Optional[Event]) -> None:
     """
     Helper function to handle stop event in threads.
+
     Args:
         stop_event: Event to signal stop
 
@@ -44,6 +45,7 @@ def thread_exit_handler(stop_event: Optional[Event]) -> None:
 def get_function_name(func) -> str:
     """
     Inspects the func to get the function's name
+
     Args:
         func: Function to inspect
 
@@ -56,6 +58,7 @@ def get_function_name(func) -> str:
 def get_function_module(func) -> str:
     """
     Inspects the func to get the function's module
+
     Args:
         func: Function to inspect
 

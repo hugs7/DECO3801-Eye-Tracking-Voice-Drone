@@ -108,6 +108,7 @@ class FaceModel:
     def compute_3d_pose(self, face: Face) -> None:
         """
         Compute the transformed model.
+
         Args:
             face: Face object
 

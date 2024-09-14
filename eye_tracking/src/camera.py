@@ -20,6 +20,7 @@ class Camera:
     def __post_init__(self, camera_params_path):
         """
         Initialises the camera object with the camera parameters
+
         Args:
             camera_params_path: Path to the camera parameters file
         """
@@ -36,6 +37,7 @@ class Camera:
     def project_points(self, points3d: np.ndarray, rvec: Optional[np.ndarray] = None, tvec: Optional[np.ndarray] = None) -> np.ndarray:
         """
         Projects 3D world points (metres) to 2D image points (pixels)
+
         Args:
             points3d: 3D world points (metres)
             rvec: Rotation vector
@@ -56,6 +58,7 @@ class Camera:
     def project_point(self, point3d: np.ndarray, rvec: Optional[np.ndarray] = None, tvec: Optional[np.ndarray] = None) -> np.ndarray:
         """
         Projects a 3D world point (metres) to a 2D image point (pixels)
+
         Args:
             point3d: 3D world point (metres)
             rvec: Rotation vector

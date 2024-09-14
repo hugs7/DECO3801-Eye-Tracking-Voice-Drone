@@ -60,6 +60,7 @@ class FaceParts:
     def vector_to_angle(vector: np.ndarray) -> np.ndarray:
         """
         Converts a gaze vector to pitch and yaw angles
+
         Args:
             vector: Gaze vector
 

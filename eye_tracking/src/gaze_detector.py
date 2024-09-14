@@ -188,6 +188,7 @@ class GazeDetector:
     def _process_image(self, image) -> None:
         """
         Process the image to detect faces and estimate gaze.
+
         Args:
             image: Image to process
 
@@ -226,6 +227,7 @@ class GazeDetector:
     def _undistort_image(self, image: np.ndarray) -> np.ndarray:
         """
         Undistort the image using the camera matrix and distortion coefficients.
+
         Args:
             image: Image to undistort
 
@@ -389,6 +391,7 @@ class GazeDetector:
     def _draw_face_bbox(self, face: Face) -> None:
         """
         Wrapper to draw a bounding box around the face.
+
         Args:
             face: Face object
 
@@ -403,6 +406,7 @@ class GazeDetector:
     def _draw_head_pose(self, face: Face) -> None:
         """
         Draws the head pose of the user as a set of axes.
+
         Args:
             face: Face object
 
@@ -424,6 +428,7 @@ class GazeDetector:
     def _draw_landmarks(self, face: Face) -> None:
         """
         Landmarks are 2D points in the upscaled image (pixels).
+
         Args:
             face: Face object
 
@@ -438,6 +443,7 @@ class GazeDetector:
     def _draw_face_template_model(self, face: Face) -> None:
         """
         Face Template Model is the 3D model of the face in world coordinates (metres)
+
         Args:
             face: Face object
 
@@ -452,6 +458,7 @@ class GazeDetector:
     def _display_normalized_image(self, face: Face) -> None:
         """
         Display the normalized eye images side by side.
+
         Args:
             face: Face object
 
@@ -476,6 +483,7 @@ class GazeDetector:
     def _draw_gaze_vector(self, face: Face) -> None:
         """
         Draws the gaze vector of the user as a line in 3D space.
+
         Args:
             face: Face object
 

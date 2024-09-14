@@ -60,6 +60,7 @@ class GazeEstimator:
     def detect_faces(self, image: np.ndarray) -> List[Face]:
         """
         Detect faces in the image and return a list of Face objects
+
         Args:
             image: RGB image
 
@@ -71,6 +72,7 @@ class GazeEstimator:
     def detect_faces_raw(self, image: np.ndarray) -> List[np.ndarray]:
         """
         Detect faces in the image and return a list of raw landmarks
+
         Args:
             image: RGB image
 
@@ -82,6 +84,7 @@ class GazeEstimator:
     def estimate_gaze(self, image: np.ndarray, face: Face) -> None:
         """
         Estimate gaze for the given face
+
         Args:
             image: RGB image
             face: Face object
@@ -100,6 +103,7 @@ class GazeEstimator:
     def _run_mpiigaze_model(self, face: Face) -> None:
         """
         Run the MPIIGaze model to estimate gaze
+
         Args:
             face: Face object
         """

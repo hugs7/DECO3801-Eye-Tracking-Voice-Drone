@@ -41,6 +41,7 @@ class LoggerFormatter(logging.Formatter):
     def format(self, record: logging.LogRecord) -> str:
         """
         Format the log record with the output name in title case and color based on log level.
+
         Args:
             record: Log record
 
@@ -59,6 +60,7 @@ class LoggerFormatter(logging.Formatter):
     def get_log_colour(self, level: int) -> str:
         """
         Get the log colour based on the log level.
+
         Args:
             level: Log level
 
@@ -88,6 +90,7 @@ class LoggerFormatter(logging.Formatter):
 def init_logger(level: int = logging.INFO) -> logging.Logger:
     """
     Initialise a named logger with the specified logging level.
+
     Args:
         level: Logging level
 
@@ -115,6 +118,7 @@ def init_logger(level: int = logging.INFO) -> logging.Logger:
 def init_root_logger(level: int = logging.INFO) -> logging.Logger:
     """
     Initialise the root logger with the specified logging level.
+
     Args:
         level: Logging level
 
@@ -133,6 +137,7 @@ def init_root_logger(level: int = logging.INFO) -> logging.Logger:
 def attach_formatter(logger: logging.Logger) -> None:
     """
     Attach a formatter to the logger.
+
     Args:
         logger: Logger instance
 
@@ -155,6 +160,7 @@ def attach_formatter(logger: logging.Logger) -> None:
 def disable_logger(logger_name: str) -> None:
     """
     Disable a logger and all its handlers.
+
     Args:
         logger_name: Logger name
 
