@@ -2,3 +2,5 @@ voice_control:
     model: gpt-4o-mini
     log_level: DEBUG
     use_existing_recording: False
+    detect_voice: True
+    send_to_llm: False
