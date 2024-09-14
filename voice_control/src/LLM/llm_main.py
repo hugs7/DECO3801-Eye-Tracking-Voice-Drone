@@ -4,10 +4,10 @@ from typing import List, Dict
 from .core import AgentInteractiveConsole, react
 from .defaults import init_context
 from .wrappers import done, proxy_input
-from constants import GPT_35_MODEL, GPT_4_MODEL
 from .formatting import remove_code_block_formatting
 import logging
 
+from ..constants import GPT_35_MODEL, GPT_4_MODEL
 
 logger = logging.getLogger(__name__)
 

@@ -3,6 +3,7 @@ Module for formatting code and terminal entries.
 """
 
 from typing import List, Dict, Callable
+
 from ..constants import PYTHON_PROMPT, CONTINUATION_PROMPT, PYTHON_SHELL, ELLIPSIS
 
 

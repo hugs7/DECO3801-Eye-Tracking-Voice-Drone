@@ -4,8 +4,8 @@ This module contains the default values for the LLM model.
 
 import json
 import os
-import ast
-from file_handler import get_data_folder, get_context_file
+
+from ..file_handler import get_data_folder, get_context_file
 
 
 def init_context() -> list[dict]:

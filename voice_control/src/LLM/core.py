@@ -12,10 +12,11 @@ from .utils import ask_llm
 from .formatting import add_terminal_line_decorators, extract_terminal_entries
 import json
 import os
-from file_handler import get_context_file
-from constants import MAX_LOOP
 import logging
-import str_helper
+
+from ..file_handler import get_context_file
+from .. import str_helper
+from ..constants import MAX_LOOP
 
 logger = logging.getLogger(__name__)
 
