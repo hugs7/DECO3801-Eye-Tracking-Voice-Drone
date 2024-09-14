@@ -4,7 +4,7 @@ voice_control:
     detect_voice: True
     send_to_llm: False
 audio:
-    save_recordings: True
+    save_recordings: False
     wake_command: "Ok Drone"
     listen_timeout: 60
     phrase_time_limit: 4
