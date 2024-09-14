@@ -2,9 +2,9 @@
 File handling functions for the voice control project.
 """
 
-import os
-import site
 import logging
+import os
+import pathlib
 
 
 logger = logging.getLogger(__name__)
@@ -18,7 +18,8 @@ def get_project_root() -> str:
         str: The path to the root folder of the project (one level above the 'voice_control' folder).
     """
 
-    project_root = site.getsitepackages()[0]
+    project_root = pathlib.Path(__file__).parent.parent.parent.resolve()
+    print(project_root)
     logger.info(f"Project root: {project_root}")
     return project_root
 
