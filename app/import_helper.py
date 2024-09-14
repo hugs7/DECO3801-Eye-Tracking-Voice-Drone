@@ -23,7 +23,6 @@ def dynamic_import(module_path: str, alias: str):
         Imported module's function
     """
 
-    # Dynamically import the module
     module = importlib.import_module(module_path)
 
     return getattr(module, alias)
