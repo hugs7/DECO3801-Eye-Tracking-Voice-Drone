@@ -125,5 +125,5 @@ class AudioRecogniser:
             # return
         except sr.RequestError as e:
             text = ""
-            logger.error("Error; {0}".format(e))
+            logger.error(e)
         return text
