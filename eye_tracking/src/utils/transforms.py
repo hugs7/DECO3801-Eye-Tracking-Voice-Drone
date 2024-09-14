@@ -27,7 +27,6 @@ def upscale(frame: cv2.VideoCapture, upscaled_dim: Tuple[int, int]) -> cv2.Video
     Upscale the frame
     Args:
         frame: The frame to upscale
-    Args:
         upscaled_dim: The dimensions to upscale to (width, height)
     :return cv2.VideoCapture: The upscaled frame
     """
@@ -55,7 +54,6 @@ def add_2d_point(a: Tuple[int, int], b: Tuple[int, int]) -> Tuple[int, int]:
     Add two tuples together
     Args:
         a: The first tuple
-    Args:
         b: The second tuple
     :return Tuple[int, int]: The sum of the two tuples
     """

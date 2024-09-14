@@ -78,7 +78,6 @@ class GazeEstimator:
         Estimate gaze for the given face
         Args:
             image: RGB image
-        Args:
             face: Face object
         """
         self._face_model3d.estimate_head_pose(face, self.camera)

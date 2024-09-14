@@ -54,9 +54,7 @@ class Visualizer:
         Draws a bounding box on the image
         Args:
             bbox: The bounding box to be drawn
-        Args:
             color: The colour of the bounding box
-        Args:
             lw: The line width of the bounding box
 
         Returns:
@@ -83,9 +81,7 @@ class Visualizer:
         Draws points from 2D image coordinates onto the image (direct drawing).
         Args:
             points: The points to be drawn
-        Args:
             color: The colour of the points
-        Args:
             size: The size of the points
 
         Returns:
@@ -103,7 +99,6 @@ class Visualizer:
         Blends the original image and the overlay together, with a specified transparency/opacity
         Args:
             overlay: The overlay to be blended with the original image
-        Args:
             opacity: The transparency of the overlay
 
         Returns:
@@ -127,15 +122,10 @@ class Visualizer:
         Calculates the origin of the text to be drawn in the centre of the rectangle
         Args:
             text: The text to be drawn
-        Args:
             text_font_face: The font face of the text
-        Args:
             font_scale: The scale of the font
-        Args:
             thickness: The thickness of the text
-        Args:
             top_left: The top left corner of the rectangle
-        Args:
             bottom_right: The bottom right corner of the rectangle
         :return: The origin of the text
         """
@@ -173,19 +163,12 @@ class Visualizer:
         Draws a labelled rectangle on the specified overlay
         Args:
             top_left: The top left corner of the rectangle
-        Args:
             bottom_right: The bottom right corner of the rectangle
-        Args:
             bg_color: The background colour of the rectangle
-        Args:
             bg_alpha: The transparency of the rectangle
-        Args:
             text: The text to be displayed
-        Args:
             text_font_face: The font face of the text
-        Args:
             text_line_type: The line type of the text
-        Args:
             font_scale: The scale of the font
         Args:
             border_color: The colour of the border
@@ -225,11 +208,8 @@ class Visualizer:
         Draw a point from 3D world coordinates onto the image.
         Args:
             point3d: The 3D point to be drawn
-        Args:
             color: The colour of the point. Default is magenta
-        Args:
             size: The size of the point. Default is 3
-        Args:
             clamp_to_screen: Whether to clamp the point to the screen. Default is False
         :return: The 2D point
         """
@@ -249,11 +229,8 @@ class Visualizer:
         Draw points from 3D world coordinates onto the image.
         Args:
             points3d: The 3D points to be drawn
-        Args:
             color: The colour of the points. Default is magenta
-        Args:
             size: The size of the points. Default is 3
-        Args:
             clamp_to_screen: Whether to clamp the points to the screen. Default is False
 
         Returns:
@@ -272,11 +249,8 @@ class Visualizer:
         Draw a line from 3D world coordinates onto the image.
         Args:
             point0: The start point of the line
-        Args:
             point1: The end point of the line
-        Args:
             color: The colour of the line. Default is yellow
-        Args:
             lw: The line width. Default is 1
 
         Returns:
@@ -296,9 +270,7 @@ class Visualizer:
         Draw the axes of the model coordinate system onto the image.
         Args:
             face: The face object
-        Args:
             length: The length of the axes
-        Args:
             lw: The line width. Default is 2
 
         Returns:

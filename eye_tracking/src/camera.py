@@ -28,17 +28,17 @@ class Camera:
             data = yaml.safe_load(f)
         self.width = data["image_width"]
         self.height = data["image_height"]
-        self.camera_matrix = np.array(data["camera_matrix"]["data"]).reshape(3, 3)
-        self.dist_coefficients = np.array(data["distortion_coefficients"]["data"]).reshape(-1, 1)
+        self.camera_matrix = np.array(
+            data["camera_matrix"]["data"]).reshape(3, 3)
+        self.dist_coefficients = np.array(
+            data["distortion_coefficients"]["data"]).reshape(-1, 1)
 
     def project_points(self, points3d: np.ndarray, rvec: Optional[np.ndarray] = None, tvec: Optional[np.ndarray] = None) -> np.ndarray:
         """
         Projects 3D world points (metres) to 2D image points (pixels)
         Args:
             points3d: 3D world points (metres)
-        Args:
             rvec: Rotation vector
-        Args:
             tvec: Translation vector
         :return: 2D image points (pixels)
         """
@@ -47,7 +47,8 @@ class Camera:
             rvec = np.zeros(3, dtype=np.float32)
         if tvec is None:
             tvec = np.zeros(3, dtype=np.float32)
-        points2d, _ = cv2.projectPoints(points3d, rvec, tvec, self.camera_matrix, self.dist_coefficients)
+        points2d, _ = cv2.projectPoints(
+            points3d, rvec, tvec, self.camera_matrix, self.dist_coefficients)
         return points2d.reshape(-1, 2)
 
     def project_point(self, point3d: np.ndarray, rvec: Optional[np.ndarray] = None, tvec: Optional[np.ndarray] = None) -> np.ndarray:
@@ -55,9 +56,7 @@ class Camera:
         Projects a 3D world point (metres) to a 2D image point (pixels)
         Args:
             point3d: 3D world point (metres)
-        Args:
             rvec: Rotation vector
-        Args:
             tvec: Translation vector
         :return: 2D image point (pixels)
         """

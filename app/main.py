@@ -21,7 +21,6 @@ def dynamic_import(module_name: str, alias: str):
     Dynamically imports a module based on the current script context.
     Args:
         module_name: Name of the module to import
-    Args:
         alias: Alias for the imported module
     :return: Imported module
     """
