@@ -4,8 +4,8 @@ Logger helper module
 
 import logging
 import inspect
-from thread_helper import is_main_thread
-from str_helper import to_title_case
+from app.thread_helper import is_main_thread
+from app.str_helper import to_title_case
 
 RESET = "\033[0m"
 BRIGHT_RED = "\033[91m"
@@ -149,7 +149,7 @@ def attach_formatter(logger: logging.Logger) -> None:
         None
     """
 
-    formatter = LoggerFormatter("%(asctime)s  %(output_name)-25s %(levelname)-13s%(message)s")
+    formatter = LoggerFormatter("%(asctime)s  %(output_name)-35s %(levelname)-13s%(message)s")
 
     if not logger.handlers:
         console_handler = logging.StreamHandler()

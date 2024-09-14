@@ -15,7 +15,7 @@ from omegaconf import OmegaConf
 
 import constants as c
 from thread_helper import get_function_module
-from logger_helper import init_root_logger, disable_logger
+from common.logger_helper import init_root_logger, disable_logger
 from conf_helper import safe_get
 
 root_logger = init_root_logger()
@@ -33,8 +33,7 @@ def dynamic_import(module_path: str, alias: str):
         Imported module's function
     """
     # Go up one directory from app/main.py to project root
-    project_root = os.path.abspath(
-        os.path.join(os.path.dirname(__file__), ".."))
+    project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
     # Adjust the system path to include project root
     sys.path.insert(0, project_root)
@@ -82,11 +81,9 @@ def main():
 
     # Create threads for each of the components
     thread_functions = [eye_tracking, voice_control, drone]
-    shared_data = OmegaConf.create({
-        get_function_module(func): OmegaConf.create() for func in thread_functions})
+    shared_data = OmegaConf.create({get_function_module(func): OmegaConf.create() for func in thread_functions})
     threads = [
-        Thread(target=lambda func=func: func(stop_event, shared_data,
-               data_lock), name=f"thread_{get_function_module(func)}")
+        Thread(target=lambda func=func: func(stop_event, shared_data, data_lock), name=f"thread_{get_function_module(func)}")
         for func in thread_functions
     ]
 
