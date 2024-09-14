@@ -2,8 +2,6 @@
 Main module for the voice control program.
 """
 
-import logging
-
 import init
 from LLM import run_terminal_agent
 import logger_helper
@@ -15,16 +13,13 @@ root_logger = logger_helper.init_root_logger()
 def process_voice_command(text: str):
     """
     Takes in the voice in text form and sends it to LLM and returns the converted drone command.
+
+    Args:
+        text: The voice command in text form.
+
+    Returns:
+        None
     """
-    commands = {
-        "left": "Left",
-        "right": "Right",
-        "up": "Up",
-        "down": "Down",
-        "forward": "Forward",
-        "back": "Back"
-    }
-    command = text.lower()
     # Call the LLM to convert text
     result = run_terminal_agent(text)
     root_logger.info(result)
@@ -33,6 +28,9 @@ def process_voice_command(text: str):
 def main():
     """
     The main function that runs the voice control program.
+
+    Returns:
+        None
     """
 
     config = init.init()
