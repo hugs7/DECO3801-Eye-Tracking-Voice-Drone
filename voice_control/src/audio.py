@@ -98,13 +98,17 @@ class AudioRecogniser:
             AudioData: The recorded audio input.
         """
 
-        if source is None:
-            source = sr.Microphone()
-
-        with source as source:
+        def listen_callback(source: sr.Microphone) -> sr.AudioData:
             logger.info("    >>> Listening for audio...")
             audio = self.recogniser.listen(source, timeout=self.config.listen_timeout, phrase_time_limit=self.config.phrase_time_limit)
             logger.info("    <<< Finished listening.")
+            return audio
+
+        if source:
+            audio = listen_callback(source)
+        else:
+            with sr.Microphone() as source:
+                audio = listen_callback(source)
 
         if save:
             self.save_audio(audio)
