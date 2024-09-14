@@ -145,6 +145,6 @@ def relative_path(file_path: pathlib.Path) -> pathlib.Path:
     """
 
     project_root = get_project_root()
-    relative_path = file_path.relative_to(project_root)
+    relative_path = file_path.relative_to(project_root).as_posix()
 
-    return relative_path
+    return f"./{relative_path}"
