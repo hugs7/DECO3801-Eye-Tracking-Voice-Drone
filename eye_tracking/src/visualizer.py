@@ -176,11 +176,8 @@ class Visualizer:
             text_font_face: The font face of the text
             text_line_type: The line type of the text
             font_scale: The scale of the font
-        Args:
             border_color: The colour of the border
-        Args:
             border_thickness: The thickness of the border
-        Args:
             text_org: The origin of the text
 
         Returns:
