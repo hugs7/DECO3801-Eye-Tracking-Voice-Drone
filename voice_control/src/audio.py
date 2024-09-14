@@ -31,7 +31,7 @@ class AudioRecogniser:
         recording_folder = package_root / "recordings"
         file_handler.create_folder_if_not_exists(recording_folder)
 
-        timestamp = date.timestamp()
+        timestamp = date.timestamp_filename_safe()
         recording_name = f"recording_{timestamp}.wav"
         recording_save_path = recording_folder / recording_name
 
