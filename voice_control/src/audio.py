@@ -271,6 +271,8 @@ class AudioRecogniser:
             logger.error(e)
             segment = None
 
+        return segment
+
     def play_sound_effect(self, sound_name: str):
         """
         Plays a sound effect from the sound_effects folder.
