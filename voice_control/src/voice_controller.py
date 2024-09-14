@@ -100,22 +100,21 @@ class VoiceController:
 
         return True  # For now
 
-    def process_voice_command(self, user_audio: sr.AudioData) -> Optional[List[Tuple[str, int]]]:
+    def process_voice_command(self, user_command: str) -> Optional[List[Tuple[str, int]]]:
         """
         Takes in the voice in text form and sends it to LLM and returns the converted drone command.
         If running in thread mode, the result is stored in shared_data to send to the drone controller.
         If the command cannot be parsed, returns (and if applicable sets the shared data to) None.
 
         Args:
-            user_audio {sr.AudioData}: The audio data from the user.
+            user_command (str): The voice command in text form.
 
         Returns:
             Optional[list[tuple[str, int]]]: The drone command as a dictionary of the form
                                              [()"command": int), ...] or None if the command
                                              is invalid.
         """
-        text = self.audio_recogniser.convert_voice_to_text(user_audio)
-        result = run_terminal_agent(text)
+        result = run_terminal_agent(user_command)
         logger.info(f"Result: '{result}' of type {type(result)}")
 
         # Parse the result into a list of tuples
