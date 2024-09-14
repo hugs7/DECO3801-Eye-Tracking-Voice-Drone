@@ -36,7 +36,7 @@ class FaceModel:
             landmarks: 3D landmarks
 
         Returns:
-                None
+            None
         """
 
         assert landmarks is not None
@@ -51,7 +51,7 @@ class FaceModel:
             landmarks: 3D landmarks
 
         Returns:
-                None
+            None
         """
         # Normalise landmarks to have the nose at the origin
         normalised_landmarks = landmarks - landmarks[self.NOSE_INDEX]
@@ -75,7 +75,7 @@ class FaceModel:
             camera: Camera object
 
         Returns:
-                None
+            None
         """
         if self.LANDMARKS is None:
             raise ValueError("Landmark calibration matrix is not set.")
@@ -112,7 +112,7 @@ class FaceModel:
             face: Face object
 
         Returns:
-                None
+            None
         """
         rot = face.head_pose_rot.as_matrix()  # Has units of radians
         # This is the 3D model of the face in world coordinates
@@ -129,7 +129,7 @@ class FaceModel:
             face: Face object
 
         Returns:
-                None
+            None
         """
         face.center = face.model3d[np.concatenate(
             [self.REYE_INDICES, self.LEYE_INDICES, self.MOUTH_INDICES])].mean(axis=0)

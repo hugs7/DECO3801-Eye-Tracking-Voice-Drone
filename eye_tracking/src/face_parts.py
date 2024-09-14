@@ -30,7 +30,7 @@ class FaceParts:
         Computes distance from the camera to the face part
 
         Returns:
-                Distance in meters
+            Distance in meters
         """
         return np.linalg.norm(self.center)
 
@@ -64,7 +64,7 @@ class FaceParts:
             vector: Gaze vector
 
         Returns:
-                Pitch and yaw angles
+            Pitch and yaw angles
         """
 
         assert vector.shape == (3,)

@@ -42,7 +42,7 @@ class Camera:
             tvec: Translation vector
 
         Returns:
-                2D image points (pixels)
+            2D image points (pixels)
         """
         assert points3d.shape[1] == 3
         if rvec is None:
@@ -62,7 +62,7 @@ class Camera:
             tvec: Translation vector
 
         Returns:
-                2D image point (pixels)
+            2D image point (pixels)
         """
         assert point3d.shape == (3,)
         return self.project_points(point3d[np.newaxis], rvec, tvec)[0]

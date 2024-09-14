@@ -23,7 +23,7 @@ class LandmarkEstimator:
             image: RGB image
 
         Returns:
-                List of faces
+            List of faces
         """
 
         h, w = image.shape[:2]
@@ -51,7 +51,7 @@ class LandmarkEstimator:
             image: RGB image
 
         Returns:
-                List of faces landmarks
+            List of faces landmarks
         """
         predictions = self.detector.process(self._get_bgr_frame(image))
         faces_landmarks = []

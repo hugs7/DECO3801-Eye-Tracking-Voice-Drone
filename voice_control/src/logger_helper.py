@@ -45,7 +45,7 @@ class LoggerFormatter(logging.Formatter):
             record: Log record
 
         Returns:
-                Formatted log record
+            Formatted log record
         """
         # Add a custom field for title-cased logger name
         record.output_name = to_title_case(record.name)
@@ -63,7 +63,7 @@ class LoggerFormatter(logging.Formatter):
             level: Log level
 
         Returns:
-                Log colour
+            Log colour
         """
         # Custom log levels
         if level == TRACE_LEVEL_NUM:

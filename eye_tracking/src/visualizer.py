@@ -27,7 +27,7 @@ class Visualizer:
             image: The image to be bound
 
         Returns:
-                None
+            None
         """
         self.image = image
 
@@ -36,7 +36,7 @@ class Visualizer:
         Flips the image horizontally
 
         Returns:
-                None
+            None
         """
         flipped_image = transforms.flip_image(self.image)
         self.set_image(flipped_image)
@@ -46,7 +46,7 @@ class Visualizer:
         Returns the resolution of the 2D image
 
         Returns:
-                The resolution of the 2D image
+            The resolution of the 2D image
         """
         assert self.image is not None
         return self.image.shape[:2]
@@ -60,7 +60,7 @@ class Visualizer:
             lw: The line width of the bounding box
 
         Returns:
-                None
+            None
         """
         assert self.image is not None
         assert bbox.shape == (2, 2)
@@ -75,7 +75,7 @@ class Visualizer:
             point: The point to be converted
 
         Returns:
-                The point as a tuple of integers
+            The point as a tuple of integers
         """
 
         return tuple(np.round(point).astype(np.int32).tolist())
@@ -89,7 +89,7 @@ class Visualizer:
             size: The size of the points
 
         Returns:
-                None
+            None
         """
 
         assert self.image is not None
@@ -106,7 +106,7 @@ class Visualizer:
             opacity: The transparency of the overlay
 
         Returns:
-                None
+            None
         """
 
         img = np.zeros_like(self.image, np.uint8)
@@ -133,7 +133,7 @@ class Visualizer:
             bottom_right: The bottom right corner of the rectangle
 
         Returns:
-                The origin of the text
+            The origin of the text
         """
 
         (text_width, text_height), text_bottom_y = cv2.getTextSize(
@@ -184,7 +184,7 @@ class Visualizer:
             text_org: The origin of the text
 
         Returns:
-                None
+            None
         """
 
         assert self.image is not None
@@ -219,7 +219,7 @@ class Visualizer:
             clamp_to_screen: Whether to clamp the point to the screen. Default is False
 
         Returns:
-                The 2D point
+            The 2D point
         """
 
         assert self.image is not None
@@ -242,7 +242,7 @@ class Visualizer:
             clamp_to_screen: Whether to clamp the points to the screen. Default is False
 
         Returns:
-                None
+            None
         """
 
         assert self.image is not None
@@ -262,7 +262,7 @@ class Visualizer:
             lw: The line width. Default is 1
 
         Returns:
-                None
+            None
         """
 
         assert self.image is not None
@@ -282,7 +282,7 @@ class Visualizer:
             lw: The line width. Default is 2
 
         Returns:
-                None
+            None
         """
 
         assert self.image is not None
@@ -309,7 +309,7 @@ class Visualizer:
             point_or_points: The point or points to be clamped
 
         Returns:
-                The clamped point or points
+            The clamped point or points
         """
 
         return np.clip(point_or_points, 0, np.array(self.image.shape[:2])[::-1])
@@ -321,7 +321,7 @@ class Visualizer:
             point: The point to be flipped
 
         Returns:
-                The flipped point
+            The flipped point
         """
 
         _, res_x = self.get_2d_resolution()

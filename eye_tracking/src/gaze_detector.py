@@ -68,9 +68,9 @@ class GazeDetector:
     def _init_hitboxes(self) -> Dict[str, Tuple[Tuple[int, int], Tuple[int, int]]]:
         """
         Initialize the left and right hit-boxes.
-        
+
         Returns:
-        	Dictionary of hit-boxes: {"left": (top_left, bottom_right), "right": (top_left, bottom_right)}
+                Dictionary of hit-boxes: {"left": (top_left, bottom_right), "right": (top_left, bottom_right)}
         """
         logger.info("Initializing hit-boxes")
 
@@ -113,7 +113,7 @@ class GazeDetector:
         Runs the gaze detector on a single image or frame.
 
         Returns:
-                None
+            None
         """
         image = cv2.imread(self.config.demo.image_path)
         self._process_image(image)
@@ -142,7 +142,7 @@ class GazeDetector:
         a camera feed or a video file.
 
         Returns:
-                None
+            None
         """
         logger.info("Running gaze detector on video feed")
         if self.config.demo.display_on_screen:
@@ -170,9 +170,9 @@ class GazeDetector:
     def _read_camera(self) -> Tuple[bool, np.ndarray]:
         """
         Read the camera feed and upscale the frame.
-        
+
         Returns:
-        	Tuple of boolean and frame
+                Tuple of boolean and frame
         """
         ok, frame = self.cap.read()
         if not ok:
@@ -190,7 +190,7 @@ class GazeDetector:
             image: Image to process
 
         Returns:
-                None
+            None
         """
         undistorted = self._undistort_image(image)
 
@@ -226,18 +226,18 @@ class GazeDetector:
         Undistort the image using the camera matrix and distortion coefficients.
         Args:
             image: Image to undistort
-        
+
         Returns:
-        	Undistorted image
+                Undistorted image
         """
         return cv2.undistort(image, self.gaze_estimator.camera.camera_matrix, self.gaze_estimator.camera.dist_coefficients)
 
     def _create_capture(self) -> Optional[cv2.VideoCapture]:
         """
         Create a capture object for the camera or video file.
-        
+
         Returns:
-        	VideoCapture object or None
+                VideoCapture object or None
         """
         if self.config.demo.image_path:
             return None
@@ -255,9 +255,9 @@ class GazeDetector:
     def _create_output_dir(self) -> Optional[pathlib.Path]:
         """
         Create the output directory if specified in the config.
-        
+
         Returns:
-        	Path object or None
+                Path object or None
         """
 
         if not self.config.demo.output_dir:
@@ -270,9 +270,9 @@ class GazeDetector:
     def _create_timestamp() -> str:
         """
         Create a timestamp in the format YYYYMMDD_HHMMSS.
-        
+
         Returns:
-        	Timestamp string
+                Timestamp string
         """
         dt = datetime.datetime.now()
         return dt.strftime("%Y%m%d_%H%M%S")
@@ -280,9 +280,9 @@ class GazeDetector:
     def _create_video_writer(self) -> Optional[cv2.VideoWriter]:
         """
         Create a video writer object if the user has specified an output directory.
-        
+
         Returns:
-        	VideoWriter object or None
+                VideoWriter object or None
         """
         if self.config.demo.image_path:
             return None
@@ -312,9 +312,9 @@ class GazeDetector:
     def _wait_key(self) -> bool:
         """
         Controller for the gaze detector.
-        
+
         Returns:
-        	True if a recognised key is pressed, False otherwise
+                True if a recognised key is pressed, False otherwise
         """
 
         key = cv2.waitKey(self.config.demo.wait_time) & 0xFF
@@ -346,7 +346,7 @@ class GazeDetector:
         Calibrate the face landmarks for gaze estimation.
 
         Returns:
-                None
+            None
         """
 
         # Read camera
@@ -378,7 +378,7 @@ class GazeDetector:
         Flips the 2D gaze point along the x-axis to match the flipped image.
 
         Returns:
-                None
+            None
         """
         if self.gaze_2d_point is not None:
             self.gaze_2d_point = self.visualizer.flip_point_x(
@@ -391,7 +391,7 @@ class GazeDetector:
             face: Face object
 
         Returns:
-                None
+            None
         """
 
         if not self.show_bbox:
@@ -405,7 +405,7 @@ class GazeDetector:
             face: Face object
 
         Returns:
-                None
+            None
         """
 
         if not self.show_head_pose:
@@ -426,7 +426,7 @@ class GazeDetector:
             face: Face object
 
         Returns:
-                None
+            None
         """
         if not self.show_landmarks:
             return
@@ -440,7 +440,7 @@ class GazeDetector:
             face: Face object
 
         Returns:
-                None
+            None
         """
         if not self.show_template_model:
             return
@@ -454,7 +454,7 @@ class GazeDetector:
             face: Face object
 
         Returns:
-                None
+            None
         """
         if not self.config.demo.display_on_screen:
             return
@@ -478,7 +478,7 @@ class GazeDetector:
             face: Face object
 
         Returns:
-                None
+            None
         """
         if not self.show_gaze_vector:
             return
@@ -510,7 +510,7 @@ class GazeDetector:
         the estimated location the user is looking at.
 
         Returns:
-                None
+            None
         """
         if not self.show_gaze_vector:
             return
@@ -538,7 +538,7 @@ class GazeDetector:
         Highlights the region on the screen the user is looking at.
 
         Returns:
-                None
+            None
         """
         if not self.show_gaze_vector:
             return
