@@ -1,3 +1,4 @@
+log_level: DEBUG
 voice_control:
     use_existing_recording: False
     detect_voice: True
