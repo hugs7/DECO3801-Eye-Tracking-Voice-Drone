@@ -6,8 +6,7 @@ import os
 import pathlib
 from typing import Optional
 
-from .logger_helper import init_logger
-
+from common.logger_helper import init_logger
 
 logger = init_logger()
 
@@ -89,7 +88,7 @@ def file_exists(file_path: pathlib.Path) -> bool:
     """
 
     exists = os.path.exists(file_path)
-    if (exists):
+    if exists:
         logger.debug(f"File exists: {file_path}")
     else:
         logger.debug(f"File does not exist: {file_path}")
@@ -127,8 +126,7 @@ def list_files_in_folder(folder_path: pathlib.Path, file_types: Optional[list[st
     if file_types is None:
         file_types = [".*"]
 
-    files = [f for f in folder_path.iterdir() if f.is_file() and any(
-        f.name.endswith(file_type) for file_type in file_types)]
+    files = [f for f in folder_path.iterdir() if f.is_file() and any(f.name.endswith(file_type) for file_type in file_types)]
 
     logger.debug(f"Files in folder: {folder_path} - {files}")
     return files

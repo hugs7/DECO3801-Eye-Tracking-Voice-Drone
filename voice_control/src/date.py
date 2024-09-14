@@ -4,7 +4,7 @@ Module for date and time related functions
 
 from datetime import datetime
 
-from .logger_helper import init_logger
+from common.logger_helper import init_logger
 
 logger = init_logger()
 

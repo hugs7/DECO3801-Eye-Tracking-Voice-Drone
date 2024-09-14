@@ -9,7 +9,8 @@ from omegaconf import OmegaConf
 
 import speech_recognition as sr
 
-from .logger_helper import init_logger
+from common.logger_helper import init_logger
+
 from .audio import AudioRecogniser
 from .LLM import run_terminal_agent
 
