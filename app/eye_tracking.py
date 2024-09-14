@@ -27,7 +27,7 @@ def loop(shared_data: Optional[Dict] = None, data_lock: Optional[Lock] = None):
     logger.info(f"Set random number: {random_num}")
     if not is_main_thread():
         with data_lock:
-            shared_data["eye_tracking_data"] = random_num
+            shared_data.eye_tracking_data = random_num
 
     logger.debug("<<< End Eye Tracking loop")
 

@@ -11,6 +11,8 @@ from time import sleep
 import os
 import sys
 
+from omegaconf import OmegaConf
+
 import constants as c
 from thread_helper import get_function_module
 from logger_helper import init_root_logger, disable_logger
@@ -61,8 +63,8 @@ def main():
 
     # Create threads for each of the components
     thread_functions = [eye_tracking, voice_control, drone]
-    shared_data = {
-        get_function_module(func): None for func in thread_functions}
+    shared_data = OmegaConf.create({
+        get_function_module(func): None for func in thread_functions})
     threads = [
         Thread(target=lambda func=func: func(stop_event, shared_data,
                data_lock), name=f"thread_{get_function_module(func)}")

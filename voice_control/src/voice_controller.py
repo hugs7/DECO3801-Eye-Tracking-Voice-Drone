@@ -129,7 +129,7 @@ class VoiceController:
         if self.running_in_thread:
             logger.info(f"Setting voice command to {parsed_commands}")
             with self.data_lock:
-                self.shared_data["voice_control"]["voice_command"] = parsed_commands
+                self.shared_data.voice_control.voice_command = parsed_commands
 
             logger.debug("Voice command set in shared data.")
 

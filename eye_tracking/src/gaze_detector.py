@@ -628,6 +628,6 @@ class GazeDetector:
         if not self.is_main_thread():
             logger.info(f"Setting gaze side to {gaze_side} in shared data.")
             with self.data_lock:
-                self.shared_data["eye_tracking"]["gaze_side"] = gaze_side
+                self.shared_data.eye_tracking.gaze_side = gaze_side
 
             logger.debug("Shared data updated.")
