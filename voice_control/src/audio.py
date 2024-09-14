@@ -2,7 +2,7 @@
 Module for audio processing.
 """
 
-import logging
+from logger_helper import init_logger
 import speech_recognition as sr
 import numpy as np
 
@@ -10,7 +10,7 @@ import constants as c
 import file_handler
 import date
 
-logger = logging.getLogger(__name__)
+logger = init_logger()
 
 
 class AudioRecogniser:
