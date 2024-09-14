@@ -1,11 +1,11 @@
 import cv2
 import yaml
-import logging
+from common.logger_helper import init_logger
 import pathlib
 import tempfile
 from omegaconf import DictConfig
 
-logger = logging.getLogger(__name__)
+logger = init_logger()
 
 
 def generate_dummy_camera_params(config: DictConfig) -> None:

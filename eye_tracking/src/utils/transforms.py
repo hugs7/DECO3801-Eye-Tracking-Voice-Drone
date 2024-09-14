@@ -7,10 +7,10 @@ Last Updated: 23/08/2024
 from typing import Tuple
 import cv2
 import numpy as np
-import logging
+from common.logger_helper import init_logger
 import torchvision.transforms as T
 
-logger = logging.getLogger(__name__)
+logger = init_logger()
 
 
 def create_transform() -> T.ToTensor:

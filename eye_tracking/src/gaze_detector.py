@@ -5,7 +5,7 @@ Last Updated: 21/08/2024
 """
 
 import datetime
-import logging
+from common.logger_helper import init_logger
 import pathlib
 from typing import Optional, Tuple, Dict
 from threading import Event, Lock
@@ -21,8 +21,7 @@ from .visualizer import Visualizer
 from .gaze_estimator import GazeEstimator
 from .utils import transforms
 
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
+logger = init_logger()
 
 
 class GazeDetector:

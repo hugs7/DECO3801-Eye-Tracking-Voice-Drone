@@ -4,7 +4,7 @@ Modified by: Hugo Burton
 Last Updated: 21/08/2024
 """
 
-import logging
+from common.logger_helper import init_logger
 from typing import List
 
 import numpy as np
@@ -20,7 +20,7 @@ from .utils import transforms
 from .head_pose_estimation import HeadPoseNormalizer, LandmarkEstimator
 from .models import create_model
 
-logger = logging.getLogger(__name__)
+logger = init_logger()
 
 
 class GazeEstimator:
@@ -32,8 +32,7 @@ class GazeEstimator:
         self._face_model3d = FaceModelMediaPipe()
 
         self.camera = Camera(config.gaze_estimator.camera_params)
-        self._normalized_camera = Camera(
-            config.gaze_estimator.normalized_camera_params)
+        self._normalized_camera = Camera(config.gaze_estimator.normalized_camera_params)
 
         self._landmark_estimator = LandmarkEstimator(config)
         self._head_pose_normalizer = HeadPoseNormalizer(
@@ -50,8 +49,7 @@ class GazeEstimator:
             Gaze estimation model
         """
         model = create_model(self._config)
-        checkpoint = torch.load(
-            self._config.gaze_estimator.checkpoint, map_location="cpu")
+        checkpoint = torch.load(self._config.gaze_estimator.checkpoint, map_location="cpu")
         model.load_state_dict(checkpoint["model"])
         model.to(torch.device(self._config.device))
         model.eval()

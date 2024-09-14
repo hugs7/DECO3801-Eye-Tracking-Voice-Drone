@@ -4,14 +4,14 @@ Modified by: Hugo Burton
 Last Updated: 21/08/2024
 """
 
-import logging
+from common.logger_helper import init_logger
 import pathlib
 import torch.hub
 import operator
 from omegaconf import DictConfig
 
 
-logger = logging.getLogger(__name__)
+logger = init_logger()
 
 
 def get_ptgaze_model_dir() -> pathlib.Path:
@@ -44,12 +44,9 @@ def _expanduser(path: str) -> str:
 
 
 def expanduser_all(config: DictConfig) -> None:
-    config.gaze_estimator.checkpoint = _expanduser(
-        config.gaze_estimator.checkpoint)
-    config.gaze_estimator.camera_params = _expanduser(
-        config.gaze_estimator.camera_params)
-    config.gaze_estimator.normalized_camera_params = _expanduser(
-        config.gaze_estimator.normalized_camera_params)
+    config.gaze_estimator.checkpoint = _expanduser(config.gaze_estimator.checkpoint)
+    config.gaze_estimator.camera_params = _expanduser(config.gaze_estimator.camera_params)
+    config.gaze_estimator.normalized_camera_params = _expanduser(config.gaze_estimator.normalized_camera_params)
     if hasattr(config.demo, "image_path"):
         config.demo.image_path = _expanduser(config.demo.image_path)
     if hasattr(config.demo, "video_path"):
