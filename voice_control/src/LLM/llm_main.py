@@ -1,5 +1,4 @@
 import openai
-from colorama import Fore
 from typing import List, Dict
 from .core import AgentInteractiveConsole, react
 from .defaults import init_context

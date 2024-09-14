@@ -1,5 +1,4 @@
 tiktoken
-colorama
 PyAudio
 SpeechRecognition
 sounddevice
