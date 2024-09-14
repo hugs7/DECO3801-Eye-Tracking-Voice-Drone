@@ -8,6 +8,7 @@ import datetime
 import logging
 import pathlib
 from typing import Optional, Tuple, Dict
+from threading import Lock
 
 import cv2
 import numpy as np
@@ -96,9 +97,13 @@ class GazeDetector:
 
         return {"left": left_hitbox, "right": right_hitbox}
 
-    def run(self) -> None:
+    def run(self, shared_data: Optional[Dict] = None, data_lock: Optional[Lock] = None) -> None:
         """
         Wraps the main loop for the gaze detector based on config settings.
+
+        Args:
+            shared_data: Shared data dictionary
+            data_lock: Lock object for shared data
 
         Returns:
             None
