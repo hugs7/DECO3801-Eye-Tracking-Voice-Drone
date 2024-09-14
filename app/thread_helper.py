@@ -65,4 +65,7 @@ def get_function_module(func) -> str:
     Returns:
         Module name
     """
-    return func.__module__
+    module = func.__module__
+
+    # Take first part of module path (if module is nested)
+    return module.split(".")[0]
