@@ -54,10 +54,10 @@ class VoiceController:
             self.data_lock = data_lock
 
             # Lazily import thread helpers only if running in thread mode
-            from app.thread_helper import thread_exit_handler
+            from app.thread_helper import thread_loop_handler
 
             # Bind to class attributes so we can access later in class methods
-            self.thread_exit_handler = thread_exit_handler
+            self.thread_loop_handler = thread_loop_handler
         else:
             logger.info("Running in main mode")
 
@@ -80,7 +80,7 @@ class VoiceController:
                 run = self.audio_loop()
 
                 if self.running_in_thread:
-                    self.thread_exit_handler(self.stop_event)
+                    self.thread_loop_handler(self.stop_event)
 
                 logger.info(" <<< End voice control loop")
 
