@@ -12,7 +12,7 @@ import speech_recognition as sr
 from common.logger_helper import init_logger
 
 from .audio import AudioRecogniser
-from .LLM import run_terminal_agent
+from .LLM import LLM
 
 logger = init_logger()
 
@@ -40,6 +40,7 @@ class VoiceController:
 
         self.recogniser = sr.Recognizer()
         self.audio_recogniser = AudioRecogniser(config.audio)
+        self.llm = LLM(config.llm)
 
         required_args = [stop_event, shared_data, data_lock]
         self.running_in_thread = any(required_args)
@@ -119,7 +120,7 @@ class VoiceController:
                                              [()"command": int), ...] or None if the command
                                              is invalid.
         """
-        result = run_terminal_agent(user_command)
+        result = self.llm.run_terminal_agent(user_command)
         logger.info(f"Result: '{result}' of type {type(result)}")
 
         # Parse the result into a list of tuples
