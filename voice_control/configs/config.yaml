@@ -4,5 +4,6 @@ voice_control:
     send_to_llm: False
 audio:
     save_recordings: True
-voice_processor:
+llm:
     model: gpt-4o-mini
+    temperature: 0
