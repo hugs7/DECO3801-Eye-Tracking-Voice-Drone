@@ -16,7 +16,13 @@ pip install -r voice_control/requirements.txt
 OPENAI_API_KEY=...
 ```
 
-3. Run the main script.
+3. Add context and prompt information (used by the NLU/LLM in order to process the voice commands in a desirable manner). You can download the data folder used in development at [this Google Drive folder](https://drive.google.com/drive/folders/1vTnuQttrPQ0hgq_KUsqppmDC-xUoEvJI?usp=sharing]). Once downloaded, unzip and place at `/voice_control/data`, ensuring there is no sub-data folder within it. That is, you should have defined the following files.
+
+-   `/voice_control/data/context.jsonl`: TBD
+-   `/voice_control/data/initial.jsonl`: TBD
+-   `/voice_control/data/system_prompt.txt`: Defines the prompt provided to the LLM for how to respond when it is provided with your voice command.
+
+4. Run the main script.
 
 ```bash
 python voice_control/main.py
