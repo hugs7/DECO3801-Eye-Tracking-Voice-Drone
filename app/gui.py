@@ -13,6 +13,7 @@ from common.logger_helper import init_logger
 import constants as c
 from conf_helper import safe_get
 from gui_helper import fps_to_ms
+from thread_helper import thread_loop_handler, thread_exit
 
 logger = init_logger()
 
@@ -180,6 +181,7 @@ class MainApp(QMainWindow):
         """
         self.stop_event.set()
         self.close()
+        thread_exit(self.stop_event)
 
 
 def run_gui(shared_data, stop_event) -> None:
