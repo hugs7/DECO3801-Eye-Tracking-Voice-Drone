@@ -58,7 +58,7 @@ class MainApp(QMainWindow):
 
     def update_video_feed(self):
         # Simulate reading from shared data for the video feed
-        frame = self.get_video_frame_from_shared_data()
+        frame = self.get_webcam_feed()
 
         if frame is not None:
             # Convert the frame to a format suitable for PyQt
@@ -69,34 +69,55 @@ class MainApp(QMainWindow):
             # Display the image on QLabel
             self.video_label.setPixmap(QPixmap.fromImage(q_img))
 
-    def get_video_frame_from_shared_data(self):
-        # Simulating reading a frame from shared_data (replace this with actual data)
-        # Assuming the video frame is available as a numpy array
+    def get_webcam_feed(self) -> np.ndarray:
+        """
+        Retrieves the webcam feed from the shared data of the eye tracking module.
+        Decodes the buffer and returns the frame as a numpy array.
+
+        Returns:
+            np.ndarray: The webcam feed as a numpy array
+        """
         eye_tracking_data = self.shared_data.eye_tracking
         buffer = safe_get(eye_tracking_data, "video_frame")
 
         if buffer is None:
             return None
 
-        video_frame = self.decode_buffer(buffer)
-        if video_frame is None:
-            return None
+        webcam_frame = self.decode_feed_buffer(buffer)
+        return webcam_frame
 
-        # Convert to RGB for PyQt
-        return cv2.cvtColor(video_frame, cv2.COLOR_BGR2RGB)
+    def decode_feed_buffer(self, buffer: bytes) -> np.ndarray:
+        """
+        Decodes the buffer into a numpy array and decodes the frame into an RGB format.
 
-    def close_app(self):
-        # Stop the application and signal other threads to stop
-        self.stop_event.set()
-        self.close()
+        Args:
+            buffer: The buffer to decode
 
-    def decode_buffer(self, buffer: bytes):
+        Returns:
+            np.ndarray: The decoded frame
+        """
         try:
             nparr = np.frombuffer(buffer, np.uint8)
-            return cv2.imdecode(nparr, cv2.IMREAD_COLOR)
         except Exception as e:
             logger.error(f"Error decoding buffer: {e}")
             return None
+
+        try:
+            video_frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+            return cv2.cvtColor(video_frame, cv2.COLOR_BGR2RGB)
+        except Exception as e:
+            logger.error(f"Error decoding frame: {e}")
+            return None
+
+    def close_app(self) -> None:
+        """
+        Stop the application and signal other threads to stop
+
+        Returns:
+            None
+        """
+        self.stop_event.set()
+        self.close()
 
 
 def run_gui(shared_data, stop_event):
