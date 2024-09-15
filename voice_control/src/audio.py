@@ -5,6 +5,9 @@ Module for audio processing.
 from typing import Optional, Dict
 import numpy as np
 import pathlib
+from threading import Event
+import multiprocessing
+from multiprocessing import Process
 
 import speech_recognition as sr
 from pydub import AudioSegment
@@ -20,8 +23,26 @@ from . import date
 logger = init_logger()
 
 
+def listen_process(timeout: int, config: OmegaConf, return_dict: Dict):
+    """Function to run in the process."""
+
+    recogniser = sr.Recognizer()
+    with sr.Microphone() as source:
+        recogniser.adjust_for_ambient_noise(source, duration=config.ambient_noise_duration)
+
+        try:
+            logger.info("    >>> Listening for audio...")
+            audio = recogniser.listen(source, timeout, phrase_time_limit=config.phrase_time_limit)
+            return_dict["audio"] = audio
+            logger.info("    <<< Finished listening.")
+        except KeyboardInterrupt:
+            logger.critical("    <<< Stopping listening due to KeyboardInterrupt.")
+        except Exception as e:
+            logger.warning(f"Exception in listening process: {e}")
+
+
 class AudioRecogniser:
-    def __init__(self, audio_config: OmegaConf):
+    def __init__(self, audio_config: OmegaConf, thread_loop_handler: Optional[callable] = None, stop_event: Optional[Event] = None):
         self.recogniser = sr.Recognizer()
         self.config = audio_config
 
@@ -30,6 +51,18 @@ class AudioRecogniser:
         self.sound_effects: Dict[str, AudioSegment] = {}
 
         self.__load_sounds()
+
+        self.audio_process: Optional[Process] = None
+
+        # Thread mode only
+        params = [thread_loop_handler, stop_event]
+        self.running_in_thread = any(params)
+        if self.running_in_thread:
+            if not all(params):
+                raise ValueError("All or none of thread_loop_handler, stop_event must be provided.")
+
+        self.thread_loop_handler = thread_loop_handler
+        self.stop_event = stop_event
 
     def __load_sounds(self):
         """
@@ -74,13 +107,10 @@ class AudioRecogniser:
 
         return wake_word_detected
 
-    def _listen_until_silence(self, source: sr.Microphone):
+    def _listen_until_silence(self):
         """
         Listens to the user's voice until they stop speaking.
         Uses a combination of timeouts and silence detection to end listening.
-
-        Args:
-            source (sr.Microphone): The microphone input source.
 
         Returns:
             AudioData: The recorded audio input.
@@ -88,9 +118,8 @@ class AudioRecogniser:
         logger.info("Listening for user input...")
 
         # Adjust for ambient noise to improve speech detection
-        self.recogniser.adjust_for_ambient_noise(source, self.config.ambient_noise_duration)
         try:
-            audio = self.listen_for_audio(source, True, self.config.listen_timeout)
+            audio = self.listen_for_audio(True, self.config.listen_timeout)
             self.play_sound_effect("accept")
             self.save_audio(audio)
             return audio
@@ -99,12 +128,11 @@ class AudioRecogniser:
             self.play_sound_effect("reject")
             return None
 
-    def listen_for_audio(self, source: Optional[sr.Microphone] = None, save: bool = False, timeout: Optional[int] = None) -> sr.AudioData:
+    def listen_for_audio(self, save: bool = False, timeout: Optional[int] = None) -> sr.AudioData:
         """
         Listens for audio input from the microphone.
 
         Args:
-            source (sr.Microphone): The microphone input source. If None, a new microphone source is created.
             save (bool): Whether to save the recorded audio to a file.
             timeout (int): The maximum time to listen for audio input.
 
@@ -115,17 +143,24 @@ class AudioRecogniser:
         if timeout is None:
             logger.debug("No timeout set. Listening indefinitely.")
 
-        def listen_callback(source: sr.Microphone) -> sr.AudioData:
-            logger.info("    >>> Listening for audio...")
-            audio = self.recogniser.listen(source, timeout, phrase_time_limit=self.config.phrase_time_limit)
-            logger.info("    <<< Finished listening.")
-            return audio
+        manager = multiprocessing.Manager()
+        return_dict = manager.dict()
 
-        if source:
-            audio = listen_callback(source)
-        else:
-            with sr.Microphone() as source:
-                audio = listen_callback(source)
+        self.audio_process = Process(target=listen_process, args=(timeout, self.config, return_dict), name="audio_process")
+        self.audio_process.start()
+
+        if self.thread_loop_handler and self.stop_event:
+            while not self.stop_event.is_set():
+                self.thread_loop_handler(self.stop_event)
+            else:
+                logger.critical("Terminating listening process due to stop event.")
+                self.audio_process.terminate()
+
+        self.audio_process.join()
+
+        logger.info("    <<< Finished listening.")
+
+        audio = return_dict.get("audio", None)
 
         if save:
             self.save_audio(audio)
@@ -143,13 +178,12 @@ class AudioRecogniser:
             AudioData: AudioData object containing the recorded audio after wake word is detected.
         """
 
-        with sr.Microphone() as source:
-            logger.info("Listening for wake word...")
+        logger.info("Listening for wake word...")
 
-            audio = self.listen_for_audio(source, False, None)
-            if self._detect_wake_word(audio):
-                logger.info("Wake word detected, listening for commands...")
-                return self._listen_until_silence(source)
+        audio = self.listen_for_audio(False, None)
+        if self._detect_wake_word(audio):
+            logger.info("Wake word detected, listening for commands...")
+            return self._listen_until_silence()
 
     def convert_voice_to_text(self, audio: sr.AudioData) -> Optional[str]:
         """
