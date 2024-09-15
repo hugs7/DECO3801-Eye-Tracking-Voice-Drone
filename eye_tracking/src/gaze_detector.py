@@ -165,12 +165,7 @@ class GazeDetector:
                 if key_pressed:
                     self._process_image(image)
 
-                logger.info("Displaying image %s", str(self.running_in_thread))
-                if self.running_in_thread:
-                    with self.data_lock:
-                        self.shared_data.eye_tracking.video_frame = self.visualizer.image.copy()
-                else:
-                    cv2.imshow("image", self.visualizer.image)
+                self._render_frame("image")
 
         if self.config.demo.output_dir:
             name = pathlib.Path(self.config.demo.image_path).name
@@ -192,7 +187,10 @@ class GazeDetector:
         """
         logger.info("Running gaze detector on video feed")
         if self.config.demo.display_on_screen:
-            logger.info("Video feed will be displayed on screen")
+            if self.running_in_thread:
+                logger.info("Video feed will be relayed to GUI in main thread")
+            else:
+                logger.info("Video feed will be displayed on screen")
 
         while True:
             logger.debug(" >>> Begin eye tracking loop")
@@ -208,7 +206,7 @@ class GazeDetector:
             self._process_image(frame)
 
             if self.config.demo.display_on_screen:
-                cv2.imshow("frame", self.visualizer.image)
+                self._render_frame("frame")
 
             if self.running_in_thread:
                 self.thread_loop_handler(self.stop_event)
@@ -222,6 +220,23 @@ class GazeDetector:
         if self.running_in_thread:
             # Exit parent thread
             self.thread_exit(self.stop_event)
+
+    def _render_frame(self, win_name: str) -> None:
+        """
+        Renders a frame where it needs to go
+
+        Args:
+            win_name: Window name
+
+        Returns:
+            None
+        """
+
+        if self.running_in_thread:
+            with self.data_lock:
+                self.shared_data.eye_tracking.video_frame = self.visualizer.image.copy()
+        else:
+            cv2.imshow(win_name, self.visualizer.image)
 
     def _read_camera(self) -> Tuple[bool, np.ndarray]:
         """
