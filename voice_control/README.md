@@ -28,6 +28,15 @@ You can also run in module mode via the following. The main file at `voice_contr
 python -m voice_control.src.main
 ```
 
+## Using the Voice Control Module
+
+1. As defined in the config file `/voice_control/configs/config.yaml`, under `audio > wake command`, the command specified to activate voice control is defined. Once the application is running, you can say this command and, if enabled, a wake sound will play to signify it is listening to your next command.
+
+2. Say a command into the microphone for what you would like the drone to do. E.g. you can say _"Takeoff then go forwards 50 metres"_.
+
+3. The application will play a sound to signify the command is accepted (if enabled), and if `send_to_llm` (see below) is enabled in the configuration, the text version of your command will be sent to OpenAI to process words into commands understandable by the drone. If running in standalone, the result is discarded, but in threadding mode, the resultant command is shared with the drone controller thread and sent to the drone to perform.
+
+4. The above three steps are defined in a loop and will repeat until the application is quit. The app is always listening for your wake command, and won't respond to voice if it is not said after the wake command.
 
 ## Configuration Settings
 
