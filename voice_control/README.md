@@ -22,6 +22,12 @@ OPENAI_API_KEY=...
 python voice_control/main.py
 ```
 
+You can also run in module mode via the following. The main file at `voice_control/main.py` is simply a wrapper for the `src/main.py` file which enables running in standard mode.
+
+```bash
+python -m voice_control.src.main
+```
+
 
 ## Configuration Settings
 
