@@ -1,8 +1,13 @@
+"""
+This module contains the Visualizer class, which is responsible for visualising the output of the eye tracking system.
+"""
+
 from typing import Optional, Tuple
+import numpy as np
 
 import cv2
-import numpy as np
 from scipy.spatial.transform import Rotation
+
 from common.logger_helper import init_logger
 
 from .camera import Camera
@@ -14,6 +19,10 @@ AXIS_COLORS = [(0, 0, 255), (0, 255, 0), (255, 0, 0)]
 
 
 class Visualizer:
+    """
+    The Visualizer class is responsible for visualising the output of the eye tracking system.
+    """
+
     def __init__(self, camera: Camera, center_point_index: int):
         logger.info("Initialising Visualizer")
         self._camera = camera
