@@ -165,7 +165,11 @@ class GazeDetector:
                 if key_pressed:
                     self._process_image(image)
 
-                cv2.imshow("image", self.visualizer.image)
+                if self.running_in_thread:
+                    with self.data_lock:
+                        self.shared_data.eye_tracking.video_frame = self.visualizer.image.copy()
+                else:
+                    cv2.imshow("image", self.visualizer.image)
 
         if self.config.demo.output_dir:
             name = pathlib.Path(self.config.demo.image_path).name
