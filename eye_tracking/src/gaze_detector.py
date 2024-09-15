@@ -165,6 +165,7 @@ class GazeDetector:
                 if key_pressed:
                     self._process_image(image)
 
+                logger.info("Displaying image %s", str(self.running_in_thread))
                 if self.running_in_thread:
                     with self.data_lock:
                         self.shared_data.eye_tracking.video_frame = self.visualizer.image.copy()
