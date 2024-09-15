@@ -9,6 +9,7 @@ from PyQt5.QtGui import QImage, QPixmap
 import cv2
 import numpy as np
 
+import constants as c
 from conf_helper import safe_get
 
 
@@ -23,7 +24,7 @@ class MainApp(QMainWindow):
 
     def initUI(self):
         # Set up the main window layout
-        self.setWindowTitle("Drone Project Video Feed")
+        self.setWindowTitle(c.WINDOW_TITLE)
 
         # Main widget container
         self.main_widget = QWidget(self)
