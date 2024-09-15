@@ -303,7 +303,7 @@ class AudioRecogniser:
         else:
             logger.error(f"Sound effect not found: {sound_name}")
 
-    def log_volume(indata: np.ndarray, frames: int, time: any, status: any):
+    def log_volume(self, indata: np.ndarray, frames: int, time: any, status: any):
         """
         Outputs the normalized microphone volume to the console.
 
