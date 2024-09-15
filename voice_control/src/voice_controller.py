@@ -38,10 +38,6 @@ class VoiceController:
 
         self.config = config
 
-        self.recogniser = sr.Recognizer()
-        self.audio_recogniser = AudioRecogniser(config.audio)
-        self.llm = LLM(config.llm)
-
         required_args = [stop_event, shared_data, data_lock]
         self.running_in_thread = any(required_args)
 
@@ -62,6 +58,10 @@ class VoiceController:
             self.thread_loop_handler = thread_loop_handler
         else:
             logger.info("Running in main mode")
+
+        self.recogniser = sr.Recognizer()
+        self.audio_recogniser = AudioRecogniser(config.audio, self.thread_loop_handler, self.stop_event)
+        self.llm = LLM(config.llm)
 
     def run(self) -> None:
         """
