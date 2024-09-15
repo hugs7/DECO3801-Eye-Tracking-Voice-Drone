@@ -5,6 +5,8 @@ Logger helper module
 from typing import Optional, Union
 import logging
 import inspect
+import sys
+
 from omegaconf import OmegaConf
 
 from . import file_handler
@@ -133,8 +135,13 @@ def map_log_level(level: str) -> int:
     Returns:
         Logging level
     """
-    level_mapping = logging.getLevelNamesMapping()
-    log_level = level_mapping[level.upper()]
+    if sys.version_info >= (3, 12):
+        level_mapping = logging.getLevelNamesMapping()
+    else:
+        # Python 3.9 and below use
+        level_mapping = logging._nameToLevel
+
+    log_level = level_mapping.get(level.upper())
     if log_level is None:
         raise ValueError(f"Invalid logging level: {level}")
     return log_level
