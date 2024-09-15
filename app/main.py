@@ -19,7 +19,6 @@ from conf_helper import safe_get
 
 logger = init_logger()
 
-
 eye_tracking = dynamic_import("eye_tracking.src.main", "main")
 voice_control = dynamic_import("voice_control.src.main", "main")
 drone = dynamic_import("drone", "main")

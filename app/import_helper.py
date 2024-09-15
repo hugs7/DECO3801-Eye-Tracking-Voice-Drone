@@ -24,5 +24,4 @@ def dynamic_import(module_path: str, alias: str):
     """
 
     module = importlib.import_module(module_path)
-
     return getattr(module, alias)
