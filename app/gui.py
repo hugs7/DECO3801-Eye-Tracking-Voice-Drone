@@ -9,8 +9,11 @@ from PyQt5.QtGui import QImage, QPixmap
 import cv2
 import numpy as np
 
+from common.logger_helper import init_logger
 import constants as c
 from conf_helper import safe_get
+
+logger = init_logger()
 
 
 class MainApp(QMainWindow):
@@ -91,7 +94,7 @@ class MainApp(QMainWindow):
             nparr = np.frombuffer(buffer, np.uint8)
             return cv2.imdecode(nparr, cv2.IMREAD_COLOR)
         except Exception as e:
-            print(f"Error decoding buffer: {e}")
+            logger.error(f"Error decoding buffer: {e}")
             return None
 
 
