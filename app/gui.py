@@ -12,6 +12,7 @@ import numpy as np
 from common.logger_helper import init_logger
 import constants as c
 from conf_helper import safe_get
+from gui_helper import fps_to_ms
 
 logger = init_logger()
 
@@ -50,11 +51,18 @@ class MainApp(QMainWindow):
         self.setGeometry(100, 100, 800, 600)
         self.setMinimumSize(c.WIN_MIN_HEIGHT, c.WIN_MIN_WIDTH)
 
-    def setupVideoFeed(self):
-        # Timer to update video feed
+    def setupVideoFeed(self) -> None:
+        """
+        Set up the QTimer to update the video feed at a fixed interval
+
+        Returns:
+            None
+        """
+        logger.info("Initialising video feeds")
+
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_video_feed)
-        self.timer.start(30)  # 30 ms delay for smoother video
+        self.timer.start(fps_to_ms(30))
 
     def update_video_feed(self):
         # Simulate reading from shared data for the video feed
