@@ -23,6 +23,8 @@ class MainApp(QMainWindow):
         self.shared_data = shared_data
         self.stop_event = stop_event
 
+        self.swap_feeds = False
+
         self.initUI()
         self.setupVideoFeed()
 
@@ -35,6 +37,7 @@ class MainApp(QMainWindow):
         """
 
         logger.info("Initialising GUI")
+
         # Set up the main window layout
         self.setWindowTitle(c.WINDOW_TITLE)
 
@@ -42,13 +45,20 @@ class MainApp(QMainWindow):
         self.main_widget = QWidget(self)
         self.setCentralWidget(self.main_widget)
 
-        # Vertical layout
         self.layout = QVBoxLayout(self.main_widget)
 
-        # Video feed display
-        self.video_label = QLabel(self)
-        self.video_label.setAlignment(Qt.AlignCenter)
-        self.layout.addWidget(self.video_label)
+        # Main video feed display
+        self.main_video_label = QLabel(self)
+        self.main_video_label.setAlignment(Qt.AlignCenter)
+        self.layout.addWidget(self.main_video_label, 1, 2)  # span 1 row, 2 columns
+
+        # Side video feed display
+        self.side_video_label = QLabel(self)
+        self.side_video_label.setAlignment(Qt.AlignCenter)
+        self.layout.addWidget(self.side_video_label, 1, 1)  # span 1 row, 1 column
+
+        # Button to switch video feeds
+        self.switch_button = QPushButton("Switch", self)
 
         # Quit button
         self.quit_button = QPushButton("Quit", self)
@@ -75,18 +85,51 @@ class MainApp(QMainWindow):
         self.timer.timeout.connect(self.update_video_feed)
         self.timer.start(fps_to_ms(30))
 
-    def update_video_feed(self):
-        # Simulate reading from shared data for the video feed
-        frame = self.get_webcam_feed()
+    def update_video_feed(self) -> None:
+        """
+        Update the video feed on the GUI
 
-        if frame is not None:
-            # Convert the frame to a format suitable for PyQt
-            height, width, channel = frame.shape
-            bytes_per_line = 3 * width
-            q_img = QImage(frame.data, width, height, bytes_per_line, QImage.Format_RGB888)
+        Returns:
+            None
+        """
+        main_frame = self.get_webcam_feed()
+        small_frame = self.get_webcam_feed()
 
-            # Display the image on QLabel
-            self.video_label.setPixmap(QPixmap.fromImage(q_img))
+        if main_frame is not None and small_frame is not None:
+            if self.swap_feeds:
+                main_frame, small_frame = small_frame, main_frame
+
+            self.set_pixmap(self.main_video_label, main_frame)
+            self.set_pixmap(self.side_video_label, small_frame)
+
+    def set_pixmap(self, label: QLabel, frame: np.ndarray) -> None:
+        """
+        Set the pixmap of the label to the frame
+
+        Args:
+            label: The QLabel to update
+            frame: The frame to display
+
+        Returns:
+            None
+        """
+        q_img = self.convert_frame_to_qimage(frame)
+        label.setPixmap(QPixmap.fromImage(q_img))
+
+    def convert_frame_to_qimage(self, frame: np.ndarray) -> QImage:
+        """
+        Convert the frame to a QImage
+
+        Args:
+            frame: The frame to convert
+
+        Returns:
+            QImage: The converted frame
+        """
+
+        height, width, channel = frame.shape
+        bytes_per_line = 3 * width
+        return QImage(frame.data, width, height, bytes_per_line, QImage.Format.FORMAT_RGB888)
 
     def get_webcam_feed(self) -> np.ndarray:
         """
