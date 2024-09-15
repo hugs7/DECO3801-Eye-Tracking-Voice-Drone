@@ -147,6 +147,7 @@ def map_log_level(level: str) -> int:
     log_level = level_mapping.get(level.upper())
     if log_level is None:
         raise ValueError(f"Invalid logging level: {level}")
+
     return log_level
 
 
