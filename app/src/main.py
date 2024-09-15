@@ -10,15 +10,17 @@ from typing import List
 
 from omegaconf import OmegaConf
 
-# Must go first to ensure project directory is added to sys.path
+# Must go before any other user imports to ensure project directory is added to sys.path
 from utils.import_helper import dynamic_import
 from utils.conf_helper import safe_get
 
 from common.logger_helper import init_logger
 from common.thread_helper import get_function_module
 
+from gui import run_gui
 
 logger = init_logger()
+
 
 if __name__ == "__main__":
     logger.info(">>> Begin")
@@ -66,8 +68,13 @@ def main():
     stop_event = Event()
     data_lock = Lock()
 
+    # Gui
+    gui_thread = Thread(target=run_gui, args=(shared_data, stop_event), name="GUIThread")
+    gui_thread.start()
+
     try:
         # =========== Processes ===========
+
         # Due to blocking operation, the voice control module is run in a Process
         # (instead of a Thread) to allow for parallel execution and termination on
         # parent process exit. As a result, the shared data is managed by a Manager
