@@ -48,6 +48,7 @@ class MainApp(QMainWindow):
 
         # Window size
         self.setGeometry(100, 100, 800, 600)
+        self.setMinimumSize(c.WIN_MIN_HEIGHT, c.WIN_MIN_WIDTH)
 
     def setupVideoFeed(self):
         # Timer to update video feed

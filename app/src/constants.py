@@ -6,6 +6,8 @@ Constants for the app
 
 WINDOW_TITLE = "Gaze and Voice Aware Drone"
 
+WIN_MIN_WIDTH = 800
+WIN_MIN_HEIGHT = 600
 
 # Thread Handling
 
