@@ -51,12 +51,12 @@ class MainApp(QMainWindow):
         # Main video feed display
         self.main_video_label = QLabel(self)
         self.main_video_label.setAlignment(Qt.AlignCenter)
-        self.layout.addWidget(self.main_video_label, 1, 2)  # span 1 row, 2 columns
+        self.layout.addWidget(self.main_video_label)
 
         # Side video feed display
         self.side_video_label = QLabel(self)
         self.side_video_label.setAlignment(Qt.AlignCenter)
-        self.layout.addWidget(self.side_video_label, 1, 1)  # span 1 row, 1 column
+        self.layout.addWidget(self.side_video_label)
 
         # Button to switch video feeds
         self.switch_button = QPushButton("Switch", self)
