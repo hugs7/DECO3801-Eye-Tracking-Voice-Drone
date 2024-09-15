@@ -70,7 +70,7 @@ def main():
 
     # Gui
     gui_thread = Thread(target=run_gui, args=(shared_data, stop_event), name="GUIThread")
-    gui_thread.start()
+    threads.append(gui_thread)
 
     try:
         # =========== Processes ===========
