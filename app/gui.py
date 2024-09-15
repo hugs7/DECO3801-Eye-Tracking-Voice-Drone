@@ -139,7 +139,18 @@ class MainApp(QMainWindow):
         self.close()
 
 
-def run_gui(shared_data, stop_event):
+def run_gui(shared_data, stop_event) -> None:
+    """
+    Run the GUI application
+
+    Args:
+        shared_data: Shared data between threads
+        stop_event: Event to signal stop
+
+    Returns:
+        None
+    """
+
     app = QApplication(sys.argv)
     main_window = MainApp(shared_data, stop_event)
     main_window.show()
