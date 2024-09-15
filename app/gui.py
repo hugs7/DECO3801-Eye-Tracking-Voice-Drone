@@ -26,7 +26,15 @@ class MainApp(QMainWindow):
         self.initUI()
         self.setupVideoFeed()
 
-    def initUI(self):
+    def initUI(self) -> None:
+        """
+        Initialises the main window layout
+
+        Returns:
+            None
+        """
+
+        logger.info("Initialising GUI")
         # Set up the main window layout
         self.setWindowTitle(c.WINDOW_TITLE)
 
@@ -48,8 +56,11 @@ class MainApp(QMainWindow):
         self.layout.addWidget(self.quit_button)
 
         # Window size
+        logger.info("Configuring window size")
         self.setGeometry(100, 100, 800, 600)
         self.setMinimumSize(c.WIN_MIN_HEIGHT, c.WIN_MIN_WIDTH)
+
+        logger.info("GUI initialised")
 
     def setupVideoFeed(self) -> None:
         """
