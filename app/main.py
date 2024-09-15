@@ -10,11 +10,14 @@ from typing import List
 
 from omegaconf import OmegaConf
 
+# Must go before any other imports
 from import_helper import dynamic_import
 
+from common.logger_helper import init_logger
+
+from gui import run_gui
 import constants as c
 from thread_helper import get_function_module
-from common.logger_helper import init_logger
 from conf_helper import safe_get
 
 logger = init_logger()
@@ -62,6 +65,10 @@ def main():
         Thread(target=lambda func=func: func(stop_event, shared_data, data_lock), name=f"thread_{get_function_module(func)}")
         for func in thread_functions
     ]
+
+    # Gui
+    gui_thread = Thread(target=run_gui, args=(shared_data, stop_event), name="GUIThread")
+    gui_thread.start()
 
     # Start all threads
     for thread in threads:
