@@ -89,11 +89,10 @@ class AudioRecogniser:
         with sr.Microphone() as source:
             logger.info("Listening for wake word...")
 
-            while True:
-                audio = self.listen_for_audio(source, False, None)
-                if self._detect_wake_word(audio):
-                    logger.info("Wake word detected, listening for commands...")
-                    return self._listen_until_silence(source)
+            audio = self.listen_for_audio(source, False, None)
+            if self._detect_wake_word(audio):
+                logger.info("Wake word detected, listening for commands...")
+                return self._listen_until_silence(source)
 
     def _listen_until_silence(self, source: sr.Microphone):
         """
