@@ -150,9 +150,10 @@ class AudioRecogniser:
         self.audio_process.start()
 
         if self.thread_loop_handler and self.stop_event:
-            while not self.stop_event.is_set():
+            while not self.stop_event.is_set() and self.audio_process.is_alive():
                 self.thread_loop_handler(self.stop_event)
-            else:
+
+            if self.stop_event.is_set():
                 logger.critical("Terminating listening process due to stop event.")
                 self.audio_process.terminate()
 
