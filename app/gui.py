@@ -7,6 +7,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QPu
 from PyQt5.QtCore import QTimer, Qt
 from PyQt5.QtGui import QImage, QPixmap
 import cv2
+import numpy as np
 
 from conf_helper import safe_get
 
@@ -67,16 +68,30 @@ class MainApp(QMainWindow):
         # Simulating reading a frame from shared_data (replace this with actual data)
         # Assuming the video frame is available as a numpy array
         eye_tracking_data = self.shared_data.eye_tracking
-        video_feed = safe_get(eye_tracking_data, "video_frame")
+        buffer = safe_get(eye_tracking_data, "video_frame")
 
-        if video_feed is not None:
-            return cv2.cvtColor(video_feed, cv2.COLOR_BGR2RGB)  # Convert to RGB for PyQt
-        return None
+        if buffer is None:
+            return None
+
+        video_frame = self.decode_buffer(buffer)
+        if video_frame is None:
+            return None
+
+        # Convert to RGB for PyQt
+        return cv2.cvtColor(video_frame, cv2.COLOR_BGR2RGB)
 
     def close_app(self):
         # Stop the application and signal other threads to stop
         self.stop_event.set()
         self.close()
+
+    def decode_buffer(self, buffer: bytes):
+        try:
+            nparr = np.frombuffer(buffer, np.uint8)
+            return cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+        except Exception as e:
+            print(f"Error decoding buffer: {e}")
+            return None
 
 
 def run_gui(shared_data, stop_event):

@@ -234,7 +234,12 @@ class GazeDetector:
 
         if self.running_in_thread:
             with self.data_lock:
-                self.shared_data.eye_tracking.video_frame = self.visualizer.image.copy()
+                if self.visualizer.image is not None:
+                    success, encoded_img = cv2.imencode(".jpg", self.visualizer.image)
+                    if success:
+                        buffer = encoded_img.tobytes()
+                        self.shared_data.eye_tracking.video_frame = buffer
+                    logger.debug("Set video frame in shared data.")
         else:
             cv2.imshow(win_name, self.visualizer.image)
 
