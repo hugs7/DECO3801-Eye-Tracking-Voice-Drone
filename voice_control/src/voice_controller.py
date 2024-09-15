@@ -97,6 +97,9 @@ class VoiceController:
 
         if self.config.voice_control.detect_voice:
             user_audio = self.audio_recogniser.capture_voice_input()
+            if user_audio is None:
+                return True
+
             text = self.audio_recogniser.convert_voice_to_text(user_audio)
         else:
             text = input("Enter command: ")
