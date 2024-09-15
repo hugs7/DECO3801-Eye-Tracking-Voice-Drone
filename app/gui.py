@@ -60,6 +60,7 @@ class MainApp(QMainWindow):
 
         # Button to switch video feeds
         self.switch_button = QPushButton("Switch", self)
+        self.switch_button.clicked.connect(self.switch_feeds)
 
         # Quit button
         self.quit_button = QPushButton("Quit", self)
@@ -84,7 +85,7 @@ class MainApp(QMainWindow):
 
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_video_feed)
-        self.timer.start(fps_to_ms(30))
+        self.timer.start(fps_to_ms(60))
 
     def update_video_feed(self) -> None:
         """
@@ -171,6 +172,16 @@ class MainApp(QMainWindow):
         except Exception as e:
             logger.error(f"Error decoding frame: {e}")
             return None
+
+    def switch_feeds(self) -> None:
+        """
+        Switch the main and side video feeds
+
+        Returns:
+            None
+        """
+        self.swap_feeds = not self.swap_feeds
+        logger.info(f"Swapping feeds: {self.swap_feeds}")
 
     def close_app(self) -> None:
         """
