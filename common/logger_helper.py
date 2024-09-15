@@ -135,10 +135,13 @@ def map_log_level(level: str) -> int:
     Returns:
         Logging level
     """
-    if sys.version_info >= (3, 12):
+    # See https://docs.python.org/3/library/logging.html#logging.getLevelNamesMapping
+
+    if sys.version_info >= (3, 11):
+        # Introduced in Python 3.11
         level_mapping = logging.getLevelNamesMapping()
     else:
-        # Python 3.9 and below use
+        # Python 3.10 and below
         level_mapping = logging._nameToLevel
 
     log_level = level_mapping.get(level.upper())
