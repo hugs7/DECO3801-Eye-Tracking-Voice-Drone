@@ -39,3 +39,38 @@ The project repository is split into five main sections summarised below:
 
 Modules `drone`, `eye_tracking`, and `voice_control` can indeed run independently. See individual documentation linked below or how to run in this way.
 
+### Gaze Tracking
+
+See also [the gaze tracking documentation](./gaze_tracking/README.md)
+
+### Voice Control
+
+See also [the voice control documentation](./voice_control/README.md)
+
+### Drone Controller
+
+See also [the drone controller documentation](./drone/README.md)
+
+---
+
+## Getting Started
+
+To run the project, use the following Python script
+
+```bash
+python ./app/main.py
+```
+
+For running each module independently, see the relevant documentation linked above.
+
+To add some information here about how the application opeprates, it's controls, etc.
+
+## Configuration
+
+TODO
+
+## Debugging
+
+As some modules can be run independently, they can also be debugged independently.
+
+To add more here after merging [#33](https://github.com/hugs7/DECO3801/pull/34).
