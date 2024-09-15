@@ -23,7 +23,6 @@ def loop(shared_data: Optional[OmegaConf] = None, data_lock: Optional[Lock] = No
     logger.debug(">>> Begin drone loop")
     if not is_main_thread():
         random_num = shared_data.eye_tracking
-        logger.info(f"Received random number from eye_tracking thread: {random_num}")
 
     sleep(1)
     logger.debug("<<< End drone loop")
