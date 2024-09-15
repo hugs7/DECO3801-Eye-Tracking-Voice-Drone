@@ -74,26 +74,6 @@ class AudioRecogniser:
 
         return wake_word_detected
 
-    def _listen_for_wake_word(self):
-        """
-        Listens continuously for the wake word defined in config.
-        Once the wake word is detected, it listens continuously until the user stops speaking.
-
-        Args:
-            None
-
-        Returns:
-            AudioData: AudioData object containing the recorded audio after wake word is detected.
-        """
-
-        with sr.Microphone() as source:
-            logger.info("Listening for wake word...")
-
-            audio = self.listen_for_audio(source, False, None)
-            if self._detect_wake_word(audio):
-                logger.info("Wake word detected, listening for commands...")
-                return self._listen_until_silence(source)
-
     def _listen_until_silence(self, source: sr.Microphone):
         """
         Listens to the user's voice until they stop speaking.
@@ -153,13 +133,23 @@ class AudioRecogniser:
 
     def capture_voice_input(self):
         """
-        Captures voice input after detecting the wake word.
-        Listens for "Hey Drone" and then records the user's input.
+        Listens continuously for the wake word defined in config.
+        Once the wake word is detected, it listens continuously until the user stops speaking.
+
+        Args:
+            None
 
         Returns:
-            AudioData: The recorded audio input.
+            AudioData: AudioData object containing the recorded audio after wake word is detected.
         """
-        return self._listen_for_wake_word()
+
+        with sr.Microphone() as source:
+            logger.info("Listening for wake word...")
+
+            audio = self.listen_for_audio(source, False, None)
+            if self._detect_wake_word(audio):
+                logger.info("Wake word detected, listening for commands...")
+                return self._listen_until_silence(source)
 
     def convert_voice_to_text(self, audio: sr.AudioData) -> Optional[str]:
         """
