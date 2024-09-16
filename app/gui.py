@@ -99,12 +99,12 @@ class MainApp(QMainWindow):
 
         logger.info("GUI initialised")
 
-    def _init_timers(self) -> OmegaConf["timers"]:
+    def _init_timers(self) -> OmegaConf:
         """
         Initialise the timers for the gui
 
         Returns:
-            OmegaConf["timers"]: The timers configuration in an OmegaConf object
+            OmegaConf: The timers configuration in an OmegaConf object
         """
         timers_conf = {
             "webcam": {"callback": self.update_webcam_feed, "fps": self.config.timers.webcam},
