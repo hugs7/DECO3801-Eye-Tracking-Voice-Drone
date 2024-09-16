@@ -95,10 +95,6 @@ class MainApp(QMainWindow):
         Returns:
             None
         """
-        if self.stop_event.is_set():
-            self.timer.stop()
-            return
-
         try:
             main_frame = self.get_webcam_feed()
             small_frame = self.get_webcam_feed()
@@ -111,7 +107,6 @@ class MainApp(QMainWindow):
                 self.set_pixmap(self.side_video_label, small_frame)
         except KeyboardInterrupt:
             logger.critical("Interrupted! Stopping all threads...")
-            self.timer.stop()
             self.close_app()
 
     def set_pixmap(self, label: QLabel, frame: np.ndarray) -> None:
@@ -200,7 +195,15 @@ class MainApp(QMainWindow):
         Returns:
             None
         """
-        self.stop_event.set()
+        if self.timer.isActive():
+            logger.info("Stopping timer")
+            self.timer.stop()
+
+        if not self.stop_event.is_set():
+            logger.info("Stopping threads from GUI")
+            self.stop_event.set()
+
+        logger.info("Closing GUI")
         self.close()
 
 
