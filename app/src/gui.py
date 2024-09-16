@@ -15,6 +15,7 @@ from queue import Queue
 
 from common.logger_helper import init_logger
 
+from common_gui import CommonGUI
 from options import PreferencesDialog
 
 import constants as c
@@ -25,7 +26,7 @@ from utils.gui_helper import fps_to_ms
 logger = init_logger("DEBUG")
 
 
-class MainApp(QMainWindow):
+class MainApp(QMainWindow, CommonGUI):
     def __init__(self, stop_event: Event, thread_data: Dict, data_lock: Lock, interprocess_data: Dict):
         super().__init__()
         self.stop_event = stop_event
@@ -119,23 +120,6 @@ class MainApp(QMainWindow):
         self._add_menu_action(self.file_menu, "Quit", self.close_app)
 
         logger.info("Menu bar initialised")
-
-    def _add_menu_action(self, menu: QMenu, action_name: str, callback: callable) -> None:
-        """
-        Add an action to the menu
-
-        Args:
-            menu: The menu to add the action to
-            action_name: The name of the action
-            callback: The callback function to run when the action is triggered
-
-        Returns:
-            None
-        """
-
-        action = QAction(action_name, self)
-        action.triggered.connect(callback)
-        menu.addAction(action)
 
     def _init_timers(self) -> Dict[str, QTimer]:
         """
