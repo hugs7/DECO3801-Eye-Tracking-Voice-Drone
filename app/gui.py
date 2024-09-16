@@ -12,7 +12,9 @@ from threading import Event
 from omegaconf import OmegaConf
 
 from common.logger_helper import init_logger
+
 import constants as c
+import file_handler
 from conf_helper import safe_get
 from gui_helper import fps_to_ms
 
@@ -27,8 +29,28 @@ class MainApp(QMainWindow):
 
         self.swap_feeds = False
 
+        self.config = self.init_config()
         self.init_gui()
         self.setup_video_feed()
+
+    def init_config(self) -> OmegaConf:
+        """
+        Initialise the configuration object
+
+        Returns:
+            OmegaConf: The configuration object
+        """
+
+        logger.info("Initialising configuration")
+        configs_folder = file_handler.get_configs_folder()
+        gui_config = configs_folder / "gui.yaml"
+        if not gui_config.exists():
+            raise FileNotFoundError(f"GUI configuration file not found: {gui_config}")
+
+        config = OmegaConf.load(gui_config)
+        logger.info("Configuration initialised")
+
+        return config
 
     def init_gui(self) -> None:
         """
