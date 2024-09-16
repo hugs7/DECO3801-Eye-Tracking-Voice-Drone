@@ -68,7 +68,7 @@ This module has various configuration settings which are defined below.
 
 -   **`use_existing_recording`** (`bool`): If `True`, uses a pre-existing recording for voice recognition instead of capturing new audio.
 -   **`detect_voice`** (`bool`): If `True`, enables voice detection for user commands. If disabled, user will be prompted via a text input in the console.
--   **`send_to_llm`** (`bool`): If `True`, sends your voice command (as converted to text) to the LLM to be converted into a format understandable by the drone controller. When running in standalone, the result is discarded, but when running in threadded mode, the result is saved to `shared_data.voice_control.voice_command`. If `False`, it is not required for the user to define their `OPENAI_API_KEY` in their `.env` file.
+-   **`send_to_llm`** (`bool`): If `True`, sends your voice command (as converted to text) to the LLM to be converted into a format understandable by the drone controller. When running in standalone, the result is discarded, but when running in threadded mode, the result is added to the queue at `thread_data["voice_control"]["command_queue"]`. If `False`, it is not required for the user to define their `OPENAI_API_KEY` in their `.env` file.
 
 ### `audio`
 

@@ -4,7 +4,7 @@ Author: Hugo Burton
 Last Updated: 21/08/2024
 """
 
-from typing import Optional
+from typing import Optional, Dict
 from threading import Event, Lock
 import os
 import sys
@@ -19,14 +19,14 @@ from . import init
 from .gaze_detector import GazeDetector
 
 
-def main(stop_event: Optional[Event] = None, shared_data: Optional[OmegaConf] = None, data_lock: Optional[Lock] = None):
+def main(stop_event: Optional[Event] = None, thread_data: Optional[Dict] = None, data_lock: Optional[Lock] = None):
     """
     Defines entry point for the eye tracking application
 
     Args:
         (Only provided if running as a child thread)
         stop_event: Event to signal stop
-        shared_data: Shared data between threads
+        thread_data: Shared data between threads
         data_lock: Lock for shared data
 
     Returns:
@@ -35,7 +35,7 @@ def main(stop_event: Optional[Event] = None, shared_data: Optional[OmegaConf] = 
 
     config = init.init_ptgaze()
 
-    gaze_detector = GazeDetector(config, stop_event, shared_data, data_lock)
+    gaze_detector = GazeDetector(config, stop_event, thread_data, data_lock)
     gaze_detector.run()
 
 

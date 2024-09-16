@@ -41,7 +41,7 @@ def main(manager_data: Optional[Dict] = None):
     The main function that runs the voice control program.
 
     Args:
-        shared_data (Dict): Shared data between threads: (Only provided if running as a child thread)
+        thread_data (Dict): Shared data between threads: (Only provided if running as a child thread)
 
     Returns:
         None

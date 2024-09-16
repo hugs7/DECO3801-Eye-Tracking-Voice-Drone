@@ -34,14 +34,14 @@ class GazeDetector:
         self,
         config: DictConfig,
         stop_event: Optional[Event] = None,
-        shared_data: Optional[OmegaConf] = None,
+        thread_data: Optional[Dict] = None,
         data_lock: Optional[Lock] = None,
     ):
         """
         Args:
             config: Configuration object
             stop_event: Event object to stop the gaze detector
-            shared_data: Shared data dictionary
+            thread_data: Shared data dictionary
             data_lock: Lock object for shared data
 
         Returns:
@@ -50,17 +50,17 @@ class GazeDetector:
 
         logger.info("Initialising Gaze Detector")
 
-        required_args = [stop_event, shared_data, data_lock]
+        required_args = [stop_event, thread_data, data_lock]
         self.running_in_thread = any(required_args)
 
         if self.running_in_thread:
             # If running in thread mode, all or none of the required args must be provided
             if not all(required_args):
-                raise ValueError("All or none of stop_event, shared_data, data_lock must be provided.")
+                raise ValueError("All or none of stop_event, thread_data, data_lock must be provided.")
 
             logger.info("Running in thread mode")
             self.stop_event = stop_event
-            self.shared_data = shared_data
+            self.thread_data = thread_data
             self.data_lock = data_lock
 
             # Lazily import thread helpers only if running in thread mode
@@ -241,7 +241,7 @@ class GazeDetector:
                     success, encoded_img = cv2.imencode(".jpg", self.visualizer.image)
                     if success:
                         buffer = encoded_img.tobytes()
-                        self.shared_data.eye_tracking.video_frame = buffer
+                        self.thread_data["eye_tracking"]["video_frame"] = buffer
                     logger.debug("Set video frame in shared data.")
         else:
             cv2.imshow(win_name, self.visualizer.image)
@@ -413,7 +413,7 @@ class GazeDetector:
             # practice for more complex inputs.
             key_buffer: List[int] = []
             with self.data_lock:
-                keyboard_queue: Optional[Queue] = safe_get(self.shared_data, "keyboard_queue")
+                keyboard_queue: Optional[Queue] = safe_get(self.thread_data, "keyboard_queue")
                 if keyboard_queue is not None:
                     while not keyboard_queue.empty():
                         key: int = keyboard_queue.get()
@@ -693,6 +693,6 @@ class GazeDetector:
         if self.running_in_thread:
             logger.info(f"Setting gaze side to {gaze_side} in shared data.")
             with self.data_lock:
-                self.shared_data.eye_tracking.gaze_side = gaze_side
+                self.thread_data["eye_tracking"]["gaze_side"] = gaze_side
 
             logger.debug("Shared data updated.")

@@ -24,7 +24,7 @@ class VoiceController:
 
             (Only provided if running as a child thread)
             stop_event: Event to signal stop
-            shared_data: Shared data between threads
+            thread_data: Shared data between threads
             data_lock: Lock for shared data
 
         Returns:
@@ -90,14 +90,14 @@ class VoiceController:
         else:
             # Mostly for testing purposes
             logger.info(f"User command: {text}")
-            self.save_command_to_shared_data(text)
+            self.save_command_to_thread_data(text)
 
         return True  # For now
 
     def process_voice_command(self, user_command: str) -> Optional[List[Tuple[str, int]]]:
         """
         Takes in the voice in text form and sends it to LLM and returns the converted drone command.
-        If running in thread mode, the result is stored in shared_data to send to the drone controller.
+        If running in thread mode, the result is stored in thread_data to send to the drone controller.
         If the command cannot be parsed, returns (and if applicable sets the shared data to) None.
 
         Args:
@@ -121,11 +121,11 @@ class VoiceController:
 
         logger.info(f"Parsed voice command: '%s'", parsed_commands)
         logger.debug(f"Parsed voice command of type %s", type(parsed_commands))
-        self.save_command_to_shared_data(parsed_commands)
+        self.save_command_to_thread_data(parsed_commands)
 
         return parsed_commands
 
-    def save_command_to_shared_data(self, command: Union[str, List[Tuple[str, int]]]) -> None:
+    def save_command_to_thread_data(self, command: Union[str, List[Tuple[str, int]]]) -> None:
         """
         Saves the command to the shared data.
 
