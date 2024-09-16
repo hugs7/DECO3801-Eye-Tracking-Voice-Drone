@@ -5,8 +5,6 @@ Controller for voice processing
 from typing import Optional, Tuple, List, Dict
 import ast
 
-import speech_recognition as sr
-
 from common.logger_helper import init_logger
 
 from .audio import AudioRecogniser
@@ -41,7 +39,6 @@ class VoiceController:
         else:
             logger.info("Running in main mode")
 
-        self.recogniser = sr.Recognizer()
         self.audio_recogniser = AudioRecogniser(config.audio)
         self.llm = LLM(config.llm)
 
