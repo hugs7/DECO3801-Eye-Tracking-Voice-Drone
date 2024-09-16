@@ -49,16 +49,19 @@ class AudioRecogniser:
             segment = self.load_audio_segment(sound_file_path)
             self.sound_effects[sound_name] = segment
 
-    def _detect_wake_word(self, audio: sr.AudioData) -> bool:
+    def _detect_wake_word(self, audio: Optional[sr.AudioData]) -> bool:
         """
         Detects the wake word (defined in config) in the audio data.
 
         Args:
-            audio (sr.AudioData): The audio data to check for the wake word.
+            audio (Optional[sr.AudioData]): The audio data to check for the wake word or None if no audio is provided.
 
         Returns:
             bool: True if the wake word is detected, False otherwise.
         """
+
+        if not audio:
+            return False
 
         command = self.convert_voice_to_text(audio)
         if not command:
@@ -87,8 +90,6 @@ class AudioRecogniser:
         """
         logger.info("Listening for user input...")
 
-        # Adjust for ambient noise to improve speech detection
-        self.recogniser.adjust_for_ambient_noise(source, self.config.ambient_noise_duration)
         try:
             audio = self.listen_for_audio(source, True, self.config.listen_timeout)
             self.play_sound_effect("accept")
@@ -117,8 +118,20 @@ class AudioRecogniser:
 
         def listen_callback(source: sr.Microphone) -> sr.AudioData:
             logger.info("    >>> Listening for audio...")
-            audio = self.recogniser.listen(source, timeout, phrase_time_limit=self.config.phrase_time_limit)
-            logger.info("    <<< Finished listening.")
+            # Adjust for ambient noise to improve speech detection
+            self.recogniser.adjust_for_ambient_noise(source, self.config.ambient_noise_duration)
+            try:
+                audio = self.recogniser.listen(source, timeout, phrase_time_limit=self.config.phrase_time_limit)
+            except sr.WaitTimeoutError:
+                logger.warning("    >>> Listening timed out.")
+            except KeyboardInterrupt:
+                logger.error("    >>> Keyboard interrupt received.")
+                audio = None
+                return None
+
+            if audio is not None:
+                logger.info("    <<< Finished listening.")
+
             return audio
 
         if source:
