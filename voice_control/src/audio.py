@@ -99,7 +99,6 @@ class AudioRecogniser:
 
         if audio is not None:
             self.play_sound_effect("accept")
-            self.save_audio(audio)
 
         return audio
 
