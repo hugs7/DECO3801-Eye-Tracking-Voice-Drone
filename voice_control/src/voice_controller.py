@@ -2,10 +2,8 @@
 Controller for voice processing
 """
 
-from typing import Optional, Tuple, List
-from threading import Event, Lock
+from typing import Optional, Tuple, List, Dict
 import ast
-from omegaconf import OmegaConf
 
 import speech_recognition as sr
 
@@ -18,9 +16,7 @@ logger = init_logger()
 
 
 class VoiceController:
-    def __init__(
-        self, config, stop_event: Optional[Event] = None, shared_data: Optional[OmegaConf] = None, data_lock: Optional[Lock] = None
-    ):
+    def __init__(self, config, shared_manager_data: Dict):
         """
         Initialises the voice controller.
 
@@ -38,24 +34,10 @@ class VoiceController:
 
         self.config = config
 
-        required_args = [stop_event, shared_data, data_lock]
-        self.running_in_thread = any(required_args)
-
-        if self.running_in_thread:
-            # If running in thread mode, all or none of the required args must be provided
-            if not all(required_args):
-                raise ValueError("All or none of stop_event, shared_data, data_lock must be provided.")
-
-            logger.info("Running in thread mode")
-            self.stop_event = stop_event
-            self.shared_data = shared_data
-            self.data_lock = data_lock
-
-            # Lazily import thread helpers only if running in thread mode
-            from app.thread_helper import thread_loop_handler
-
-            # Bind to class attributes so we can access later in class methods
-            self.thread_loop_handler = thread_loop_handler
+        self.running_in_process = shared_manager_data is not None
+        if self.running_in_process:
+            logger.info("Running in process mode")
+            self.shared_manager_data = shared_manager_data
         else:
             logger.info("Running in main mode")
 
@@ -80,9 +62,6 @@ class VoiceController:
             while run:
                 logger.info(" >>> Begin voice control loop")
                 run = self.audio_loop()
-
-                if self.running_in_thread:
-                    self.thread_loop_handler(self.stop_event)
 
                 logger.info(" <<< End voice control loop")
 
@@ -135,10 +114,9 @@ class VoiceController:
 
         logger.info(f"Voice command: {parsed_commands} of type {type(parsed_commands)}")
 
-        if self.running_in_thread:
+        if self.running_in_process:
             logger.info(f"Setting voice command to {parsed_commands}")
-            with self.data_lock:
-                self.shared_data.voice_control.voice_command = parsed_commands
+            self.shared_manager_data["voice_control"]["voice_command"] = parsed_commands
 
             logger.debug("Voice command set in shared data.")
 
