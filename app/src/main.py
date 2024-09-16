@@ -98,13 +98,13 @@ def main():
 
         # GUI
         # Keeps the main thread alive so we do not need a secondary while loop
+        logger.info("Initialising GUI")
         gui = QApplication(sys.argv)
         main_window = MainApp(shared_data)
         main_window.show()
-        sys.exit(gui.exec_())
+        gui.exec_()
     except KeyboardInterrupt:
         logger.critical("Interrupted! Stopping all threads...")
-        stop_event.set()
 
     logger.info("Signalling all threads to stop")
     stop_event.set()
@@ -118,7 +118,10 @@ def main():
 
     for thread in threads:
         thread.join()
-        main_window.close()
+
+    logger.info("Closing GUI")
+    main_window.close_app()
+    gui.quit()
 
     logger.debug("<<< End")
 
