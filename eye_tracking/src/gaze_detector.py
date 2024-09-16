@@ -13,9 +13,9 @@ from queue import Queue
 
 import cv2
 import numpy as np
-from omegaconf import DictConfig, OmegaConf
+from omegaconf import DictConfig
 
-from common.omegaconf_helper import safe_get
+from common.constants import Constants as cc
 
 from .face import Face
 from .face_model_mediapipe import FaceModelMediaPipe
@@ -28,8 +28,6 @@ logger = init_logger()
 
 
 class GazeDetector:
-    QUIT_KEYS = {27, ord("q")}
-
     def __init__(
         self,
         config: DictConfig,
@@ -63,12 +61,21 @@ class GazeDetector:
             self.thread_data = thread_data
             self.data_lock = data_lock
 
+            logger.debug("Initialising thread helper functions")
             # Lazily import thread helpers only if running in thread mode
             from app.thread_helper import thread_loop_handler, thread_exit
 
             # Bind to class attributes so we can access them in class methods
             self.thread_loop_handler = thread_loop_handler
             self.thread_exit = thread_exit
+
+            logger.debug("Initialising QT module")
+            # Lazy import PyQt5 for key handling only if running in thread mode
+            from PyQt5.QtCore import Qt
+
+            self.Qt = Qt
+
+            logger.debug("Thread initialisation complete")
         else:
             logger.info("Running in main mode")
 
@@ -196,7 +203,7 @@ class GazeDetector:
                 logger.info("Video feed will be displayed on screen")
 
         while True:
-            logger.debug(" >>> Begin eye tracking loop")
+            logger.debug(">>> Begin eye tracking loop")
             if self.config.demo.display_on_screen:
                 self._wait_key()
                 if self.stop:
@@ -214,7 +221,7 @@ class GazeDetector:
             if self.running_in_thread:
                 self.thread_loop_handler(self.stop_event)
 
-            logger.debug(" <<< End eye tracking loop")
+            logger.debug("<<< End eye tracking loop")
 
         self.cap.release()
         if self.writer:
@@ -418,6 +425,8 @@ class GazeDetector:
                     while not keyboard_queue.empty():
                         key: int = keyboard_queue.get()
                         key_buffer.append(key)
+                else:
+                    logger.warning("Keyboard queue not initialised in shared data.")
 
             accepted_keys = []
             for key in key_buffer:
@@ -429,36 +438,43 @@ class GazeDetector:
             key = cv2.waitKey(self.config.demo.wait_time) & 0xFF
             return self._keyboard_controller(key)
 
-    def _keyboard_controller(self, key: int) -> bool:
+    def _keyboard_controller(self, key_code: int) -> bool:
         """
         Controller for the gaze detector.
 
         Returns:
             True if a recognised key is pressed, False otherwise
         """
-        logger.info(f"Received key: {key}")
 
-        if key in self.QUIT_KEYS:
+        # Obtain lowercase version of key always. If we need to detect uppercase, we
+        # can determine if the shift key is pressed.
+        key_chr = chr(key_code).lower()
+        logger.info(f"Received key: %s (%d)", key_chr, key_code)
+
+        if key_chr in cc.QUIT_KEYS:
             self.stop = True
-        elif key == ord("b"):
-            self.show_bbox = not self.show_bbox
-        elif key == ord("l"):
-            self.show_landmarks = not self.show_landmarks
-        elif key == ord("h"):
-            self.show_head_pose = not self.show_head_pose
-        elif key == ord("n"):
-            self.show_normalized_image = not self.show_normalized_image
-        elif key == ord("t"):
-            self.show_template_model = not self.show_template_model
-        elif key == ord("g"):
-            self.show_gaze_vector = not self.show_gaze_vector
-        elif key == ord("c"):
-            # Calibrate
-            logger.info("Setting calibrated to False")
-            self.calibrated = False
-            self._calibrate_landmarks()
-        else:
-            return False
+            return True
+
+        match key_chr:
+            case "b":
+                self.show_bbox = not self.show_bbox
+            case "l":
+                self.show_landmarks = not self.show_landmarks
+            case "h":
+                self.show_head_pose = not self.show_head_pose
+            case "n":
+                self.show_normalized_image = not self.show_normalized_image
+            case "t":
+                self.show_template_model = not self.show_template_model
+            case "g":
+                self.show_gaze_vector = not self.show_gaze_vector
+            case "c":
+                # Calibrate
+                logger.info("Setting calibrated to False")
+                self.calibrated = False
+                self._calibrate_landmarks()
+            case _:
+                return False
 
         return True
 
