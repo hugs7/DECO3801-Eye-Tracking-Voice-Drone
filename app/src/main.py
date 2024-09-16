@@ -7,7 +7,7 @@ Hugo Burton
 from threading import Thread, Event, Lock
 from multiprocessing import Manager, Process
 from typing import List
-
+import sys
 from omegaconf import OmegaConf
 
 # Must go before any other user imports to ensure project directory is added to sys.path
@@ -17,7 +17,7 @@ from utils.conf_helper import safe_get
 from common.logger_helper import init_logger
 from common.thread_helper import get_function_module
 
-from gui import run_gui
+from gui import MainApp, QApplication
 
 logger = init_logger()
 
@@ -69,9 +69,20 @@ def main():
     data_lock = Lock()
 
     # Gui
-    gui_thread = Thread(target=run_gui, args=(shared_data, stop_event), name="GUIThread")
-    threads.append(gui_thread)
+    gui = QApplication(sys.argv)
+    main_window = MainApp(shared_data)
+    main_window.show()
+    sys.exit(gui.exec_())
 
+    # Create threads for each of the components
+    thread_functions = [eye_tracking, drone]
+    shared_data = OmegaConf.create({get_function_module(func): OmegaConf.create() for func in thread_functions})
+    threads = [
+        Thread(target=lambda func=func: func(stop_event, shared_data, data_lock), name=f"thread_{get_function_module(func)}")
+        for func in thread_functions
+    ]
+
+    # Voice Control is process
     try:
         # =========== Processes ===========
 
@@ -128,6 +139,7 @@ def main():
 
     for thread in threads:
         thread.join()
+        main_window.close()
 
     logger.debug("<<< End")
 
