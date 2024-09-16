@@ -37,10 +37,7 @@ def run_voice_controller(config, shared_manager_data: Optional[Dict] = None) -> 
     """
 
     voice_controller = VoiceController(config, shared_manager_data)
-    try:
-        voice_controller.run()
-    except KeyboardInterrupt:
-        logger.critical("Keyboard interrupt received. Stopping voice controller.")
+    voice_controller.run()
 
 
 def main(stop_event: Optional[Event] = None, shared_data: Optional[OmegaConf] = None, data_lock: Optional[Lock] = None):
