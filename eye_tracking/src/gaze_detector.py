@@ -69,12 +69,6 @@ class GazeDetector:
             self.thread_loop_handler = thread_loop_handler
             self.thread_exit = thread_exit
 
-            logger.debug("Initialising QT module")
-            # Lazy import PyQt5 for key handling only if running in thread mode
-            from PyQt5.QtCore import Qt
-
-            self.Qt = Qt
-
             logger.debug("Thread initialisation complete")
         else:
             logger.info("Running in main mode")
