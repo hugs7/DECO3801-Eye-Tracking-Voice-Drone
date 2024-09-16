@@ -87,6 +87,10 @@ class VoiceController:
 
         if self.config.voice_control.send_to_llm:
             self.process_voice_command(text)
+        else:
+            # Mostly for testing purposes
+            logger.info(f"User command: {text}")
+            self.save_command_to_shared_data(text)
 
         return True  # For now
 
