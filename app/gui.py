@@ -33,7 +33,7 @@ class MainApp(QMainWindow):
 
         self.config = self._init_config()
         self._init_gui()
-        self.timers = self._init_timers()
+        self.timers: Dict[QTimer] = self._init_timers()
 
     def _init_config(self) -> OmegaConf:
         """
@@ -99,21 +99,35 @@ class MainApp(QMainWindow):
 
         logger.info("GUI initialised")
 
-    def _init_timers(self) -> OmegaConf:
+    def _init_timers(self) -> Dict[QTimer]:
         """
         Initialise the timers for the gui
 
         Returns:
-            OmegaConf: The timers configuration in an OmegaConf object
+            Dict[QTimer]: The timers configuration in an OmegaConf object
         """
         timers_conf = {
             "webcam": {"callback": self.update_webcam_feed, "fps": self.config.timers.webcam},
             "voice_command": {"callback": self.get_voice_command, "fps": self.config.timers.voice_command},
         }
 
-        timers = {name: self.__configure_timer(name, **conf) for name, conf in timers_conf.items()}
-        timers = OmegaConf.create(timers)
-        return timers
+        return {name: self.__configure_timer(name, **conf) for name, conf in timers_conf.items()}
+
+    def get_timer(self, name: str) -> QTimer:
+        """
+        Get the timer with the given name
+
+        Args:
+            name: The name of the timer
+
+        Returns:
+            QTimer: The timer
+        """
+        timer = self.timers.get(name, None)
+        if timer is None:
+            logger.error(f"Timer not found: {name}")
+
+        return timer
 
     def __configure_timer(self, name: str, callback: callable, fps: int, *args) -> QTimer:
         """
