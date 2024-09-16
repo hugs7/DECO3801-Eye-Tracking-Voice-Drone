@@ -3,7 +3,7 @@ Handles GUI for the application using PyQt5
 """
 
 from typing import Dict
-from PyQt5.QtWidgets import QMainWindow, QVBoxLayout, QWidget, QPushButton, QLabel
+from PyQt5.QtWidgets import QMainWindow, QVBoxLayout, QWidget, QPushButton, QLabel, QMenuBar, QMenu, QAction
 from PyQt5.QtCore import QTimer, Qt
 from PyQt5.QtGui import QImage, QPixmap, QKeyEvent
 import cv2
@@ -59,9 +59,6 @@ class MainApp(QMainWindow):
     def _init_gui(self) -> None:
         """
         Initialises the main window layout
-
-        Returns:
-            None
         """
 
         logger.info("Initialising GUI")
@@ -100,6 +97,40 @@ class MainApp(QMainWindow):
         self.setMinimumSize(c.WIN_MIN_HEIGHT, c.WIN_MIN_WIDTH)
 
         logger.info("GUI initialised")
+
+    def _init_menu(self) -> None:
+        """
+        Initialises the menu bar
+        """
+
+        logger.info("Initialising menu bar")
+
+        menu_bar = QMenuBar(self)
+        file_menu = menu_bar.addMenu("File")
+
+        self._add_menu_action(file_menu, "Options", self._open_options)
+
+        self._add_menu_action(file_menu, "Quit", self.close_app)
+
+        self.layout.setMenuBar(menu_bar)
+        logger.info("Menu bar initialised")
+
+    def _add_menu_action(self, menu: QMenu, action_name: str, callback: callable) -> None:
+        """
+        Add an action to the menu
+
+        Args:
+            menu: The menu to add the action to
+            action_name: The name of the action
+            callback: The callback function to run when the action is triggered
+
+        Returns:
+            None
+        """
+
+        action = QAction(action_name, self)
+        action.triggered.connect(callback)
+        menu.addAction(action)
 
     def _init_timers(self) -> Dict[str, QTimer]:
         """
@@ -141,7 +172,7 @@ class MainApp(QMainWindow):
 
     def __configure_timer(self, name: str, callback: callable, fps: int, *args) -> QTimer:
         """
-        Configure the QTimer with the given parameters
+        Configures a QTimer with the given parameters
 
         Args:
             name: The name of the timer
@@ -179,6 +210,15 @@ class MainApp(QMainWindow):
             logger.debug(f"Adding key to queue: {key}")
             keyboard_queue: Queue = self.thread_data["keyboard_queue"]
             keyboard_queue.put(key)
+
+    def _open_options(self) -> None:
+        """
+        Open the options window
+
+        Returns:
+            None
+        """
+        logger.info("Opening options window")
 
     def update_webcam_feed(self) -> None:
         """
