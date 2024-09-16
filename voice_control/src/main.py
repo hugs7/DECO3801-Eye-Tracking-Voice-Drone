@@ -88,6 +88,9 @@ def main(stop_event: Optional[Event] = None, shared_data: Optional[OmegaConf] = 
         if running_in_thread:
             thread_loop_handler(stop_event)
 
+    if running_in_thread and stop_event.is_set():
+        voice_controller.terminate()
+
     voice_controller.join()
 
     logger.info("Done.")
