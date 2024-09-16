@@ -41,25 +41,6 @@ def is_any_thread_alive(threads: List[Thread]):
     return any(t.is_alive() for t in threads)
 
 
-def main_loop(shared_data: OmegaConf):
-    """
-    Main loop in parent thread.
-
-    Args:
-        shared_data: Shared data between threads
-
-    Returns:
-        None
-    """
-
-    # Read shared eye gaze
-    eye_tracking_data = shared_data.eye_tracking
-    gaze_side = safe_get(eye_tracking_data, "gaze_side")
-
-    if gaze_side is not None:
-        logger.info(f"Received gaze side: {gaze_side}")
-
-
 def main():
     logger.info(">>> Main Begin")
 
