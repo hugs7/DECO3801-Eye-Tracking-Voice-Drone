@@ -120,7 +120,6 @@ def main():
         thread.join()
 
     logger.info("Closing GUI")
-    main_window.close_app()
     gui.quit()
 
     logger.debug("<<< End")
