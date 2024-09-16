@@ -61,12 +61,16 @@ def main():
         process_shared_dict = {get_function_module(func): init_val for func, init_val in process_functions.items()}
         manager_data.update(process_shared_dict)
         processes = [Process(target=func, args=(manager_data,), name=f"process_{get_function_module(func)}") for func in process_functions]
+
+        logger.info("Initialising drone process")
         for process in processes:
+            logger.debug(f"Starting process {process.name}")
             process.start()
 
         # Start all threads
         logger.info("Initialising threads")
         for thread in threads:
+            logger.debug(f"Starting thread {thread.name}")
             thread.start()
 
         # Gui
