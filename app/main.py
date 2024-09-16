@@ -16,15 +16,17 @@ from import_helper import dynamic_import
 from common.logger_helper import init_logger
 
 from gui import MainApp, QApplication
-import constants as c
 from thread_helper import get_function_module
-from conf_helper import safe_get
 
 logger = init_logger()
 
+logger.info(">>> Begin")
+
+logger.info("Initialising modules...")
 eye_tracking = dynamic_import("eye_tracking.src.main", "main")
 voice_control = dynamic_import("voice_control.src.main", "main")
 drone = dynamic_import("drone", "main")
+logger.info("Modules initialised.")
 
 # === Globals ===
 
@@ -37,7 +39,7 @@ def is_any_thread_alive(threads: List[Thread]):
 
 
 def main():
-    logger.info(">>> Begin")
+    logger.info(">>> Main Begin")
 
     # Create threads for each of the components
     thread_functions = [eye_tracking, voice_control, drone]

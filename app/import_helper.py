@@ -26,6 +26,7 @@ def dynamic_import(module_path: str, alias: str):
     Returns:
         Imported module's function
     """
+    logger.info(f"Importing module: {module_path}")
     try:
         module = importlib.import_module(module_path)
     except KeyboardInterrupt:
