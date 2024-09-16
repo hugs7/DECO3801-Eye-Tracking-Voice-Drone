@@ -122,11 +122,7 @@ class AudioRecogniser:
             logger.info("    >>> Listening for audio...")
             # Adjust for ambient noise to improve speech detection
             self.recogniser.adjust_for_ambient_noise(source, self.config.ambient_noise_duration)
-            try:
-                audio = self.recogniser.listen(source, timeout, phrase_time_limit=self.config.phrase_time_limit)
-            except KeyboardInterrupt:
-                logger.error("    >>> Keyboard interrupt received.")
-                audio = None
+            audio = self.recogniser.listen(source, timeout, phrase_time_limit=self.config.phrase_time_limit)
 
             if audio is not None:
                 logger.info("    <<< Finished listening.")

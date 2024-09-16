@@ -56,11 +56,15 @@ class VoiceController:
             self.process_voice_command(user_audio)
         else:
             run = True
-            while run:
-                logger.info(" >>> Begin voice control loop")
-                run = self.audio_loop()
+            try:
+                while run:
+                    logger.info(" >>> Begin voice control loop")
+                    run = self.audio_loop()
 
-                logger.info(" <<< End voice control loop")
+                    logger.info(" <<< End voice control loop")
+            except KeyboardInterrupt:
+                logger.error("    >>> Keyboard interrupt received. Exiting immediately.")
+                run = False
 
     def audio_loop(self) -> bool:
         """
@@ -74,7 +78,7 @@ class VoiceController:
         if self.config.voice_control.detect_voice:
             user_audio = self.audio_recogniser.capture_voice_input()
             if user_audio is None:
-                return True
+                return False
 
             text = self.audio_recogniser.convert_voice_to_text(user_audio)
         else:
