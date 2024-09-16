@@ -19,7 +19,7 @@ import file_handler
 from conf_helper import safe_get
 from gui_helper import fps_to_ms
 
-logger = init_logger()
+logger = init_logger("DEBUG")
 
 
 class MainApp(QMainWindow):
@@ -31,12 +31,11 @@ class MainApp(QMainWindow):
 
         self.swap_feeds = False
 
-        self.config = self.init_config()
-        self.init_gui()
-        self.init_webcam_feed()
-        self.init_voice_command_feed()
+        self.config = self._init_config()
+        self._init_gui()
+        self.timers = self._init_timers()
 
-    def init_config(self) -> OmegaConf:
+    def _init_config(self) -> OmegaConf:
         """
         Initialise the configuration object
 
@@ -55,7 +54,7 @@ class MainApp(QMainWindow):
 
         return config
 
-    def init_gui(self) -> None:
+    def _init_gui(self) -> None:
         """
         Initialises the main window layout
 
@@ -86,7 +85,7 @@ class MainApp(QMainWindow):
 
         # Button to switch video feeds
         self.switch_button = QPushButton("Switch", self)
-        self.switch_button.clicked.connect(self.switch_feeds)
+        self.switch_button.clicked.connect(self._switch_feeds)
 
         # Quit button
         self.quit_button = QPushButton("Quit", self)
@@ -100,25 +99,23 @@ class MainApp(QMainWindow):
 
         logger.info("GUI initialised")
 
-    def init_webcam_feed(self) -> None:
+    def _init_timers(self) -> OmegaConf["timers"]:
         """
-        Set up the QTimer to update the video feed at a fixed interval
+        Initialise the timers for the gui
 
         Returns:
-            None
+            OmegaConf["timers"]: The timers configuration in an OmegaConf object
         """
-        self.configure_timer("video feed", self.update_webcam_feed, self.config.timers.webcam)
+        timers_conf = {
+            "webcam": {"callback": self.update_webcam_feed, "fps": self.config.timers.webcam},
+            "voice_command": {"callback": self.get_voice_command, "fps": self.config.timers.voice_command},
+        }
 
-    def init_voice_command_feed(self) -> None:
-        """
-        Set up the QTimer to update the voice command feed at a fixed interval
+        timers = {name: self.__configure_timer(name, **conf) for name, conf in timers_conf.items()}
+        timers = OmegaConf.create(timers)
+        return timers
 
-        Returns:
-            None
-        """
-        self.configure_timer("voice command", self.get_voice_command, self.config.timers.voice_command)
-
-    def configure_timer(self, name: str, callback: callable, fps: int, *args) -> None:
+    def __configure_timer(self, name: str, callback: callable, fps: int, *args) -> None:
         """
         Configure the QTimer with the given parameters
 
@@ -151,13 +148,13 @@ class MainApp(QMainWindow):
                 if self.swap_feeds:
                     main_frame, small_frame = small_frame, main_frame
 
-                self.set_pixmap(self.main_video_label, main_frame)
-                self.set_pixmap(self.side_video_label, small_frame)
+                self._set_pixmap(self.main_video_label, main_frame)
+                self._set_pixmap(self.side_video_label, small_frame)
         except KeyboardInterrupt:
             logger.critical("Interrupted! Stopping all threads...")
             self.close_app()
 
-    def set_pixmap(self, label: QLabel, frame: np.ndarray) -> None:
+    def _set_pixmap(self, label: QLabel, frame: np.ndarray) -> None:
         """
         Set the pixmap of the label to the frame
 
@@ -168,10 +165,10 @@ class MainApp(QMainWindow):
         Returns:
             None
         """
-        q_img = self.convert_frame_to_qimage(frame)
+        q_img = self._convert_frame_to_qimage(frame)
         label.setPixmap(QPixmap.fromImage(q_img))
 
-    def convert_frame_to_qimage(self, frame: np.ndarray) -> QImage:
+    def _convert_frame_to_qimage(self, frame: np.ndarray) -> QImage:
         """
         Convert the frame to a QImage
 
@@ -200,7 +197,7 @@ class MainApp(QMainWindow):
         if buffer is None:
             return None
 
-        webcam_frame = self.decode_feed_buffer(buffer)
+        webcam_frame = self._decode_feed_buffer(buffer)
         return webcam_frame
 
     def get_voice_command(self) -> list[tuple[str, int]]:
@@ -212,6 +209,7 @@ class MainApp(QMainWindow):
             list(tuple(str, int)): The voice command
         """
 
+        logger.debug(self.manager_data)
         voice_data = self.manager_data["voice_control"]
         if not voice_data:
             return None
@@ -226,7 +224,7 @@ class MainApp(QMainWindow):
 
         return voice_command
 
-    def decode_feed_buffer(self, buffer: bytes) -> np.ndarray:
+    def _decode_feed_buffer(self, buffer: bytes) -> np.ndarray:
         """
         Decodes the buffer into a numpy array and decodes the frame into an RGB format.
 
@@ -249,7 +247,7 @@ class MainApp(QMainWindow):
             logger.error(f"Error decoding frame: {e}")
             return None
 
-    def switch_feeds(self) -> None:
+    def _switch_feeds(self) -> None:
         """
         Switch the main and side video feeds
 
