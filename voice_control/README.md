@@ -18,7 +18,7 @@ The voice control module also requires ffmpeg to handle in-app sounds. This libr
 
 Once downloaded, unzip the folder then move the contents into `C:\Program Files\ffmpeg\`. You should have something like `C:\Program Files\ffmpeg\ffmpeg-2024-09-15`, with the date changed depending upon your build. Note you don't have to place it here, but it is convenient and makes sense for most setups.
 
-Open the start menu and type `Env` then press Enter. Click `Environment Variables` and under **System Variables**, double-click on **Path**. Click New then browse to the `/bin/` folder of ffmpeg. E.g. `C:\Program Files\ffmpeg\ffmpeg-2024-09-14\bin\`. Click `OK` > `OK` > `OK`.
+Open the start menu and type `Env` then press Enter. Click `Environment Variables` and under **System Variables**, double-click on **Path**. Click New then browse to the `/bin/` folder of ffmpeg. E.g. `C:\Program Files\ffmpeg\ffmpeg-2024-09-15\bin\`. Click `OK` > `OK` > `OK`.
 
 **Ensure you restart your terminal (or computer) after installation.** Drone Voice Control will work without it, however, sound effects will not.
 
