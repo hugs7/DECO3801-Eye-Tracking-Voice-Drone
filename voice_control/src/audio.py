@@ -92,13 +92,14 @@ class AudioRecogniser:
 
         try:
             audio = self.listen_for_audio(source, True, self.config.listen_timeout)
-            self.play_sound_effect("accept")
-            self.save_audio(audio)
-            return audio
         except sr.WaitTimeoutError:
             logger.warning("Listening timed out.")
             self.play_sound_effect("reject")
             return None
+
+        self.play_sound_effect("accept")
+        self.save_audio(audio)
+        return audio
 
     def listen_for_audio(self, source: Optional[sr.Microphone] = None, save: bool = False, timeout: Optional[int] = None) -> sr.AudioData:
         """
