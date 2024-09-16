@@ -8,27 +8,25 @@ from PyQt5.QtCore import QTimer, Qt
 from PyQt5.QtGui import QImage, QPixmap
 import cv2
 import numpy as np
+from omegaconf import OmegaConf
 
 from common.logger_helper import init_logger
 import constants as c
 from conf_helper import safe_get
 from gui_helper import fps_to_ms
-from thread_helper import thread_loop_handler, thread_exit
 
 logger = init_logger()
 
 
 class MainApp(QMainWindow):
-    def __init__(self, shared_data, stop_event):
+    def __init__(self, shared_data: OmegaConf):
         super().__init__()
         self.shared_data = shared_data
-        self.stop_event = stop_event
 
         self.swap_feeds = False
 
         self.init_gui()
         self.setup_video_feed()
-        self.watch_thread()
 
     def init_gui(self) -> None:
         """
@@ -87,23 +85,6 @@ class MainApp(QMainWindow):
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_video_feed)
         self.timer.start(fps_to_ms(60))
-
-    def watch_thread(self) -> None:
-        """
-        Watch the thread and handle any exceptions
-
-        Returns:
-            None
-        """
-
-        def check_thread():
-            thread_loop_handler(self.stop_event)
-
-        logger.info("Initialising thread watcher")
-
-        self.thread_timer = QTimer(self)
-        self.thread_timer.timeout.connect(check_thread)
-        self.thread_timer.start(fps_to_ms(1))
 
     def update_video_feed(self) -> None:
         """
@@ -210,22 +191,20 @@ class MainApp(QMainWindow):
         """
         self.stop_event.set()
         self.close()
-        thread_exit(self.stop_event)
 
 
-def run_gui(shared_data, stop_event) -> None:
+def run_gui(shared_data: OmegaConf) -> None:
     """
     Run the GUI application
 
     Args:
-        shared_data: Shared data between threads
-        stop_event: Event to signal stop
+        shared_data (OmegaConf): Shared data between threads
 
     Returns:
         None
     """
 
     app = QApplication(sys.argv)
-    main_window = MainApp(shared_data, stop_event)
+    main_window = MainApp(shared_data)
     main_window.show()
     sys.exit(app.exec_())

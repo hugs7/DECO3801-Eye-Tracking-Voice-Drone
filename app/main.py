@@ -7,7 +7,7 @@ Hugo Burton
 from threading import Thread, Event, Lock
 from time import sleep
 from typing import List
-
+import sys
 from omegaconf import OmegaConf
 
 # Must go before any other imports
@@ -15,7 +15,7 @@ from import_helper import dynamic_import
 
 from common.logger_helper import init_logger
 
-from gui import run_gui
+from gui import MainApp, QApplication
 import constants as c
 from thread_helper import get_function_module
 from conf_helper import safe_get
@@ -67,8 +67,10 @@ def main():
     ]
 
     # Gui
-    gui_thread = Thread(target=run_gui, args=(shared_data, stop_event), name="GUIThread")
-    threads.append(gui_thread)
+    gui = QApplication(sys.argv)
+    main_window = MainApp(shared_data)
+    main_window.show()
+    sys.exit(gui.exec_())
 
     # Start all threads
     for thread in threads:
@@ -88,6 +90,7 @@ def main():
         # Ensure all threads are properly joined after signaling them to stop
         for thread in threads:
             thread.join()
+            main_window.close()
 
     logger.debug("<<< End")
 
