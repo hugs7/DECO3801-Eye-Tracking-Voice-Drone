@@ -189,7 +189,7 @@ class MainApp(QMainWindow):
         Convert the frame to a QImage
 
         Args:
-            frame: The frame to convert
+            frame (np.ndarray): The frame to convert
 
         Returns:
             QImage: The converted frame
@@ -222,7 +222,7 @@ class MainApp(QMainWindow):
         module.
 
         Returns:
-            list(tuple(str, int)): The voice command
+            list(tuple[str, int]): The voice command
         """
 
         voice_data = self.manager_data["voice_control"]
@@ -243,10 +243,10 @@ class MainApp(QMainWindow):
 
     def _decode_feed_buffer(self, buffer: bytes) -> np.ndarray:
         """
-        Decodes the buffer into a numpy array and decodes the frame into an RGB format.
+        Decodes the byte buffer into a numpy array then decodes the frame into an RGB format.
 
         Args:
-            buffer: The buffer to decode
+            buffer (bytes): The buffer to decode
 
         Returns:
             np.ndarray: The decoded frame
