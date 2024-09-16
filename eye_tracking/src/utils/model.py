@@ -6,7 +6,6 @@ Last Updated: 21/08/2024
 
 from common.logger_helper import init_logger
 import pathlib
-import torch.hub
 import operator
 from omegaconf import DictConfig
 
@@ -28,10 +27,13 @@ def download_mpiigaze_model() -> pathlib.Path:
     output_dir.mkdir(exist_ok=True, parents=True)
     output_path = output_dir / "mpiigaze_resnet_preact.pth"
     if not output_path.exists():
-        logger.debug("Download the pretrained model")
-        torch.hub.download_url_to_file(
-            "https://github.com/hysts/pytorch_mpiigaze_demo/releases/download/v0.1.0/mpiigaze_resnet_preact.pth", output_path.as_posix()
-        )
+        # Lazy import to avoid unnecessary dependency
+        logger.info("Lazy loading torch.hub")
+        import torch.hub
+
+        url = "https://github.com/hysts/pytorch_mpiigaze_demo/releases/download/v0.1.0/mpiigaze_resnet_preact.pth"
+        logger.debug("Downloading the pretrained model from '%s'", url)
+        torch.hub.download_url_to_file(url, output_path.as_posix())
     else:
         logger.debug(f"The pretrained model {output_path} already exists.")
     return output_path
