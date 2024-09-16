@@ -204,7 +204,13 @@ def init_logger(level: Union[int, str] = logging.INFO) -> logging.Logger:
     caller_name = get_caller_module_name(caller_frame)
 
     # Use the caller's module name for the logger
-    logger_name = caller_name if caller_name != "__main__" else "Global"
+    if caller_name == "__main__":
+        logger_name = "Global"
+    elif caller_name == "__mp_main__":
+        logger_name = "Multiprocessing"
+    else:
+        logger_name = caller_name
+
     logger = logging.getLogger(logger_name)
 
     level = get_log_level(level)
