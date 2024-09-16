@@ -97,8 +97,10 @@ class AudioRecogniser:
             self.play_sound_effect("reject")
             return None
 
-        self.play_sound_effect("accept")
-        self.save_audio(audio)
+        if audio is not None:
+            self.play_sound_effect("accept")
+            self.save_audio(audio)
+
         return audio
 
     def listen_for_audio(self, source: Optional[sr.Microphone] = None, save: bool = False, timeout: Optional[int] = None) -> sr.AudioData:
