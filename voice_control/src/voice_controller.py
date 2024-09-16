@@ -2,8 +2,9 @@
 Controller for voice processing
 """
 
-from typing import Optional, Tuple, List, Dict
+from typing import Optional, Tuple, List, Dict, Union
 import ast
+from multiprocessing import Manager, Queue
 
 from common.logger_helper import init_logger
 
@@ -104,7 +105,8 @@ class VoiceController:
                                              is invalid.
         """
         result = self.llm.run_terminal_agent(user_command)
-        logger.info(f"Result: '{result}' of type {type(result)}")
+        logger.info(f"Voice command: '%s'", user_command)
+        logger.debug(f"Voice command of type %s", type(user_command))
 
         # Parse the result into a list of tuples
         parsed_commands = None
@@ -113,12 +115,27 @@ class VoiceController:
         except Exception:
             logger.error("Failed to parse result into dictionary.")
 
-        logger.info(f"Voice command: {parsed_commands} of type {type(parsed_commands)}")
-
-        if self.running_in_process:
-            logger.info(f"Setting voice command to {parsed_commands}")
-            self.shared_manager_data["voice_control"]["voice_command"] = parsed_commands
-
-            logger.debug("Voice command set in shared data.")
+        logger.info(f"Parsed voice command: '%s'", parsed_commands)
+        logger.debug(f"Parsed voice command of type %s", type(parsed_commands))
+        self.save_command_to_shared_data(parsed_commands)
 
         return parsed_commands
+
+    def save_command_to_shared_data(self, command: Union[str, List[Tuple[str, int]]]) -> None:
+        """
+        Saves the command to the shared data.
+
+        Args:
+            command (Union[str, List[Tuple[str, int]]]): The command to save.
+
+        Returns:
+            None
+        """
+        if not self.running_in_process:
+            logger.trace("Not running in process mode. Not saving command to shared data.")
+            return
+
+        logger.info(f"Setting voice command to '%s'", command)
+        command_queue: Queue = self.shared_manager_data["voice_control"]["command_queue"]
+        command_queue.put(command)
+        logger.debug("Voice command '%s' added to command queue of length %d.", command, command_queue.qsize())

@@ -57,8 +57,8 @@ def main():
         logger.info("Initialising voice process")
         manager = Manager()
         manager_data = manager.dict()
-        process_functions = [voice_control]
-        process_shared_dict = {get_function_module(func): None for func in process_functions}
+        process_functions = {voice_control: {"command_queue": manager.Queue()}}
+        process_shared_dict = {get_function_module(func): init_val for func, init_val in process_functions.items()}
         manager_data.update(process_shared_dict)
         processes = [Process(target=func, args=(manager_data,), name=f"process_{get_function_module(func)}") for func in process_functions]
         for process in processes:
