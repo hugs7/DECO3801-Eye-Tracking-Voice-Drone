@@ -189,7 +189,6 @@ class MainApp(QMainWindow):
         Returns:
             None
         """
-        self.stop_event.set()
         self.close()
 
 
