@@ -224,7 +224,6 @@ class MainApp(QMainWindow):
             list(tuple(str, int)): The voice command
         """
 
-        logger.debug(self.manager_data)
         voice_data = self.manager_data["voice_control"]
         if not voice_data:
             return None
