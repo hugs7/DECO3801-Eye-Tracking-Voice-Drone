@@ -179,6 +179,27 @@ class MainApp(QMainWindow):
         webcam_frame = self.decode_feed_buffer(buffer)
         return webcam_frame
 
+    def get_voice_command(self) -> list[tuple[str, int]]:
+        """
+        Gets the voice command from the IPC shared data of the voice control
+        module.
+
+        Returns:
+            list(tuple(str, int)): The voice command
+        """
+
+        voice_data = self.manager_data["voice_control"]
+
+        voice_command = voice_data.get("voice_command", None)
+        if voice_command is not None:
+            logger.info(f"Voice command: {voice_command}")
+
+            # Clear the voice command from the shared data to prevent \
+            # repeated commands
+            voice_data["voice_command"] = None
+
+        return voice_command
+
     def decode_feed_buffer(self, buffer: bytes) -> np.ndarray:
         """
         Decodes the buffer into a numpy array and decodes the frame into an RGB format.
