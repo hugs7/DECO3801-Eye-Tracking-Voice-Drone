@@ -26,10 +26,10 @@ class MainApp(QMainWindow):
 
         self.swap_feeds = False
 
-        self.initUI()
-        self.setupVideoFeed()
+        self.init_gui()
+        self.setup_video_feed()
 
-    def initUI(self) -> None:
+    def init_gui(self) -> None:
         """
         Initialises the main window layout
 
@@ -74,7 +74,7 @@ class MainApp(QMainWindow):
 
         logger.info("GUI initialised")
 
-    def setupVideoFeed(self) -> None:
+    def setup_video_feed(self) -> None:
         """
         Set up the QTimer to update the video feed at a fixed interval
 
