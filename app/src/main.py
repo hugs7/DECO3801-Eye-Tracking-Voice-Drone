@@ -68,12 +68,6 @@ def main():
     stop_event = Event()
     data_lock = Lock()
 
-    # Gui
-    gui = QApplication(sys.argv)
-    main_window = MainApp(shared_data)
-    main_window.show()
-    sys.exit(gui.exec_())
-
     # Create threads for each of the components
     thread_functions = [eye_tracking, drone]
     shared_data = OmegaConf.create({get_function_module(func): OmegaConf.create() for func in thread_functions})
@@ -121,8 +115,12 @@ def main():
             logger.debug(f"Starting thread {thread.name}")
             thread.start()
 
-        while is_any_thread_alive(threads):
-            main_loop(shared_data)
+        # GUI
+        # Keeps the main thread alive so we do not need a secondary while loop
+        gui = QApplication(sys.argv)
+        main_window = MainApp(shared_data)
+        main_window.show()
+        sys.exit(gui.exec_())
     except KeyboardInterrupt:
         logger.critical("Interrupted! Stopping all threads...")
         stop_event.set()
