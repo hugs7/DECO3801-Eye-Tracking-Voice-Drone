@@ -11,6 +11,7 @@ import cv2
 import numpy as np
 from threading import Event
 from omegaconf import OmegaConf
+from multiprocessing import Queue
 
 from common.logger_helper import init_logger
 
@@ -108,7 +109,7 @@ class MainApp(QMainWindow):
         """
         timers_conf = {
             "webcam": {"callback": self.update_webcam_feed, "fps": self.config.timers.webcam},
-            "voice_command": {"callback": self.get_voice_command, "fps": self.config.timers.voice_command},
+            "voice_command": {"callback": self.get_next_voice_command, "fps": self.config.timers.voice_command},
         }
 
         return {name: self.__configure_timer(name, **conf) for name, conf in timers_conf.items()}
@@ -215,7 +216,7 @@ class MainApp(QMainWindow):
         webcam_frame = self._decode_feed_buffer(buffer)
         return webcam_frame
 
-    def get_voice_command(self) -> list[tuple[str, int]]:
+    def get_next_voice_command(self) -> list[tuple[str, int]]:
         """
         Gets the voice command from the IPC shared data of the voice control
         module.
@@ -228,15 +229,17 @@ class MainApp(QMainWindow):
         if not voice_data:
             return None
 
-        voice_command = voice_data.get("voice_command", None)
-        if voice_command is not None:
-            logger.info(f"Voice command: {voice_command}")
+        command_queue: Queue = voice_data.get("command_queue", None)
+        if command_queue is None:
+            logger.error("Voice command queue not found")
+            return None
 
-            # Clear the voice command from the shared data to prevent \
-            # repeated commands
-            voice_data["voice_command"] = None
+        if not command_queue.empty():
+            logger.info(f"Voice command queue size: {command_queue.qsize()}")
+            next_command = command_queue.get()
+            logger.info(f"Next voice command: {next_command}")
 
-        return voice_command
+            return next_command
 
     def _decode_feed_buffer(self, buffer: bytes) -> np.ndarray:
         """
