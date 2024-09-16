@@ -66,15 +66,15 @@ def main():
         for func in thread_functions
     ]
 
+    # Start all threads
+    for thread in threads:
+        thread.start()
+
     # Gui
     gui = QApplication(sys.argv)
     main_window = MainApp(shared_data)
     main_window.show()
     sys.exit(gui.exec_())
-
-    # Start all threads
-    for thread in threads:
-        thread.start()
 
     try:
         # Periodically check if any thread is alive
