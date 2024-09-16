@@ -52,9 +52,9 @@ def main():
 
     # Create threads for each of the components
     thread_functions = [eye_tracking, drone]
-    shared_data = OmegaConf.create({get_function_module(func): OmegaConf.create() for func in thread_functions})
+    thread_data = {get_function_module(func): {} for func in thread_functions}
     threads = [
-        Thread(target=lambda func=func: func(stop_event, shared_data, data_lock), name=f"thread_{get_function_module(func)}")
+        Thread(target=lambda func=func: func(stop_event, thread_data, data_lock), name=f"thread_{get_function_module(func)}")
         for func in thread_functions
     ]
 
@@ -101,7 +101,7 @@ def main():
         # Keeps the main thread alive so we do not need a secondary while loop
         logger.info("Initialising GUI")
         gui = QApplication(sys.argv)
-        main_window = MainApp(stop_event, shared_data, data_lock, interprocess_data)
+        main_window = MainApp(stop_event, thread_data, data_lock, interprocess_data)
         main_window.show()
         gui.exec_()
     except KeyboardInterrupt:

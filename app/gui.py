@@ -24,10 +24,10 @@ logger = init_logger("DEBUG")
 
 
 class MainApp(QMainWindow):
-    def __init__(self, stop_event: Event, shared_data: OmegaConf, data_lock: Lock, interprocess_data: Dict):
+    def __init__(self, stop_event: Event, thread_data: Dict, data_lock: Lock, interprocess_data: Dict):
         super().__init__()
         self.stop_event = stop_event
-        self.shared_data = shared_data
+        self.thread_data = thread_data
         self.data_lock = data_lock
         self.interprocess_data = interprocess_data
 
@@ -122,7 +122,7 @@ class MainApp(QMainWindow):
         particular module since any thread can "subscribe" to this queue.
         """
         with self.data_lock:
-            self.shared_data.keyboard_queue = Queue()
+            self.thread_data["keyboard_queue"] = Queue()
 
     def get_timer(self, name: str) -> QTimer:
         """
@@ -176,9 +176,9 @@ class MainApp(QMainWindow):
             self.close_app()
 
         # Any other key goes into the keyboard queue
-        with self.shared_data.lock:
+        with self.data_lock:
             logger.debug(f"Adding key to queue: {key}")
-            keyboard_queue: Queue = self.shared_data.keyboard_queue
+            keyboard_queue: Queue = self.thread_data["keyboard_queue"]
             keyboard_queue.put(key)
 
     def update_webcam_feed(self) -> None:
@@ -239,7 +239,7 @@ class MainApp(QMainWindow):
         Returns:
             np.ndarray: The webcam feed as a numpy array
         """
-        eye_tracking_data = self.shared_data.eye_tracking
+        eye_tracking_data = self.thread_data["eye_tracking"]
         buffer = safe_get(eye_tracking_data, "video_frame")
 
         if buffer is None:
