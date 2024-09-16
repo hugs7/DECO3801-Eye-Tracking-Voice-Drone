@@ -16,8 +16,8 @@ from queue import Queue
 from common.logger_helper import init_logger
 
 import constants as c
-import file_handler
-from gui_helper import fps_to_ms
+import utils.file_handler as file_handler
+from utils.gui_helper import fps_to_ms
 
 logger = init_logger("DEBUG")
 

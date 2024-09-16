@@ -8,8 +8,8 @@ from typing import Optional, Dict
 from threading import Event, Lock
 from time import sleep
 
-from common.logger_helper import init_logger
 from common.thread_helper import thread_loop_handler, is_main_thread
+from common.logger_helper import init_logger
 
 logger = init_logger()
 

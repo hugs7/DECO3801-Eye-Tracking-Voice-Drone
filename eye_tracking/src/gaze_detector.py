@@ -15,7 +15,7 @@ import cv2
 import numpy as np
 from omegaconf import OmegaConf
 
-from common.constants import Constants as cc
+from common import constants as cc
 
 from .face import Face
 from .face_model_mediapipe import FaceModelMediaPipe

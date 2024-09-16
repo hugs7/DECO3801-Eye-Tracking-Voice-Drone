@@ -11,6 +11,7 @@ import sys
 
 # Add the project root to the path
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../.."))
+print("Project root: ", project_root)
 sys.path.insert(0, project_root)
 
 from common.logger_helper import init_logger

@@ -15,8 +15,9 @@ from .wrappers import AgentIsDone
 from .utils import ask_llm
 from .formatting import add_terminal_line_decorators, extract_terminal_entries
 
+from common import str_helper
+
 from ..file_handler import get_context_file
-from .. import str_helper
 from ..constants import MAX_LOOP
 
 
