@@ -112,7 +112,8 @@ class VoiceController:
                                              is invalid.
         """
         result = self.llm.run_terminal_agent(user_command)
-        logger.info(f"Result: '{result}' of type {type(result)}")
+        logger.info(f"Voice command: '%s'", user_command)
+        logger.debug(f"Voice command of type %s", type(user_command))
 
         # Parse the result into a list of tuples
         parsed_commands = None
@@ -123,11 +124,11 @@ class VoiceController:
 
         logger.info(f"Parsed voice command: '%s'", parsed_commands)
         logger.debug(f"Parsed voice command of type %s", type(parsed_commands))
-        self.save_command_to_thread_data(parsed_commands)
+        self.save_command_to_shared_data(parsed_commands)
 
         return parsed_commands
 
-    def save_command_to_thread_data(self, command: Union[str, List[Tuple[str, int]]]) -> None:
+    def save_command_to_shared_data(self, command: Union[str, List[Tuple[str, int]]]) -> None:
         """
         Saves the command to the shared data.
 
