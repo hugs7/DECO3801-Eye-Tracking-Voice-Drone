@@ -7,12 +7,15 @@ Last Updated: 21/08/2024
 import datetime
 from common.logger_helper import init_logger
 import pathlib
-from typing import Optional, Tuple, Dict
+from typing import Optional, Tuple, Dict, List
 from threading import Event, Lock
+from queue import Queue
 
 import cv2
 import numpy as np
 from omegaconf import DictConfig, OmegaConf
+
+from common.omegaconf_helper import safe_get
 
 from .face import Face
 from .face_model_mediapipe import FaceModelMediaPipe
@@ -395,13 +398,46 @@ class GazeDetector:
 
     def _wait_key(self) -> bool:
         """
+        Handles keyboard commands either from cv2 GUI if running as module or
+        from GUI if running in thread mode. Will handle multiple keys if there is more
+        than one in the queue.
+
+        Returns:
+            True if a recognised key is pressed (or any if there are multiple in the queue).
+            False otherwise.
+        """
+
+        if self.running_in_thread:
+            # Define a buffer so that we are not locking the data for too long.
+            # Not critical while keyboard inputs are simple, however, this is good
+            # practice for more complex inputs.
+            key_buffer: List[int] = []
+            with self.data_lock:
+                keyboard_queue: Optional[Queue] = safe_get(self.shared_data, "keyboard_queue")
+                if keyboard_queue is not None:
+                    while not keyboard_queue.empty():
+                        key: int = keyboard_queue.get()
+                        key_buffer.append(key)
+
+            accepted_keys = []
+            for key in key_buffer:
+                accepted_keys.append(self._keyboard_controller(key))
+
+            # Accept if any valid key was pressed
+            return any(accepted_keys)
+        else:
+            key = cv2.waitKey(self.config.demo.wait_time) & 0xFF
+            return self._keyboard_controller(key)
+
+    def _keyboard_controller(self, key: int) -> bool:
+        """
         Controller for the gaze detector.
 
         Returns:
             True if a recognised key is pressed, False otherwise
         """
+        logger.info(f"Received key: {key}")
 
-        key = cv2.waitKey(self.config.demo.wait_time) & 0xFF
         if key in self.QUIT_KEYS:
             self.stop = True
         elif key == ord("b"):
@@ -423,6 +459,7 @@ class GazeDetector:
             self._calibrate_landmarks()
         else:
             return False
+
         return True
 
     def _calibrate_landmarks(self) -> None:
