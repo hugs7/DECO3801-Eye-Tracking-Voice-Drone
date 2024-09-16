@@ -13,7 +13,6 @@ from omegaconf import OmegaConf
 from multiprocessing import Queue as MPQueue
 from queue import Queue
 
-from common.omegaconf_helper import safe_get
 from common.logger_helper import init_logger
 
 import constants as c
@@ -239,9 +238,8 @@ class MainApp(QMainWindow):
         Returns:
             np.ndarray: The webcam feed as a numpy array
         """
-        eye_tracking_data = self.thread_data["eye_tracking"]
-        buffer = safe_get(eye_tracking_data, "video_frame")
-
+        eye_tracking_data: Dict = self.thread_data["eye_tracking"]
+        buffer = eye_tracking_data.get("video_frame", None)
         if buffer is None:
             return None
 
