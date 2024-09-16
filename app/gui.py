@@ -28,6 +28,7 @@ class MainApp(QMainWindow):
 
         self.init_gui()
         self.setup_video_feed()
+        self.watch_thread()
 
     def init_gui(self) -> None:
         """
@@ -86,6 +87,23 @@ class MainApp(QMainWindow):
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_video_feed)
         self.timer.start(fps_to_ms(60))
+
+    def watch_thread(self) -> None:
+        """
+        Watch the thread and handle any exceptions
+
+        Returns:
+            None
+        """
+
+        def check_thread():
+            thread_loop_handler(self.stop_event)
+
+        logger.info("Initialising thread watcher")
+
+        self.thread_timer = QTimer(self)
+        self.thread_timer.timeout.connect(check_thread)
+        self.thread_timer.start(fps_to_ms(1))
 
     def update_video_feed(self) -> None:
         """
