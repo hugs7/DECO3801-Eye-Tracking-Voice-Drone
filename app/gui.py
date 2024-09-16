@@ -314,20 +314,3 @@ class MainApp(QMainWindow):
 
         logger.info("Closing GUI")
         self.close()
-
-
-def run_gui(shared_data: OmegaConf) -> None:
-    """
-    Run the GUI application
-
-    Args:
-        shared_data (OmegaConf): Shared data between threads
-
-    Returns:
-        None
-    """
-
-    app = QApplication(sys.argv)
-    main_window = MainApp(shared_data)
-    main_window.show()
-    sys.exit(app.exec_())
