@@ -100,7 +100,7 @@ def main():
         # Keeps the main thread alive so we do not need a secondary while loop
         logger.info("Initialising GUI")
         gui = QApplication(sys.argv)
-        main_window = MainApp(shared_data)
+        main_window = MainApp(shared_data, stop_event)
         main_window.show()
         gui.exec_()
     except KeyboardInterrupt:
