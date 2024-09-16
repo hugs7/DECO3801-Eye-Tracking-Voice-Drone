@@ -33,7 +33,8 @@ class MainApp(QMainWindow):
 
         self.config = self.init_config()
         self.init_gui()
-        self.setup_video_feed()
+        self.init_webcam_feed()
+        self.init_voice_command_feed()
 
     def init_config(self) -> OmegaConf:
         """
@@ -99,20 +100,43 @@ class MainApp(QMainWindow):
 
         logger.info("GUI initialised")
 
-    def setup_video_feed(self) -> None:
+    def init_webcam_feed(self) -> None:
         """
         Set up the QTimer to update the video feed at a fixed interval
 
         Returns:
             None
         """
-        logger.info("Initialising video feeds")
+        self.configure_timer("video feed", self.update_webcam_feed, self.config.timers.webcam)
 
-        self.timer = QTimer(self)
-        self.timer.timeout.connect(self.update_video_feed)
-        self.timer.start(fps_to_ms(60))
+    def init_voice_command_feed(self) -> None:
+        """
+        Set up the QTimer to update the voice command feed at a fixed interval
 
-    def update_video_feed(self) -> None:
+        Returns:
+            None
+        """
+        self.configure_timer("voice command", self.get_voice_command, self.config.timers.voice_command)
+
+    def configure_timer(self, name: str, callback: callable, fps: int, *args) -> None:
+        """
+        Configure the QTimer with the given parameters
+
+        Args:
+            name: The name of the timer
+            callback: The callback function to run
+            fps: The frames per second
+            *args: Additional arguments for the callback function
+
+        Returns:
+            None
+        """
+        logger.info(f"Configuring timer: {name}")
+        timer = QTimer(self)
+        timer.timeout.connect(lambda: callback(*args))
+        timer.start(fps_to_ms(fps))
+
+    def update_webcam_feed(self) -> None:
         """
         Update the video feed on the GUI
 
