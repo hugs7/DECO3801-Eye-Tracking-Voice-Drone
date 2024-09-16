@@ -257,6 +257,19 @@ class MainApp(QMainWindow):
         self.swap_feeds = not self.swap_feeds
         logger.info(f"Swapping feeds: {self.swap_feeds}")
 
+    def _stop_all_timers(self) -> None:
+        """
+        Stop all timers
+
+        Returns:
+            None
+        """
+        logger.info("Stopping all timers")
+        for timer in self.timers.values():
+            if timer.isActive():
+                logger.debug(f"Stopping timer: {timer}")
+                timer.stop()
+
     def close_app(self) -> None:
         """
         Stop the application and signal other threads to stop
@@ -264,9 +277,7 @@ class MainApp(QMainWindow):
         Returns:
             None
         """
-        if self.timer.isActive():
-            logger.info("Stopping timer")
-            self.timer.stop()
+        self._stop_all_timers()
 
         if not self.stop_event.is_set():
             logger.info("Stopping threads from GUI")
