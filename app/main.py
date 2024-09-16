@@ -48,23 +48,30 @@ def main():
     ]
 
     # Start all threads
+    logger.info("Initialising threads")
     for thread in threads:
         thread.start()
 
+    logger.info("Initialising GUI")
     try:
         # Gui
         gui = QApplication(sys.argv)
         main_window = MainApp(shared_data)
         main_window.show()
-        sys.exit(gui.exec_())
+        gui.exec_()
     except KeyboardInterrupt:
         logger.critical("Interrupted! Stopping all threads...")
-        stop_event.set()
 
-        # Ensure all threads are properly joined after signaling them to stop
-        for thread in threads:
-            thread.join()
-            main_window.close()
+    logger.info("Signalling all threads to stop")
+    stop_event.set()
+
+    # Ensure all threads are properly joined after signaling them to stop
+    for thread in threads:
+        thread.join()
+
+    logger.info("Closing GUI")
+    main_window.close_app()
+    gui.quit()
 
     logger.debug("<<< End")
 
