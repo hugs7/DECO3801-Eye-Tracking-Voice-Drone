@@ -123,12 +123,9 @@ class AudioRecogniser:
             self.recogniser.adjust_for_ambient_noise(source, self.config.ambient_noise_duration)
             try:
                 audio = self.recogniser.listen(source, timeout, phrase_time_limit=self.config.phrase_time_limit)
-            except sr.WaitTimeoutError:
-                logger.warning("    >>> Listening timed out.")
             except KeyboardInterrupt:
                 logger.error("    >>> Keyboard interrupt received.")
                 audio = None
-                return None
 
             if audio is not None:
                 logger.info("    <<< Finished listening.")
@@ -143,6 +140,7 @@ class AudioRecogniser:
 
         if save:
             self.save_audio(audio)
+
         return audio
 
     def capture_voice_input(self):
