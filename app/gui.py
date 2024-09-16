@@ -8,6 +8,7 @@ from PyQt5.QtCore import QTimer, Qt
 from PyQt5.QtGui import QImage, QPixmap
 import cv2
 import numpy as np
+from threading import Event
 from omegaconf import OmegaConf
 
 from common.logger_helper import init_logger
@@ -19,9 +20,10 @@ logger = init_logger()
 
 
 class MainApp(QMainWindow):
-    def __init__(self, shared_data: OmegaConf):
+    def __init__(self, shared_data: OmegaConf, stop_event: Event):
         super().__init__()
         self.shared_data = shared_data
+        self.stop_event = stop_event
 
         self.swap_feeds = False
 
@@ -93,15 +95,24 @@ class MainApp(QMainWindow):
         Returns:
             None
         """
-        main_frame = self.get_webcam_feed()
-        small_frame = self.get_webcam_feed()
+        if self.stop_event.is_set():
+            self.timer.stop()
+            return
 
-        if main_frame is not None and small_frame is not None:
-            if self.swap_feeds:
-                main_frame, small_frame = small_frame, main_frame
+        try:
+            main_frame = self.get_webcam_feed()
+            small_frame = self.get_webcam_feed()
 
-            self.set_pixmap(self.main_video_label, main_frame)
-            self.set_pixmap(self.side_video_label, small_frame)
+            if main_frame is not None and small_frame is not None:
+                if self.swap_feeds:
+                    main_frame, small_frame = small_frame, main_frame
+
+                self.set_pixmap(self.main_video_label, main_frame)
+                self.set_pixmap(self.side_video_label, small_frame)
+        except KeyboardInterrupt:
+            logger.critical("Interrupted! Stopping all threads...")
+            self.timer.stop()
+            self.close_app()
 
     def set_pixmap(self, label: QLabel, frame: np.ndarray) -> None:
         """
@@ -189,6 +200,7 @@ class MainApp(QMainWindow):
         Returns:
             None
         """
+        self.stop_event.set()
         self.close()
 
 

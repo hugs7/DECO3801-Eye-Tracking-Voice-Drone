@@ -56,7 +56,7 @@ def main():
     try:
         # Gui
         gui = QApplication(sys.argv)
-        main_window = MainApp(shared_data)
+        main_window = MainApp(shared_data, stop_event)
         main_window.show()
         gui.exec_()
     except KeyboardInterrupt:
