@@ -14,11 +14,11 @@ from omegaconf import OmegaConf
 from multiprocessing import Queue as MPQueue
 from queue import Queue
 
+from common.omegaconf_helper import safe_get
 from common.logger_helper import init_logger
 
 import constants as c
 import file_handler
-from conf_helper import safe_get
 from gui_helper import fps_to_ms
 
 logger = init_logger("DEBUG")
