@@ -2,14 +2,13 @@
 Handles GUI for the application using PyQt5
 """
 
-import sys
 from typing import Dict
-from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QPushButton, QLabel
+from PyQt5.QtWidgets import QMainWindow, QVBoxLayout, QWidget, QPushButton, QLabel
 from PyQt5.QtCore import QTimer, Qt
-from PyQt5.QtGui import QImage, QPixmap
+from PyQt5.QtGui import QImage, QPixmap, QKeyEvent
 import cv2
 import numpy as np
-from threading import Event
+from threading import Event, Lock
 from omegaconf import OmegaConf
 from multiprocessing import Queue as MPQueue
 from queue import Queue
@@ -25,11 +24,12 @@ logger = init_logger("DEBUG")
 
 
 class MainApp(QMainWindow):
-    def __init__(self, shared_data: OmegaConf, manager_data: Dict, stop_event: Event):
+    def __init__(self, stop_event: Event, shared_data: OmegaConf, data_lock: Lock, interprocess_data: Dict):
         super().__init__()
-        self.shared_data = shared_data
-        self.manager_data = manager_data
         self.stop_event = stop_event
+        self.shared_data = shared_data
+        self.data_lock = data_lock
+        self.interprocess_data = interprocess_data
 
         self.swap_feeds = False
 
@@ -121,7 +121,8 @@ class MainApp(QMainWindow):
         Initialise the keyboard queue. Not assigned to any
         particular module since any thread can "subscribe" to this queue.
         """
-        self.shared_data.keyboard_queue = Queue()
+        with self.data_lock:
+            self.shared_data.keyboard_queue = Queue()
 
     def get_timer(self, name: str) -> QTimer:
         """
@@ -157,6 +158,28 @@ class MainApp(QMainWindow):
         timer.timeout.connect(lambda: callback(*args))
         timer.start(fps_to_ms(fps))
         return timer
+
+    def keyPressEvent(self, event: QKeyEvent) -> None:
+        """
+        Handle key press events
+
+        Args:
+            event: The key press event
+
+        Returns:
+            None
+        """
+        key = event.key()
+        logger.info(f"Key pressed: {key}")
+
+        if key == Qt.Key_Escape or key == Qt.Key_Q:
+            self.close_app()
+
+        # Any other key goes into the keyboard queue
+        with self.shared_data.lock:
+            logger.debug(f"Adding key to queue: {key}")
+            keyboard_queue: Queue = self.shared_data.keyboard_queue
+            keyboard_queue.put(key)
 
     def update_webcam_feed(self) -> None:
         """
@@ -234,7 +257,7 @@ class MainApp(QMainWindow):
             list(tuple[str, int]): The voice command
         """
 
-        voice_data = self.manager_data["voice_control"]
+        voice_data = self.interprocess_data["voice_control"]
         if not voice_data:
             return None
 
