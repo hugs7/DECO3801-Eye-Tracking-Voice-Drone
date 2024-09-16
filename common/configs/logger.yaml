@@ -1,4 +1,4 @@
 loggers:
     eye_tracking: False
-    voice_control: False
+    voice_control: DEBUG
     drone: False
