@@ -15,9 +15,12 @@ from queue import Queue
 
 from common.logger_helper import init_logger
 
+from options import PreferencesDialog
+
 import constants as c
 import utils.file_handler as file_handler
 from utils.gui_helper import fps_to_ms
+
 
 logger = init_logger("DEBUG")
 
@@ -85,11 +88,14 @@ class MainApp(QMainWindow):
         # Button to switch video feeds
         self.switch_button = QPushButton("Switch", self)
         self.switch_button.clicked.connect(self._switch_feeds)
+        self.layout.addWidget(self.switch_button)
 
         # Quit button
         self.quit_button = QPushButton("Quit", self)
         self.quit_button.clicked.connect(self.close_app)
         self.layout.addWidget(self.quit_button)
+
+        self._init_menu()
 
         # Window size
         logger.info("Configuring window size")
@@ -105,14 +111,13 @@ class MainApp(QMainWindow):
 
         logger.info("Initialising menu bar")
 
-        menu_bar = QMenuBar(self)
-        file_menu = menu_bar.addMenu("File")
+        menu_bar = self.menuBar()
+        self.file_menu = menu_bar.addMenu("File")
 
-        self._add_menu_action(file_menu, "Options", self._open_options)
+        self._add_menu_action(self.file_menu, "Options", self._open_options)
+        self.file_menu.addSeparator()
+        self._add_menu_action(self.file_menu, "Quit", self.close_app)
 
-        self._add_menu_action(file_menu, "Quit", self.close_app)
-
-        self.layout.setMenuBar(menu_bar)
         logger.info("Menu bar initialised")
 
     def _add_menu_action(self, menu: QMenu, action_name: str, callback: callable) -> None:
@@ -219,6 +224,8 @@ class MainApp(QMainWindow):
             None
         """
         logger.info("Opening options window")
+        dialog = PreferencesDialog()
+        dialog.exec_()
 
     def update_webcam_feed(self) -> None:
         """
