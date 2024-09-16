@@ -36,25 +36,6 @@ def is_any_thread_alive(threads: List[Thread]):
     return any(t.is_alive() for t in threads)
 
 
-def main_loop(shared_data: OmegaConf):
-    """
-    Main loop in parent thread.
-
-    Args:
-        shared_data: Shared data between threads
-
-    Returns:
-        None
-    """
-
-    # Read shared eye gaze
-    eye_tracking_data = shared_data.eye_tracking
-    gaze_side = safe_get(eye_tracking_data, "gaze_side")
-
-    if gaze_side is not None:
-        logger.info(f"Received gaze side: {gaze_side}")
-
-
 def main():
     logger.info(">>> Begin")
 
@@ -70,19 +51,12 @@ def main():
     for thread in threads:
         thread.start()
 
-    # Gui
-    gui = QApplication(sys.argv)
-    main_window = MainApp(shared_data)
-    main_window.show()
-    sys.exit(gui.exec_())
-
     try:
-        # Periodically check if any thread is alive
-        while is_any_thread_alive(threads):
-            main_loop(shared_data)
-
-            # Sleep for a short duration to prevent busy-waiting
-            sleep(c.BUSY_WAIT_PERIOD_SECONDS)
+        # Gui
+        gui = QApplication(sys.argv)
+        main_window = MainApp(shared_data)
+        main_window.show()
+        sys.exit(gui.exec_())
     except KeyboardInterrupt:
         logger.critical("Interrupted! Stopping all threads...")
         stop_event.set()
