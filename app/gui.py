@@ -11,7 +11,8 @@ import cv2
 import numpy as np
 from threading import Event
 from omegaconf import OmegaConf
-from multiprocessing import Queue
+from multiprocessing import Queue as MPQueue
+from queue import Queue
 
 from common.logger_helper import init_logger
 
@@ -35,6 +36,7 @@ class MainApp(QMainWindow):
         self.config = self._init_config()
         self._init_gui()
         self.timers: Dict[str, QTimer] = self._init_timers()
+        self._init_keyboard_queue()
 
     def _init_config(self) -> OmegaConf:
         """
@@ -113,6 +115,13 @@ class MainApp(QMainWindow):
         }
 
         return {name: self.__configure_timer(name, **conf) for name, conf in timers_conf.items()}
+
+    def _init_keyboard_queue(self) -> None:
+        """
+        Initialise the keyboard queue. Not assigned to any
+        particular module since any thread can "subscribe" to this queue.
+        """
+        self.shared_data.keyboard_queue = Queue()
 
     def get_timer(self, name: str) -> QTimer:
         """
@@ -229,7 +238,7 @@ class MainApp(QMainWindow):
         if not voice_data:
             return None
 
-        command_queue: Queue = voice_data.get("command_queue", None)
+        command_queue: MPQueue = voice_data.get("command_queue", None)
         if command_queue is None:
             logger.error("Voice command queue not found")
             return None
