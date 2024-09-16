@@ -3,16 +3,12 @@ Entry point for the voice control module.
 """
 
 from typing import Optional, Dict
-from threading import Event, Lock
-from multiprocessing import Process, Manager
 import os
 import sys
 
 # Add the project root to the path
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
 sys.path.insert(0, project_root)
-
-from omegaconf import OmegaConf
 
 from common.logger_helper import init_logger
 
@@ -40,15 +36,12 @@ def run_voice_controller(config, shared_manager_data: Optional[Dict] = None) -> 
     voice_controller.run()
 
 
-def main(stop_event: Optional[Event] = None, shared_data: Optional[OmegaConf] = None, data_lock: Optional[Lock] = None):
+def main(manager_data: Optional[Dict] = None):
     """
     The main function that runs the voice control program.
 
     Args:
-        (Only provided if running as a child thread)
-        stop_event: Event to signal stop
-        shared_data: Shared data between threads
-        data_lock: Lock for shared data
+        shared_data (Dict): Shared data between threads: (Only provided if running as a child thread)
 
     Returns:
         None
@@ -56,39 +49,14 @@ def main(stop_event: Optional[Event] = None, shared_data: Optional[OmegaConf] = 
 
     config = init.init()
 
-    required_args = [stop_event, shared_data, data_lock]
-    running_in_thread = any(required_args)
+    running_in_thread = manager_data is not None
 
     if running_in_thread:
-        # If running in thread mode, all or none of the required args must be provided
-        if not all(required_args):
-            raise ValueError("All or none of stop_event, shared_data, data_lock must be provided.")
-
-        logger.info("Running in thread mode")
-
-        # Lazily import thread helpers only if running in thread mode
-        from app.thread_helper import thread_loop_handler
-
-        manager = Manager()
-        shared_manager_data = manager.dict()
-        shared_manager_data.update(shared_data)
+        logger.info("Running as process.")
     else:
         logger.info("Running in main mode")
-        shared_manager_data = None
 
-    # Start voice controller in a separate process
-    voice_controller = Process(target=run_voice_controller, args=(config, shared_manager_data))
-    voice_controller.name = "VoiceController"
-    voice_controller.start()
-
-    while voice_controller.is_alive():
-        if running_in_thread:
-            thread_loop_handler(stop_event)
-
-    if running_in_thread and stop_event.is_set():
-        voice_controller.terminate()
-
-    voice_controller.join()
+    run_voice_controller(config, manager_data)
 
     logger.info("Done.")
 

@@ -5,7 +5,7 @@ Hugo Burton
 """
 
 from threading import Thread, Event, Lock
-from time import sleep
+from multiprocessing import Manager, Process
 from typing import List
 import sys
 from omegaconf import OmegaConf
@@ -42,21 +42,32 @@ def main():
     logger.info(">>> Main Begin")
 
     # Create threads for each of the components
-    thread_functions = [eye_tracking, voice_control, drone]
+    thread_functions = [eye_tracking, drone]
     shared_data = OmegaConf.create({get_function_module(func): OmegaConf.create() for func in thread_functions})
     threads = [
         Thread(target=lambda func=func: func(stop_event, shared_data, data_lock), name=f"thread_{get_function_module(func)}")
         for func in thread_functions
     ]
 
-    # Start all threads
-    logger.info("Initialising threads")
-    for thread in threads:
-        thread.start()
-
-    logger.info("Initialising GUI")
+    # Voice Control is process
     try:
+        logger.info("Initialising voice process")
+        manager = Manager()
+        manager_data = manager.dict()
+        process_functions = [voice_control]
+        process_shared_dict = {get_function_module(func): None for func in process_functions}
+        manager_data.update(process_shared_dict)
+        processes = [Process(target=func, args=(manager_data,), name=f"process_{get_function_module(func)}") for func in process_functions]
+        for process in processes:
+            process.start()
+
+        # Start all threads
+        logger.info("Initialising threads")
+        for thread in threads:
+            thread.start()
+
         # Gui
+        logger.info("Initialising GUI")
         gui = QApplication(sys.argv)
         main_window = MainApp(shared_data, stop_event)
         main_window.show()
@@ -67,7 +78,13 @@ def main():
     logger.info("Signalling all threads to stop")
     stop_event.set()
 
-    # Ensure all threads are properly joined after signaling them to stop
+    # Ensure all threads and processes are properly joined after signaling them to stop
+    for process in processes:
+        process.join()
+        if process.is_alive():
+            logger.info(f"Terminating process {process.name}")
+            process.terminate()
+
     for thread in threads:
         thread.join()
 
