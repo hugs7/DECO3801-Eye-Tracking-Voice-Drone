@@ -3,6 +3,7 @@ Handles GUI for the application using PyQt5
 """
 
 import sys
+from typing import Dict
 from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QPushButton, QLabel
 from PyQt5.QtCore import QTimer, Qt
 from PyQt5.QtGui import QImage, QPixmap
@@ -22,9 +23,10 @@ logger = init_logger()
 
 
 class MainApp(QMainWindow):
-    def __init__(self, shared_data: OmegaConf, stop_event: Event):
+    def __init__(self, shared_data: OmegaConf, manager_data: Dict, stop_event: Event):
         super().__init__()
         self.shared_data = shared_data
+        self.manager_data = manager_data
         self.stop_event = stop_event
 
         self.swap_feeds = False
