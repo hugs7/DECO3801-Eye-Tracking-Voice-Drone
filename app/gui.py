@@ -213,6 +213,8 @@ class MainApp(QMainWindow):
         """
 
         voice_data = self.manager_data["voice_control"]
+        if not voice_data:
+            return None
 
         voice_command = voice_data.get("voice_command", None)
         if voice_command is not None:
