@@ -10,6 +10,10 @@ import sys
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, project_root)
 
+from common.logger_helper import init_logger
+
+logger = init_logger()
+
 
 def dynamic_import(module_path: str, alias: str):
     """
@@ -22,6 +26,10 @@ def dynamic_import(module_path: str, alias: str):
     Returns:
         Imported module's function
     """
+    try:
+        module = importlib.import_module(module_path)
+    except KeyboardInterrupt:
+        logger.critical(f"Interrupted while importing module: {module_path}")
+        sys.exit(1)
 
-    module = importlib.import_module(module_path)
     return getattr(module, alias)
