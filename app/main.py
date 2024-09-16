@@ -4,18 +4,20 @@ Hugo Burton
 06/09/2024
 """
 
+import sys
+from typing import List
 from threading import Thread, Event, Lock
 from multiprocessing import Manager, Process
-from typing import List
-import sys
-from omegaconf import OmegaConf
 
-# Must go before any other imports
+from omegaconf import OmegaConf
+from PyQt5.QtWidgets import QApplication
+
+# Must go before any other user imports
 from import_helper import dynamic_import
 
 from common.logger_helper import init_logger
 
-from gui import MainApp, QApplication
+from gui import MainApp
 from thread_helper import get_function_module
 
 logger = init_logger()
@@ -76,7 +78,7 @@ def main():
         # Gui
         logger.info("Initialising GUI")
         gui = QApplication(sys.argv)
-        main_window = MainApp(shared_data, manager_data, stop_event)
+        main_window = MainApp(stop_event, shared_data, data_lock, manager_data)
         main_window.show()
         gui.exec_()
     except KeyboardInterrupt:
