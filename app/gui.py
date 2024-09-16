@@ -115,7 +115,7 @@ class MainApp(QMainWindow):
         timers = OmegaConf.create(timers)
         return timers
 
-    def __configure_timer(self, name: str, callback: callable, fps: int, *args) -> None:
+    def __configure_timer(self, name: str, callback: callable, fps: int, *args) -> QTimer:
         """
         Configure the QTimer with the given parameters
 
@@ -126,12 +126,13 @@ class MainApp(QMainWindow):
             *args: Additional arguments for the callback function
 
         Returns:
-            None
+            QTimer: The configured QTimer
         """
         logger.info(f"Configuring timer: {name}")
         timer = QTimer(self)
         timer.timeout.connect(lambda: callback(*args))
         timer.start(fps_to_ms(fps))
+        return timer
 
     def update_webcam_feed(self) -> None:
         """
@@ -266,6 +267,9 @@ class MainApp(QMainWindow):
         """
         logger.info("Stopping all timers")
         for timer in self.timers.values():
+            if timer is None:
+                continue
+
             if timer.isActive():
                 logger.debug(f"Stopping timer: {timer}")
                 timer.stop()
