@@ -4,25 +4,41 @@ This module handles voice recognition and command translation via an LLM to conv
 
 ## Getting started
 
-1. Install the requirements.
+### 1. Package Dependencies
+
+Install the requirements via the following command from a command prompt in the root directory of the project.
 
 ```bash
 pip install -r voice_control/requirements.txt
 ```
 
-2. Add your OpenAI API key in `voice_control/.env` as
+### 2. Additional Dependencies
+
+The voice control module also requires ffmpeg to handle in-app sounds. This library is not available via pip. For Windows, you can install this by visiting [ffmpeg-builds on GitHub](https://github.com/BtbN/FFmpeg-Builds/releases) and downloading the latest `win64` release. At the time of writing, that is [2024-09-15 13:01](https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl.zip) but there are releases daily for this software.
+
+Once downloaded, unzip the folder then move the contents into `C:\Program Files\ffmpeg\`. You should have something like `C:\Program Files\ffmpeg\ffmpeg-2024-09-15`, with the date changed depending upon your build. Note you don't have to place it here, but it is convenient and makes sense for most setups.
+
+Open the start menu and type `Env` then press Enter. Click `Environment Variables` and under **System Variables**, double-click on **Path**. Click New then browse to the `/bin/` folder of ffmpeg. E.g. `C:\Program Files\ffmpeg\ffmpeg-2024-09-14\bin\`. Click `OK` > `OK` > `OK`.
+
+**Ensure you restart your terminal (or computer) after installation.** Drone Voice Control will work without it, however, sound effects will not.
+
+### 3. OpenAI Key
+
+Add your OpenAI API key in `voice_control/.env` as
 
 ```
 OPENAI_API_KEY=...
 ```
 
-3. Add context and prompt information (used by the NLU/LLM in order to process the voice commands in a desirable manner). You can download the data folder used in development at [this Google Drive folder](https://drive.google.com/drive/folders/1vTnuQttrPQ0hgq_KUsqppmDC-xUoEvJI?usp=sharing]). Once downloaded, unzip and place at `/voice_control/data`, ensuring there is no sub-data folder within it. That is, you should have defined the following files.
+### 4. LLM Data
+
+Add context and prompt information (used by the NLU/LLM in order to process the voice commands in a desirable manner). You can download the data folder used in development at [this Google Drive folder](https://drive.google.com/drive/folders/1vTnuQttrPQ0hgq_KUsqppmDC-xUoEvJI?usp=sharing]). Once downloaded, unzip and place at `/voice_control/data`, ensuring there is no sub-data folder within it. That is, you should have defined the following files.
 
 -   `/voice_control/data/context.jsonl`: TBD
 -   `/voice_control/data/initial.jsonl`: TBD
 -   `/voice_control/data/system_prompt.txt`: Defines the prompt provided to the LLM for how to respond when it is provided with your voice command.
 
-4. Run the main script.
+### 5. Run the main script.
 
 ```bash
 python voice_control/main.py
