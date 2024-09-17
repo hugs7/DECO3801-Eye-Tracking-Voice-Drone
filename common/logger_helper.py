@@ -11,7 +11,6 @@ from omegaconf import OmegaConf
 
 from . import file_handler
 
-from app.thread_helper import is_main_thread
 from app.str_helper import to_title_case
 
 RESET = "\033[0m"
