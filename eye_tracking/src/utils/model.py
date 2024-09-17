@@ -14,6 +14,12 @@ logger = init_logger()
 
 
 def get_ptgaze_model_dir() -> pathlib.Path:
+    """
+    Gets the directory to store the model files.
+
+    Returns:
+        pathlib.Path: The directory to store the model files
+    """
     package_root = pathlib.Path(__file__).parent.parent.parent.resolve()
     model_dir = package_root / "data/models/"
     model_dir.mkdir(exist_ok=True, parents=True)
@@ -21,6 +27,12 @@ def get_ptgaze_model_dir() -> pathlib.Path:
 
 
 def download_mpiigaze_model() -> pathlib.Path:
+    """
+    Downloads the pretrained MPIIGaze model.
+
+    Returns:
+        pathlib.Path: The path to the downloaded model
+    """
     logger.debug("Called _download_mpiigaze_model()")
     model_dir = get_ptgaze_model_dir()
     output_dir = model_dir / "models/"
@@ -40,12 +52,28 @@ def download_mpiigaze_model() -> pathlib.Path:
 
 
 def _expanduser(path: str) -> str:
+    """
+    Expands a relative path to absolute posix paths.
+    E.g. "~/path/to/file" -> "/home/user/path/to/file".
+
+    Args:
+        path (str): The path to expand as a string.
+
+    Returns:
+        str: The expanded path as a string.
+    """
     if not path:
         return path
     return pathlib.Path(path).expanduser().as_posix()
 
 
 def expanduser_all(config: DictConfig) -> None:
+    """
+    Expands the user in the paths in the config.
+
+    Args:
+        config (DictConfig): The config to expand the user in.
+    """
     config.gaze_estimator.checkpoint = _expanduser(config.gaze_estimator.checkpoint)
     config.gaze_estimator.camera_params = _expanduser(config.gaze_estimator.camera_params)
     config.gaze_estimator.normalized_camera_params = _expanduser(config.gaze_estimator.normalized_camera_params)
@@ -58,6 +86,13 @@ def expanduser_all(config: DictConfig) -> None:
 
 
 def _check_path(config: DictConfig, key: str) -> None:
+    """
+    Checks if the path exists and is a file.
+
+    Args:
+        config (DictConfig): The config to check the path in.
+        key (str): The key to get the path from the config.
+    """
     path_str = operator.attrgetter(key)(config)
     path = pathlib.Path(path_str)
     if not path.exists():
@@ -67,6 +102,12 @@ def _check_path(config: DictConfig, key: str) -> None:
 
 
 def check_path_all(config: DictConfig) -> None:
+    """
+    Checks if the paths in the config exist and are files.
+
+    Args:
+        config (DictConfig): The config to check the paths in.
+    """
     _check_path(config, "gaze_estimator.checkpoint")
     _check_path(config, "gaze_estimator.camera_params")
     _check_path(config, "gaze_estimator.normalized_camera_params")
