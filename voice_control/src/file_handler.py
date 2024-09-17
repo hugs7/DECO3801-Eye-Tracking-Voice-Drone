@@ -7,21 +7,10 @@ import pathlib
 from typing import Optional
 
 from common.logger_helper import init_logger
+from common.file_handler import get_project_root
+
 
 logger = init_logger()
-
-
-def get_project_root() -> pathlib.Path:
-    """
-    Returns the root folder of the project, assuming 'voice_control' is part of the directory structure.
-
-    Returns:
-        pathlib.Path: The path to the root folder of the project.
-    """
-
-    project_root = pathlib.Path(__file__).parent.parent.parent.resolve()
-    logger.trace(f"Project root: {project_root}")
-    return project_root
 
 
 def get_package_folder() -> pathlib.Path:
