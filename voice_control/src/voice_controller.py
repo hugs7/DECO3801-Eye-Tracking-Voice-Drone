@@ -5,6 +5,8 @@ Controller for voice processing
 from typing import Optional, Tuple, List, Dict
 import ast
 
+from omegaconf import OmegaConf
+
 from common.logger_helper import init_logger
 
 from .audio import AudioRecogniser
@@ -14,17 +16,14 @@ logger = init_logger()
 
 
 class VoiceController:
-    def __init__(self, config, shared_manager_data: Dict):
+    def __init__(self, config: OmegaConf, shared_manager_data: Optional[Dict] = None):
         """
         Initialises the voice controller.
 
         Args:
-            config: The configuration object
-
-            (Only provided if running as a child thread)
-            stop_event: Event to signal stop
-            shared_data: Shared data between threads
-            data_lock: Lock for shared data
+            config (OmegaConf): Configuration for the voice controller.
+            manager_data (Optional[Dict]): Interprocess communication (IPC) data dictionary:
+                                           (Only provided if running as a child process)
 
         Returns:
             None
