@@ -10,8 +10,8 @@ import sys
 from omegaconf import OmegaConf
 
 from . import file_handler
+from .str_helper import to_title_case
 
-from app.str_helper import to_title_case
 
 RESET = "\033[0m"
 BRIGHT_RED = "\033[91m"

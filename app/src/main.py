@@ -10,12 +10,12 @@ from typing import List
 
 from omegaconf import OmegaConf
 
-from import_helper import dynamic_import
+# Must go first to ensure project directory is added to sys.path
+from utils.import_helper import dynamic_import
+from utils.conf_helper import safe_get
 
 from common.logger_helper import init_logger
-
-from thread_helper import get_function_module
-from conf_helper import safe_get
+from common.thread_helper import get_function_module
 
 
 logger = init_logger()
