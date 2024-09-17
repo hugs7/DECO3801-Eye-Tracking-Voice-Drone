@@ -62,7 +62,7 @@ class GazeDetector:
             self.data_lock = data_lock
 
             # Lazily import thread helpers only if running in thread mode
-            from app.thread_helper import thread_loop_handler, thread_exit
+            from common.thread_helper import thread_loop_handler, thread_exit
 
             # Bind to class attributes so we can access them in class methods
             self.thread_loop_handler = thread_loop_handler

@@ -9,8 +9,7 @@ from threading import Event, Lock
 from time import sleep
 
 from common.logger_helper import init_logger
-
-from thread_helper import thread_loop_handler, is_main_thread
+from common.thread_helper import thread_loop_handler, is_main_thread
 
 logger = init_logger()
 
