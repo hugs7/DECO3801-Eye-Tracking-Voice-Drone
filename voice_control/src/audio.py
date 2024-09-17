@@ -37,6 +37,9 @@ class AudioRecogniser:
         self.recogniser = sr.Recognizer()
         self.config = audio_config
 
+        # Assume microphone is available by default
+        self.microphone_available = True
+
         self.wake_command = self.config.wake_command
         self.enable_sound_effects = self.config.sound_effects.enable
         self.sound_effects: Dict[str, AudioSegment] = {}
@@ -144,15 +147,19 @@ class AudioRecogniser:
         if source:
             audio = listen_callback(source)
         else:
-            with sr.Microphone() as source:
-                audio = listen_callback(source)
+            try:
+                with sr.Microphone() as source:
+                    audio = listen_callback(source)
+            except OSError as e:
+                self.__handle_microphone_error(e)
+                return None
 
         if save:
             self.save_audio(audio)
 
         return audio
 
-    def capture_voice_input(self):
+    def capture_voice_input(self) -> Optional[sr.AudioData]:
         """
         Listens continuously for the wake word defined in config.
         Once the wake word is detected, it listens continuously until the user stops speaking.
@@ -161,16 +168,25 @@ class AudioRecogniser:
             None
 
         Returns:
-            AudioData: AudioData object containing the recorded audio after wake word is detected.
+            Optional[AudioData]: AudioData object containing the recorded audio after wake
+                                 word is detected. None if the microphone is not available
+                                 or an error occurs.
         """
 
-        with sr.Microphone() as source:
-            logger.info("Listening for wake word...")
+        if not self.microphone_available:
+            logger.debug("Microphone not available.")
+            return None
 
-            audio = self.listen_for_audio(source, False, None)
-            if self._detect_wake_word(audio):
-                logger.info("Wake word detected, listening for commands...")
-                return self._listen_until_silence(source)
+        try:
+            with sr.Microphone() as source:
+                logger.info("Listening for wake word...")
+
+                audio = self.listen_for_audio(source, False, None)
+                if self._detect_wake_word(audio):
+                    logger.info("Wake word detected, listening for commands...")
+                    return self._listen_until_silence(source)
+        except OSError as e:
+            self.__handle_microphone_error(e)
 
     def convert_voice_to_text(self, audio: sr.AudioData) -> Optional[str]:
         """
@@ -313,6 +329,19 @@ class AudioRecogniser:
             play(sound)
         else:
             logger.error(f"Sound effect not found: {sound_name}")
+
+    def __handle_microphone_error(self, e: Exception):
+        """
+        Handles microphone errors by logging the error and playing a sound effect.
+
+        Args:
+            e (Exception): The exception raised by the microphone.
+
+        Returns:
+            None
+        """
+        logger.error("Error accessing microphone. Details: %s", e)
+        self.microphone_available = False
 
     def log_volume(self, indata: np.ndarray, frames: int, time: any, status: any):
         """
