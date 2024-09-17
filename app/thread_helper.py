@@ -5,9 +5,9 @@ Helps with child threads
 from typing import Optional
 from threading import Event, current_thread
 
-import logging
+from common.logger_helper import init_logger
 
-logger = logging.getLogger(__name__)
+logger = init_logger()
 
 
 def is_main_thread() -> bool:
