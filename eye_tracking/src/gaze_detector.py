@@ -16,6 +16,7 @@ import numpy as np
 from omegaconf import OmegaConf
 
 from common import constants as cc
+from common.omegaconf_helper import safe_get
 
 from .face import Face
 from .face_model_mediapipe import FaceModelMediaPipe
