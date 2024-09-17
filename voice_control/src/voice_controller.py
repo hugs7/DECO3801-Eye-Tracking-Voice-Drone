@@ -2,8 +2,9 @@
 Controller for voice processing
 """
 
-from typing import Optional, Tuple, List, Dict
+from typing import Optional, Tuple, List, Dict, Union
 import ast
+from multiprocessing import Queue
 
 from omegaconf import OmegaConf
 
@@ -16,7 +17,7 @@ logger = init_logger()
 
 
 class VoiceController:
-    def __init__(self, config: OmegaConf, shared_manager_data: Optional[Dict] = None):
+    def __init__(self, config: OmegaConf, manager_data: Optional[Dict] = None):
         """
         Initialises the voice controller.
 
@@ -31,10 +32,10 @@ class VoiceController:
 
         self.config = config
 
-        self.running_in_process = shared_manager_data is not None
+        self.running_in_process = manager_data is not None
         if self.running_in_process:
             logger.info("Running in process mode")
-            self.shared_manager_data = shared_manager_data
+            self.manager_data = manager_data
         else:
             logger.info("Running in main mode")
 
@@ -88,14 +89,14 @@ class VoiceController:
         else:
             # Mostly for testing purposes
             logger.info(f"User command: {text}")
-            self.save_command_to_shared_data(text)
+            self.save_command_to_thread_data(text)
 
         return True  # For now
 
     def process_voice_command(self, user_command: str) -> Optional[List[Tuple[str, int]]]:
         """
         Takes in the voice in text form and sends it to LLM and returns the converted drone command.
-        If running in thread mode, the result is stored in shared_data to send to the drone controller.
+        If running in thread mode, the result is stored in thread_data to send to the drone controller.
         If the command cannot be parsed, returns (and if applicable sets the shared data to) None.
 
         Args:
@@ -116,12 +117,27 @@ class VoiceController:
         except Exception:
             logger.error("Failed to parse result into dictionary.")
 
-        logger.info(f"Voice command: {parsed_commands} of type {type(parsed_commands)}")
-
-        if self.running_in_process:
-            logger.info(f"Setting voice command to {parsed_commands}")
-            self.shared_manager_data["voice_control"]["voice_command"] = parsed_commands
-
-            logger.debug("Voice command set in shared data.")
+        logger.info(f"Parsed voice command: '%s'", parsed_commands)
+        logger.debug(f"Parsed voice command of type %s", type(parsed_commands))
+        self.save_command_to_thread_data(parsed_commands)
 
         return parsed_commands
+
+    def save_command_to_thread_data(self, command: Union[str, List[Tuple[str, int]]]) -> None:
+        """
+        Saves the command to the shared data.
+
+        Args:
+            command (Union[str, List[Tuple[str, int]]]): The command to save.
+
+        Returns:
+            None
+        """
+        if not self.running_in_process:
+            logger.trace("Not running in process mode. Not saving command to shared data.")
+            return
+
+        logger.info(f"Setting voice command to '%s'", command)
+        command_queue: Queue = self.manager_data["voice_control"]["command_queue"]
+        command_queue.put(command)
+        logger.debug("Voice command '%s' added to command queue of length %d.", command, command_queue.qsize())
