@@ -4,11 +4,12 @@ Modified by: Hugo Burton
 Last Updated: 21/08/2024
 """
 
-from common.logger_helper import init_logger
 import pathlib
 import operator
+
 from omegaconf import DictConfig
 
+from common.logger_helper import init_logger
 
 logger = init_logger()
 
