@@ -1,0 +1,13 @@
+opencv-python
+mediapipe
+omegaconf
+torchvision
+tiktoken
+PyAudio
+SpeechRecognition
+sounddevice
+torchaudio
+python-dotenv
+openai==0.28
+transformers
+pydub
