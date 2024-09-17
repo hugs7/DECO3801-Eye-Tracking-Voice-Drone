@@ -3,9 +3,9 @@ Module for audio processing.
 """
 
 from typing import Optional, Dict
-import numpy as np
 import pathlib
 
+import numpy as np
 import speech_recognition as sr
 from pydub import AudioSegment
 from pydub.playback import play
