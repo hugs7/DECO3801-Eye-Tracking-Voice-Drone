@@ -12,6 +12,7 @@ from pydub.playback import play
 from omegaconf import OmegaConf
 
 from common.logger_helper import init_logger
+from common.file_handler import get_file_extension
 
 from . import constants as c
 from . import file_handler
@@ -270,7 +271,7 @@ class AudioRecogniser:
         str_file_path = str(file_path)
         logger.debug("Loading sound file: %s", file_path)
         try:
-            extension = file_handler.get_file_extension(file_path, True)
+            extension = get_file_extension(file_path, True)
             logger.debug(f"Audio format: {extension}")
             segment = AudioSegment.from_file(str_file_path, format=extension)
         except Exception as e:

@@ -79,25 +79,6 @@ def get_assets_folder() -> pathlib.Path:
     return assets_folder
 
 
-def get_file_extension(file_path: pathlib.Path, remove_dot: bool = False) -> str:
-    """
-    Returns the file extension of the file at the specified path.
-
-    Args:
-        file_path (pathlib.Path): The path to the file.
-        remove_dot (bool): Whether to remove the dot from the file extension. Defaults to False.
-
-    Returns:
-        str: The file extension.
-    """
-    suffix = file_path.suffix
-
-    if remove_dot:
-        suffix = suffix[1:]
-
-    return suffix
-
-
 def get_context_file() -> pathlib.Path:
     """
     Returns the full path to the 'context.jsonl' file in the 'data' folder inside 'voice_control'.

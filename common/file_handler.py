@@ -27,3 +27,22 @@ def get_common_folder() -> Path:
     project_root = get_project_root()
     common_folder = project_root / "common"
     return common_folder
+
+
+def get_file_extension(file_path: Path, remove_dot: bool = False) -> str:
+    """
+    Returns the file extension of the file at the specified path.
+
+    Args:
+        file_path (Path): The path to the file.
+        remove_dot (bool): Whether to remove the dot from the file extension. Defaults to False.
+
+    Returns:
+        str: The file extension.
+    """
+    suffix = file_path.suffix
+
+    if remove_dot:
+        suffix = suffix[1:]
+
+    return suffix
