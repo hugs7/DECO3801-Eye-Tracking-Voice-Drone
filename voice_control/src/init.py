@@ -8,8 +8,9 @@ import os
 from dotenv import load_dotenv
 import logging
 
-from . import constants as c
 from common.logger_helper import init_logger
+
+from . import constants as c
 from . import file_handler
 
 logger = init_logger(logging.DEBUG)
