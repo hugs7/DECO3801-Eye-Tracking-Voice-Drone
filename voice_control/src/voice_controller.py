@@ -76,8 +76,12 @@ class VoiceController:
         """
 
         if self.config.voice_control.detect_voice:
+            if not self.audio_recogniser.microphone_available:
+                return False
+
             user_audio = self.audio_recogniser.capture_voice_input()
             if user_audio is None:
+                # Keep the loop running
                 return True
 
             text = self.audio_recogniser.convert_voice_to_text(user_audio)
