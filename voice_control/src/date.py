@@ -2,9 +2,9 @@
 Module for date and time related functions
 """
 
-from logger_helper import init_logger
 from datetime import datetime
 
+from common.logger_helper import init_logger
 
 logger = init_logger()
 

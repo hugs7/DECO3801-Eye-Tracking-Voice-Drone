@@ -1,1 +1,1 @@
-from .llm_main import run_terminal_agent
+from .llm_main import LLM

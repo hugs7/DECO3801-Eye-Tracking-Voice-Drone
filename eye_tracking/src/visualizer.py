@@ -1,19 +1,28 @@
+"""
+This module contains the Visualizer class, which is responsible for visualising the output of the eye tracking system.
+"""
+
 from typing import Optional, Tuple
+import numpy as np
 
 import cv2
-import numpy as np
 from scipy.spatial.transform import Rotation
-import logging
 
-from camera import Camera
-from face import Face
-from utils import transforms
+from common.logger_helper import init_logger
 
-logger = logging.getLogger(__name__)
+from .camera import Camera
+from .face import Face
+from .utils import transforms
+
+logger = init_logger()
 AXIS_COLORS = [(0, 0, 255), (0, 255, 0), (255, 0, 0)]
 
 
 class Visualizer:
+    """
+    The Visualizer class is responsible for visualising the output of the eye tracking system.
+    """
+
     def __init__(self, camera: Camera, center_point_index: int):
         logger.info("Initialising Visualizer")
         self._camera = camera
@@ -23,7 +32,7 @@ class Visualizer:
     def set_image(self, image: np.ndarray) -> None:
         """
         Binds the image to the visualizer state
-        
+
         Args:
             image: The image to be bound
 
@@ -55,7 +64,7 @@ class Visualizer:
     def draw_bbox(self, bbox: np.ndarray, color: Tuple[int, int, int] = (0, 255, 0), lw: int = 1) -> None:
         """
         Draws a bounding box on the image
-        
+
         Args:
             bbox: The bounding box to be drawn
             color: The colour of the bounding box
@@ -73,7 +82,7 @@ class Visualizer:
     def _convert_pt(point: np.ndarray) -> Tuple[int, int]:
         """
         Converts the point to a tuple of integers
-        
+
         Args:
             point: The point to be converted
 
@@ -86,7 +95,7 @@ class Visualizer:
     def draw_points(self, points: np.ndarray, color: Tuple[int, int, int] = (0, 0, 255), size: int = 3) -> None:
         """
         Draws points from 2D image coordinates onto the image (direct drawing).
-        
+
         Args:
             points: The points to be drawn
             color: The colour of the points
@@ -105,7 +114,7 @@ class Visualizer:
     def create_opacity(self, overlay: np.ndarray, opacity: float):
         """
         Blends the original image and the overlay together, with a specified transparency/opacity
-        
+
         Args:
             overlay: The overlay to be blended with the original image
             opacity: The transparency of the overlay
@@ -129,7 +138,7 @@ class Visualizer:
     ):
         """
         Calculates the origin of the text to be drawn in the centre of the rectangle
-        
+
         Args:
             text: The text to be drawn
             text_font_face: The font face of the text
@@ -142,8 +151,7 @@ class Visualizer:
             The origin of the text
         """
 
-        (text_width, text_height), text_bottom_y = cv2.getTextSize(
-            text, text_font_face, font_scale, thickness)
+        (text_width, text_height), text_bottom_y = cv2.getTextSize(text, text_font_face, font_scale, thickness)
         text_middle = text_width // 2
 
         # Calculate the x_coordinate of the middle of the rectangle (i.e left-most x-coord of rectangle + middle of rectangle)
@@ -152,8 +160,7 @@ class Visualizer:
 
         # Aligns the centre of the text with the centre of the rectangle
         rectangle_bottom_left = rectangle_middle_x_coord - text_middle
-        text_org = (rectangle_bottom_left,
-                    (top_left[1] + bottom_right[1]) // 2)
+        text_org = (rectangle_bottom_left, (top_left[1] + bottom_right[1]) // 2)
 
         return text_org
 
@@ -173,7 +180,7 @@ class Visualizer:
     ):
         """
         Draws a labelled rectangle on the specified overlay
-        
+
         Args:
             top_left: The top left corner of the rectangle
             bottom_right: The bottom right corner of the rectangle
@@ -193,30 +200,26 @@ class Visualizer:
 
         assert self.image is not None
         if text_org is None:
-            text_org = self.calculate_text_org(
-                text, text_font_face, font_scale, 2, top_left, bottom_right)
+            text_org = self.calculate_text_org(text, text_font_face, font_scale, 2, top_left, bottom_right)
 
         overlay = np.zeros_like(self.image, np.uint8)
         if border_color is not None:
             cv2.rectangle(overlay, top_left, bottom_right, border_color, -1)
 
             # Insets the rectangle to create a border effect
-            top_left = transforms.add_2d_point(
-                top_left, (border_thickness, border_thickness))
-            bottom_right = transforms.add_2d_point(
-                bottom_right, (-border_thickness, -border_thickness))
+            top_left = transforms.add_2d_point(top_left, (border_thickness, border_thickness))
+            bottom_right = transforms.add_2d_point(bottom_right, (-border_thickness, -border_thickness))
 
         cv2.rectangle(overlay, top_left, bottom_right, bg_color, -1)
         self.create_opacity(overlay, bg_alpha)
-        cv2.putText(self.image, text, text_org, text_font_face,
-                    font_scale, bg_color, 2, text_line_type, False)
+        cv2.putText(self.image, text, text_org, text_font_face, font_scale, bg_color, 2, text_line_type, False)
 
     def draw_3d_point(
         self, point3d: np.ndarray, color: Tuple[int, int, int] = (255, 0, 255), size=3, clamp_to_screen: bool = False
     ) -> Tuple[int, int]:
         """
         Draw a point from 3D world coordinates onto the image.
-        
+
         Args:
             point3d: The 3D point to be drawn
             color: The colour of the point. Default is magenta
@@ -240,7 +243,7 @@ class Visualizer:
     ) -> None:
         """
         Draw points from 3D world coordinates onto the image.
-        
+
         Args:
             points3d: The 3D points to be drawn
             color: The colour of the points. Default is magenta
@@ -261,7 +264,7 @@ class Visualizer:
     def draw_3d_line(self, point0: np.ndarray, point1: np.ndarray, color: Tuple[int, int, int] = (255, 255, 0), lw=1) -> None:
         """
         Draw a line from 3D world coordinates onto the image.
-        
+
         Args:
             point0: The start point of the line
             point1: The end point of the line
@@ -283,7 +286,7 @@ class Visualizer:
     def draw_model_axes(self, face: Face, length: float, lw: int = 2) -> None:
         """
         Draw the axes of the model coordinate system onto the image.
-        
+
         Args:
             face: The face object
             length: The length of the axes
@@ -299,11 +302,9 @@ class Visualizer:
         assert face.head_position is not None
         assert face.landmarks is not None
         # Get the axes of the model coordinate system
-        axes3d = np.eye(
-            3, dtype=np.float32) @ Rotation.from_euler("XYZ", [0, np.pi, 0]).as_matrix()
+        axes3d = np.eye(3, dtype=np.float32) @ Rotation.from_euler("XYZ", [0, np.pi, 0]).as_matrix()
         axes3d = axes3d * length
-        axes2d = self._camera.project_points(
-            axes3d, face.head_pose_rot.as_rotvec(), face.head_position)
+        axes2d = self._camera.project_points(axes3d, face.head_pose_rot.as_rotvec(), face.head_position)
         center = face.landmarks[self._center_point_index]
         center = self._convert_pt(center)
         for pt, color in zip(axes2d, AXIS_COLORS):
@@ -313,7 +314,7 @@ class Visualizer:
     def _clamp_point(self, point_or_points: np.ndarray) -> np.ndarray:
         """
         Clamp the point or points to the image resolution
-        
+
         Args:
             point_or_points: The point or points to be clamped
 
@@ -326,7 +327,7 @@ class Visualizer:
     def flip_point_x(self, point: Tuple[int, int]) -> Tuple[int, int]:
         """
         Flip the x-coordinate of the point
-        
+
         Args:
             point: The point to be flipped
 

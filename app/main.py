@@ -4,88 +4,125 @@ Hugo Burton
 06/09/2024
 """
 
-import importlib
-import logging
 from threading import Thread, Event, Lock
-from time import sleep
+from multiprocessing import Manager, Process
+from typing import List
 
-import constants as c
+from omegaconf import OmegaConf
+
+from import_helper import dynamic_import
+
+from common.logger_helper import init_logger
+
 from thread_helper import get_function_module
-from logger_helper import init_root_logger, disable_logger
-
-root_logger = init_root_logger()
+from conf_helper import safe_get
 
 
-def dynamic_import(module_name: str, alias: str):
+logger = init_logger()
+
+if __name__ == "__main__":
+    logger.info(">>> Begin")
+
+    logger.info("Initialising modules...")
+    eye_tracking = dynamic_import("eye_tracking.src.main", "main")
+    voice_control = dynamic_import("voice_control.src.main", "main")
+    drone = dynamic_import("drone", "main")
+    logger.info("Modules initialised.")
+elif __name__ == "__mp_main__":
+    logger.info(">>> Begin Multiprocessing")
+
+
+def is_any_thread_alive(threads: List[Thread]):
     """
-    Dynamically imports a module based on the current script context.
-
-    Args:
-        module_name: Name of the module to import
-        alias: Alias for the imported module
-
-    Returns:
-        Imported module
+    Check if any thread is alive.
     """
-    if __name__ == "__main__":
-        module = importlib.import_module(module_name)
-    else:
-        # Handle relative imports
-        module = importlib.import_module(
-            f".{module_name}", package=__package__)
-
-    return getattr(module, alias)
-
-
-eye_tracking = dynamic_import("eye_tracking", "main")
-voice_control = dynamic_import("voice_control", "main")
-drone = dynamic_import("drone", "main")
-
-# === Globals ===
-
-stop_event = Event()
-data_lock = Lock()
-
-
-def is_any_thread_alive(threads):
     return any(t.is_alive() for t in threads)
 
 
+def main_loop(shared_data: OmegaConf):
+    """
+    Main loop in parent thread.
+
+    Args:
+        shared_data: Shared data between threads
+
+    Returns:
+        None
+    """
+
+    # Read shared eye gaze
+    eye_tracking_data = shared_data.eye_tracking
+    gaze_side = safe_get(eye_tracking_data, "gaze_side")
+
+    if gaze_side is not None:
+        logger.info(f"Received gaze side: {gaze_side}")
+
+
 def main():
-    root_logger.debug(">>> Begin")
+    logger.info(">>> Main Begin")
 
-    # Create threads for each of the components
-    thread_functions = [eye_tracking, voice_control, drone]
-    shared_data = {
-        f"{get_function_module(func)}_data": None for func in thread_functions}
-    threads = [
-        Thread(target=lambda func=func: func(stop_event, shared_data,
-               data_lock), name=f"thread_{get_function_module(func)}")
-        for func in thread_functions
-    ]
-
-    disable_logger("voice_control")
-    logging.getLogger("eye_tracking").setLevel(logging.DEBUG)
-    logging.getLogger("drone").setLevel(logging.DEBUG)
-
-    # Start all threads
-    for thread in threads:
-        thread.start()
+    # Define lock and stop event early to ensure KeyboardInterrupt
+    # can signal all threads to stop.
+    stop_event = Event()
+    data_lock = Lock()
 
     try:
-        # Periodically check if any thread is alive
+        # =========== Processes ===========
+        # Due to blocking operation, the voice control module is run in a Process
+        # (instead of a Thread) to allow for parallel execution and termination on
+        # parent process exit. As a result, the shared data is managed by a Manager
+        # object to allow for inter-process communication.
+        logger.info("Initialising voice process")
+        manager = Manager()
+        interprocess_data = manager.dict()
+        process_functions = {voice_control: {"command_queue": manager.Queue()}}
+        process_shared_dict = {get_function_module(func): init_val for func, init_val in process_functions.items()}
+        interprocess_data.update(process_shared_dict)
+        processes = [
+            Process(target=func, args=(interprocess_data,), name=f"process_{get_function_module(func)}") for func in process_functions
+        ]
+
+        logger.info("Initialising processes")
+        for process in processes:
+            logger.debug(f"Starting process {process.name}")
+            process.start()
+
+        # =========== Threads ===========
+
+        # The remaining components (eye tracking and drone) are run in threads.
+        # Threads use a different shared_data object because threads share memory.
+        # but also require a lock to prevent race conditions when accessing shared data.
+        thread_functions = [eye_tracking, drone]
+        shared_data = OmegaConf.create({get_function_module(func): OmegaConf.create() for func in thread_functions})
+        threads = [
+            Thread(target=lambda func=func: func(stop_event, shared_data, data_lock), name=f"thread_{get_function_module(func)}")
+            for func in thread_functions
+        ]
+        logger.info("Initialising threads")
+        for thread in threads:
+            logger.debug(f"Starting thread {thread.name}")
+            thread.start()
+
         while is_any_thread_alive(threads):
-            # Sleep for a short duration to prevent busy-waiting
-            sleep(c.BUSY_WAIT_PERIOD_SECONDS)
+            main_loop(shared_data)
     except KeyboardInterrupt:
-        root_logger.critical("Interrupted! Stopping all threads...")
+        logger.critical("Interrupted! Stopping all threads...")
         stop_event.set()
 
-        # Ensure all threads are properly joined after signaling them to stop
-        for thread in threads:
-            thread.join()
+    logger.info("Signalling all threads to stop")
+    stop_event.set()
 
-    root_logger.debug("<<< End")
+    # Ensure all threads and processes are properly joined after signaling them to stop
+    for process in processes:
+        process.join()
+        if process.is_alive():
+            logger.info(f"Terminating process {process.name}")
+            process.terminate()
+
+    for thread in threads:
+        thread.join()
+
+    logger.debug("<<< End")
 
 
 if __name__ == "__main__":

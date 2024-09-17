@@ -1,0 +1,38 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "App Multithreadding",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "app/main.py",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "Eye Tracking",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "-m",
+            "args": ["eye_tracking.src.main"],
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Voice Control (Module)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "-m",
+            "args": ["voice_control.src.main"],
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
+            "name": "Voice Control (Local)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "voice_control/main.py",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        }
+    ]
+}

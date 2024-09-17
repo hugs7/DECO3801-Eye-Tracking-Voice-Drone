@@ -2,26 +2,15 @@
 File handling functions for the voice control project.
 """
 
-from logger_helper import init_logger
 import os
 import pathlib
 from typing import Optional
 
+from common.logger_helper import init_logger
+from common.file_handler import get_project_root
+
 
 logger = init_logger()
-
-
-def get_project_root() -> pathlib.Path:
-    """
-    Returns the root folder of the project, assuming 'voice_control' is part of the directory structure.
-
-    Returns:
-        pathlib.Path: The path to the root folder of the project.
-    """
-
-    project_root = pathlib.Path(__file__).parent.parent.parent.resolve()
-    logger.trace(f"Project root: {project_root}")
-    return project_root
 
 
 def get_package_folder() -> pathlib.Path:
@@ -65,6 +54,20 @@ def get_recordings_folder() -> pathlib.Path:
     return recordings_folder
 
 
+def get_assets_folder() -> pathlib.Path:
+    """
+    Returns the path to the 'assets' folder inside the 'voice_control' folder.
+
+    Returns:
+        pathlib.Path: The path to the 'assets' folder.
+    """
+    package_root = get_package_folder()
+    assets_folder = package_root / "assets"
+    create_folder_if_not_exists(assets_folder)
+    logger.trace(f"Assets folder: {relative_path(assets_folder)}")
+    return assets_folder
+
+
 def get_context_file() -> pathlib.Path:
     """
     Returns the full path to the 'context.jsonl' file in the 'data' folder inside 'voice_control'.
@@ -88,7 +91,7 @@ def file_exists(file_path: pathlib.Path) -> bool:
     """
 
     exists = os.path.exists(file_path)
-    if (exists):
+    if exists:
         logger.debug(f"File exists: {file_path}")
     else:
         logger.debug(f"File does not exist: {file_path}")
@@ -126,8 +129,7 @@ def list_files_in_folder(folder_path: pathlib.Path, file_types: Optional[list[st
     if file_types is None:
         file_types = [".*"]
 
-    files = [f for f in folder_path.iterdir() if f.is_file() and any(
-        f.name.endswith(file_type) for file_type in file_types)]
+    files = [f for f in folder_path.iterdir() if f.is_file() and any(f.name.endswith(file_type) for file_type in file_types)]
 
     logger.debug(f"Files in folder: {folder_path} - {files}")
     return files

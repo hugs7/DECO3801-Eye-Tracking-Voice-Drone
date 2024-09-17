@@ -2,10 +2,16 @@
 Logger helper module
 """
 
+from typing import Optional, Union
 import logging
 import inspect
-from thread_helper import is_main_thread
-from str_helper import to_title_case
+import sys
+
+from omegaconf import OmegaConf
+
+from . import file_handler
+
+from app.str_helper import to_title_case
 
 RESET = "\033[0m"
 BRIGHT_RED = "\033[91m"
@@ -88,7 +94,100 @@ class LoggerFormatter(logging.Formatter):
                 return RESET
 
 
-def init_logger(level: int = logging.INFO) -> logging.Logger:
+def get_logger_config() -> OmegaConf:
+    """
+    Get the logger configuration.
+
+    Returns:
+        Logger configuration
+    """
+    configs_folder = file_handler.get_common_folder() / "configs"
+    config_path = configs_folder / "logger.yaml"
+    if not config_path.exists():
+        raise FileNotFoundError(f"Logger configuration file not found: {config_path}")
+
+    logger_config = OmegaConf.load(config_path)
+    return logger_config
+
+
+def get_caller_module_name(caller_frame: inspect.FrameInfo) -> str:
+    """
+    Get the full name of the caller's module.
+
+    Args:
+        caller_frame: Caller's frame
+
+    Returns:
+        Caller's module name
+    """
+    caller_module = inspect.getmodule(caller_frame[0])
+    return caller_module.__name__
+
+
+def map_log_level(level: str) -> int:
+    """
+    Map the log level string to the corresponding logging level.
+
+    Args:
+        level: Log level string
+
+    Returns:
+        Logging level
+    """
+    # See https://docs.python.org/3/library/logging.html#logging.getLevelNamesMapping
+
+    if sys.version_info >= (3, 11):
+        # Introduced in Python 3.11
+        level_mapping = logging.getLevelNamesMapping()
+    else:
+        # Python 3.10 and below
+        level_mapping = logging._nameToLevel
+
+    log_level = level_mapping.get(level.upper())
+    if log_level is None:
+        raise ValueError(f"Invalid logging level: {level}")
+
+    return log_level
+
+
+def get_log_level(level: Union[int, str]) -> Optional[int]:
+    """
+    Get the logging level based on the caller's module name.
+
+    Args:
+        level: Logging level
+
+    Returns:
+        Logging level
+    """
+
+    loggers = logger_config.loggers
+
+    caller_frame = inspect.stack()[2]
+    caller_name = get_caller_module_name(caller_frame)
+    top_level_module = caller_name.split(".")[0]
+
+    log_level = None
+    if top_level_module in loggers:
+        # Override the logging level with the specified level
+        log_level = loggers[top_level_module]
+        if log_level == False:
+            # Disable the logger
+            log_level = logging.CRITICAL + 1
+        else:
+            # Parse the logging level
+            log_level = map_log_level(log_level)
+
+    if log_level is None:
+        if type(level) == int:
+            log_level = level
+        elif type(level) == str:
+            log_level = map_log_level(level)
+
+    return log_level
+
+
+def init_logger(level: Union[int, str] = logging.INFO) -> logging.Logger:
     """
     Initialise a named logger with the specified logging level.
 
@@ -101,38 +200,25 @@ def init_logger(level: int = logging.INFO) -> logging.Logger:
 
     # [1] gives the caller of this function
     caller_frame = inspect.stack()[1]
-    caller_module = inspect.getmodule(caller_frame[0])
+    caller_name = get_caller_module_name(caller_frame)
 
     # Use the caller's module name for the logger
-    logger_name = caller_module.__name__ if caller_module else "__main__"
+    if caller_name == "__main__":
+        logger_name = "Global"
+    elif caller_name == "__mp_main__":
+        logger_name = "Multiprocessing"
+    else:
+        logger_name = caller_name
+
     logger = logging.getLogger(logger_name)
 
-    if is_main_thread():
-        logger.setLevel(level)
+    level = get_log_level(level)
+    logger.setLevel(level)
 
     logger.propagate = False
 
     if not logger.hasHandlers():
         attach_formatter(logger)
-
-    return logger
-
-
-def init_root_logger(level: int = logging.INFO) -> logging.Logger:
-    """
-    Initialise the root logger with the specified logging level.
-
-    Args:
-        level: Logging level
-
-    Returns:
-        Logger instance
-    """
-
-    logger = logging.getLogger()
-    logger.setLevel(level)
-
-    attach_formatter(logger)
 
     return logger
 
@@ -148,8 +234,7 @@ def attach_formatter(logger: logging.Logger) -> None:
         None
     """
 
-    formatter = LoggerFormatter(
-        "%(asctime)s  %(output_name)-13s %(levelname)-13s%(message)s")
+    formatter = LoggerFormatter("%(asctime)s  %(output_name)-35s %(levelname)-13s%(message)s")
 
     if not logger.handlers:
         console_handler = logging.StreamHandler()
@@ -192,3 +277,5 @@ def test_logger():
 
 if __name__ == "__main__":
     test_logger()
+
+logger_config = get_logger_config()

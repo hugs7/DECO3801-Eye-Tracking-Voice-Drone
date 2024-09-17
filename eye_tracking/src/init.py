@@ -6,23 +6,26 @@ Last Updated: 21/08/2024
 
 import pathlib
 from omegaconf import DictConfig, OmegaConf
-import logging
-from utils.model import (
+
+from common.logger_helper import init_logger
+
+from .utils.model import (
     check_path_all,
     download_mpiigaze_model,
     expanduser_all,
 )
-from utils.camera import generate_dummy_camera_params
-from omegaconf import DictConfig, OmegaConf
+from .utils.camera import generate_dummy_camera_params
 
 
-logger = logging.getLogger(__name__)
+logger = init_logger()
 
 
 def init_ptgaze_config() -> DictConfig:
     """
     Custom config initialiser for ptgaze
-    :return DictConfig: The ptgaze config
+
+    Returns:
+        DictConfig: The ptgaze config
     """
 
     package_root = pathlib.Path(__file__).parent.parent.resolve()
@@ -39,7 +42,9 @@ def init_ptgaze_config() -> DictConfig:
 def init_ptgaze() -> DictConfig:
     """
     Initialises ptgaze for eye tracking
-    :return DictConfig: The ptgaze config
+
+    Returns:
+        DictConfig: The locked ptgaze config
     """
 
     config = init_ptgaze_config()

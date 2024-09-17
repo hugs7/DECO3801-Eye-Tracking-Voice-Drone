@@ -1,5 +1,4 @@
 tiktoken
-colorama
 PyAudio
 SpeechRecognition
 sounddevice
@@ -8,3 +7,4 @@ python-dotenv
 openai==0.28
 transformers
 omegaconf
+pydub

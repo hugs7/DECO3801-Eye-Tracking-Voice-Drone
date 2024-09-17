@@ -1,53 +1,48 @@
 """
-Main module for the voice control program.
+Entry point for the voice control module.
 """
 
-import logging
+from typing import Optional, Dict
+import os
+import sys
 
-import init
-from LLM import run_terminal_agent
-import logger_helper
-import audio
+# Add the project root to the path. Must execute prior to common imports.
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
+sys.path.insert(0, project_root)
 
-root_logger = logger_helper.init_root_logger()
+from common.logger_helper import init_logger
 
+from . import init
+from .voice_controller import VoiceController
 
-def process_voice_command(text: str):
-    """
-    Takes in the voice in text form and sends it to LLM and returns the converted drone command.
-    """
-    commands = {
-        "left": "Left",
-        "right": "Right",
-        "up": "Up",
-        "down": "Down",
-        "forward": "Forward",
-        "back": "Back"
-    }
-    command = text.lower()
-    # Call the LLM to convert text
-    result = run_terminal_agent(text)
-    root_logger.info(result)
+logger = init_logger()
 
 
-def main():
+def main(manager_data: Optional[Dict] = None):
     """
     The main function that runs the voice control program.
+
+    Args:
+        manager_data (Optional[Dict]): Interprocess communication (IPC) data dictionary:
+                                       (Only provided if running as a child process)
+
+    Returns:
+        None
     """
 
     config = init.init()
 
-    audio_processor = audio.AudioRecogniser()
+    running_in_thread = manager_data is not None
 
-    if config.voice_control.use_existing_recording:
-        user_audio = audio_processor.load_audio()
+    if running_in_thread:
+        logger.info("Running as process.")
     else:
-        user_audio = audio_processor.capture_voice_input()
+        logger.info("Running in main mode")
 
-    text = audio_processor.convert_voice_to_text(user_audio)
-    process_voice_command(text)
+    voice_controller = VoiceController(config, manager_data)
+    voice_controller.run()
 
-    root_logger.info("Done.")
+    logger.info("Done.")
 
 
 if __name__ == "__main__":

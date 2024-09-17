@@ -6,7 +6,7 @@ Last Updated: 21/08/2024
 
 import numpy as np
 
-from face_model import FaceModel
+from .face_model import FaceModel
 
 
 class FaceModelMediaPipe(FaceModel):

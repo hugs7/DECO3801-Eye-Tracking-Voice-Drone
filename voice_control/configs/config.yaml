@@ -1,4 +1,19 @@
 voice_control:
+    use_existing_recording: False
+    detect_voice: True
+    send_to_llm: True
+audio:
+    save_recordings: False
+    wake_command: "Ok Drone"
+    listen_timeout: 60
+    phrase_time_limit: 4
+    ambient_noise_duration: 0.5
+    sound_effects:
+        enable: True
+        files:
+            wake: "sounds/wake.mp3"
+            accept: "sounds/accept.mp3"
+            reject: "sounds/reject.mp3"
+llm:
     model: gpt-4o-mini
-    log_level: DEBUG
-    use_existing_recording: True
+    temperature: 0
