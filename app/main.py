@@ -11,9 +11,9 @@ from typing import List
 from omegaconf import OmegaConf
 
 from import_helper import dynamic_import
+
 from common.logger_helper import init_logger
 
-import constants as c
 from thread_helper import get_function_module
 from conf_helper import safe_get
 
