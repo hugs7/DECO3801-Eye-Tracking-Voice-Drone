@@ -7,12 +7,13 @@ Last Updated: 21/08/2024
 import datetime
 from common.logger_helper import init_logger
 import pathlib
-from typing import Optional, Tuple, Dict
+from typing import Optional, Tuple, Dict, List
 from threading import Event, Lock
+from queue import Queue
 
 import cv2
 import numpy as np
-from omegaconf import DictConfig, OmegaConf
+from omegaconf import OmegaConf
 
 from .face import Face
 from .face_model_mediapipe import FaceModelMediaPipe
@@ -29,7 +30,7 @@ class GazeDetector:
 
     def __init__(
         self,
-        config: DictConfig,
+        config: OmegaConf,
         stop_event: Optional[Event] = None,
         thread_data: Optional[Dict] = None,
         data_lock: Optional[Lock] = None,
