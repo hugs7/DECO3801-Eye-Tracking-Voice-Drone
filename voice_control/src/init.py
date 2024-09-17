@@ -2,11 +2,12 @@
 Initialisation module
 """
 
-import openai
-from omegaconf import DictConfig, OmegaConf
 import os
-from dotenv import load_dotenv
 import logging
+
+from dotenv import load_dotenv
+from omegaconf import DictConfig, OmegaConf
+import openai
 
 from common.logger_helper import init_logger
 
