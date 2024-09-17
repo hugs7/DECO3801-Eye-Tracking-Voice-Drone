@@ -1,7 +1,7 @@
 voice_control:
     use_existing_recording: False
     detect_voice: True
-    send_to_llm: False
+    send_to_llm: True
 audio:
     save_recordings: False
     wake_command: "Ok Drone"
