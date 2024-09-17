@@ -22,7 +22,18 @@ logger = init_logger()
 
 
 class AudioRecogniser:
+    """
+    Class to handle voice recognition and audio processing.
+    """
+
     def __init__(self, audio_config: OmegaConf):
+        """
+        Initializes the AudioRecogniser.
+
+        Args:
+            audio_config (OmegaConf): The audio configuration settings.
+        """
+
         self.recogniser = sr.Recognizer()
         self.config = audio_config
 
