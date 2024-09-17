@@ -412,7 +412,7 @@ class GazeDetector:
             # practice for more complex inputs.
             key_buffer: List[int] = []
             with self.data_lock:
-                keyboard_queue: Optional[Queue] = safe_get(self.thread_data, "keyboard_queue")
+                keyboard_queue: Optional[Queue] = self.thread_data.get("keyboard_queue", None)
                 if keyboard_queue is not None:
                     while not keyboard_queue.empty():
                         key: int = keyboard_queue.get()
