@@ -2,22 +2,25 @@
 Core functionality for interacting with the language model and executing code in the agent's environment.
 """
 
+from typing import List, Tuple, Dict, Callable
+import json
+import os
 import contextlib
 from io import StringIO
-from typing import List, Tuple, Dict, Callable
 from code import InteractiveConsole
+
+from common.logger_helper import init_logger
+
 from .wrappers import AgentIsDone
 from .utils import ask_llm
 from .formatting import add_terminal_line_decorators, extract_terminal_entries
-import json
-import os
-import logging
 
 from ..file_handler import get_context_file
 from .. import str_helper
 from ..constants import MAX_LOOP
 
-logger = logging.getLogger(__name__)
+
+logger = init_logger()
 
 
 class AgentInteractiveConsole(InteractiveConsole):
@@ -58,9 +61,7 @@ class AgentInteractiveConsole(InteractiveConsole):
             self.showtraceback()
 
 
-def run_entry(
-        interactive_console: AgentInteractiveConsole, entry_code: str
-) -> Tuple[bool, str, str, str]:
+def run_entry(interactive_console: AgentInteractiveConsole, entry_code: str) -> Tuple[bool, str, str, str]:
     """
     Executes a given code entry in the agent's interactive console and captures the output.
 
@@ -100,8 +101,7 @@ def run_entry(
                         interactive_console.push("")
                 except AgentIsDone:
                     agent_is_done = True
-        executed_lines = add_terminal_line_decorators(
-            "\n".join(executed_lines))
+        executed_lines = add_terminal_line_decorators("\n".join(executed_lines))
         return (
             agent_is_done,
             redirected_stdout_stderr.getvalue().strip(),
@@ -135,9 +135,9 @@ def correct_format(response: str) -> bool:
 
 
 def run_until_halt(
-        interactive_console: AgentInteractiveConsole,
-        ask_fn: Callable[[List[Dict[str, str]], bool], str],
-        context: List[Dict[str, str]],
+    interactive_console: AgentInteractiveConsole,
+    ask_fn: Callable[[List[Dict[str, str]], bool], str],
+    context: List[Dict[str, str]],
 ) -> Tuple[bool, str]:
     """
     Continuously executes code provided by a language model until an agent signals completion or a valid output is produced.
@@ -202,10 +202,10 @@ def run_until_halt(
 
 
 def react(
-        interactive_console: AgentInteractiveConsole,
-        ask_fn: Callable[[List[Dict[str, str]], bool], str],
-        context: List[Dict[str, str]],
-        user_command: str,
+    interactive_console: AgentInteractiveConsole,
+    ask_fn: Callable[[List[Dict[str, str]], bool], str],
+    context: List[Dict[str, str]],
+    user_command: str,
 ) -> Tuple[bool, str]:
     """
     Handles user commands by updating context, saving it, and interacting with the LLM until a task is completed or output is produced.
@@ -238,18 +238,17 @@ def react(
     stored_context = []
 
     if os.path.exists(context_file) and os.path.getsize(context_file) > 0:
-        with open(context_file, 'r') as f:
+        with open(context_file, "r") as f:
             for line in f:
                 parsed = json.loads(line)
                 stored_context.append(parsed)
 
     stored_context.append({"role": "user", "content": user_command})
-    with open(context_file, 'w') as f:
+    with open(context_file, "w") as f:
         for entry in stored_context:
-            f.write(json.dumps(entry) + '\n')
+            f.write(json.dumps(entry) + "\n")
 
     logger.info(user_command)
     context.append({"role": "user", "content": user_command})
-    agent_is_done, message, output = run_until_halt(
-        interactive_console, ask_fn, stored_context)
+    agent_is_done, message, output = run_until_halt(interactive_console, ask_fn, stored_context)
     return agent_is_done, message, output

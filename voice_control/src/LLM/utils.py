@@ -1,12 +1,19 @@
-import tiktoken
+"""
+Utils for the Language Model (LLM) module.
+"""
+
 from typing import List, Dict, Callable
+
+import tiktoken
+
+from common.logger_helper import init_logger
+
 from .formatting import ensure_terminal_formatting
-import logging
 
 from ..constants import MAX_TOKENS, GPT_4
 
 gpt_token_encoder = tiktoken.encoding_for_model(GPT_4)
-logger = logging.getLogger(__name__)
+logger = init_logger()
 
 
 def context_token_len(context: List[Dict[str, str]]) -> int:

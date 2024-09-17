@@ -1,18 +1,21 @@
 """
-This module contains the main logic for running the terminal agent in the Local Language Model (LLM) system.
+Main logic for running the terminal agent in the Local Language Model (LLM) system.
 """
 
-import openai
 from typing import List, Dict, Optional
-import logging
+
 from omegaconf import OmegaConf
+import openai
+
+from common.logger_helper import init_logger
 
 from .core import AgentInteractiveConsole, react
 from .defaults import init_context
 from .wrappers import done, proxy_input
 from .formatting import remove_code_block_formatting
 
-logger = logging.getLogger(__name__)
+
+logger = init_logger()
 
 
 class LLM:
