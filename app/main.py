@@ -102,6 +102,9 @@ def main():
         for thread in threads:
             logger.debug(f"Starting thread {thread.name}")
             thread.start()
+
+        while is_any_thread_alive(threads):
+            main_loop(shared_data)
     except KeyboardInterrupt:
         logger.critical("Interrupted! Stopping all threads...")
         stop_event.set()
