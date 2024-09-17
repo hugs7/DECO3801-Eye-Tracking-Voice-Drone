@@ -1,7 +1,7 @@
 """
 Class to run the gaze estimation model
 Modified by: Hugo Burton
-Last Updated: 21/08/2024
+Last Updated: 17/09/2024
 """
 
 from common.logger_helper import init_logger
@@ -24,9 +24,20 @@ logger = init_logger()
 
 
 class GazeEstimator:
+    """
+    Class to run the eye gaze estimation machine learning model
+    """
+
     EYE_KEYS = [FacePartsName.REYE, FacePartsName.LEYE]
 
     def __init__(self, config: DictConfig):
+        """
+        Initialize the GazeEstimator
+
+        Args:
+            config: Gaze estimator configuration object
+        """
+
         self._config = config
 
         self._face_model3d = FaceModelMediaPipe()
