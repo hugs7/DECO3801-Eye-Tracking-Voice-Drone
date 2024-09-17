@@ -1,5 +1,8 @@
 """
-Helper functions for importing modules
+Helper for importing modules dynamically across the project repository.
+Adds the project root to enable imports from outside the entry point.
+E.g. if the entry point is /app/src/main.py we can then import from /voice_control/... 
+without any issues.
 """
 
 import importlib
@@ -15,16 +18,17 @@ from common.logger_helper import init_logger
 logger = init_logger()
 
 
-def dynamic_import(module_path: str, alias: str):
+def dynamic_import(module_path: str, alias: str) -> object:
     """
-    Dynamically imports a module based on the given path.
+    Dynamically imports a module based on the given path. Path should be given as
+    a Python module path. E.g. "voice_control.src.voice_controller".
 
     Args:
-        module_path: Relative path to the module to import
-        alias: Alias for the imported module's main function
+        module_path (str): Relative path to the module to import
+        alias (str): Alias for the imported module's main function
 
     Returns:
-        Imported module's function
+        (object) Imported module
     """
     logger.info(f"Importing module: {module_path}")
     try:
