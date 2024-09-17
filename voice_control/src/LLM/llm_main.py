@@ -19,12 +19,30 @@ logger = init_logger()
 
 
 class LLM:
+    """
+    Driver for interfacing with the OpenAI API to run the Local Language Model (LLM)
+    for interactive terminal agent tasks.
+    """
+
     def __init__(self, llm_config: OmegaConf):
+        """
+        Initialises the LLM with the specified configuration.
+
+        Args:
+            llm_config (OmegaConf): The configuration object for the LLM.
+        """
+
         self.config = llm_config
 
         self.__check_config()
 
-    def __check_config(self):
+    def __check_config(self) -> None:
+        """
+        Checks if the configuration object contains the required parameters.
+
+        Raises:
+            ValueError: If the configuration object is missing the required parameters.
+        """
         if "model" not in self.config:
             raise ValueError("The model parameter is required in the LLM configuration.")
 
