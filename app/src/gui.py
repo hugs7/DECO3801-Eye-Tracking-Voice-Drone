@@ -3,7 +3,7 @@ Handles GUI for the application using PyQt5
 """
 
 from typing import Dict, List, Union, Tuple, Optional
-from PyQt5.QtWidgets import QMainWindow, QVBoxLayout, QWidget, QPushButton, QLabel, QMenuBar, QMenu, QAction
+from PyQt5.QtWidgets import QMainWindow, QVBoxLayout, QWidget, QPushButton, QLabel, QLineEdit, QMenuBar, QMenu, QAction
 from PyQt5.QtCore import QTimer, Qt
 from PyQt5.QtGui import QImage, QPixmap, QKeyEvent
 import cv2
@@ -85,6 +85,9 @@ class MainApp(QMainWindow, CommonGUI):
         self.side_video_label = QLabel(self)
         self.side_video_label.setAlignment(Qt.AlignCenter)
         self.layout.addWidget(self.side_video_label)
+
+        self.text_input = QLineEdit(self)
+        self.layout.addWidget(self.text_input)
 
         # Button to switch video feeds
         self.switch_button = QPushButton("Switch", self)
