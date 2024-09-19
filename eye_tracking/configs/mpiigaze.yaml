@@ -1,37 +1,46 @@
 mode: MPIIGaze
 device: cpu
 model:
-    name: resnet_preact
+  name: resnet_preact
 face_detector:
-    mode: mediapipe
-    mediapipe_max_num_faces: 3
-    mediapipe_static_image_mode: false
+  mode: mediapipe
+  mediapipe_max_num_faces: 3
+  mediapipe_static_image_mode: false
 gaze_estimator:
-    checkpoint: ${PACKAGE_ROOT}/data/models/models/mpiigaze_resnet_preact.pth
-    camera_params: ${PACKAGE_ROOT}/calib/camera_params.yaml
-    use_dummy_camera_params: false
-    normalized_camera_params: ${PACKAGE_ROOT}/normalized_camera_params/mpiigaze.yaml
-    normalized_camera_distance: 0.6
+  checkpoint: ${PACKAGE_ROOT}/data/models/models/mpiigaze_resnet_preact.pth
+  camera_params: ${PACKAGE_ROOT}/calib/camera_params.yaml
+  use_dummy_camera_params: false
+  normalized_camera_params: ${PACKAGE_ROOT}/normalized_camera_params/mpiigaze.yaml
+  normalized_camera_distance: 0.6
 gaze_point:
-    smoothing_frames: 8
-    z_projection_multiplier: 0.9
-    gaze_vector_y_scale: 0.15
-    dot_size: 20
+  smoothing_frames: 8
+  z_projection_multiplier: 0.9
+  gaze_vector_y_scale: 0.15
+  dot_size: 20
 demo:
-    use_camera: true
-    display_on_screen: true
-    wait_time: 1
-    image_path: null
-    video_path: null
-    output_dir: null
-    output_file_extension: avi
-    head_pose_axis_length: 0.05
-    gaze_visualization_length: 0.05
-    show_bbox: false
-    show_head_pose: false
-    show_gaze_vector: false
-    show_landmarks: false
-    show_normalized_image: false
-    show_template_model: false
-    upscale_dim: [1500, 843]
-    hitbox_width_proprtion: 0.2
+  use_camera: true
+  display_on_screen: true
+  wait_time: 1
+  image_path: null
+  video_path: null
+  output_dir: null
+  output_file_extension: avi
+  head_pose_axis_length: 0.05
+  gaze_visualization_length: 0.05
+  show_bbox: false
+  show_head_pose: false
+  show_gaze_vector: false
+  show_landmarks: false
+  show_normalized_image: false
+  show_template_model: false
+  upscale_dim: [1500, 843]
+  hitbox_width_proprtion: 0.2
+keyboard_bindings:
+  bbox: b
+  landmark: l
+  head_pose: h
+  normalized_image: n
+  template_model: t
+  gaze_vector: g
+  calibrate: c
+  loop_toggle: .
