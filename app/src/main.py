@@ -75,7 +75,7 @@ def main():
         # =========== Threads ===========
 
         # The remaining components (eye tracking and drone) are run in threads.
-        # Threads use a different shared_data object because threads share memory.
+        # Threads use a different thread_data object because threads share memory.
         # but also require a lock to prevent race conditions when accessing shared data.
         thread_functions = [eye_tracking, drone]
         thread_data = OmegaConf.create({get_function_module(func): OmegaConf.create() for func in thread_functions})
