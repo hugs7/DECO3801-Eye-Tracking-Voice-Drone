@@ -1,0 +1,3 @@
+timers:
+    voice_command: 5
+    webcam: 60

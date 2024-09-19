@@ -1,1 +1,3 @@
 omegaconf
+PyQt5
+pydevd

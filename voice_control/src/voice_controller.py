@@ -112,7 +112,8 @@ class VoiceController:
                                              is invalid.
         """
         result = self.llm.run_terminal_agent(user_command)
-        logger.info(f"Result: '{result}' of type {type(result)}")
+        logger.info(f"Voice command: '%s'", user_command)
+        logger.debug(f"Voice command of type %s", type(user_command))
 
         # Parse the result into a list of tuples
         parsed_commands = None

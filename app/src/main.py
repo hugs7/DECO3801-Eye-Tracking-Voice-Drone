@@ -4,21 +4,24 @@ Hugo Burton
 06/09/2024
 """
 
+import sys
+from typing import List
 from threading import Thread, Event, Lock
 from multiprocessing import Manager, Process
-from typing import List
+
+# Must go before any other user imports to ensure project directory is added to sys.path
+from utils.import_helper import dynamic_import
 
 from omegaconf import OmegaConf
-
-# Must go first to ensure project directory is added to sys.path
-from utils.import_helper import dynamic_import
-from utils.conf_helper import safe_get
+from PyQt5.QtWidgets import QApplication
+from gui import MainApp
 
 from common.logger_helper import init_logger
 from common.thread_helper import get_function_module
 
 
 logger = init_logger()
+
 
 if __name__ == "__main__":
     logger.info(">>> Begin")
@@ -39,25 +42,6 @@ def is_any_thread_alive(threads: List[Thread]):
     return any(t.is_alive() for t in threads)
 
 
-def main_loop(shared_data: OmegaConf):
-    """
-    Main loop in parent thread.
-
-    Args:
-        shared_data: Shared data between threads
-
-    Returns:
-        None
-    """
-
-    # Read shared eye gaze
-    eye_tracking_data = shared_data.eye_tracking
-    gaze_side = safe_get(eye_tracking_data, "gaze_side")
-
-    if gaze_side is not None:
-        logger.info(f"Received gaze side: {gaze_side}")
-
-
 def main():
     logger.info(">>> Main Begin")
 
@@ -68,6 +52,7 @@ def main():
 
     try:
         # =========== Processes ===========
+
         # Due to blocking operation, the voice control module is run in a Process
         # (instead of a Thread) to allow for parallel execution and termination on
         # parent process exit. As a result, the shared data is managed by a Manager
@@ -90,12 +75,12 @@ def main():
         # =========== Threads ===========
 
         # The remaining components (eye tracking and drone) are run in threads.
-        # Threads use a different shared_data object because threads share memory.
+        # Threads use a different thread_data object because threads share memory.
         # but also require a lock to prevent race conditions when accessing shared data.
         thread_functions = [eye_tracking, drone]
-        shared_data = OmegaConf.create({get_function_module(func): OmegaConf.create() for func in thread_functions})
+        thread_data = OmegaConf.create({get_function_module(func): OmegaConf.create() for func in thread_functions})
         threads = [
-            Thread(target=lambda func=func: func(stop_event, shared_data, data_lock), name=f"thread_{get_function_module(func)}")
+            Thread(target=lambda func=func: func(stop_event, thread_data, data_lock), name=f"thread_{get_function_module(func)}")
             for func in thread_functions
         ]
         logger.info("Initialising threads")
@@ -103,11 +88,15 @@ def main():
             logger.debug(f"Starting thread {thread.name}")
             thread.start()
 
-        while is_any_thread_alive(threads):
-            main_loop(shared_data)
+        # GUI
+        # Keeps the main thread alive so we do not need a secondary while loop
+        logger.info("Initialising GUI")
+        gui = QApplication(sys.argv)
+        main_window = MainApp(stop_event, thread_data, data_lock, interprocess_data)
+        main_window.show()
+        gui.exec_()
     except KeyboardInterrupt:
         logger.critical("Interrupted! Stopping all threads...")
-        stop_event.set()
 
     logger.info("Signalling all threads to stop")
     stop_event.set()
@@ -121,6 +110,9 @@ def main():
 
     for thread in threads:
         thread.join()
+
+    logger.info("Closing GUI")
+    gui.quit()
 
     logger.debug("<<< End")
 
