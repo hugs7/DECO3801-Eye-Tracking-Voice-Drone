@@ -50,15 +50,6 @@ def main():
     stop_event = Event()
     data_lock = Lock()
 
-    # Create threads for each of the components
-    thread_functions = [eye_tracking, drone]
-    thread_data = {get_function_module(func): {} for func in thread_functions}
-    threads = [
-        Thread(target=lambda func=func: func(stop_event, thread_data, data_lock), name=f"thread_{get_function_module(func)}")
-        for func in thread_functions
-    ]
-
-    # Voice Control is process
     try:
         # =========== Processes ===========
 
