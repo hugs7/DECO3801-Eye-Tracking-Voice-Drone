@@ -78,7 +78,7 @@ def main():
         # Threads use a different thread_data object because threads share memory.
         # but also require a lock to prevent race conditions when accessing shared data.
         thread_functions = [eye_tracking, drone]
-        thread_data = OmegaConf.create({get_function_module(func): OmegaConf.create() for func in thread_functions})
+        thread_data = {get_function_module(func): {} for func in thread_functions}
         threads = [
             Thread(target=lambda func=func: func(stop_event, thread_data, data_lock), name=f"thread_{get_function_module(func)}")
             for func in thread_functions
