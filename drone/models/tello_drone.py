@@ -32,7 +32,6 @@ class TelloDrone(Drone):
         """
         Connects to the drone
         """
-
         self.drone.connect()
 
     def read_camera(self) -> cv2.typing.MatLike:
@@ -65,8 +64,24 @@ class TelloDrone(Drone):
         cmd = 'setfps {}'.format(fps)
         self.drone.send_control_command(cmd)
 
+    def set_video_bitrate(self, bitrate: int):
+        """Sets the bitrate of the video stream
+        Use one of the following for the bitrate argument:
+            Tello.BITRATE_AUTO
+            Tello.BITRATE_1MBPS
+            Tello.BITRATE_2MBPS
+            Tello.BITRATE_3MBPS
+            Tello.BITRATE_4MBPS
+            Tello.BITRATE_5MBPS
+        """
+        cmd = 'setbitrate {}'.format(bitrate)
+        self.drone.send_control_command(cmd)
+
     def send_info(self, command):
-        self.drone.send_command_without_return(command)
+        if self.polling_flag:
+            self.drone.send_control_command(command)
+        else:
+            self.drone.send_command_without_return(command)
         #data, address = client_socket.recvfrom(1024)
         #client_socket.sendto(command.encode('utf-8'), address)
 
@@ -107,43 +122,47 @@ class TelloDrone(Drone):
 
     def rotate_clockwise(self, degrees: int) -> None:
         command = "cw {}".format(degrees)
-        self.drone.send_info(command)
+        self.send_info(command)
 
     def rotate_counter_clockwise(self, degrees: int) -> None:
         command = "ccw {}".format(degrees)
-        self.drone.send_info(command)
+        self.send_info(command)
 
     def move_up(self, cm: int) -> None:
         command = "up {}".format(cm)
-        self.drone.send_info(command)
+        self.send_info(command)
 
     def move_down(self, cm: int) -> None:
         command = "down {}".format(cm)
-        self.drone.send_info(command)
+        self.send_info(command)
 
     def move_left(self, cm: int) -> None:
         command = "left {}".format(cm)
-        self.dronef.send_info(command)
+        self.send_info(command)
 
     def move_right(self, cm: int) -> None:
         command = "right {}".format(cm)
-        self.drone.send_info(command)
+        self.send_info(command)
 
     def move_forward(self, cm: int) -> None:
         command = "forward {}".format(cm)
-        self.drone.send_info(command)
+        self.send_info(command)
 
     def move_backward(self, cm: int) -> None:
         command = "back {}".format(cm)
-        self.drone.send_info(command)
+        self.send_info(command)
 
     def takeoff(self) -> None:
         command = "takeoff"
-        self.drone.send_info(command)
+        self.send_info(command)
 
     def land(self) -> None:
         command = "land"
-        self.drone.send_info(command)
+        self.send_info(command)
+
+    def flip_forward(self) -> None:
+        command = "flip f"
+        self.send_info(command)
 
     # Polling methods
     def get_altitude(self) -> int:
