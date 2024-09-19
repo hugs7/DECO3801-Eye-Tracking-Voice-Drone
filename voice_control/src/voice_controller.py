@@ -88,14 +88,17 @@ class VoiceController:
         else:
             text = input("Enter command: ")
 
-        if self.config.voice_control.send_to_llm:
-            self.process_voice_command(text)
-        else:
-            # Mostly for testing purposes
-            logger.info(f"User command: {text}")
-            self.save_command_to_thread_data(text)
+        command_data = {"text": text}
 
-        return True  # For now
+        parsed_command = None
+        if self.config.voice_control.send_to_llm:
+            parsed_command = self.process_voice_command(text)
+
+        command_data["parsed_command"] = parsed_command
+
+        self.save_command_to_thread_data(command_data)
+
+        return True
 
     def process_voice_command(self, user_command: str) -> Optional[List[Tuple[str, int]]]:
         """
@@ -113,7 +116,7 @@ class VoiceController:
         """
         result = self.llm.run_terminal_agent(user_command)
         logger.info(f"Voice command: '%s'", user_command)
-        logger.debug(f"Voice command of type %s", type(user_command))
+        logger.trace(f"Voice command of type %s", type(user_command))
 
         # Parse the result into a list of tuples
         parsed_commands = None
@@ -123,17 +126,17 @@ class VoiceController:
             logger.error("Failed to parse result into dictionary.")
 
         logger.info(f"Parsed voice command: '%s'", parsed_commands)
-        logger.debug(f"Parsed voice command of type %s", type(parsed_commands))
+        logger.trace(f"Parsed voice command of type %s", type(parsed_commands))
         self.save_command_to_thread_data(parsed_commands)
 
         return parsed_commands
 
-    def save_command_to_thread_data(self, command: Union[str, List[Tuple[str, int]]]) -> None:
+    def save_command_to_thread_data(self, command_data: Dict[str, Union[str, List[Tuple[str, int]]]]) -> None:
         """
         Saves the command to the shared data.
 
         Args:
-            command (Union[str, List[Tuple[str, int]]]): The command to save.
+            command_data (Dict[str, Union[str, List[Tuple[str, int]]]]): The command to save.
 
         Returns:
             None
@@ -142,7 +145,7 @@ class VoiceController:
             logger.trace("Not running in process mode. Not saving command to shared data.")
             return
 
-        logger.info(f"Setting voice command to '%s'", command)
+        logger.info(f"Setting voice command to '%s'", command_data["text"])
         command_queue: Queue = self.manager_data["voice_control"]["command_queue"]
-        command_queue.put(command)
-        logger.debug("Voice command '%s' added to command queue of length %d.", command, command_queue.qsize())
+        command_queue.put(command_data)
+        logger.debug("Voice command added to command queue of length %d.", command_queue.qsize())
