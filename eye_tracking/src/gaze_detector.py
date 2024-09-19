@@ -449,21 +449,21 @@ class GazeDetector:
         if key_chr in cc.QUIT_KEYS:
             self.stop = True
             return True
-
+        keybindings = self.config.keyboard_bindings
         match key_chr:
-            case "b":
+            case keybindings.bbox:
                 self.show_bbox = not self.show_bbox
-            case "l":
+            case keybindings.landmark:
                 self.show_landmarks = not self.show_landmarks
-            case "h":
+            case keybindings.head_pose:
                 self.show_head_pose = not self.show_head_pose
-            case "n":
+            case keybindings.normalized_image:
                 self.show_normalized_image = not self.show_normalized_image
-            case "t":
+            case keybindings.template_model:
                 self.show_template_model = not self.show_template_model
-            case "g":
+            case keybindings.gaze_vector:
                 self.show_gaze_vector = not self.show_gaze_vector
-            case "c":
+            case keybindings.calibrate:
                 # Calibrate
                 logger.info("Setting calibrated to False")
                 self.calibrated = False
