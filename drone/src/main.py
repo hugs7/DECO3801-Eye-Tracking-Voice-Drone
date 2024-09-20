@@ -56,28 +56,10 @@ def render_drone_feed(img: cv2.typing.MatLike) -> None:
     cv2.imshow(c.WINDOW_NAME, img)
 
 
-def init(drone_type):
-    """
-    Initialies the drone
-    """
-
-    match drone_type:
-        case c.MAVIC:
-            vehicle = models.MavicDrone(c.MAVIC_IP, c.MAVIC_PORT)
-        case c.TELLO:
-            vehicle = models.TelloDrone()
-        case _:
-            raise ValueError(f"Invalid drone type: {drone_type}")
-
-    controller = Controller(vehicle)
-
-    return controller
-
-
 def main():
-    drone_type = c.TELLO  # / c.MAVIC
-
-    controller = init(drone_type)
+    drone_config = init.init()
+    drone = init.init_drone(drone_config)
+    controller = Controller(drone)
 
     root = tk.Tk()
     DroneApp(root, controller)
