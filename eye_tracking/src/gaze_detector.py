@@ -103,7 +103,6 @@ class GazeDetector:
         self.average_gaze_vector = None
 
         # Point on screen
-        self.point_on_screen_smoothing_factor = 8  # Number of frames to average over
         self.point_buffer = []
         self.gaze_2d_point = None
 
