@@ -38,7 +38,8 @@ class Controller:
         self.model = drone
         self.drone_video_fps = self.model.video_fps
 
-    def perform_command(self, command: str):
+
+    def perform_action(self, command: str):
         """
         Handler for sending an action to the drone given a command.
 

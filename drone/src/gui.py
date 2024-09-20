@@ -5,7 +5,7 @@ Local drone GUI. Not used in threading mode.
 from typing import Dict, Optional
 from PyQt6.QtWidgets import QMainWindow, QVBoxLayout, QHBoxLayout, QWidget, QPushButton, QLabel
 from PyQt6.QtCore import QTimer, Qt
-from PyQt6.QtGui import QImage, QPixmap
+from PyQt6.QtGui import QImage, QPixmap, QKeyEvent
 import numpy as np
 
 from common.logger_helper import init_logger
@@ -104,6 +104,28 @@ class DroneApp(QMainWindow, CommonGUI):
         }
 
         return {name: self._configure_timer(name, **conf) for name, conf in timers_conf.items()}
+
+    def keyPressEvent(self, event: QKeyEvent) -> None:
+        """
+        Handle key press events
+
+        Args:
+            event: The key press event
+
+        Returns:
+            None
+        """
+        key_code = event.key()
+        logger.info(f"Key pressed: {key_code}")
+
+        if key_code == Qt.Key.Key_Escape or key_code == Qt.Key.Key_Q:
+            self.close_app()
+
+        if self.limited_mode:
+            logger.debug("Running in limited mode. No controller provided")
+            return
+
+        self.controller.perform_action(key_code)
 
     def update_drone_feed(self):
         """
