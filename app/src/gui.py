@@ -14,10 +14,9 @@ from multiprocessing import Queue as MPQueue
 from queue import Queue
 
 from common.logger_helper import init_logger
+from common.common_gui import CommonGUI
 
-from common_gui import CommonGUI
 from options import PreferencesDialog
-
 import constants as c
 import utils.file_handler as file_handler
 from utils.gui_helper import fps_to_ms
