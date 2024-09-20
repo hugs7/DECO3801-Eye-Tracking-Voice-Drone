@@ -7,19 +7,7 @@ from typing import Union
 from .models.tello_drone import TelloDrone
 from .models.mavic_drone import MavicDrone
 
-KEY_MAPPING = {
-    "Left": "LEFT",
-    "Right": "RIGHT",
-    "Up": "UP",
-    "Down": "DOWN",
-    "w": "FORWARD",
-    "s": "BACKWARD",
-    "l": "LAND",
-    "space": "TAKEOFF",
-    "q": "ROTATE CW",
-    "e": "ROTATE CCW",
-    "z": "FLIP FORWARD",
-}
+
 
 
 class Controller:
