@@ -1,0 +1,4 @@
+dronekit
+pygame
+djitellopy
+omegaconf

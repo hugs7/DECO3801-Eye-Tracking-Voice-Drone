@@ -33,6 +33,14 @@
             "program": "voice_control/main.py",
             "console": "integratedTerminal",
             "justMyCode": true
+        },
+        {
+            "name": "Drone",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "drone/main.py",
+            "console": "integratedTerminal",
+            "justMyCode": true
         }
     ]
 }
