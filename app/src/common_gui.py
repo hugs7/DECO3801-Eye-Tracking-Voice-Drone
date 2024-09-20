@@ -2,14 +2,16 @@
 Defines common methods for the GUI
 """
 
-from PyQt6.QtWidgets import QMenu, QPushButton, QLabel
+from typing import Optional
+
+from PyQt6.QtWidgets import QMenu, QPushButton, QLabel, QVBoxLayout
 from PyQt6.QtGui import QAction
 from PyQt6.QtCore import Qt
 
 
 class CommonGUI:
     def __init__(self):
-        self.layout = None
+        self.layout: Optional[QVBoxLayout] = None
 
     def __check_layout(self):
         if self.layout is None:
