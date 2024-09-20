@@ -1,3 +1,4 @@
 dronekit
 pygame
 djitellopy
+omegaconf
