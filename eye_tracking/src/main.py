@@ -19,18 +19,14 @@ from .gaze_detector import GazeDetector
 
 def main(stop_event: Optional[Event] = None, thread_data: Optional[Dict] = None, data_lock: Optional[Lock] = None):
     """
-    Defines entry point for the eye tracking application
+    Defines entry point for the eye tracking module
 
     Args:
         (Only provided if running as a child thread)
         stop_event: Event to signal stop
         thread_data: Shared data between threads
         data_lock: Lock for shared data
-
-    Returns:
-        None
     """
-
     config = init.init_ptgaze()
 
     gaze_detector = GazeDetector(config, stop_event, thread_data, data_lock)

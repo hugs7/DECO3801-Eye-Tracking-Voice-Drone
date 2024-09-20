@@ -4,6 +4,8 @@ Main file for the drone
 
 import os
 import sys
+from typing import Optional, Dict
+from threading import Event, Lock
 
 from PyQt6.QtWidgets import QApplication
 
@@ -17,7 +19,16 @@ from .gui import DroneApp
 from . import init
 
 
-def main():
+def main(stop_event: Optional[Event] = None, thread_data: Optional[Dict] = None, data_lock: Optional[Lock] = None):
+    """
+    Defines entry point for the drone module
+
+    Args:
+        (Only provided if running as a child thread)
+        stop_event: Event to signal stop
+        thread_data: Shared data between threads
+        data_lock: Lock for shared data
+    """
     drone_config = init.init()
     controller = None
 
