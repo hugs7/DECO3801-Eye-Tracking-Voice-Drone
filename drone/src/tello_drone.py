@@ -2,11 +2,12 @@
 Defines class for Tello drone
 """
 
-from models.drone import Drone
 from djitellopy import tello
 import cv2
 
-import constants as c
+from models.drone import Drone
+
+from . import constants as c
 
 
 class TelloDrone(Drone):
@@ -37,7 +38,7 @@ class TelloDrone(Drone):
         img = frame_read.frame
 
         return img
-    
+
     def rotate_clockwise(self, degrees: int) -> None:
         """
         Rotates the drone clockwise by the specified number of degrees
