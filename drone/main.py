@@ -9,7 +9,7 @@ import tkinter as tk
 import constants as c
 from controller import Controller
 import models
-from Gui import DroneApp
+from gui import DroneApp
 import init
 
 
