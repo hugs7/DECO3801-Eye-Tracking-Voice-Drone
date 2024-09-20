@@ -14,6 +14,7 @@ class TelloDrone(Drone):
         tello_drone = tello.Tello()
         self.drone = tello_drone
         self.connect()
+        self.polling_flag = False
 
         # Start Camera Display Stream
         self.drone.streamon()
