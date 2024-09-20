@@ -1,9 +1,8 @@
 import tkinter as tk
 from tkinter import Canvas
 from PIL import Image, ImageTk
-import os
 
-from . import file_handler as fh
+from .utils import file_handler as fh
 
 
 class DroneApp:

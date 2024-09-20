@@ -23,8 +23,8 @@ def init_config() -> DictConfig:
         DictConfig: The drone config object
     """
 
-    package_root = fh.get_package_folder()
-    path = package_root / "configs/drone.yaml"
+    configs_folder = fh.get_configs_folder()
+    path = configs_folder / "drone.yaml"
 
     logger.info(f"Loading config from {path}")
     config = OmegaConf.load(path)
@@ -34,7 +34,7 @@ def init_config() -> DictConfig:
 
 def init() -> DictConfig:
     """
-    Initialises the drone
+    Initialises the drone module
 
     Returns:
         DictConfig: The drone config object
