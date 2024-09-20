@@ -59,7 +59,7 @@ class CommonGUI:
         label = QLabel(text)
         self.layout.addWidget(label)
 
-    def _add_label_with_alignment(self, alignment: Qt.Alignment | Qt.AlignmentFlag) -> QLabel:
+    def _add_label_with_alignment(self, alignment: Qt.AlignmentFlag) -> QLabel:
         """
         Add a label to the preferences dialog
 
