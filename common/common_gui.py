@@ -4,9 +4,14 @@ Defines common methods for the GUI
 
 from typing import Optional
 
-from PyQt6.QtWidgets import QMenu, QPushButton, QLabel, QVBoxLayout
+from PyQt6.QtWidgets import QMenu, QPushButton, QLabel, QVBoxLayout, QWidget, QTimer
 from PyQt6.QtGui import QAction
 from PyQt6.QtCore import Qt
+
+from .logger_helper import init_logger
+from .gui_helper import fps_to_ms
+
+logger = init_logger()
 
 
 class CommonGUI:
@@ -78,3 +83,22 @@ class CommonGUI:
         self.layout.addWidget(label)
 
         return label
+
+    def _configure_timer(self, name: str, callback: callable, fps: int, *args) -> QTimer:
+        """
+        Configures a QTimer with the given parameters
+
+        Args:
+            name: The name of the timer
+            callback: The callback function to run
+            fps: The frames per second
+            *args: Additional arguments for the callback function
+
+        Returns:
+            QTimer: The configured QTimer
+        """
+        logger.info(f"Configuring timer: {name}")
+        timer = QTimer(self)
+        timer.timeout.connect(lambda: callback(*args))
+        timer.start(fps_to_ms(fps))
+        return timer
