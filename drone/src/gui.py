@@ -52,7 +52,7 @@ class DroneApp:
         Args:
             event: The key press event
         """
-        self.controller.handle_input(event.keysym)
+        self.controller.perform_command(event.keysym)
 
     def update_video_feed(self):
         """
