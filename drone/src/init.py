@@ -7,7 +7,7 @@ from omegaconf import DictConfig, OmegaConf
 import logging
 from typing import Union
 
-from . import file_handler as fh
+from .utils import file_handler as fh
 
 from . import constants as c
 from . import models
