@@ -35,7 +35,9 @@ class TelloDrone(Drone):
         logger.info("Initialising TelloDrone...")
         tello_drone = Tello()
         self.drone = tello_drone
-        self.connect()
+        success = self.connect()
+        if not success:
+            return
 
         self.__init_config(tello_config)
         self.__init_drone_params()
@@ -133,9 +135,12 @@ class TelloDrone(Drone):
 
         self.drone.set_video_direction(camera_selection)
 
-    def connect(self) -> None:
+    def connect(self) -> bool:
         """
         Connects to the drone
+
+        Returns:
+            bool: True if the drone connected successfully, False otherwise
         """
 
         logger.info("Connecting to the Tello Drone...")
@@ -145,8 +150,10 @@ class TelloDrone(Drone):
         except tello.TelloException as e:
             logger.error("There was an issue connecting to the drone. Check you are on the correct WiFi network.")
             logger.error("Details %s", e)
+            return False
 
         logger.info("Connected to the Tello Drone")
+        return True
 
     def read_camera(self) -> cv2.typing.MatLike:
         """
