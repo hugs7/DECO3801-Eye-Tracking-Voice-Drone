@@ -95,7 +95,10 @@ class TelloDrone(Drone):
             logger.warning("Invalid video bitrate '%s'. Defaulting to auto", config_video_bitrate)
             tello_video_bitrate = Tello.BITRATE_AUTO
 
-        self.drone.set_video_bitrate(tello_video_bitrate)
+        try:
+            self.drone.set_video_bitrate(tello_video_bitrate)
+        except tello.TelloException as e:
+            logger.error("Failed to set video bitrate. Details: %s", e)
 
         logger.debug("Initialising video resolution...")
         config_res = self.config.video_resolution
@@ -108,7 +111,10 @@ class TelloDrone(Drone):
                 logger.warning("Invalid video resolution '%s'. Defaulting to 720p", config_res)
                 tello_res = Tello.RESOLUTION_720P
 
-        self.drone.set_video_resolution(tello_res)
+        try:
+            self.drone.set_video_resolution(tello_res)
+        except tello.TelloException as e:
+            logger.error("Failed to set video resolution. Details: %s", e)
 
         logger.debug("Initialising video fps...")
         config_fps = int(self.config.video_fps)
@@ -124,7 +130,11 @@ class TelloDrone(Drone):
                 tello_fps = Tello.FPS_30
                 config_fps = DEFAULT_FPS
 
-        self.drone.set_video_fps(tello_fps)
+        try:
+            self.drone.set_video_fps(tello_fps)
+        except tello.TelloException as e:
+            logger.error("Failed to set video fps. Details: %s", e)
+
         self.video_fps = config_fps
 
         # Forward-facing 10080x720p colour camera or 320x240 greyscale
@@ -140,7 +150,10 @@ class TelloDrone(Drone):
                 logger.warning("Invalid camera selection '%s'. Defaulting to forward", config_camera)
                 camera_selection = Tello.CAMERA_FORWARD
 
-        self.drone.set_video_direction(camera_selection)
+        try:
+            self.drone.set_video_direction(camera_selection)
+        except tello.TelloException as e:
+            logger.error("Failed to set camera selection. Details: %s", e)
 
     def connect(self) -> bool:
         """
@@ -241,6 +254,12 @@ class TelloDrone(Drone):
         command = "emergency"
         self._send_command(command)
         self.in_flight = False
+
+    def motor_on(self) -> None:
+        self.drone.turn_motor_on()
+
+    def motor_off(self) -> None:
+        self.drone.turn_motor_off()
 
     def __getattribute__(self, name: str) -> Any:
         if name != "drone" and name in self.drone.__dict__:
