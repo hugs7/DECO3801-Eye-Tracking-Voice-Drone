@@ -17,3 +17,5 @@ class DroneActions:
     FLIP_FORWARD = "flip forward"
     SPEED = "speed"
     EMERGENCY = "emergency"
+    MOTOR_ON = "motor on"
+    MOTOR_OFF = "motor off"

@@ -1,5 +1,5 @@
 drone_type: tello
-gui_only: True
+gui_only: False
 mavic:
     ip: 192.168.69.244
     port: 14551
@@ -25,3 +25,5 @@ controller:
         flip foward: f
         cw: e
         ccw: q
+        motor on: "9"
+        motor off: "0"
