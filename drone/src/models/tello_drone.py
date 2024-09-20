@@ -35,6 +35,7 @@ class TelloDrone(Drone):
         logger.info("Initialising TelloDrone...")
         self.__init_config(tello_config)
         self.__init_drone_params()
+        logger.info("Tello drone initialised.")
 
         tello_drone = Tello()
         self.drone = tello_drone
@@ -129,8 +130,6 @@ class TelloDrone(Drone):
                 camera_selection = Tello.CAMERA_FORWARD
 
         self.drone.set_video_direction(camera_selection)
-
-        logger.info("Tello drone initialised.")
 
     def connect(self) -> None:
         """
