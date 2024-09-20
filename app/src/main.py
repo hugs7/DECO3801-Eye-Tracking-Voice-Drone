@@ -13,7 +13,7 @@ from multiprocessing import Manager, Process
 from utils.import_helper import dynamic_import
 
 from omegaconf import OmegaConf
-from PyQt5.QtWidgets import QApplication
+from PyQt6.QtWidgets import QApplication
 from gui import MainApp
 
 from common.logger_helper import init_logger
