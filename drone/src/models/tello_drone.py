@@ -102,7 +102,7 @@ class TelloDrone(Drone):
         self.drone.set_video_resolution(tello_res)
 
         logger.debug("Initialising video fps...")
-        config_fps = self.config.video_fps
+        config_fps = int(self.config.video_fps)
         match config_fps:
             case 5:
                 tello_fps = Tello.FPS_5
@@ -113,8 +113,10 @@ class TelloDrone(Drone):
             case _:
                 logger.warning("Invalid video fps '%s'. Defaulting to 30", config_fps)
                 tello_fps = Tello.FPS_30
+                config_fps = 30
 
         self.drone.set_video_fps(tello_fps)
+        self.video_fps = config_fps
 
         # Forward-facing 10080x720p colour camera or 320x240 greyscale
         # IR down-facing camera
