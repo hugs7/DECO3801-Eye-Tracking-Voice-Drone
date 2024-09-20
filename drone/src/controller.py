@@ -54,12 +54,12 @@ class Controller:
 
         self.model = drone
 
-    def perform_command(self, command):
+    def perform_command(self, command: str):
         """
         Handler for sending an action to the drone given a command.
 
         Args:
-            command:
+            command (str): The command to send to the drone.
         command - String involving either up, down, left, right, forward, backward,
             cw(rotate clockwise), ccw (rotate counter clockwise)
         value - an int of the amount to change the drones direction by, if command is rotational
