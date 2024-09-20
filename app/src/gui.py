@@ -78,12 +78,12 @@ class MainApp(QMainWindow, CommonGUI):
 
         # Main video feed display
         self.main_video_label = QLabel(self)
-        self.main_video_label.setAlignment(Qt.AlignCenter)
+        self.main_video_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.layout.addWidget(self.main_video_label)
 
         # Side video feed display
         self.side_video_label = QLabel(self)
-        self.side_video_label.setAlignment(Qt.AlignCenter)
+        self.side_video_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.layout.addWidget(self.side_video_label)
 
         self.text_input = QLineEdit(self)
