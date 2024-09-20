@@ -9,10 +9,11 @@ from typing import List
 from threading import Thread, Event, Lock
 from multiprocessing import Manager, Process
 
+from PyQt6.QtWidgets import QApplication
+
 # Must go before any other user imports to ensure project directory is added to sys.path
 from utils.import_helper import dynamic_import
 
-from PyQt6.QtWidgets import QApplication
 from gui import MainApp
 
 from common.logger_helper import init_logger
