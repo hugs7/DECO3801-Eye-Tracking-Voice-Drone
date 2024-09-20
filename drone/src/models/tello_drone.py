@@ -137,7 +137,7 @@ class TelloDrone(Drone):
 
         self.video_fps = config_fps
 
-        # Forward-facing 10080x720p colour camera or 320x240 greyscale
+        # Forward-facing 1080x720p colour camera or 320x240 greyscale
         # IR down-facing camera
         logger.debug("Initialising camera selection...")
         config_camera = self.config.camera_selection
