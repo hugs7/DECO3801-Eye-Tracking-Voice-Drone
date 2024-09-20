@@ -41,11 +41,11 @@ class TelloDrone(Drone):
 
         self.__init_config(tello_config)
         self.__init_drone_params()
-        logger.info("Tello drone initialised.")
 
         self.last_command_time = datetime.now()
+        self.in_flight = False
 
-        logger.info("Drone battery: %d", self.drone.get_battery())
+        logger.info("TelloDrone initialised.")
 
     def __init_config(self, tello_config: OmegaConf) -> None:
         """
@@ -153,6 +153,7 @@ class TelloDrone(Drone):
             return False
 
         logger.info("Connected to the Tello Drone")
+        logger.info("Drone battery: %d", self.drone.get_battery())
         return True
 
     def read_camera(self) -> cv2.typing.MatLike:
@@ -218,10 +219,12 @@ class TelloDrone(Drone):
     def takeoff(self) -> None:
         command = "takeoff"
         self._send_command(command)
+        self.in_flight = True
 
     def land(self) -> None:
         command = "land"
         self._send_command(command)
+        self.in_flight = False
 
     def flip_forward(self) -> None:
         command = "flip f"
