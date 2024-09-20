@@ -1,15 +1,31 @@
+"""
+Local drone GUI. Not used in threading mode.
+"""
+
 import tkinter as tk
 from tkinter import Canvas
 from PIL import Image, ImageTk
 
+from .controller import Controller
 from .utils import file_handler as fh
 
 
 class DroneApp:
+    """
+    Local drone GUI
+    """
+
     WIDTH = 640
     HEIGHT = 480
 
-    def __init__(self, root, controller):
+    def __init__(self, root, controller: Controller):
+        """
+        Initialises the drone app
+
+        Args:
+            root: The root window
+            controller: The controller object
+        """
         self.root = root
         self.controller = controller
 
@@ -31,11 +47,20 @@ class DroneApp:
 
         self.root.bind("<KeyPress>", self.on_key_press)
 
-    def on_key_press(self, event):
+    def on_key_press(self, event: tk.Event):
+        """
+        Handles key press events
+
+        Args:
+            event: The key press event
+        """
         self.controller.handle_input(event.keysym)
 
     def update_video_feed(self):
-        frame = self.controller.get_frame()
+        """
+        Updates the video feed
+        """
+        frame = self.controller.model.get_frame()
 
         if frame is not None:
             # Convert the image from OpenCV format to PIL format
