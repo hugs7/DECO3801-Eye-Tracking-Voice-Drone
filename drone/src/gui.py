@@ -36,7 +36,6 @@ class DroneApp(QMainWindow, CommonGUI):
         self.limited_mode = controller is None
 
         self._init_gui()
-        self.update_drone_feed()
 
     def _init_gui(self) -> None:
         """
