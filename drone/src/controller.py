@@ -37,14 +37,16 @@ KEY_MAPPING = {
 
 
 class Controller:
+    """
+    Controller for the drone, handles the input of a drone from voice, Gaze or manual input
+    """
+
     def __init__(self, droneModel):
         self.model = droneModel
 
     def get_frame(self):
         frame = self.model.read_camera()
         return cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    
-
 
     def handle_input(self, command):
         """Handles the input of a drone from voice, Gaze or manual input
