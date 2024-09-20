@@ -4,9 +4,9 @@ Defines common methods for the GUI
 
 from typing import Optional
 
-from PyQt6.QtWidgets import QMenu, QPushButton, QLabel, QVBoxLayout, QWidget, QTimer
+from PyQt6.QtWidgets import QMenu, QPushButton, QLabel, QVBoxLayout
 from PyQt6.QtGui import QAction
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, QTimer
 
 from .logger_helper import init_logger
 from .gui_helper import fps_to_ms
