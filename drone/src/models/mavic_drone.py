@@ -2,7 +2,6 @@
 Defines class for Mavic drone
 """
 
-from dronekit import connect, VehicleMode
 import cv2
 import time
 from typing import Any
@@ -33,6 +32,10 @@ class MavicDrone(Drone):
 
         self.vehicle = self.connect()
 
+        from dronekit import VehicleMode
+
+        self.VehicleMode = VehicleMode
+
     def connect(self):
         """
         Connects to the Mavic drone
@@ -40,6 +43,9 @@ class MavicDrone(Drone):
         Returns:
             vehicle: The vehicle object
         """
+        logger.info("Importing libraries...")
+        from dronekit import connect as mavic_connect
+
         logger.info("Connecting to the Mavic drone...")
 
         ip = self.config.ip
@@ -51,7 +57,7 @@ class MavicDrone(Drone):
         logger.debug(f"Connecting to mavic on with connection: %s", connection_string)
 
         try:
-            vehicle = connect(connection_string, wait_ready=True, timeout=60)
+            vehicle = mavic_connect(connection_string, wait_ready=True, timeout=60)
             vehicle = None
         except Exception as e:
             logger.error("Failed to connect to Mavic drone")
@@ -82,7 +88,7 @@ class MavicDrone(Drone):
         """
 
         logger.info(f"Setting vehicle mode to {mode}")
-        self.vehicle.mode = VehicleMode(mode)
+        self.vehicle.mode = self.VehicleMode(mode)
 
     def _is_armable(self) -> bool:
         """
