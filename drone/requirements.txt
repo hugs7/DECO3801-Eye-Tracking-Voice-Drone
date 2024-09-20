@@ -1,3 +1,5 @@
 dronekit
 djitellopy
 omegaconf
+PyQt6
+opencv-python
