@@ -24,7 +24,7 @@ def main():
     if not drone_config.gui_only:
         drone = init.init_drone(drone_config)
         if drone.success:
-            controller = Controller(drone)
+            controller = Controller(drone, drone_config.controller)
 
     gui = QApplication(sys.argv)
     drone_window = DroneApp(controller)

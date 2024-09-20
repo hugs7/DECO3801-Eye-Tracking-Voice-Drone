@@ -125,7 +125,7 @@ class DroneApp(QMainWindow, CommonGUI):
             logger.debug("Running in limited mode. No controller provided")
             return
 
-        self.controller.perform_action(key_code)
+        self.controller.handle_key_press(key_code)
 
     def update_drone_feed(self):
         """
