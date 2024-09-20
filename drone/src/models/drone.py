@@ -3,7 +3,6 @@ Defines abstract class for drones
 """
 
 from abc import ABC, abstractmethod
-from typing import Tuple
 import cv2
 
 
@@ -16,11 +15,15 @@ class Drone(ABC):
         pass
 
     @abstractmethod
-    def read_camera(self):
-        pass
+    def read_camera(self) -> cv2.typing.MatLike:
+        """
+        Reads the camera feed from the drone
 
-    def resize_frame(self, frame: cv2.typing.MatLike, output_dim: Tuple[int, int]) -> cv2.typing.MatLike:
-        return cv2.resize(frame, output_dim)
+        Returns:
+            img [cv2.typing.MatLike]: The image from the camera feed as a numpy array
+        """
+
+        pass
 
     # Controlling methods
     @abstractmethod

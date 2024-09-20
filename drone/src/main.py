@@ -48,7 +48,7 @@ def read_camera_feed(drone: Union[models.MavicDrone, models.TelloDrone]) -> None
     output_dim = (960, 720)
 
     img = drone.read_camera()
-    img = drone.resize_frame(img, output_dim)
+    img = cv2.resize(img, output_dim)
 
 
 def render_drone_feed(img: cv2.typing.MatLike) -> None:
