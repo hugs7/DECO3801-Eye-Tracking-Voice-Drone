@@ -4,25 +4,8 @@ Controller for the drone, handles the input of a drone from voice, Gaze or manua
 
 from typing import Union
 
-import pygame
-
 from .models.tello_drone import TelloDrone
 from .models.mavic_drone import MavicDrone
-
-
-CONTROLLER_MAPPING = {
-    pygame.K_LEFT: "LEFT",
-    pygame.K_RIGHT: "RIGHT",
-    pygame.K_UP: "UP",
-    pygame.K_DOWN: "DOWN",
-    pygame.K_w: "FORWARD",
-    pygame.K_s: "BACKWARD",
-    pygame.K_l: "LAND",
-    pygame.K_SPACE: "TAKEOFF",
-    pygame.K_q: "ROTATE CW",
-    pygame.K_e: "ROTATE CCW",
-    pygame.K_z: "FLIP FORWARD",
-}
 
 KEY_MAPPING = {
     "Left": "LEFT",
