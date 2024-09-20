@@ -232,6 +232,10 @@ class TelloDrone(Drone):
         # Look for attribute in drone object
         return getattr(self.drone, name)
 
+    def get_height(self) -> int:
+        # Must exist as is defined as an abstract method in Drone
+        return self.drone.get_height()
+
     def __has_waited_between_commands(self) -> bool:
         """
         Checks if the time between commands is greater than the minimum time between commands

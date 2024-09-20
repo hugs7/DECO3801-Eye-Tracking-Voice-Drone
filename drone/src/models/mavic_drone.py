@@ -164,10 +164,10 @@ class MavicDrone(Drone):
         self.vehicle.simple_takeoff(target_altitude_metres)
 
         while True:
-            logger.info(f"Drone altitude: {self.get_altitude()}")
+            logger.info(f"Drone altitude: {self.get_height()}")
 
             # Break and return from function just below target altitude.
-            alt = self.get_altitude()
+            alt = self.get_height()
             if alt >= target_altitude_metres * c.ALTITUDE_THRESHOLD_MULTIPLIER:
                 logger.info(f"Reached altitude: {alt} (of target {target_altitude_metres} m)")
                 break
@@ -192,7 +192,7 @@ class MavicDrone(Drone):
 
     # Polling methods
 
-    def get_altitude(self) -> int:
+    def get_height(self) -> int:
         """
         Gets the altitude of the drone
 

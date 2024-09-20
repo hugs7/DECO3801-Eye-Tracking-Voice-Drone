@@ -91,7 +91,7 @@ class TelloDrone(Drone):
         """
         self.drone.land()
 
-    def get_altitude(self) -> int:
+    def get_height(self) -> int:
         """
         Gets the current altitude of the drone.
 

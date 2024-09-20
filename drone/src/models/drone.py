@@ -141,7 +141,7 @@ class Drone(ABC):
 
     # Polling methods
     @abstractmethod
-    def get_altitude(self) -> int:
+    def get_height(self) -> int:
         """Get the altitude of the drone.
 
         Returns:
