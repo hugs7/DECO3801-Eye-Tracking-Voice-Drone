@@ -1,4 +1,5 @@
 drone_type: tello
+gui_only: True
 mavic:
     ip: 192.168.69.244
     port: 14551

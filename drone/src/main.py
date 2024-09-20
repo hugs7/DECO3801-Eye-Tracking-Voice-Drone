@@ -65,9 +65,12 @@ def render_drone_feed(img: cv2.typing.MatLike) -> None:
 
 def main():
     drone_config = init.init()
-    drone = init.init_drone(drone_config)
-    if drone.success:
-        controller = Controller(drone)
+    controller = None
+
+    if not drone_config.gui_only:
+        drone = init.init_drone(drone_config)
+        if drone.success:
+            controller = Controller(drone)
 
     gui = QApplication(sys.argv)
     drone_window = DroneApp(controller)
