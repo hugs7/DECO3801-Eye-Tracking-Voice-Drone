@@ -12,7 +12,6 @@ from multiprocessing import Manager, Process
 # Must go before any other user imports to ensure project directory is added to sys.path
 from utils.import_helper import dynamic_import
 
-from omegaconf import OmegaConf
 from PyQt6.QtWidgets import QApplication
 from gui import MainApp
 
