@@ -8,7 +8,7 @@ import os
 import sys
 import tkinter as tk
 
-# Add the project root to the path
+# Add the project root to the path. Must execute prior to user imports.
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
 print("Project root: ", project_root)
 sys.path.insert(0, project_root)
@@ -23,8 +23,12 @@ from . import init
 def loop(drone, controller):
     """
     Defines main loop for the drone
+
+    Args:
+        drone: The drone object
+        controller: The controller object
     """
-    
+
     controller.handle_input(drone)
 
     img = read_camera_feed(drone)
