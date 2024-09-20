@@ -2,14 +2,15 @@
 Defines class for Tello drone
 """
 
-from djitellopy import tello
 import cv2
+from djitellopy import tello
 from omegaconf import OmegaConf
 
 from common.logger_helper import init_logger
 
-from .drone import Drone
 from .. import constants as c
+
+from .drone import Drone
 
 logger = init_logger()
 
