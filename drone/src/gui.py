@@ -36,11 +36,9 @@ class DroneApp:
 
         loading_screen_path = fh.get_assets_folder() / "loadingScreen.png"
         base_image = Image.open(loading_screen_path)
-        # Resize the image to fit the canvas
         base_image = base_image.resize((self.WIDTH, self.HEIGHT), Image.Resampling.BILINEAR)
         base_image = ImageTk.PhotoImage(base_image)
 
-        # Display the base image first
         self.image_on_canvas = self.canvas.create_image(0, 0, anchor=tk.NW, image=base_image)
 
         self.update_video_feed()
