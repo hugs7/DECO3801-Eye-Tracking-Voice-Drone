@@ -5,7 +5,7 @@ Defines class for Tello drone
 from djitellopy import tello
 import cv2
 
-from models.drone import Drone
+from .models.drone import Drone
 
 from . import constants as c
 

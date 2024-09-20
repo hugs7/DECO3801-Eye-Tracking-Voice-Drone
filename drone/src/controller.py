@@ -6,8 +6,8 @@ from typing import Union
 
 import pygame
 
-from models.tello_drone import TelloDrone
-from models.mavic_drone import MavicDrone
+from .models.tello_drone import TelloDrone
+from .models.mavic_drone import MavicDrone
 
 
 CONTROLLER_MAPPING = {
