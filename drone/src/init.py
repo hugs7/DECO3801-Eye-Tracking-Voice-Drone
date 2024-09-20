@@ -22,6 +22,7 @@ def init_config() -> DictConfig:
     Returns:
         DictConfig: The drone config object
     """
+    logger.info("Initialising drone configuration...")
 
     configs_folder = fh.get_configs_folder()
     path = configs_folder / "drone.yaml"
@@ -40,6 +41,8 @@ def init() -> DictConfig:
         DictConfig: The drone config object
     """
 
+    logger.info("Initialising drone module...")
+
     # === Config ===
     config = init_config()
 
@@ -56,6 +59,8 @@ def init_drone(config: OmegaConf) -> Union[models.TelloDrone, models.MavicDrone]
     Returns:
         DictConfig: The drone config object
     """
+
+    logger.info("Initialising drone vehicle...")
 
     drone_type = config.drone_type
 
