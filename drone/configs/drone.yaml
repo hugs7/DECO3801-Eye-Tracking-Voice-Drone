@@ -4,3 +4,5 @@ drone:
         ip: 192.168.69.244
         port: 14551
         connection_timeout: 60 # Seconds
+    tello:
+        default_speed: 50

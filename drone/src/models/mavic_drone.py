@@ -2,32 +2,58 @@
 Defines class for Mavic drone
 """
 
-# from dronekit import connect, VehicleMode
+from dronekit import connect, VehicleMode
 import cv2
 import time
+from omegaconf import OmegaConf
+
+from common.logger_helper import init_logger
 
 from .. import constants as c
+
 from .drone import Drone
 
+logger = init_logger()
 
 
 class MavicDrone(Drone):
-    def __init__(self, ip: str, port: int) -> NotImplementedError:
-        self.vehicle = self.connect(ip, port)
+    def __init__(self, mavic_config: OmegaConf):
+        """
+        Initialises the Mavic drone
 
-    def connect(self, ip, port):
+        Args:
+            mavic_config (OmegaConf): The Mavic config object
+        """
+        self.config = mavic_config
+
+        self.vehicle = self.connect()
+
+    def connect(self):
+        """
+        Connects to the Mavic drone
+
+        Returns:
+            vehicle: The vehicle object
+        """
+        logger.info("Connecting to the Mavic drone...")
+
+        ip = self.config.ip
+        port = self.config.port
+        logger.info("IP: %s", ip)
+        logger.info("Port: %s", port)
+
         connection_string = f"udp:{ip}:{port}"
-        print(f"Connecting to mavic on: {connection_string}")
+        logger.debug(f"Connecting to mavic on with connection: %s", connection_string)
 
-        # Try connecting with a longer timeout
         try:
-            # vehicle = connect(connection_string, wait_ready=True, timeout=60)
+            vehicle = connect(connection_string, wait_ready=True, timeout=60)
             vehicle = None
-            print("Connected to vehicle!")
         except Exception as e:
-            print(f"Failed to connect: {e}")
+            logger.error("Failed to connect to Mavic drone")
+            logger.error("Details %s", e)
             exit(1)
 
+        logger.info("Connected to Mavic!")
         return vehicle
 
     def read_camera(self) -> cv2.typing.MatLike:
@@ -62,12 +88,12 @@ class MavicDrone(Drone):
         Arms the drone for flight. User is not allowed to fly the drone until it is armed
         Cannot arm until the drone's autopilot is ready.
         """
-        print("Performing basic pre-arm checks")
+        logger.info("Performing basic pre-arm checks")
         while not self._is_armable():
-            print(" Waiting for vehicle to initialise...")
+            logger.info(" Waiting for vehicle to initialise...")
             time.sleep(1)
 
-        print("Arming motors")
+        logger.info("Arming motors")
         self.__set_vehicle_mode("GUIDED")
         self.vehicle.armed = True
 
@@ -104,19 +130,19 @@ class MavicDrone(Drone):
         :return: None
         """
         while not self._is_armed():
-            print(" Waiting for arming...")
+            logger.info(" Waiting for arming...")
             time.sleep(1)
 
-        print("Taking off!")
+        logger.info("Taking off!")
         self.vehicle.simple_takeoff(target_altitude_metres)
 
         while True:
-            print(f"Drone altitude: {self.get_altitude()}")
+            logger.info(f"Drone altitude: {self.get_altitude()}")
 
             # Break and return from function just below target altitude.
             alt = self.get_altitude()
             if alt >= target_altitude_metres * c.ALTITUDE_THRESHOLD_MULTIPLIER:
-                print(f"Reached altitude: {alt} (of target {target_altitude_metres} m)")
+                logger.info(f"Reached altitude: {alt} (of target {target_altitude_metres} m)")
                 break
             time.sleep(1)
 
