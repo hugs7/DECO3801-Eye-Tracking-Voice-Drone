@@ -18,9 +18,6 @@ class DroneApp:
         self.canvas = Canvas(self.root, width=self.WIDTH, height=self.HEIGHT)
         self.canvas.pack(expand=True)
 
-        # module_dir = os.path.pardir(__file__)
-        # print(module_dir)
-        # loading_screen = os.path.join(module_dir, "assets/loadingScreen.png")
         loading_screen_path = fh.get_assets_folder() / "loadingScreen.png"
         base_image = Image.open(loading_screen_path)
         # Resize the image to fit the canvas
@@ -51,4 +48,4 @@ class DroneApp:
             # Save image so it isn't garbage collected
             self.canvas.image = image
 
-        self.root.after(33, self.update_video_feed)  # 30 FPSish
+        self.root.after(30, self.update_video_feed)
