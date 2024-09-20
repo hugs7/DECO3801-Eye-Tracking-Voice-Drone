@@ -2,21 +2,25 @@
 Local drone GUI. Not used in threading mode.
 """
 
-import tkinter as tk
-from tkinter import Canvas
-from PIL import Image, ImageTk
+from typing import Dict
+from PyQt6.QtWidgets import QMainWindow, QVBoxLayout, QWidget, QPushButton, QLabel
+from PyQt6.QtCore import QTimer, Qt
+from PyQt6.QtGui import QImage, QPixmap
+import numpy as np
 
+from common.logger_helper import init_logger
+from common.common_gui import CommonGUI
+
+from . import constants as c
 from .controller import Controller
-from .utils import file_handler as fh
+
+logger = init_logger()
 
 
-class DroneApp:
+class DroneApp(QMainWindow, CommonGUI):
     """
     Local drone GUI
     """
-
-    WIDTH = 640
-    HEIGHT = 480
 
     def __init__(self, root, controller: Controller):
         """
@@ -26,49 +30,113 @@ class DroneApp:
             root: The root window
             controller: The controller object
         """
+        super().__init__()
+
         self.root = root
         self.controller = controller
 
-        self.root.title("Drone App")
+        self._init_gui()
 
-        self.canvas = Canvas(self.root, width=self.WIDTH, height=self.HEIGHT)
-        self.canvas.pack(expand=True)
+        self.update_drone_feed()
 
-        loading_screen_path = fh.get_assets_folder() / "loadingScreen.png"
-        base_image = Image.open(loading_screen_path)
-        base_image = base_image.resize((self.WIDTH, self.HEIGHT), Image.Resampling.BILINEAR)
-        base_image = ImageTk.PhotoImage(base_image)
-
-        self.image_on_canvas = self.canvas.create_image(0, 0, anchor=tk.NW, image=base_image)
-
-        self.update_video_feed()
-
-        self.root.bind("<KeyPress>", self.on_key_press)
-
-    def on_key_press(self, event: tk.Event):
+    def _init_gui(self) -> None:
         """
-        Handles key press events
-
-        Args:
-            event: The key press event
+        Initialises the GUI window and widgets
         """
-        self.controller.perform_command(event.keysym)
 
-    def update_video_feed(self):
+        logger.info("Initialising GUI")
+
+        self.setWindowTitle("Drone App")
+
+        self.main_widget = QWidget(self)
+        self.setCentralWidget(self.main_widget)
+
+        self.layout = QVBoxLayout()
+
+        self.drone_video_label = QLabel(self)
+        self.drone_video_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.layout.addWidget(self.drone_video_label)
+
+        self.quit_button = QPushButton("Quit", self)
+        self.quit_button.clicked.connect(self.quit)
+        self.layout.addWidget(self.quit_button)
+
+        self._init_menu()
+
+        # Window size
+        logger.info("Configuring window size")
+        self.setGeometry(100, 100, 800, 600)
+        self.setMinimumSize(c.WIN_MIN_WIDTH, c.WIN_MIN_HEIGHT)
+
+    def _init_menu(self) -> None:
+        """
+        Initialises the menu bar
+        """
+        logger.info("Initialising menu bar")
+
+        menu_bar = self.menuBar()
+        self.file_menu = menu_bar.addMenu("File")
+
+        self._add_menu_action(self.file_menu, "Quit", self.close_app)
+
+        logger.info("Menu bar initialised")
+
+    def _init_timers(self) -> Dict[str, QTimer]:
+        """
+        Initialise the timers for the gui
+
+        Returns:
+            Dict[str, QTimer]: The timers configuration in an OmegaConf object
+        """
+        timers_conf = {
+            "drone_feed": {"callback": self.update_drone_feed, "fps": self.controller.model.video_fps},
+        }
+
+        return {name: self._configure_timer(name, **conf) for name, conf in timers_conf.items()}
+
+    def update_drone_feed(self):
         """
         Updates the video feed
         """
         frame = self.controller.model.read_camera()
+        if frame is None:
+            logger.trace("No frame returned from camera")
+            return
 
-        if frame is not None:
-            # Convert the image from OpenCV format to PIL format
-            image = Image.fromarray(frame)
-            image = ImageTk.PhotoImage(image)
+        self._set_pixmap(self.drone_video_label, frame)
 
-            # Update image
-            self.canvas.itemconfig(self.image_on_canvas, image=image)
+    def _set_pixmap(self, label: QLabel, frame: np.ndarray) -> None:
+        """
+        Set the pixmap of the label to the frame
 
-            # Save image so it isn't garbage collected
-            self.canvas.image = image
+        Args:
+            label: The QLabel to update
+            frame: The frame to display
 
-        self.root.after(30, self.update_video_feed)
+        Returns:
+            None
+        """
+        q_img = self._convert_frame_to_qimage(frame)
+        label.setPixmap(QPixmap.fromImage(q_img))
+
+    def _convert_frame_to_qimage(self, frame: np.ndarray) -> QImage:
+        """
+        Convert the frame to a QImage
+
+        Args:
+            frame (np.ndarray): The frame to convert
+
+        Returns:
+            QImage: The converted frame
+        """
+
+        height, width, channel = frame.shape
+        bytes_per_line = 3 * width
+        return QImage(frame.data, width, height, bytes_per_line, QImage.Format.Format_RGB888)
+
+    def close_app(self) -> None:
+        """
+        Stop the GUI and close the app
+        """
+        logger.info("Closing GUI")
+        self.close()
