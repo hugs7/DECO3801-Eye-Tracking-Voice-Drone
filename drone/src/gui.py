@@ -2,7 +2,7 @@
 Local drone GUI. Not used in threading mode.
 """
 
-from typing import Dict
+from typing import Dict, Optional
 from PyQt6.QtWidgets import QMainWindow, QVBoxLayout, QWidget, QPushButton, QLabel
 from PyQt6.QtCore import QTimer, Qt
 from PyQt6.QtGui import QImage, QPixmap
@@ -22,21 +22,20 @@ class DroneApp(QMainWindow, CommonGUI):
     Local drone GUI
     """
 
-    def __init__(self, root, controller: Controller):
+    def __init__(self, controller: Optional[Controller]):
         """
         Initialises the drone app
 
         Args:
-            root: The root window
-            controller: The controller object
+            controller[Optional[Controller]]: The controller object or None.
+            If none, the GUI will run in limited mode.
         """
         super().__init__()
 
-        self.root = root
         self.controller = controller
+        self.limited_mode = controller is None
 
         self._init_gui()
-
         self.update_drone_feed()
 
     def _init_gui(self) -> None:
@@ -88,6 +87,10 @@ class DroneApp(QMainWindow, CommonGUI):
         Returns:
             Dict[str, QTimer]: The timers configuration in an OmegaConf object
         """
+        if self.limited_mode:
+            logger.info("Running in limited mode. No timers required")
+            return {}
+
         timers_conf = {
             "drone_feed": {"callback": self.update_drone_feed, "fps": self.controller.model.video_fps},
         }
