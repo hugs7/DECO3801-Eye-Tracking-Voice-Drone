@@ -2,8 +2,8 @@
 Defines the options window for the gui
 """
 
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QComboBox, QPushButton, QCheckBox, QDialog
-from PyQt5.QtCore import Qt
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QComboBox, QPushButton, QCheckBox, QDialog
+from PyQt6.QtCore import Qt
 
 from common_gui import CommonGUI
 

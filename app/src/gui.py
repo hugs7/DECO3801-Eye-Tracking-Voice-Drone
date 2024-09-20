@@ -1,11 +1,11 @@
 """
-Handles GUI for the application using PyQt5
+Handles GUI for the application using PyQt6
 """
 
 from typing import Dict, List, Union, Tuple, Optional
-from PyQt5.QtWidgets import QMainWindow, QVBoxLayout, QWidget, QPushButton, QLabel, QLineEdit, QMenuBar, QMenu, QAction
-from PyQt5.QtCore import QTimer, Qt
-from PyQt5.QtGui import QImage, QPixmap, QKeyEvent
+from PyQt6.QtWidgets import QMainWindow, QVBoxLayout, QWidget, QPushButton, QLabel, QLineEdit, QMenuBar, QMenu
+from PyQt6.QtCore import QTimer, Qt
+from PyQt6.QtGui import QImage, QPixmap, QKeyEvent
 import cv2
 import numpy as np
 from threading import Event, Lock
@@ -78,12 +78,12 @@ class MainApp(QMainWindow, CommonGUI):
 
         # Main video feed display
         self.main_video_label = QLabel(self)
-        self.main_video_label.setAlignment(Qt.AlignCenter)
+        self.main_video_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.layout.addWidget(self.main_video_label)
 
         # Side video feed display
         self.side_video_label = QLabel(self)
-        self.side_video_label.setAlignment(Qt.AlignCenter)
+        self.side_video_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.layout.addWidget(self.side_video_label)
 
         self.text_input = QLineEdit(self)
@@ -194,7 +194,7 @@ class MainApp(QMainWindow, CommonGUI):
         key = event.key()
         logger.info(f"Key pressed: {key}")
 
-        if key == Qt.Key_Escape or key == Qt.Key_Q:
+        if key == Qt.Key.Key_Escape or key == Qt.Key.Key_Q:
             self.close_app()
 
         # Any other key goes into the keyboard queue
@@ -212,7 +212,7 @@ class MainApp(QMainWindow, CommonGUI):
         """
         logger.info("Opening options window")
         dialog = PreferencesDialog()
-        dialog.exec_()
+        dialog.exec()
 
     def update_webcam_feed(self) -> None:
         """
@@ -262,7 +262,7 @@ class MainApp(QMainWindow, CommonGUI):
 
         height, width, channel = frame.shape
         bytes_per_line = 3 * width
-        return QImage(frame.data, width, height, bytes_per_line, QImage.Format_RGB888)
+        return QImage(frame.data, width, height, bytes_per_line, QImage.Format.Format_RGB888)
 
     def get_webcam_feed(self) -> np.ndarray:
         """

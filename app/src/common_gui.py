@@ -2,13 +2,16 @@
 Defines common methods for the GUI
 """
 
-from PyQt5.QtWidgets import QMenu, QAction, QPushButton, QLabel
-from PyQt5.QtCore import Qt
+from typing import Optional
+
+from PyQt6.QtWidgets import QMenu, QPushButton, QLabel, QVBoxLayout
+from PyQt6.QtGui import QAction
+from PyQt6.QtCore import Qt
 
 
 class CommonGUI:
     def __init__(self):
-        self.layout = None
+        self.layout: Optional[QVBoxLayout] = None
 
     def __check_layout(self):
         if self.layout is None:
@@ -58,7 +61,7 @@ class CommonGUI:
         label = QLabel(text)
         self.layout.addWidget(label)
 
-    def _add_label_with_alignment(self, alignment: Qt.Alignment | Qt.AlignmentFlag) -> QLabel:
+    def _add_label_with_alignment(self, alignment: Qt.AlignmentFlag) -> QLabel:
         """
         Add a label to the preferences dialog
 

@@ -12,8 +12,7 @@ from multiprocessing import Manager, Process
 # Must go before any other user imports to ensure project directory is added to sys.path
 from utils.import_helper import dynamic_import
 
-from omegaconf import OmegaConf
-from PyQt5.QtWidgets import QApplication
+from PyQt6.QtWidgets import QApplication
 from gui import MainApp
 
 from common.logger_helper import init_logger
@@ -94,7 +93,7 @@ def main():
         gui = QApplication(sys.argv)
         main_window = MainApp(stop_event, thread_data, data_lock, interprocess_data)
         main_window.show()
-        gui.exec_()
+        gui.exec()
     except KeyboardInterrupt:
         logger.critical("Interrupted! Stopping all threads...")
 
