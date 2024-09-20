@@ -23,17 +23,9 @@ class TelloDrone(Drone):
         print("Drone battery:", self.drone.get_battery())
 
     def connect(self) -> None:
-        """
-        Connects to the drone
-        """
         self.drone.connect()
 
     def read_camera(self) -> cv2.typing.MatLike:
-        """
-        Reads the camera feed from the drone
-        :return: img - the image from the camera feed
-        """
-
         frame_read = self.drone.get_frame_read()
         img = frame_read.frame
 
@@ -101,11 +93,12 @@ class TelloDrone(Drone):
 
     def get_altitude(self) -> int:
         """
-        Gets the current altitude of the drone
-        :return: Altitude in cm
+        Gets the current altitude of the drone.
+
+        Returns:
+            int: The current altitude of the drone in cm
         """
-        pass
-        # return self.drone.get_height()
+        return self.drone.get_height()
 
     def flip_forward(self) -> None:
         self.drone.flip_forward()

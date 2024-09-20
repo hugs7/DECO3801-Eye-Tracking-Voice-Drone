@@ -22,7 +22,6 @@ class Drone(ABC):
         Returns:
             img [cv2.typing.MatLike]: The image from the camera feed as a numpy array
         """
-
         pass
 
     # Controlling methods
