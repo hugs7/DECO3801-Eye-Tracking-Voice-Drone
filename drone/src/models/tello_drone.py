@@ -230,6 +230,11 @@ class TelloDrone(Drone):
         command = "flip f"
         self._send_command(command)
 
+    def emergency(self) -> None:
+        command = "emergency"
+        self._send_command(command)
+        self.in_flight = False
+
     def __getattribute__(self, name: str) -> Any:
         if name != "drone" and name in self.drone.__dict__:
             return getattr(self.drone, name)
