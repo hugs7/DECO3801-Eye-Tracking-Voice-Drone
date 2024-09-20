@@ -2,10 +2,13 @@
 Controller for the drone, handles the input of a drone from voice, Gaze or manual input
 """
 
-from typing import Union, Optional
+from typing import Union
+
 import pygame
-import time
-import cv2
+
+from models.tello_drone import TelloDrone
+from models.mavic_drone import MavicDrone
+
 
 CONTROLLER_MAPPING = {
     pygame.K_LEFT: "LEFT",
@@ -41,16 +44,22 @@ class Controller:
     Controller for the drone, handles the input of a drone from voice, Gaze or manual input
     """
 
-    def __init__(self, droneModel):
-        self.model = droneModel
+    def __init__(self, drone: Union[TelloDrone, MavicDrone]):
+        """
+        Initialises the drone controller
 
-    def get_frame(self):
-        frame = self.model.read_camera()
-        return cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        Args:
+            drone [Union[TelloDrone, MavicDrone]]: The drone to control.
+        """
 
-    def handle_input(self, command):
-        """Handles the input of a drone from voice, Gaze or manual input
-        @Param
+        self.model = drone
+
+    def perform_command(self, command):
+        """
+        Handler for sending an action to the drone given a command.
+
+        Args:
+            command:
         command - String involving either up, down, left, right, forward, backward,
             cw(rotate clockwise), ccw (rotate counter clockwise)
         value - an int of the amount to change the drones direction by, if command is rotational
@@ -110,6 +119,3 @@ class Controller:
             case "FLIP FORWARD":
                 # xtra = 3
                 self.model.flip_forward()
-        # drone.send_rc_control(lr, fb, ud, yv)
-        time.sleep(0.1)  # Ensure value is correctly calculated above
-        # drone.send_rc_control(0,0,0,0)

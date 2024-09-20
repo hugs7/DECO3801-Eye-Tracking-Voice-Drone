@@ -29,7 +29,7 @@ def loop(drone: Union[models.MavicDrone, models.TelloDrone], controller: Control
         controller: The controller object
     """
 
-    controller.handle_input(drone)
+    controller.perform_command(drone)
 
     img = read_camera_feed(drone)
     render_drone_feed(img)
