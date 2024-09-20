@@ -2,7 +2,8 @@
 Defines common methods for the GUI
 """
 
-from PyQt6.QtWidgets import QMenu, QAction, QPushButton, QLabel
+from PyQt6.QtWidgets import QMenu, QPushButton, QLabel
+from PyQt6.QtGui import QAction
 from PyQt6.QtCore import Qt
 
 
