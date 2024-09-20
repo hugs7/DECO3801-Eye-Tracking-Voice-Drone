@@ -23,13 +23,13 @@ def safe_get(conf: OmegaConf, attr: str) -> any:
         return None
 
 
-def conf_key_from_value(conf: OmegaConf, value: Any) -> Optional[str]:
+def conf_key_from_value(conf: OmegaConf, *values: Any) -> Optional[str]:
     """
     Finds key in OmegaConf from value
 
     Args:
         conf [Omegaconf]: Omegaconfig to find key from by value
-        value: [Any]: The value to search by
+        values [Any]: Values to find in the OmegaConf
 
     Returns:
         [Optional[str]]: The key of the value or None if not found.
@@ -37,5 +37,5 @@ def conf_key_from_value(conf: OmegaConf, value: Any) -> Optional[str]:
     dict = OmegaConf.to_container(conf)
 
     for key, dict_value in dict.items():
-        if value == dict_value:
+        if dict_value in values:
             return key

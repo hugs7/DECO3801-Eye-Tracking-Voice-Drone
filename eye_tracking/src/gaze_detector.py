@@ -16,7 +16,7 @@ import numpy as np
 from omegaconf import OmegaConf
 
 from common import constants as cc
-from common.omegaconf_helper import safe_get, conf_key_from_value
+from common.omegaconf_helper import conf_key_from_value
 
 from . import constants as c
 from .face import Face
@@ -449,19 +449,19 @@ class GazeDetector:
         # Obtain lowercase version of key always. If we need to detect uppercase, we
         # can determine if the shift key is pressed.
         key_chr = chr(key_code).lower()
-        logger.info(f"Received key: %s (%d)", key_chr, key_code)
+        logger.info("Received key: %s (%d)", key_chr, key_code)
 
         if key_chr in cc.QUIT_KEYS:
             self.stop = True
             return True
 
         keybindings = self.config.keyboard_bindings
-        bindings_key = conf_key_from_value(keybindings, key_chr)
-
-        if bindings_key is None:
+        key_action = conf_key_from_value(keybindings, key_chr)
+        if key_action is None:
+            logger.trace("Key %s not found in keybindings", key_chr)
             return False
 
-        if bindings_key in c.LOOP_KEYS:
+        if key_action in c.LOOP_ACTIONS:
             match key_chr:
                 case keybindings.bbox:
                     self.show_bbox = not self.show_bbox

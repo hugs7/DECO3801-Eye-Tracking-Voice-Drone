@@ -2,36 +2,186 @@
 Defines class for Tello drone
 """
 
-from djitellopy import tello
+from datetime import datetime
+from typing import Any
+
 import cv2
+from djitellopy import tello
+from djitellopy.tello import Tello
+from omegaconf import OmegaConf
+
+from common.logger_helper import init_logger
 
 from .drone import Drone
-from .. import constants as c
+
+logger = init_logger()
+
+MIN_SPEED = 10
+MAX_SPEED = 100
+DEFAULT_SPEED = 50
+
+MIN_VIDEO_BITRATE = 1
+MAX_VIDEO_BITRATE = 5
+
+DEFAULT_FPS = 30
 
 
 class TelloDrone(Drone):
-    def __init__(self) -> None:
-        tello_drone = tello.Tello()
+    """
+    Implements a Tello drone wrapper class
+    """
+
+    def __init__(self, tello_config: OmegaConf) -> None:
+        """
+        Initialises the Tello drone
+
+        Args:
+            tello_config (OmegaConf): The Tello config object
+        """
+
+        logger.info("Initialising TelloDrone...")
+        tello_drone = Tello()
         self.drone = tello_drone
-        self.connect()
-        self.polling_flag = False
+        self.success = self.connect()
+        if not self.success:
+            return
 
-        # Start Camera Display Stream
+        self.__init_config(tello_config)
+        self.__init_drone_params()
+
+        self.last_command_time = datetime.now()
+        self.in_flight = False
+
+        logger.info("TelloDrone initialised.")
+
+    def __init_config(self, tello_config: OmegaConf) -> None:
+        """
+        Initialises class variables from the Tello configuration
+
+        Args:
+            tello_config (OmegaConf): The Tello config object
+        """
+
+        self.config = tello_config
+
+        self.poll_response = self.config.poll_response
+
+    def __init_drone_params(self) -> None:
+        """
+        Initialises the drone parameters
+        """
+
         self.drone.streamon()
-        self.drone.set_speed(c.TELLO_SPEED_CM_S)
 
-        print("Drone battery:", self.drone.get_battery())
+        logger.debug("Initialising drone speed...")
+        config_speed = self.config.default_speed
+        if config_speed in range(MIN_SPEED, MAX_SPEED + 1):
+            tello_speed = config_speed
+            logger.debug("Setting drone speed to %s cm/s", tello_speed)
+        else:
+            tello_speed = DEFAULT_SPEED
+            logger.warning("Invalid speed '%s' cm/s. Defaulting to %d cm/s", config_speed, tello_speed)
 
-    def connect(self) -> None:
+        self.drone.set_speed(tello_speed)
+
+        logger.debug("Initialising video bitrate")
+        config_video_bitrate = self.config.video_bitrate
+        if config_video_bitrate == "auto":
+            tello_video_bitrate = Tello.BITRATE_AUTO
+        elif config_video_bitrate in range(MIN_VIDEO_BITRATE, MAX_VIDEO_BITRATE + 1):
+            tello_video_bitrate = eval(f"Tello.BITRATE_{config_video_bitrate}")
+            logger.debug("Setting video bitrate to %s", tello_video_bitrate)
+        else:
+            logger.warning("Invalid video bitrate '%s'. Defaulting to auto", config_video_bitrate)
+            tello_video_bitrate = Tello.BITRATE_AUTO
+
+        try:
+            self.drone.set_video_bitrate(tello_video_bitrate)
+        except tello.TelloException as e:
+            logger.error("Failed to set video bitrate. Details: %s", e)
+
+        logger.debug("Initialising video resolution...")
+        config_res = self.config.video_resolution
+        match config_res:
+            case "480p":
+                tello_res = Tello.RESOLUTION_480P
+            case "720p":
+                tello_res = Tello.RESOLUTION_720P
+            case _:
+                logger.warning("Invalid video resolution '%s'. Defaulting to 720p", config_res)
+                tello_res = Tello.RESOLUTION_720P
+
+        try:
+            self.drone.set_video_resolution(tello_res)
+        except tello.TelloException as e:
+            logger.error("Failed to set video resolution. Details: %s", e)
+
+        logger.debug("Initialising video fps...")
+        config_fps = int(self.config.video_fps)
+        match config_fps:
+            case 5:
+                tello_fps = Tello.FPS_5
+            case 15:
+                tello_fps = Tello.FPS_15
+            case 30:
+                tello_fps = Tello.FPS_30
+            case _:
+                logger.warning("Invalid video fps '%s'. Defaulting to %d", config_fps, DEFAULT_FPS)
+                tello_fps = Tello.FPS_30
+                config_fps = DEFAULT_FPS
+
+        try:
+            self.drone.set_video_fps(tello_fps)
+        except tello.TelloException as e:
+            logger.error("Failed to set video fps. Details: %s", e)
+
+        self.video_fps = config_fps
+
+        # Forward-facing 1080x720p colour camera or 320x240 greyscale
+        # IR down-facing camera
+        logger.debug("Initialising camera selection...")
+        config_camera = self.config.camera_selection
+        match config_camera:
+            case "forward":
+                camera_selection = Tello.CAMERA_FORWARD
+            case "downward":
+                camera_selection = Tello.CAMERA_DOWNWARD
+            case _:
+                logger.warning("Invalid camera selection '%s'. Defaulting to forward", config_camera)
+                camera_selection = Tello.CAMERA_FORWARD
+
+        try:
+            self.drone.set_video_direction(camera_selection)
+        except tello.TelloException as e:
+            logger.error("Failed to set camera selection. Details: %s", e)
+
+    def connect(self) -> bool:
         """
         Connects to the drone
+
+        Returns:
+            bool: True if the drone connected successfully, False otherwise
         """
-        self.drone.connect()
+
+        logger.info("Connecting to the Tello Drone...")
+
+        try:
+            self.drone.connect()
+        except tello.TelloException as e:
+            logger.error("There was an issue connecting to the drone. Check you are on the correct WiFi network.")
+            logger.error("Details %s", e)
+            return False
+
+        logger.info("Connected to the Tello Drone")
+        logger.info("Drone battery: %d", self.drone.get_battery())
+        return True
 
     def read_camera(self) -> cv2.typing.MatLike:
         """
         Reads the camera feed from the drone
-        :return: img - the image from the camera feed
+
+        Returns:
+            img - the image from the camera feed
         """
 
         frame_read = self.drone.get_frame_read()
@@ -39,131 +189,92 @@ class TelloDrone(Drone):
 
         return img
 
-
-
-    def set_video_resolution(self, resolution: str):
-        """Sets the resolution of the video stream
-        Use one of the following for the resolution argument:
-            Tello.RESOLUTION_480P
-            Tello.RESOLUTION_720P
+    def _send_command(self, command):
         """
-        cmd = 'setresolution {}'.format(resolution)
-        self.drone.send_control_command(cmd)
-
-    def set_video_fps(self, fps: str):
-        """Sets the frames per second of the video stream
-        Use one of the following for the fps argument:
-            Tello.FPS_5
-            Tello.FPS_15
-            Tello.FPS_30
+        Sends a command to the drone, either with or without a return
+        depending on config.
         """
-        cmd = 'setfps {}'.format(fps)
-        self.drone.send_control_command(cmd)
 
-    def set_video_bitrate(self, bitrate: int):
-        """Sets the bitrate of the video stream
-        Use one of the following for the bitrate argument:
-            Tello.BITRATE_AUTO
-            Tello.BITRATE_1MBPS
-            Tello.BITRATE_2MBPS
-            Tello.BITRATE_3MBPS
-            Tello.BITRATE_4MBPS
-            Tello.BITRATE_5MBPS
-        """
-        cmd = 'setbitrate {}'.format(bitrate)
-        self.drone.send_control_command(cmd)
-
-    def send_info(self, command):
-        if self.polling_flag:
+        if self.poll_response:
             self.drone.send_control_command(command)
         else:
+            if not self.__has_waited_between_commands():
+                logger.info("Wait before sending command")
+                return
+
             self.drone.send_command_without_return(command)
-        #data, address = client_socket.recvfrom(1024)
-        #client_socket.sendto(command.encode('utf-8'), address)
-
-
-    # Controlling methods
-    '''def send_control_command(self, command: str, timeout: int = RESPONSE_TIMEOUT) -> bool:
-        """Send control command to Tello and wait for its response.
-        Internal method, you normally wouldn't call this yourself.
-        """
-        response = "max retries exceeded"
-        for i in range(0, self.retry_count):
-            response = self.send_command_without_return(command, timeout=timeout) #USUALLY SEND WITH RETURN
-
-            if 'ok' in response.lower():
-                return True
-
-            self.LOGGER.debug("Command attempt #{} failed for command: '{}'".format(i, command))
-
-        self.raise_result_error(command, response)
-        return False # never reached
-    '''
-
-    #valid tello command strings:
-    '''
-    Connect = "command"
-    Takeoff = "takeoff", 20sec
-    Land = "land"
-    Stream on = "streamon"
-    Stream off = "streamoff"
-    Emergency off = "emergency"
-    Movement = "direction magnitude"
-    directions = {"up", "down", "left", "right", "forward", "back"}
-    Rotate CW = "cw magnitude"
-    Rotate CCW = "ccw magnitude"
-    Flip = "flip direction"
-    directions = {"l", "r", "f", "b"}
-    '''
 
     def rotate_clockwise(self, degrees: int) -> None:
         command = "cw {}".format(degrees)
-        self.send_info(command)
+        self._send_command(command)
 
     def rotate_counter_clockwise(self, degrees: int) -> None:
         command = "ccw {}".format(degrees)
-        self.send_info(command)
+        self._send_command(command)
 
     def move_up(self, cm: int) -> None:
         command = "up {}".format(cm)
-        self.send_info(command)
+        self._send_command(command)
 
     def move_down(self, cm: int) -> None:
         command = "down {}".format(cm)
-        self.send_info(command)
+        self._send_command(command)
 
     def move_left(self, cm: int) -> None:
         command = "left {}".format(cm)
-        self.send_info(command)
+        self._send_command(command)
 
     def move_right(self, cm: int) -> None:
         command = "right {}".format(cm)
-        self.send_info(command)
+        self._send_command(command)
 
     def move_forward(self, cm: int) -> None:
         command = "forward {}".format(cm)
-        self.send_info(command)
+        self._send_command(command)
 
     def move_backward(self, cm: int) -> None:
         command = "back {}".format(cm)
-        self.send_info(command)
+        self._send_command(command)
 
     def takeoff(self) -> None:
         command = "takeoff"
-        self.send_info(command)
+        self._send_command(command)
+        self.in_flight = True
 
     def land(self) -> None:
         command = "land"
-        self.send_info(command)
+        self._send_command(command)
+        self.in_flight = False
 
     def flip_forward(self) -> None:
         command = "flip f"
-        self.send_info(command)
+        self._send_command(command)
 
-    # Polling methods
-    def get_altitude(self) -> int:
+    def emergency(self) -> None:
+        command = "emergency"
+        self._send_command(command)
+        self.in_flight = False
+
+    def motor_on(self) -> None:
+        self.drone.turn_motor_on()
+
+    def motor_off(self) -> None:
+        self.drone.turn_motor_off()
+
+    def __getattribute__(self, name: str) -> Any:
+        if name != "drone" and name in self.drone.__dict__:
+            return getattr(self.drone, name)
+
+        return super().__getattribute__(name)
+
+    def get_height(self) -> int:
+        # Must exist as is defined as an abstract method in Drone
+        return self.drone.get_height()
+
+    def __has_waited_between_commands(self) -> bool:
         """
-        Gets the altitude of the drone
-        :return: The altitude of the drone
+        Checks if the time between commands is greater than the minimum time between commands
+        :return: True if the time between commands is greater than the minimum time between commands
         """
-        pass
+        time_diff = datetime.now() - self.last_command_time
+        return time_diff.total_seconds() >= self.drone.TIME_BTW_COMMANDS

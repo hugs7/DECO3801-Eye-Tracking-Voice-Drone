@@ -2,7 +2,7 @@
 Helper functions for GUI
 """
 
-import constants as c
+from . import constants as c
 
 
 def fps_to_ms(fps: int) -> int:

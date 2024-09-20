@@ -2,37 +2,81 @@
 Defines class for Mavic drone
 """
 
-# from dronekit import connect, VehicleMode
 import cv2
 import time
+from typing import Any, Optional
+from omegaconf import OmegaConf
+
+from common.logger_helper import init_logger
 
 from .. import constants as c
+
 from .drone import Drone
 
+logger = init_logger()
 
 
 class MavicDrone(Drone):
-    def __init__(self, ip: str, port: int) -> NotImplementedError:
-        self.vehicle = self.connect(ip, port)
+    """
+    Implements a Mavic drone wrapper class
+    """
 
-    def connect(self, ip, port):
+    def __init__(self, mavic_config: OmegaConf):
+        """
+        Initialises the Mavic drone
+
+        Args:
+            mavic_config (OmegaConf): The Mavic config object
+        """
+        self.config = mavic_config
+
+        self.vehicle = self.connect()
+        self.success = self.vehicle is not None
+        if not self.success:
+            self.success = False
+            return
+
+        from dronekit import VehicleMode
+
+        self.VehicleMode = VehicleMode
+
+    def connect(self) -> Optional[Any]:
+        """
+        Connects to the Mavic drone
+
+        Returns:
+            Optional[vehicle]: The vehicle object or None if connection failed
+        """
+        logger.info("Importing libraries...")
+        from dronekit import connect as mavic_connect
+
+        logger.info("Connecting to the Mavic drone...")
+
+        ip = self.config.ip
+        port = self.config.port
+        logger.info("IP: %s", ip)
+        logger.info("Port: %s", port)
+
         connection_string = f"udp:{ip}:{port}"
-        print(f"Connecting to mavic on: {connection_string}")
+        logger.debug(f"Connecting to mavic on with connection: %s", connection_string)
 
-        # Try connecting with a longer timeout
         try:
-            # vehicle = connect(connection_string, wait_ready=True, timeout=60)
+            vehicle = mavic_connect(connection_string, wait_ready=True, timeout=60)
             vehicle = None
-            print("Connected to vehicle!")
         except Exception as e:
-            print(f"Failed to connect: {e}")
-            exit(1)
+            logger.error("Failed to connect to Mavic drone")
+            logger.error("Details %s", e)
+            return
 
+        logger.info("Connected to Mavic!")
         return vehicle
 
     def read_camera(self) -> cv2.typing.MatLike:
         """
         TODO: Read the camera feed from the mavic drone
+
+        Returns:
+            img: The image from the camera feed
         """
 
         img = None
@@ -40,12 +84,22 @@ class MavicDrone(Drone):
         return img
 
     def __set_vehicle_mode(self, mode: str) -> None:
-        # self.vehicle.mode = VehicleMode(mode)
-        self.vehicle.mode = None
+        """
+        Sets the vehicle mode to the specified mode
+
+        Args:
+            mode (str): The mode to set the vehicle to
+        """
+
+        logger.info(f"Setting vehicle mode to {mode}")
+        self.vehicle.mode = self.VehicleMode(mode)
 
     def _is_armable(self) -> bool:
         """
         Checks if the drone is ready to be armed
+
+        Returns:
+            bool: True if the drone is armable, False otherwise
         """
 
         return self.vehicle.is_armable
@@ -53,7 +107,9 @@ class MavicDrone(Drone):
     def _is_armed(self) -> bool:
         """
         Checks if the drone is armed
-        :return: True if the drone is armed, False otherwise
+
+        Returns:
+            bool: True if the drone is armed, False otherwise
         """
         return self.vehicle.armed
 
@@ -62,12 +118,12 @@ class MavicDrone(Drone):
         Arms the drone for flight. User is not allowed to fly the drone until it is armed
         Cannot arm until the drone's autopilot is ready.
         """
-        print("Performing basic pre-arm checks")
+        logger.info("Performing basic pre-arm checks")
         while not self._is_armable():
-            print(" Waiting for vehicle to initialise...")
+            logger.info(" Waiting for vehicle to initialise...")
             time.sleep(1)
 
-        print("Arming motors")
+        logger.info("Arming motors")
         self.__set_vehicle_mode("GUIDED")
         self.vehicle.armed = True
 
@@ -100,39 +156,52 @@ class MavicDrone(Drone):
     def takeoff(self, target_altitude_metres: int) -> None:
         """
         Takes off the drone to the specified altitude
-        :param target_altitude_metres: The target altitude in metres
-        :return: None
+
+        Args:
+            target_altitude_metres (int): The target altitude to take off to
         """
         while not self._is_armed():
-            print(" Waiting for arming...")
+            logger.info(" Waiting for arming...")
             time.sleep(1)
 
-        print("Taking off!")
+        logger.info("Taking off!")
         self.vehicle.simple_takeoff(target_altitude_metres)
 
         while True:
-            print(f"Drone altitude: {self.get_altitude()}")
+            logger.info(f"Drone altitude: {self.get_height()}")
 
             # Break and return from function just below target altitude.
-            alt = self.get_altitude()
+            alt = self.get_height()
             if alt >= target_altitude_metres * c.ALTITUDE_THRESHOLD_MULTIPLIER:
-                print(f"Reached altitude: {alt} (of target {target_altitude_metres} m)")
+                logger.info(f"Reached altitude: {alt} (of target {target_altitude_metres} m)")
                 break
             time.sleep(1)
 
     def land(self):
+        """
+        Lands the drone
+        """
+        logger.info("Landing the drone")
         self.__set_vehicle_mode("LAND")
 
-    def __get_global_relative_frame(self):
+    def __get_global_relative_frame(self) -> Any:
+        """
+        Gets the global relative frame of the drone
+
+        Returns:
+            global_relative_frame: The global relative frame of the drone
+        """
         location = self.vehicle.location
         return location.global_relative_frame
 
     # Polling methods
 
-    def get_altitude(self) -> int:
+    def get_height(self) -> int:
         """
         Gets the altitude of the drone
-        :return: The altitude of the drone
+
+        Returns:
+            altitude: The altitude of the drone
         """
         global_relative_frame = self.__get_global_relative_frame()
         altitude = global_relative_frame.alt

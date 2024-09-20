@@ -6,3 +6,8 @@ Common constants used in the project
 
 ESC_KEY_CODE = 27
 QUIT_KEYS = {"q", chr(ESC_KEY_CODE)}
+
+
+# Time constants
+
+MILLISECONDS_PER_SECOND = 1000

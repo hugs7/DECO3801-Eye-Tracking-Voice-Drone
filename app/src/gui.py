@@ -14,13 +14,12 @@ from multiprocessing import Queue as MPQueue
 from queue import Queue
 
 from common.logger_helper import init_logger
+from common.common_gui import CommonGUI
 
-from common_gui import CommonGUI
 from options import PreferencesDialog
-
 import constants as c
 import utils.file_handler as file_handler
-from utils.gui_helper import fps_to_ms
+
 
 
 logger = init_logger("DEBUG")
@@ -136,7 +135,7 @@ class MainApp(QMainWindow, CommonGUI):
             "voice_command": {"callback": self.get_next_voice_command, "fps": self.config.timers.voice_command},
         }
 
-        return {name: self.__configure_timer(name, **conf) for name, conf in timers_conf.items()}
+        return {name: self._configure_timer(name, **conf) for name, conf in timers_conf.items()}
 
     def _init_keyboard_queue(self) -> None:
         """
@@ -162,24 +161,6 @@ class MainApp(QMainWindow, CommonGUI):
 
         return timer
 
-    def __configure_timer(self, name: str, callback: callable, fps: int, *args) -> QTimer:
-        """
-        Configures a QTimer with the given parameters
-
-        Args:
-            name: The name of the timer
-            callback: The callback function to run
-            fps: The frames per second
-            *args: Additional arguments for the callback function
-
-        Returns:
-            QTimer: The configured QTimer
-        """
-        logger.info(f"Configuring timer: {name}")
-        timer = QTimer(self)
-        timer.timeout.connect(lambda: callback(*args))
-        timer.start(fps_to_ms(fps))
-        return timer
 
     def keyPressEvent(self, event: QKeyEvent) -> None:
         """

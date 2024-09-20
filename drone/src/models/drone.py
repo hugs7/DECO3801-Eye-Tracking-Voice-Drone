@@ -3,116 +3,148 @@ Defines abstract class for drones
 """
 
 from abc import ABC, abstractmethod
-from typing import Tuple
 import cv2
 
 
 class Drone(ABC):
     @abstractmethod
     def connect(self):
+        """
+        Connects to the drone
+        """
         pass
 
     @abstractmethod
-    def read_camera(self):
-        pass
+    def read_camera(self) -> cv2.typing.MatLike:
+        """
+        Reads the camera feed from the drone
 
-    def resize_frame(self, frame: cv2.typing.MatLike, output_dim: Tuple[int, int]) -> cv2.typing.MatLike:
-        return cv2.resize(frame, output_dim)
+        Returns:
+            img [cv2.typing.MatLike]: The image from the camera feed as a numpy array
+        """
+        pass
 
     # Controlling methods
     @abstractmethod
     def rotate_clockwise(self, degrees: int) -> None:
-        """
-        Rotates the drone clockwise by the specified number of degrees
-        :param degrees: The number of degrees to rotate the drone
-        :return: None
+        """Rotate the drone clockwise by the specified number of degrees.
+
+        Args:
+            degrees (int): The number of degrees to rotate the drone.
+
+        Returns:
+            None
         """
         pass
 
     @abstractmethod
     def rotate_counter_clockwise(self, degrees: int) -> None:
-        """
-        Rotates the drone counter clockwise by the specified number of degrees
-        ::param cm: The number of cm to move the drone
-        :return: None
+        """Rotate the drone counterclockwise by the specified number of degrees.
+
+        Args:
+            degrees (int): The number of degrees to rotate the drone.
+
+        Returns:
+            None
         """
         pass
 
     @abstractmethod
     def move_up(self, cm: int) -> None:
-        """
-        Moves the drone up by the specified magnitude.
-        ::param cm: The number of cm to move the drone up
-        :return: None
+        """Move the drone up by the specified magnitude.
+
+        Args:
+            cm (int): The number of cm to move the drone up.
+
+        Returns:
+            None
         """
         pass
 
     @abstractmethod
     def move_down(self, cm: int) -> None:
-        """
-        Moves the drone down by the specified magnitude.
-        ::param cm: The number of cm to move the drone down
-        :return: None
+        """Move the drone down by the specified magnitude.
+
+        Args:
+            cm (int): The number of cm to move the drone down.
+
+        Returns:
+            None
         """
         pass
 
     @abstractmethod
     def move_left(self, cm: int) -> None:
-        """
-        Moves the drone left by the specified magnitude.
-        ::param cm: The number of cm to move the drone left
-        :return: None
+        """Move the drone left by the specified magnitude.
+
+        Args:
+            cm (int): The number of cm to move the drone left.
+
+        Returns:
+            None
         """
         pass
 
     @abstractmethod
     def move_right(self, cm: int) -> None:
-        """
-        Moves the drone right by the specified magnitude.
-        ::param cm: The number of cm to move the drone right
-        :return: None
+        """Move the drone right by the specified magnitude.
+
+        Args:
+            cm (int): The number of cm to move the drone right.
+
+        Returns:
+            None
         """
         pass
 
     @abstractmethod
     def move_forward(self, cm: int) -> None:
-        """
-        Moves the drone forward by the specified magnitude.
-        ::param cm: The number of cm to move the drone forward
-        :return: None
+        """Move the drone forward by the specified magnitude.
+
+        Args:
+            cm (int): The number of cm to move the drone forward.
+
+        Returns:
+            None
         """
         pass
 
     @abstractmethod
     def move_backward(self, cm: int) -> None:
-        """
-        Moves the drone backward by the specified magnitude.
-        ::param cm: The number of cm to move the drone backward
-        :return: None
+        """Move the drone backward by the specified magnitude.
+
+        Args:
+            cm (int): The number of cm to move the drone backward.
+
+        Returns:
+            None
         """
         pass
 
     @abstractmethod
     def takeoff(self) -> None:
-        """
-        Performs the takeoff operation for the drone
-        :return: None
+        """Perform the takeoff operation for the drone.
+
+        Returns:
+            None
         """
         pass
 
     @abstractmethod
     def land(self) -> None:
-        """
-        Lands the drone
-        :return: None
+        """Land the drone.
+
+        Returns:
+            None
         """
         pass
 
     # Polling methods
     @abstractmethod
-    def get_altitude(self) -> int:
-        """
-        Gets the altitude of the drone
-        :return: The altitude of the drone
+    def get_height(self) -> int:
+        """Get the altitude of the drone.
+
+        Returns:
+            int: The altitude of the drone.
         """
         pass

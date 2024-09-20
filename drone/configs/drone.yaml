@@ -1,0 +1,29 @@
+drone_type: tello
+gui_only: False
+mavic:
+    ip: 192.168.69.244
+    port: 14551
+    connection_timeout: 60 # Seconds
+tello:
+    poll_response: False
+    default_speed: 50
+    video_bitrate: auto
+    video_resolution: 720p
+    video_fps: 30
+    camera_selection: forward
+controller:
+    keyboard_bindings:
+        land: l
+        takeoff: 32 # Space key
+        up: 273 # Up arrow
+        down: 274 # Down arrow
+        left: a
+        right: d
+        forward: w
+        backward: s
+        emergency: 46 # Delete key
+        flip foward: f
+        cw: e
+        ccw: q
+        motor on: "9"
+        motor off: "0"
