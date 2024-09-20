@@ -7,8 +7,9 @@ import pathlib
 from omegaconf import DictConfig, OmegaConf
 import logging
 from typing import Union
-import models
-import constants as c
+
+from . import models
+from . import constants as c
 
 logger = logging.getLogger(__name__)
 

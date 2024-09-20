@@ -4,13 +4,20 @@ Main file for the drone
 
 from typing import Union
 import cv2
+import os
+import sys
 import tkinter as tk
 
-import constants as c
-from controller import Controller
-import models
-from gui import DroneApp
-import init
+# Add the project root to the path
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
+print("Project root: ", project_root)
+sys.path.insert(0, project_root)
+
+from . import constants as c
+from .controller import Controller
+from . import models
+from .gui import DroneApp
+from . import init
 
 
 def loop(drone, controller):

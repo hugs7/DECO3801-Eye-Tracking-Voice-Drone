@@ -2,11 +2,11 @@
 Defines class for Tello drone
 """
 
-from .drone import Drone
 from djitellopy import tello
 import cv2
 
-import constants as c
+from .drone import Drone
+from .. import constants as c
 
 
 class TelloDrone(Drone):

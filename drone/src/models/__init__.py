@@ -1,3 +1,3 @@
-from models.mavic_drone import MavicDrone
-from models.tello_drone import TelloDrone
-from models.drone import Drone
+from src.models.mavic_drone import MavicDrone
+from src.models.tello_drone import TelloDrone
+from src.models.drone import Drone

@@ -4,10 +4,10 @@ Common file handler functions
 
 from typing import Optional
 from pathlib import Path
+import logging
 
-from .logger_helper import init_logger
-
-logger = init_logger()
+# To fix later
+logger = logging.getLogger(__name__)
 
 
 def get_project_root() -> Path:
