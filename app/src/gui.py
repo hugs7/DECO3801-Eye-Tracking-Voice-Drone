@@ -262,7 +262,7 @@ class MainApp(QMainWindow, CommonGUI):
 
         height, width, channel = frame.shape
         bytes_per_line = 3 * width
-        return QImage(frame.data, width, height, bytes_per_line, QImage.Format_RGB888)
+        return QImage(frame.data, width, height, bytes_per_line, QImage.Format.Format_RGB888)
 
     def get_webcam_feed(self) -> np.ndarray:
         """
