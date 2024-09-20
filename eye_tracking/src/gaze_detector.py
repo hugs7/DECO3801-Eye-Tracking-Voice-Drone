@@ -16,7 +16,7 @@ import numpy as np
 from omegaconf import OmegaConf
 
 from common import constants as cc
-from common.omegaconf_helper import safe_get, conf_key_from_value
+from common.omegaconf_helper import conf_key_from_value
 
 from . import constants as c
 from .face import Face
