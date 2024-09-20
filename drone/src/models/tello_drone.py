@@ -5,12 +5,17 @@ Defines class for Tello drone
 from djitellopy import tello
 import cv2
 
+from common.logger_helper import init_logger
+
 from .drone import Drone
 from .. import constants as c
+
+logger = init_logger()
 
 
 class TelloDrone(Drone):
     def __init__(self) -> None:
+        logger.info("Initialising TelloDrone...")
         tello_drone = tello.Tello()
         self.drone = tello_drone
         self.connect()
@@ -20,13 +25,20 @@ class TelloDrone(Drone):
         self.drone.streamon()
         self.drone.set_speed(c.TELLO_SPEED_CM_S)
 
-        print("Drone battery:", self.drone.get_battery())
+        logger.info("Drone battery: %d", self.drone.get_battery())
 
     def connect(self) -> None:
         """
         Connects to the drone
         """
-        self.drone.connect()
+
+        logger.info("Connecting to the Tello Drone...")
+
+        try:
+            self.drone.connect()
+        except tello.TelloException as e:
+            logger.error("There was an issue connecting to the drone. Check you are on the correct WiFi network.")
+            logger.error("Details %s", e)
 
     def read_camera(self) -> cv2.typing.MatLike:
         """
@@ -39,15 +51,13 @@ class TelloDrone(Drone):
 
         return img
 
-
-
     def set_video_resolution(self, resolution: str):
         """Sets the resolution of the video stream
         Use one of the following for the resolution argument:
             Tello.RESOLUTION_480P
             Tello.RESOLUTION_720P
         """
-        cmd = 'setresolution {}'.format(resolution)
+        cmd = "setresolution {}".format(resolution)
         self.drone.send_control_command(cmd)
 
     def set_video_fps(self, fps: str):
@@ -57,7 +67,7 @@ class TelloDrone(Drone):
             Tello.FPS_15
             Tello.FPS_30
         """
-        cmd = 'setfps {}'.format(fps)
+        cmd = "setfps {}".format(fps)
         self.drone.send_control_command(cmd)
 
     def set_video_bitrate(self, bitrate: int):
@@ -70,7 +80,7 @@ class TelloDrone(Drone):
             Tello.BITRATE_4MBPS
             Tello.BITRATE_5MBPS
         """
-        cmd = 'setbitrate {}'.format(bitrate)
+        cmd = "setbitrate {}".format(bitrate)
         self.drone.send_control_command(cmd)
 
     def send_info(self, command):
@@ -78,9 +88,8 @@ class TelloDrone(Drone):
             self.drone.send_control_command(command)
         else:
             self.drone.send_command_without_return(command)
-        #data, address = client_socket.recvfrom(1024)
-        #client_socket.sendto(command.encode('utf-8'), address)
-
+        # data, address = client_socket.recvfrom(1024)
+        # client_socket.sendto(command.encode('utf-8'), address)
 
     # Controlling methods
     '''def send_control_command(self, command: str, timeout: int = RESPONSE_TIMEOUT) -> bool:
@@ -100,8 +109,8 @@ class TelloDrone(Drone):
         return False # never reached
     '''
 
-    #valid tello command strings:
-    '''
+    # valid tello command strings:
+    """
     Connect = "command"
     Takeoff = "takeoff", 20sec
     Land = "land"
@@ -114,7 +123,7 @@ class TelloDrone(Drone):
     Rotate CCW = "ccw magnitude"
     Flip = "flip direction"
     directions = {"l", "r", "f", "b"}
-    '''
+    """
 
     def rotate_clockwise(self, degrees: int) -> None:
         command = "cw {}".format(degrees)
