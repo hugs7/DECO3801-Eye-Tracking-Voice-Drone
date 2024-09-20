@@ -93,7 +93,7 @@ def main():
         gui = QApplication(sys.argv)
         main_window = MainApp(stop_event, thread_data, data_lock, interprocess_data)
         main_window.show()
-        gui.exec_()
+        gui.exec()
     except KeyboardInterrupt:
         logger.critical("Interrupted! Stopping all threads...")
 

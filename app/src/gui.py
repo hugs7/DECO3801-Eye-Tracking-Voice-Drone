@@ -212,7 +212,7 @@ class MainApp(QMainWindow, CommonGUI):
         """
         logger.info("Opening options window")
         dialog = PreferencesDialog()
-        dialog.exec_()
+        dialog.exec()
 
     def update_webcam_feed(self) -> None:
         """
