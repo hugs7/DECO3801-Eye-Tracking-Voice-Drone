@@ -57,7 +57,7 @@ class DroneApp(QMainWindow, CommonGUI):
         self.layout.addWidget(self.drone_video_label)
 
         self.quit_button = QPushButton("Quit", self)
-        self.quit_button.clicked.connect(self.quit)
+        self.quit_button.clicked.connect(self.close_app)
         self.layout.addWidget(self.quit_button)
 
         self._init_menu()
