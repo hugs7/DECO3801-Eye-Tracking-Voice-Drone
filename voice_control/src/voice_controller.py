@@ -4,12 +4,10 @@ Controller for voice processing
 
 from typing import Optional, Tuple, List, Dict, Union
 import ast
-
 from omegaconf import OmegaConf
 
 from common import constants as cc
 from common.logger_helper import init_logger
-from common.PeekableMPQueue import PeekableMPQueue
 
 from .audio import AudioRecogniser
 from .LLM import LLM
@@ -18,13 +16,13 @@ logger = init_logger()
 
 
 class VoiceController:
-    def __init__(self, config: OmegaConf, manager_data: Optional[Dict] = None):
+    def __init__(self, config: OmegaConf, interprocess_data: Optional[Dict] = None):
         """
         Initialises the voice controller.
 
         Args:
             config (OmegaConf): Configuration for the voice controller.
-            manager_data (Optional[Dict]): Interprocess communication (IPC) data dictionary:
+            interprocess_data (Optional[Dict]): Interprocess communication (IPC) data dictionary:
                                            (Only provided if running as a child process)
 
         Returns:
@@ -32,13 +30,16 @@ class VoiceController:
         """
 
         self.config = config
-
-        self.running_in_process = manager_data is not None
+        self.running_in_process = interprocess_data is not None
         if self.running_in_process:
             logger.info("Running in process mode")
-            self.manager_data = manager_data
+            self.interprocess_data = interprocess_data
+            if "voice_toggle" not in interprocess_data:
+                self.interprocess_data["voice_toggle"] = True
+            self.voice_toggle = self.interprocess_data["voice_toggle"]
         else:
             logger.info("Running in main mode")
+            self.voice_toggle = True
 
         self.audio_recogniser = AudioRecogniser(config.audio)
         self.llm = LLM(config.llm)
@@ -59,13 +60,39 @@ class VoiceController:
             run = True
             try:
                 while run:
-                    logger.info(" >>> Begin voice control loop")
-                    run = self.audio_loop()
+                    self._wait_key()
 
-                    logger.info(" <<< End voice control loop")
+                    if self.voice_toggle:
+                        logger.info(" >>> Begin voice control loop")
+                        run = self.audio_loop()
+                        logger.info(" <<< End voice control loop")
+
             except KeyboardInterrupt:
                 logger.error("    >>> Keyboard interrupt received. Exiting immediately.")
                 run = False
+
+    def _wait_key(self) -> None:
+        keyboard_queue: Optional[MPQueue] = self.interprocess_data["keyboard_queue"]
+        if keyboard_queue is not None:
+            while not keyboard_queue.empty():
+                key: int = keyboard_queue.get()
+                self._keyboard_controller(key)
+        else:
+            logger.warning("Keyboard queue not initialised in shared data.")
+
+        if self.running_in_process:
+            self.interprocess_data["voice_toggle"] = self.voice_toggle
+
+    def _keyboard_controller(self, key_code: int) -> None:
+
+        key_chr = chr(key_code).lower()
+        logger.info(f"Received key: %s (%d)", key_chr, key_code)
+
+        match key_chr:
+            case "v":
+                self.voice_toggle = not self.voice_toggle
+
+    # def _update_interprocess_data(self):
 
     def audio_loop(self) -> bool:
         """
@@ -147,7 +174,7 @@ class VoiceController:
             return
 
         command_text = command_data[cc.COMMAND_TEXT]
-        logger.info(f"Setting voice command to '%s'", command_text)
-        command_queue: PeekableMPQueue = self.manager_data[cc.VOICE_CONTROL][cc.COMMAND_QUEUE]
+        logger.info("Setting voice command to '%s'", command_text)
+        command_queue: MPQueue = self.manager_data[cc.VOICE_CONTROL][cc.COMMAND_QUEUE]
         command_queue.put(command_data)
         logger.debug("Voice command added to command queue of length %d.", command_queue.qsize())
