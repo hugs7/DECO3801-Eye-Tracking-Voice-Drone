@@ -58,7 +58,7 @@ class DroneApp:
         """
         Updates the video feed
         """
-        frame = self.controller.model.get_frame()
+        frame = self.controller.model.read_camera()
 
         if frame is not None:
             # Convert the image from OpenCV format to PIL format
