@@ -20,7 +20,7 @@ from .gui import DroneApp
 from . import init
 
 
-def loop(drone, controller):
+def loop(drone: Union[models.MavicDrone, models.TelloDrone], controller: Controller) -> None:
     """
     Defines main loop for the drone
 
@@ -37,9 +37,12 @@ def loop(drone, controller):
     cv2.waitKey(1)
 
 
-def read_camera_feed(drone: Union[models.MavicDrone, models.TelloDrone]):
+def read_camera_feed(drone: Union[models.MavicDrone, models.TelloDrone]) -> None:
     """
     Reads the camera feed from the drone
+
+    Args:
+        drone (Union[models.MavicDrone, models.TelloDrone]): The drone object
     """
 
     output_dim = (960, 720)
@@ -51,6 +54,9 @@ def read_camera_feed(drone: Union[models.MavicDrone, models.TelloDrone]):
 def render_drone_feed(img: cv2.typing.MatLike) -> None:
     """
     Renders the drone feed
+
+    Args:
+        img: The image to render
     """
 
     cv2.imshow(c.WINDOW_NAME, img)
