@@ -99,7 +99,7 @@ class Controller:
             case "BACKWARD":
                 # run back directional command with value
                 fb = -moveSpeed
-                self.model.move_back(50)
+                self.model.move_backward(50)
             case "TAKEOFF":
                 # xtra = 1
                 self.model.takeoff()
