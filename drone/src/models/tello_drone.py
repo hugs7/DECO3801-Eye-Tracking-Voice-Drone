@@ -12,8 +12,6 @@ from omegaconf import OmegaConf
 
 from common.logger_helper import init_logger
 
-from .. import constants as c
-
 from .drone import Drone
 
 logger = init_logger()
