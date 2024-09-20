@@ -22,19 +22,18 @@ CONTROLLER_MAPPING = {
 }
 
 KEY_MAPPING = {
-        "Left": "LEFT",
-        "Right": "RIGHT",
-        "Up": "UP",
-        "Down": "DOWN",
-        "w": "FORWARD",
-        "s": "BACKWARD",
-        "l": "LAND",
-        "space": "TAKEOFF",
-        "q": "ROTATE CW",
-        "e": "ROTATE CCW",
-        "z": "FLIP FORWARD",
-        }
-
+    "Left": "LEFT",
+    "Right": "RIGHT",
+    "Up": "UP",
+    "Down": "DOWN",
+    "w": "FORWARD",
+    "s": "BACKWARD",
+    "l": "LAND",
+    "space": "TAKEOFF",
+    "q": "ROTATE CW",
+    "e": "ROTATE CCW",
+    "z": "FLIP FORWARD",
+}
 
 
 class Controller:
