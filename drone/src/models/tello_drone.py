@@ -18,6 +18,15 @@ from .drone import Drone
 
 logger = init_logger()
 
+MIN_SPEED = 10
+MAX_SPEED = 100
+DEFAULT_SPEED = 50
+
+MIN_VIDEO_BITRATE = 1
+MAX_VIDEO_BITRATE = 5
+
+DEFAULT_FPS = 30
+
 
 class TelloDrone(Drone):
     """
@@ -68,11 +77,11 @@ class TelloDrone(Drone):
 
         logger.debug("Initialising drone speed...")
         config_speed = self.config.default_speed
-        if config_speed in range(10, 100 + 1):
+        if config_speed in range(MIN_SPEED, MAX_SPEED + 1):
             tello_speed = config_speed
             logger.debug("Setting drone speed to %s cm/s", tello_speed)
         else:
-            tello_speed = 50
+            tello_speed = DEFAULT_SPEED
             logger.warning("Invalid speed '%s' cm/s. Defaulting to %d cm/s", config_speed, tello_speed)
 
         self.drone.set_speed(tello_speed)
@@ -81,7 +90,7 @@ class TelloDrone(Drone):
         config_video_bitrate = self.config.video_bitrate
         if config_video_bitrate == "auto":
             tello_video_bitrate = Tello.BITRATE_AUTO
-        elif config_video_bitrate in range(1, 5 + 1):
+        elif config_video_bitrate in range(MIN_VIDEO_BITRATE, MAX_VIDEO_BITRATE + 1):
             tello_video_bitrate = eval(f"Tello.BITRATE_{config_video_bitrate}")
             logger.debug("Setting video bitrate to %s", tello_video_bitrate)
         else:
@@ -113,9 +122,9 @@ class TelloDrone(Drone):
             case 30:
                 tello_fps = Tello.FPS_30
             case _:
-                logger.warning("Invalid video fps '%s'. Defaulting to 30", config_fps)
+                logger.warning("Invalid video fps '%s'. Defaulting to %d", config_fps, DEFAULT_FPS)
                 tello_fps = Tello.FPS_30
-                config_fps = 30
+                config_fps = DEFAULT_FPS
 
         self.drone.set_video_fps(tello_fps)
         self.video_fps = config_fps
