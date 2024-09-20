@@ -33,13 +33,13 @@ class TelloDrone(Drone):
         """
 
         logger.info("Initialising TelloDrone...")
-        self.__init_config(tello_config)
-        self.__init_drone_params()
-        logger.info("Tello drone initialised.")
-
         tello_drone = Tello()
         self.drone = tello_drone
         self.connect()
+
+        self.__init_config(tello_config)
+        self.__init_drone_params()
+        logger.info("Tello drone initialised.")
 
         self.last_command_time = datetime.now()
 
@@ -221,16 +221,10 @@ class TelloDrone(Drone):
         self._send_command(command)
 
     def __getattribute__(self, name: str) -> Any:
-        """
-        Returns attributes from the drone object. Usefulf for drone polling methods.
-        E.g. drone.get_height()
-        """
-        if name in Drone.__dict__:
-            # Use local method if it exists
-            return super().__getattribute__(name)
+        if name != "drone" and name in self.drone.__dict__:
+            return getattr(self.drone, name)
 
-        # Look for attribute in drone object
-        return getattr(self.drone, name)
+        return super().__getattribute__(name)
 
     def get_height(self) -> int:
         # Must exist as is defined as an abstract method in Drone
