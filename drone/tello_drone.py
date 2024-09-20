@@ -2,7 +2,7 @@
 Defines class for Tello drone
 """
 
-from drone_model import Drone
+from models.drone import Drone
 from djitellopy import tello
 import cv2
 
