@@ -4,4 +4,9 @@ mavic:
     port: 14551
     connection_timeout: 60 # Seconds
 tello:
+    poll_response: False
     default_speed: 50
+    video_bitrate: auto
+    video_resolution: 720p
+    video_fps: 30
+    camera_selection: forward

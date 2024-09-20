@@ -7,6 +7,7 @@ from typing import Any
 
 import cv2
 from djitellopy import tello
+from djitellopy.tello import Tello
 from omegaconf import OmegaConf
 
 from common.logger_helper import init_logger
@@ -32,20 +33,104 @@ class TelloDrone(Drone):
         """
 
         logger.info("Initialising TelloDrone...")
-        self.config = tello_config
+        self.__init_config(tello_config)
+        self.__init_drone_params()
 
-        tello_drone = tello.Tello()
+        tello_drone = Tello()
         self.drone = tello_drone
         self.connect()
-        self.polling_flag = False
-
-        # Start Camera Display Stream
-        self.drone.streamon()
-        self.drone.set_speed(c.TELLO_SPEED_CM_S)
 
         self.last_command_time = datetime.now()
 
         logger.info("Drone battery: %d", self.drone.get_battery())
+
+    def __init_config(self, tello_config: OmegaConf) -> None:
+        """
+        Initialises class variables from the Tello configuration
+
+        Args:
+            tello_config (OmegaConf): The Tello config object
+        """
+
+        self.config = tello_config
+
+        self.poll_response = self.config.poll_response
+
+    def __init_drone_params(self) -> None:
+        """
+        Initialises the drone parameters
+        """
+
+        self.drone.streamon()
+
+        logger.debug("Initialising drone speed...")
+        config_speed = self.config.default_speed
+        if config_speed in range(10, 100 + 1):
+            tello_speed = config_speed
+            logger.debug("Setting drone speed to %s cm/s", tello_speed)
+        else:
+            tello_speed = 50
+            logger.warning("Invalid speed '%s' cm/s. Defaulting to %d cm/s", config_speed, tello_speed)
+
+        self.drone.set_speed(tello_speed)
+
+        logger.debug("Initialising video bitrate")
+        config_video_bitrate = self.config.video_bitrate
+        if config_video_bitrate == "auto":
+            tello_video_bitrate = Tello.BITRATE_AUTO
+        elif config_video_bitrate in range(1, 5 + 1):
+            tello_video_bitrate = eval(f"Tello.BITRATE_{config_video_bitrate}")
+            logger.debug("Setting video bitrate to %s", tello_video_bitrate)
+        else:
+            logger.warning("Invalid video bitrate '%s'. Defaulting to auto", config_video_bitrate)
+            tello_video_bitrate = Tello.BITRATE_AUTO
+
+        self.drone.set_video_bitrate(tello_video_bitrate)
+
+        logger.debug("Initialising video resolution...")
+        config_res = self.config.video_resolution
+        match config_res:
+            case "480p":
+                tello_res = Tello.RESOLUTION_480P
+            case "720p":
+                tello_res = Tello.RESOLUTION_720P
+            case _:
+                logger.warning("Invalid video resolution '%s'. Defaulting to 720p", config_res)
+                tello_res = Tello.RESOLUTION_720P
+
+        self.drone.set_video_resolution(tello_res)
+
+        logger.debug("Initialising video fps...")
+        config_fps = self.config.video_fps
+        match config_fps:
+            case 5:
+                tello_fps = Tello.FPS_5
+            case 15:
+                tello_fps = Tello.FPS_15
+            case 30:
+                tello_fps = Tello.FPS_30
+            case _:
+                logger.warning("Invalid video fps '%s'. Defaulting to 30", config_fps)
+                tello_fps = Tello.FPS_30
+
+        self.drone.set_video_fps(tello_fps)
+
+        # Forward-facing 10080x720p colour camera or 320x240 greyscale
+        # IR down-facing camera
+        logger.debug("Initialising camera selection...")
+        config_camera = self.config.camera_selection
+        match config_camera:
+            case "forward":
+                camera_selection = Tello.CAMERA_FORWARD
+            case "downward":
+                camera_selection = Tello.CAMERA_DOWNWARD
+            case _:
+                logger.warning("Invalid camera selection '%s'. Defaulting to forward", config_camera)
+                camera_selection = Tello.CAMERA_FORWARD
+
+        self.drone.set_video_direction(camera_selection)
+
+        logger.info("Tello drone initialised.")
 
     def connect(self) -> None:
         """
@@ -75,12 +160,13 @@ class TelloDrone(Drone):
 
         return img
 
-    def send_info(self, command):
+    def _send_command(self, command):
         """
-        Override for
+        Sends a command to the drone, either with or without a return
+        depending on config.
         """
 
-        if self.polling_flag:
+        if self.poll_response:
             self.drone.send_control_command(command)
         else:
             if not self.__has_waited_between_commands():
@@ -91,47 +177,47 @@ class TelloDrone(Drone):
 
     def rotate_clockwise(self, degrees: int) -> None:
         command = "cw {}".format(degrees)
-        self.send_info(command)
+        self._send_command(command)
 
     def rotate_counter_clockwise(self, degrees: int) -> None:
         command = "ccw {}".format(degrees)
-        self.send_info(command)
+        self._send_command(command)
 
     def move_up(self, cm: int) -> None:
         command = "up {}".format(cm)
-        self.send_info(command)
+        self._send_command(command)
 
     def move_down(self, cm: int) -> None:
         command = "down {}".format(cm)
-        self.send_info(command)
+        self._send_command(command)
 
     def move_left(self, cm: int) -> None:
         command = "left {}".format(cm)
-        self.send_info(command)
+        self._send_command(command)
 
     def move_right(self, cm: int) -> None:
         command = "right {}".format(cm)
-        self.send_info(command)
+        self._send_command(command)
 
     def move_forward(self, cm: int) -> None:
         command = "forward {}".format(cm)
-        self.send_info(command)
+        self._send_command(command)
 
     def move_backward(self, cm: int) -> None:
         command = "back {}".format(cm)
-        self.send_info(command)
+        self._send_command(command)
 
     def takeoff(self) -> None:
         command = "takeoff"
-        self.send_info(command)
+        self._send_command(command)
 
     def land(self) -> None:
         command = "land"
-        self.send_info(command)
+        self._send_command(command)
 
     def flip_forward(self) -> None:
         command = "flip f"
-        self.send_info(command)
+        self._send_command(command)
 
     def __getattribute__(self, name: str) -> Any:
         """
