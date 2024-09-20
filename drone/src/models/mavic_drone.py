@@ -4,7 +4,7 @@ Defines class for Mavic drone
 
 import cv2
 import time
-from typing import Any
+from typing import Any, Optional
 from omegaconf import OmegaConf
 
 from common.logger_helper import init_logger
@@ -31,17 +31,21 @@ class MavicDrone(Drone):
         self.config = mavic_config
 
         self.vehicle = self.connect()
+        self.success = self.vehicle is not None
+        if not self.success:
+            self.success = False
+            return
 
         from dronekit import VehicleMode
 
         self.VehicleMode = VehicleMode
 
-    def connect(self):
+    def connect(self) -> Optional[Any]:
         """
         Connects to the Mavic drone
 
         Returns:
-            vehicle: The vehicle object
+            Optional[vehicle]: The vehicle object or None if connection failed
         """
         logger.info("Importing libraries...")
         from dronekit import connect as mavic_connect
@@ -62,7 +66,7 @@ class MavicDrone(Drone):
         except Exception as e:
             logger.error("Failed to connect to Mavic drone")
             logger.error("Details %s", e)
-            exit(1)
+            return
 
         logger.info("Connected to Mavic!")
         return vehicle

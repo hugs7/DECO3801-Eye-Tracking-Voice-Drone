@@ -35,8 +35,8 @@ class TelloDrone(Drone):
         logger.info("Initialising TelloDrone...")
         tello_drone = Tello()
         self.drone = tello_drone
-        success = self.connect()
-        if not success:
+        self.success = self.connect()
+        if not self.success:
             return
 
         self.__init_config(tello_config)

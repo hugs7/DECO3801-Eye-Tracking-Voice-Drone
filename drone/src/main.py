@@ -65,6 +65,9 @@ def render_drone_feed(img: cv2.typing.MatLike) -> None:
 def main():
     drone_config = init.init()
     drone = init.init_drone(drone_config)
+    if drone.success is False:
+        return
+
     controller = Controller(drone)
 
     root = tk.Tk()
