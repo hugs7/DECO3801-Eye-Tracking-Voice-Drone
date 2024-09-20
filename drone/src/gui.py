@@ -3,7 +3,7 @@ Local drone GUI. Not used in threading mode.
 """
 
 from typing import Dict, Optional
-from PyQt6.QtWidgets import QMainWindow, QVBoxLayout, QWidget, QPushButton, QLabel
+from PyQt6.QtWidgets import QMainWindow, QVBoxLayout, QHBoxLayout, QWidget, QPushButton, QLabel
 from PyQt6.QtCore import QTimer, Qt
 from PyQt6.QtGui import QImage, QPixmap
 import numpy as np
@@ -34,6 +34,8 @@ class DroneApp(QMainWindow, CommonGUI):
 
         self.controller = controller
         self.limited_mode = controller is None
+        if self.limited_mode:
+            logger.info("Running in limited mode. No controller provided")
 
         self._init_gui()
 
@@ -49,15 +51,22 @@ class DroneApp(QMainWindow, CommonGUI):
         self.main_widget = QWidget(self)
         self.setCentralWidget(self.main_widget)
 
-        self.layout = QVBoxLayout()
+        self.layout = QVBoxLayout(self.main_widget)
 
         self.drone_video_label = QLabel(self)
         self.drone_video_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.layout.addWidget(self.drone_video_label)
 
+        self.layout.addStretch()
+
+        button_layout = QHBoxLayout()
+
         self.quit_button = QPushButton("Quit", self)
         self.quit_button.clicked.connect(self.close_app)
-        self.layout.addWidget(self.quit_button)
+        button_layout.addStretch()
+        button_layout.addWidget(self.quit_button)
+
+        self.layout.addLayout(button_layout)
 
         self._init_menu()
 
