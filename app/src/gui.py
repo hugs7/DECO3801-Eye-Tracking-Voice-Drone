@@ -2,8 +2,8 @@
 Handles GUI for the application using PyQt5
 """
 
-from typing import Dict
-from PyQt5.QtWidgets import QMainWindow, QVBoxLayout, QWidget, QPushButton, QLabel, QMenuBar, QMenu, QAction
+from typing import Dict, List, Union, Tuple, Optional
+from PyQt5.QtWidgets import QMainWindow, QVBoxLayout, QWidget, QPushButton, QLabel, QLineEdit, QMenuBar, QMenu, QAction
 from PyQt5.QtCore import QTimer, Qt
 from PyQt5.QtGui import QImage, QPixmap, QKeyEvent
 import cv2
@@ -85,6 +85,9 @@ class MainApp(QMainWindow, CommonGUI):
         self.side_video_label = QLabel(self)
         self.side_video_label.setAlignment(Qt.AlignCenter)
         self.layout.addWidget(self.side_video_label)
+
+        self.text_input = QLineEdit(self)
+        self.layout.addWidget(self.text_input)
 
         # Button to switch video feeds
         self.switch_button = QPushButton("Switch", self)
@@ -277,13 +280,18 @@ class MainApp(QMainWindow, CommonGUI):
         webcam_frame = self._decode_feed_buffer(buffer)
         return webcam_frame
 
-    def get_next_voice_command(self) -> list[tuple[str, int]]:
+    def get_next_voice_command(self) -> Optional[List[Dict[str, Union[str, Tuple[str, int]]]]]:
         """
         Gets the voice command from the IPC shared data of the voice control
         module.
 
         Returns:
-            list(tuple[str, int]): The voice command
+            Optional[
+                List[Dict[str, 
+                          Union[str, 
+                                Tuple[str, int]]]]]: A dictionary of the voice as 
+                                                     text and parsed command The 
+                                                     voice command.
         """
 
         voice_data = self.interprocess_data["voice_control"]
@@ -298,7 +306,7 @@ class MainApp(QMainWindow, CommonGUI):
         if not command_queue.empty():
             logger.info(f"Voice command queue size: {command_queue.qsize()}")
             next_command = command_queue.get()
-            logger.info(f"Next voice command: {next_command}")
+            logger.info(f"Next voice command: {next_command["text"]}")
 
             return next_command
 
