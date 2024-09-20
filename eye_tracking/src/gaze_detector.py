@@ -16,8 +16,9 @@ import numpy as np
 from omegaconf import OmegaConf
 
 from common import constants as cc
-from common.omegaconf_helper import safe_get
+from common.omegaconf_helper import safe_get, conf_key_from_value
 
+from . import constants as c
 from .face import Face
 from .face_model_mediapipe import FaceModelMediaPipe
 from .face_parts import FacePartsName
@@ -83,6 +84,7 @@ class GazeDetector:
         self.output_dir = self._create_output_dir()
         self.writer = self._create_video_writer()
 
+        self.loop_enabled = True
         self.stop = False
         self.show_bbox = self.config.demo.show_bbox
         self.show_head_pose = self.config.demo.show_head_pose
@@ -207,7 +209,6 @@ class GazeDetector:
             ok, frame = self._read_camera()
             if not ok:
                 break
-
             self._process_image(frame)
 
             if self.config.demo.display_on_screen:
@@ -274,30 +275,34 @@ class GazeDetector:
             None
         """
         undistorted = self._undistort_image(image)
-
         self.visualizer.set_image(image.copy())
-        if self.hitboxes is None:
-            self.hitboxes = self._init_hitboxes()
 
-        faces = self.gaze_estimator.detect_faces(undistorted)
-        for face in faces:
-            self._draw_landmarks(face)
-            self._draw_face_bbox(face)
-            if self.calibrated:
-                self.gaze_estimator.estimate_gaze(undistorted, face)
-                self._draw_head_pose(face)
-                self._draw_face_template_model(face)
-                self._draw_gaze_vector(face)
-                self._draw_gaze_point()
-                self._display_normalized_image(face)
+        if self.loop_enabled:
+            if self.hitboxes is None:
+                self.hitboxes = self._init_hitboxes()
+
+            faces = self.gaze_estimator.detect_faces(undistorted)
+            for face in faces:
+                self._draw_landmarks(face)
+                self._draw_face_bbox(face)
+                if self.calibrated:
+                    self.gaze_estimator.estimate_gaze(undistorted, face)
+                    self._draw_head_pose(face)
+                    self._draw_face_template_model(face)
+                    self._draw_gaze_vector(face)
+                    self._draw_gaze_point()
+                    self._display_normalized_image(face)
 
         if self.config.demo.use_camera:
             self.visualizer.flip_image()
-            self._flip_points()
 
-        for face in faces:
-            if self.calibrated:
-                self._draw_gaze_region()
+            if self.loop_enabled:
+                self._flip_points()
+
+        if self.loop_enabled:
+            for face in faces:
+                if self.calibrated:
+                    self._draw_gaze_region()
 
         if self.writer:
             self.writer.write(self.visualizer.image)
@@ -435,7 +440,7 @@ class GazeDetector:
 
     def _keyboard_controller(self, key_code: int) -> bool:
         """
-        Keybaord controller for the gaze detector.
+        Keyboard controller for the gaze detector.
 
         Returns:
             True if a recognised key is pressed, False otherwise
@@ -450,26 +455,37 @@ class GazeDetector:
             self.stop = True
             return True
 
+        keybindings = self.config.keyboard_bindings
+        bindings_key = conf_key_from_value(keybindings, key_chr)
+
+        if bindings_key is None:
+            return False
+
+        if bindings_key in c.LOOP_KEYS:
+            match key_chr:
+                case keybindings.bbox:
+                    self.show_bbox = not self.show_bbox
+                case keybindings.landmark:
+                    self.show_landmarks = not self.show_landmarks
+                case keybindings.head_pose:
+                    self.show_head_pose = not self.show_head_pose
+                case keybindings.normalized_image:
+                    self.show_normalized_image = not self.show_normalized_image
+                case keybindings.template_model:
+                    self.show_template_model = not self.show_template_model
+                case keybindings.gaze_vector:
+                    self.show_gaze_vector = not self.show_gaze_vector
+                case keybindings.calibrate:
+                    # Calibrate
+                    logger.info("Setting calibrated to False")
+                    self.calibrated = False
+                    self._calibrate_landmarks()
+                case _:
+                    return False
+
         match key_chr:
-            case "b":
-                self.show_bbox = not self.show_bbox
-            case "l":
-                self.show_landmarks = not self.show_landmarks
-            case "h":
-                self.show_head_pose = not self.show_head_pose
-            case "n":
-                self.show_normalized_image = not self.show_normalized_image
-            case "t":
-                self.show_template_model = not self.show_template_model
-            case "g":
-                self.show_gaze_vector = not self.show_gaze_vector
-            case "c":
-                # Calibrate
-                logger.info("Setting calibrated to False")
-                self.calibrated = False
-                self._calibrate_landmarks()
-            case _:
-                return False
+            case keybindings.loop_toggle:
+                self.loop_enabled = not self.loop_enabled
 
         return True
 
