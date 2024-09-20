@@ -4,6 +4,7 @@ Defines class for Tello drone
 
 from djitellopy import tello
 import cv2
+from omegaconf import OmegaConf
 
 from common.logger_helper import init_logger
 
@@ -14,8 +15,21 @@ logger = init_logger()
 
 
 class TelloDrone(Drone):
-    def __init__(self) -> None:
+    """
+    Implements a Tello drone wrapper class
+    """
+
+    def __init__(self, tello_config: OmegaConf) -> None:
+        """
+        Initialises the Tello drone
+
+        Args:
+            tello_config (OmegaConf): The Tello config object
+        """
+
         logger.info("Initialising TelloDrone...")
+        self.config = tello_config
+
         tello_drone = tello.Tello()
         self.drone = tello_drone
         self.connect()
@@ -40,10 +54,14 @@ class TelloDrone(Drone):
             logger.error("There was an issue connecting to the drone. Check you are on the correct WiFi network.")
             logger.error("Details %s", e)
 
+        logger.info("Connected to the Tello Drone")
+
     def read_camera(self) -> cv2.typing.MatLike:
         """
         Reads the camera feed from the drone
-        :return: img - the image from the camera feed
+
+        Returns:
+            img - the image from the camera feed
         """
 
         frame_read = self.drone.get_frame_read()

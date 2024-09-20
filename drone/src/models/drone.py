@@ -10,6 +10,9 @@ import cv2
 class Drone(ABC):
     @abstractmethod
     def connect(self):
+        """
+        Connects to the drone
+        """
         pass
 
     @abstractmethod
