@@ -18,7 +18,7 @@ class DroneApp:
 
         #module_dir = os.path.pardir(__file__)
         #print(module_dir)
-        l#oading_screen = os.path.join(module_dir, "assets/loadingScreen.png")
+        #loading_screen = os.path.join(module_dir, "assets/loadingScreen.png")
         base_image = Image.open("assets/loadingScreen.png")
         base_image = base_image.resize((self.WIDTH, self.HEIGHT), Image.ANTIALIAS)  # Resize the image to fit the canvas
         base_image = ImageTk.PhotoImage(base_image)
