@@ -3,10 +3,11 @@ Main file for the drone
 """
 
 from typing import Union
-import cv2
 import os
 import sys
-import tkinter as tk
+
+import cv2
+from PyQt6.QtWidgets import QApplication
 
 # Add the project root to the path. Must execute prior to user imports.
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
@@ -65,14 +66,13 @@ def render_drone_feed(img: cv2.typing.MatLike) -> None:
 def main():
     drone_config = init.init()
     drone = init.init_drone(drone_config)
-    if drone.success is False:
-        return
+    if drone.success:
+        controller = Controller(drone)
 
-    controller = Controller(drone)
-
-    root = tk.Tk()
-    DroneApp(root, controller)
-    root.mainloop()
+    gui = QApplication(sys.argv)
+    drone_window = DroneApp(controller)
+    drone_window.show()
+    gui.exec()
 
 
 if __name__ == "__main__":
