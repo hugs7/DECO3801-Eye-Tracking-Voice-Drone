@@ -80,8 +80,9 @@ class Controller:
         self.model = drone
         self.config = controller_config
         self.connect_to_drone = self.config.connect_to_drone
+        self.drone_connected = self.connect_to_drone and self.model and self.model.success
 
-        if self.connect_to_drone and self.model.success:
+        if self.drone_connected:
             self.drone_video_fps = self.model.video_fps
 
         logger.info("Drone controller initialised.")
@@ -95,7 +96,7 @@ class Controller:
 
         self._wait_key()
 
-        if self.model.success:
+        if self.drone_connected:
             ok, frame = self.model.read_camera()
             if not ok:
                 return
