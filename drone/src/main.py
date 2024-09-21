@@ -14,9 +14,13 @@ project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
 print("Project root: ", project_root)
 sys.path.insert(0, project_root)
 
+from common.logger_helper import init_logger
+
 from .controller import Controller
 from .gui import DroneApp
 from . import init
+
+logger = init_logger()
 
 
 def main(stop_event: Optional[Event] = None, thread_data: Optional[Dict] = None, data_lock: Optional[Lock] = None):
@@ -43,6 +47,8 @@ def main(stop_event: Optional[Event] = None, thread_data: Optional[Dict] = None,
         drone_window = DroneApp(controller)
         drone_window.show()
         gui.exec()
+    else:
+        logger.debug("Drone module running in thread mode. Local GUI disabled.")
 
 
 if __name__ == "__main__":

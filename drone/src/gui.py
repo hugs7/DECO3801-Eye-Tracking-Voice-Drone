@@ -30,6 +30,7 @@ class DroneApp(QMainWindow, CommonGUI):
             controller[Optional[Controller]]: The controller object or None.
             If none, the GUI will run in limited mode.
         """
+        logger.info("Initialising GUI")
         super().__init__()
 
         self.controller = controller
@@ -45,7 +46,7 @@ class DroneApp(QMainWindow, CommonGUI):
         Initialises the GUI window and widgets
         """
 
-        logger.info("Initialising GUI")
+        logger.info("Initialising GUI widgets")
 
         self.setWindowTitle("Drone App")
 
