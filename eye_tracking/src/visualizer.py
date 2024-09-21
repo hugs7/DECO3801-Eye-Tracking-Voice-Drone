@@ -39,6 +39,7 @@ class Visualizer:
         Returns:
             None
         """
+        image = np.require(image, np.uint8, "C")
         self.image = image
 
     def flip_image(self) -> None:
