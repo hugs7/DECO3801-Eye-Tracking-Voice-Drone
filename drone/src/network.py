@@ -5,6 +5,7 @@ Network module
 from typing import Optional
 import sys
 import subprocess
+import re
 
 if __name__ == "__main__":
     import os
@@ -83,6 +84,25 @@ def win_create_wifi_profile(ssid: str, password: str) -> None:
     os.remove(profile_file)
 
 
+def is_wifi_connected() -> bool:
+    """
+    Checks if the device is connected to a Wi-Fi network
+
+    Returns:
+        bool: True if connected, False otherwise
+    """
+    if sys.platform == "win32":
+        result = subprocess.run(["netsh", "wlan", "show", "interfaces"], capture_output=True, text=True, shell=True)
+        pattern = r"State\s+:\s+connected"
+        return re.search(pattern, result.stdout) is not None
+    elif sys.platform == "linux":
+        result = subprocess.run(["iwgetid"], capture_output=True, text=True, shell=True)
+        return "ESSID" in result.stdout
+    elif sys.platform == "darwin":
+        result = subprocess.run(["networksetup", "-getairportnetwork", "en0"], capture_output=True, text=True, shell=True)
+        return "Current Wi-Fi Network" in result.stdout
+
+
 def connect_to_wifi(ssid: str, password: str, network_interface: Optional[str] = None) -> bool:
     """
     Connects to the specified wifi network
@@ -122,18 +142,18 @@ def connect_to_wifi(ssid: str, password: str, network_interface: Optional[str] =
     logger.debug("Running connection command: %s", connect_cmd)
 
     try:
-        result = subprocess.run(connect_cmd, shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-        output = result.stdout.strip()  # Capture and clean up stdout
+        subprocess.run(connect_cmd, shell=True, check=True)
     except subprocess.CalledProcessError as e:
         logger.error("Failed to connect to wifi network '%s'. Details: %s", ssid, e)
         return False
 
-    if "Connection request was completed successfully." in output:
+    connected = is_wifi_connected()
+    if connected:
         logger.info("Successfully connected to wifi network '%s'", ssid)
-        return True
+    else:
+        logger.error("Failed to connect to wifi network '%s'", ssid)
 
-    logger.error("Failed to connect to wifi network '%s'", ssid)
-    return False
+    return connected
 
 
 if __name__ == "__main__":
