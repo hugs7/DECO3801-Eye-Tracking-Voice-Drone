@@ -3,9 +3,12 @@ Helps with child threads
 """
 
 from typing import Optional
+from datetime import datetime
+import time
 from threading import Event, current_thread
 
-import common.logger_helper as lh
+from . import logger_helper as lh
+from .gui_helper import fps_to_ms
 
 logger = lh.init_logger()
 
@@ -89,3 +92,32 @@ def get_function_module(func) -> str:
 
     # Take first part of module path (if module is nested)
     return module.split(".")[0]
+
+
+def run_loop_with_max_tickrate(max_fps: int, callback: callable, *args, **kwargs) -> None:
+    """
+    Runs a loop with a minimum execution time.
+
+    Args:
+        max_fps (int): The maximum frames per second. If 0, the loop will run as
+        fast as possible.
+        callback (callable): The function to be called in the loop.
+        *args: Positional arguments to pass to the callback.
+        **kwargs: Keyword arguments to pass to the callback.
+    """
+    min_loop_time = fps_to_ms(max_fps)
+    last_loop_start_time = datetime.now()
+
+    while True:
+        callback(*args, **kwargs)
+
+        if min_loop_time == 0:
+            continue
+
+        now = datetime.now()
+        diff = now - last_loop_start_time
+
+        if diff.total_seconds() * 1000 < min_loop_time:
+            time.sleep((min_loop_time - diff.total_seconds() * 1000) / 1000)
+
+        last_loop_start_time = datetime.now()

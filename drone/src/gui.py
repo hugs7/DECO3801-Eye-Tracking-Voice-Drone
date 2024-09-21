@@ -35,7 +35,7 @@ class DroneApp(QMainWindow, CommonGUI):
         self.controller = controller
         self.limited_mode = self.controller.gui_only
         if self.limited_mode:
-            logger.info("Running in limited mode. No controller provided")
+            logger.info("Running in limited mode.")
 
         self._init_gui()
         self.timers = self._init_timers()

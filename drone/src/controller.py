@@ -66,11 +66,12 @@ class Controller:
 
             logger.debug("Initialising thread helper functions")
             # Lazily import thread helpers only if running in thread mode
-            from common.thread_helper import thread_loop_handler, thread_exit
+            from common.thread_helper import thread_loop_handler, thread_exit, run_loop_with_max_tickrate
 
             # Bind to class attributes so we can access them in class methods
             self.thread_loop_handler = thread_loop_handler
             self.thread_exit = thread_exit
+            self.run_loop_with_max_tickrate = run_loop_with_max_tickrate
 
             logger.debug("Thread initialisation complete")
         else:
@@ -79,12 +80,30 @@ class Controller:
         self.model = drone
         self.config = controller_config
         self.gui_only = self.config.gui_only
-        self.min_loop_time = fps_to_ms(self.config.max_tick_rate)
 
         if not self.gui_only and self.model.success:
             self.drone_video_fps = self.model.video_fps
 
         logger.info("Drone controller initialised.")
+
+    def controller_loop(self) -> None:
+        """
+        One interation of the controller loop.
+        """
+
+        logger.debug(">>> Begin drone loop")
+
+        self._wait_key()
+
+        if self.model.success:
+            ok, frame = self.model.read_camera()
+            if not ok:
+                return
+
+            self._render_frame(frame)
+
+        self.thread_loop_handler(self.stop_event)
+        logger.debug("<<< End drone loop")
 
     def run(self) -> None:
         """
@@ -94,28 +113,7 @@ class Controller:
         if self.running_in_thread:
             logger.debug("Drone module running in thread mode. Local GUI disabled.")
 
-            last_loop_start_time = datetime.now()
-            while True:
-                logger.debug(">>> Begin drone loop")
-                now = datetime.now()
-
-                diff = now - last_loop_start_time
-                if diff.total_seconds() * 1000 < self.min_loop_time:
-                    time.sleep((self.min_loop_time - diff.total_seconds() * 1000) / 1000)
-
-                last_loop_start_time = datetime.now()
-
-                self._wait_key()
-
-                if self.model.success:
-                    ok, frame = self.model.read_camera()
-                    if not ok:
-                        break
-
-                    self._render_frame(frame)
-
-                self.thread_loop_handler(self.stop_event)
-                logger.debug("<<< End drone loop")
+            self.run_loop_with_max_tickrate(self.config.max_tick_rate, self.controller_loop)
         else:
             logger.debug("Importing PyQt6...")
 
