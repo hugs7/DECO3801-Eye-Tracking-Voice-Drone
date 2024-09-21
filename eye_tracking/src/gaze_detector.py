@@ -430,15 +430,15 @@ class GazeDetector:
 
             accepted_keys = []
             for key in key_buffer:
-                accepted_keys.append(self._keyboard_controller(key))
+                accepted_keys.append(self._handle_key_event(key))
 
             # Accept if any valid key was pressed
             return any(accepted_keys)
         else:
             key = cv2.waitKey(self.config.demo.wait_time) & 0xFF
-            return self._keyboard_controller(key)
+            return self._handle_key_event(key)
 
-    def _keyboard_controller(self, key_code: int) -> bool:
+    def _handle_key_event(self, key_code: int) -> bool:
         """
         Keyboard controller for the gaze detector.
 
