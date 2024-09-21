@@ -3,6 +3,8 @@ Defines abstract class for drones
 """
 
 from abc import ABC, abstractmethod
+from typing import Tuple
+
 import cv2
 
 
@@ -15,12 +17,14 @@ class Drone(ABC):
         pass
 
     @abstractmethod
-    def read_camera(self) -> cv2.typing.MatLike:
+    def read_camera(self) -> Tuple[bool, cv2.typing.MatLike]:
         """
         Reads the camera feed from the drone
 
         Returns:
-            img [cv2.typing.MatLike]: The image from the camera feed as a numpy array
+            Tuple[bool, cv2.typing.MatLike]: A tuple containing a boolean indicating
+             - ok: if the read was successful and the image read
+             - img: the image read
         """
         pass
 

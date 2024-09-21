@@ -3,7 +3,7 @@ Defines class for Tello drone
 """
 
 from datetime import datetime
-from typing import Any
+from typing import Any, Tuple
 
 import cv2
 from djitellopy import tello
@@ -176,18 +176,13 @@ class TelloDrone(Drone):
         logger.info("Drone battery: %d", self.drone.get_battery())
         return True
 
-    def read_camera(self) -> cv2.typing.MatLike:
-        """
-        Reads the camera feed from the drone
-
-        Returns:
-            img - the image from the camera feed
-        """
-
+    def read_camera(self) -> Tuple[bool, cv2.typing.MatLike]:
         frame_read = self.drone.get_frame_read()
+
+        ok = frame_read is not None
         img = frame_read.frame
 
-        return img
+        return ok, img
 
     def _send_command(self, command):
         """
