@@ -22,19 +22,18 @@ class DroneApp(QMainWindow, CommonGUI):
     Local drone GUI
     """
 
-    def __init__(self, controller: Optional[Controller]):
+    def __init__(self, controller: Controller):
         """
         Initialises the drone app
 
         Args:
-            controller[Optional[Controller]]: The controller object or None.
-            If none, the GUI will run in limited mode.
+            controller [Controller]: The controller object.
         """
         logger.info("Initialising GUI")
         super().__init__()
 
         self.controller = controller
-        self.limited_mode = controller is None
+        self.limited_mode = self.controller.gui_only
         if self.limited_mode:
             logger.info("Running in limited mode. No controller provided")
 
