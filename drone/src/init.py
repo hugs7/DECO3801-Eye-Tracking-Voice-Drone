@@ -61,7 +61,7 @@ def init_drone(config: OmegaConf) -> Optional[Union[models.TelloDrone, models.Ma
         DictConfig: The drone config object
     """
 
-    if config.controller.gui_only:
+    if not config.controller.connect_to_drone:
         logger.info("Running in GUI only mode. Not initialising drone.")
         return None
 
