@@ -206,6 +206,7 @@ class TelloDrone(Drone):
         depending on config.
         """
 
+        logger.debug("Sending command: %s", command)
         if self.poll_response:
             self.drone.send_control_command(command)
         else:
