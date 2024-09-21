@@ -244,7 +244,7 @@ class GazeDetector:
                 return
 
             buffer = img_helper.encode_frame(self.visualizer.image)
-            if not buffer:
+            if buffer is None:
                 return
 
             with self.data_lock:

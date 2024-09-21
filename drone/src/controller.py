@@ -133,7 +133,7 @@ class Controller:
             return
 
         buffer = img_helper.encode_frame(frame)
-        if not buffer:
+        if buffer is None:
             return
 
         with self.data_lock:
