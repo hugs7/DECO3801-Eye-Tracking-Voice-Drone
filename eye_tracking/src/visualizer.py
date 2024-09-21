@@ -135,7 +135,7 @@ class Visualizer:
         thickness: int,
         top_left: Tuple[int, int],
         bottom_right: Tuple[int, int],
-    ):
+    ) -> Tuple[int, int]:
         """
         Calculates the origin of the text to be drawn in the centre of the rectangle
 
@@ -148,7 +148,7 @@ class Visualizer:
             bottom_right: The bottom right corner of the rectangle
 
         Returns:
-            The origin of the text
+            Tuple[int, int]: The origin of the text
         """
 
         (text_width, text_height), text_bottom_y = cv2.getTextSize(text, text_font_face, font_scale, thickness)
