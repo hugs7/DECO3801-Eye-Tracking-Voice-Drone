@@ -62,6 +62,25 @@ class Visualizer:
         assert self.image is not None
         return self.image.shape[:2]
 
+    def draw_fps(self, fps: float, color: Tuple[int, int, int] = (0, 255, 0)) -> None:
+        """
+        Draws the FPS on the image
+
+        Args:
+            fps: The FPS to be drawn
+            color: The colour of the FPS
+
+        Returns:
+            None
+        """
+        assert self.image is not None
+
+        fps_text = "inf" if fps == float("inf") else f"{fps:.2f}"
+
+        padding = 50
+        top_right_corner = (self.image.shape[1] - padding, padding)
+        self.draw_text(f"FPS: {fps_text}", top_right_corner, color)
+
     def draw_bbox(self, bbox: np.ndarray, color: Tuple[int, int, int] = (0, 255, 0), lw: int = 1) -> None:
         """
         Draws a bounding box on the image

@@ -210,7 +210,7 @@ class GazeDetector:
             # Exit parent thread
             self.thread_exit(self.stop_event)
 
-    def _gaze_loop(self) -> bool:
+    def _gaze_loop(self, tick_rate: float) -> bool:
         """
         A single iteration of the gaze loop in threaded mode.
 
@@ -218,6 +218,7 @@ class GazeDetector:
             True if the gaze loop should continue, False otherwise
         """
         logger.debug(">>> Begin eye tracking loop")
+
         if self.config.demo.display_on_screen:
             self._wait_key()
             if self.stop:
@@ -230,7 +231,7 @@ class GazeDetector:
         self._process_image(frame)
 
         if self.config.demo.display_on_screen:
-            self._render_frame("frame")
+            self._render_frame("frame", tick_rate)
 
         if self.running_in_thread:
             self.thread_loop_handler(self.stop_event)
@@ -238,12 +239,13 @@ class GazeDetector:
         logger.debug("<<< End eye tracking loop")
         return not self.stop
 
-    def _render_frame(self, win_name: str) -> None:
+    def _render_frame(self, win_name: str, tick_rate: float) -> None:
         """
         Renders a frame where it needs to go
 
         Args:
-            win_name: Window name
+            win_name [str]: Window name
+            tick_rate [float]: Tick rate of the gaze loop
 
         Returns:
             None
@@ -256,10 +258,15 @@ class GazeDetector:
 
             with self.data_lock:
                 self.thread_data["eye_tracking"]["video_frame"] = self.visualizer.image
+                self.thread_data["eye_tracking"]["tick_rate"] = tick_rate
 
             logger.debug("Set video frame in shared data.")
         else:
             cv2.imshow(win_name, self.visualizer.image)
+
+            # Render fps on the image
+            if self.config.demo.show_fps:
+                self.visualizer.draw_fps(tick_rate)
 
     def _read_camera(self) -> Tuple[bool, np.ndarray]:
         """

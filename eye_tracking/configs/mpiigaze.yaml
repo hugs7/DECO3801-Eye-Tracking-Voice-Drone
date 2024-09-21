@@ -22,6 +22,7 @@ demo:
     display_on_screen: true
     wait_time: 1
     max_tick_rate: 30
+    show_fps: true
     image_path: null
     video_path: null
     output_dir: null
