@@ -5,9 +5,7 @@ Controller for the drone, handles the input of a drone from voice, Gaze or manua
 from typing import Union, Optional, Dict, List
 from threading import Event, Lock
 from queue import Queue
-from datetime import datetime
 import sys
-import time
 
 from omegaconf import OmegaConf
 import cv2
@@ -15,7 +13,7 @@ import cv2
 from common import constants as cc, keyboard
 from common.logger_helper import init_logger
 from common.omegaconf_helper import conf_key_from_value
-from common.gui_helper import fps_to_ms
+from common.loop import run_loop_with_max_tickrate
 
 from .drone_actions import DroneActions
 from .models.tello_drone import TelloDrone
@@ -66,12 +64,11 @@ class Controller:
 
             logger.debug("Initialising thread helper functions")
             # Lazily import thread helpers only if running in thread mode
-            from common.thread_helper import thread_loop_handler, thread_exit, run_loop_with_max_tickrate
+            from common.thread_helper import thread_loop_handler, thread_exit
 
             # Bind to class attributes so we can access them in class methods
             self.thread_loop_handler = thread_loop_handler
             self.thread_exit = thread_exit
-            self.run_loop_with_max_tickrate = run_loop_with_max_tickrate
 
             logger.debug("Thread initialisation complete")
         else:
@@ -118,7 +115,7 @@ class Controller:
         if self.running_in_thread:
             logger.debug("Drone module running in thread mode. Local GUI disabled.")
 
-            self.run_loop_with_max_tickrate(self.config.max_tick_rate, self._controller_loop)
+            run_loop_with_max_tickrate(self.config.max_tick_rate, self._controller_loop)
         else:
             logger.debug("Importing PyQt6...")
 

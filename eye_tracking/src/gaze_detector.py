@@ -17,6 +17,7 @@ from omegaconf import OmegaConf
 
 from common import constants as cc, keyboard
 from common.omegaconf_helper import conf_key_from_value
+from common.loop import run_loop_with_max_tickrate
 
 from . import constants as c
 from .face import Face
@@ -66,12 +67,11 @@ class GazeDetector:
 
             logger.debug("Initialising thread helper functions")
             # Lazily import thread helpers only if running in thread mode
-            from common.thread_helper import thread_loop_handler, thread_exit, run_loop_with_max_tickrate
+            from common.thread_helper import thread_loop_handler, thread_exit
 
             # Bind to class attributes so we can access them in class methods
             self.thread_loop_handler = thread_loop_handler
             self.thread_exit = thread_exit
-            self.run_loop_with_max_tickrate = run_loop_with_max_tickrate
 
             logger.debug("Thread initialisation complete")
         else:
@@ -173,7 +173,7 @@ class GazeDetector:
                 if key_pressed:
                     self._process_image(image)
 
-                self._render_frame("image")
+                self._render_frame("image", 0.0)
 
         if self.config.demo.output_dir:
             name = pathlib.Path(self.config.demo.image_path).name
@@ -200,7 +200,7 @@ class GazeDetector:
             else:
                 logger.info("Video feed will be displayed on screen")
 
-        self.run_loop_with_max_tickrate(self.config.demo.max_tick_rate, self._gaze_loop)
+        run_loop_with_max_tickrate(self.config.demo.max_tick_rate, self._gaze_loop)
 
         self.cap.release()
         if self.writer:
