@@ -76,6 +76,24 @@ class Controller:
 
         logger.info("Drone controller initialised.")
 
+    def poll_video_feed(self) -> None:
+        """
+        Polls the video feed from the drone. If in threaded mode, stores
+        the frame in the shared data dictionary.
+        """
+
+        if not self.running_in_thread:
+            logger.warning("Video feed polling should be disabled in main mode")
+            return
+
+        frame = self.model.read_camera()
+        if frame is None:
+            logger.trace("No frame returned from camera")
+            return
+
+        with self.data_lock:
+            self.thread_data["drone_feed"] = frame
+
     def handle_key_press(self, key_code: int) -> None:
         """
         Handles key press events for the drone controller.
