@@ -250,6 +250,8 @@ class MainApp(QMainWindow, CommonGUI):
             frame = data.get("video_frame", None)
             if frame is None:
                 return None
+            
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
             self._set_pixmap(label, frame)
         except KeyboardInterrupt:
