@@ -3,7 +3,7 @@ Handles GUI for the application using PyQt6
 """
 
 from typing import Dict, List, Union, Tuple, Optional
-from PyQt6.QtWidgets import QMainWindow, QVBoxLayout, QWidget, QPushButton, QLabel, QLineEdit, QMenuBar, QMenu
+from PyQt6.QtWidgets import QMainWindow, QVBoxLayout, QWidget, QPushButton, QLabel, QLineEdit
 from PyQt6.QtCore import QTimer, Qt
 from PyQt6.QtGui import QImage, QPixmap, QKeyEvent
 import cv2
@@ -33,10 +33,9 @@ class MainApp(QMainWindow, CommonGUI):
         self.data_lock = data_lock
         self.interprocess_data = interprocess_data
 
-        self.swap_feeds = False
-
         self.config = self._init_config()
         self._init_gui()
+        self._init_feed_labels()
         self.timers: Dict[str, QTimer] = self._init_timers()
         self._init_keyboard_queue()
 
@@ -123,6 +122,13 @@ class MainApp(QMainWindow, CommonGUI):
 
         logger.info("Menu bar initialised")
 
+    def _init_feed_labels(self) -> None:
+        """
+        Initialise the labels for the video feeds
+        """
+        self.drone_video_label = self.main_video_label
+        self.webcam_video_label = self.side_video_label
+
     def _init_timers(self) -> Dict[str, QTimer]:
         """
         Initialise the timers for the gui
@@ -131,7 +137,8 @@ class MainApp(QMainWindow, CommonGUI):
             Dict[str, QTimer]: The timers configuration in an OmegaConf object
         """
         timers_conf = {
-            "webcam": {"callback": self.update_video_feeds, "fps": self.config.timers.webcam},
+            "webcam": {"callback": self.get_webcam_feed, "fps": self.config.timers.webcam},
+            "drone_feed": {"callback": self.get_drone_feed, "fps": self.config.timers.drone_video},
             "voice_command": {"callback": self.get_next_voice_command, "fps": self.config.timers.voice_command},
         }
 
@@ -195,30 +202,6 @@ class MainApp(QMainWindow, CommonGUI):
         dialog = PreferencesDialog()
         dialog.exec()
 
-    def update_video_feeds(self) -> None:
-        """
-        Update the video feed on the GUI
-
-        Returns:
-            None
-        """
-        try:
-            main_frame = self.get_drone_feed()
-            small_frame = self.get_webcam_feed()
-
-            if main_frame is not None and small_frame is not None:
-                if self.swap_feeds:
-                    main_frame, small_frame = small_frame, main_frame
-
-            if main_frame is not None:
-                self._set_pixmap(self.main_video_label, main_frame)
-
-            if small_frame is not None:
-                self._set_pixmap(self.side_video_label, small_frame)
-        except KeyboardInterrupt:
-            logger.critical("Interrupted! Stopping all threads...")
-            self.close_app()
-
     def _set_pixmap(self, label: QLabel, frame: np.ndarray) -> None:
         """
         Set the pixmap of the label to the frame
@@ -248,6 +231,31 @@ class MainApp(QMainWindow, CommonGUI):
         bytes_per_line = 3 * width
         return QImage(frame.data, width, height, bytes_per_line, QImage.Format.Format_RGB888)
 
+    def get_video_feed(self, source: str, label: QLabel) -> Optional[cv2.typing.MatLike]:
+        """
+        Retrieves the video feed from the specified module and updates the corresponding label.
+
+        Args:
+            source (str): The key in thread_data to retrieve the video frame from.
+            label (QLabel): The label to update with the video feed.
+
+        Returns:
+            Optional[cv2.typing.MatLike]: The decoded frame or None if decoding failed
+        """
+        try:
+            data: Dict = self.thread_data[source]
+            buffer = data.get("video_frame", None)
+            if buffer is None:
+                return None
+
+            frame = img_helper.decode_frame(buffer)
+
+            if frame is not None:
+                self._set_pixmap(label, frame)
+        except KeyboardInterrupt:
+            logger.critical("Interrupted! Stopping all threads...")
+            self.close_app()
+
     def get_webcam_feed(self) -> Optional[cv2.typing.MatLike]:
         """
         Retrieves the webcam feed from the shared data of the eye tracking module.
@@ -256,13 +264,7 @@ class MainApp(QMainWindow, CommonGUI):
         Returns:
             Optional[cv2.typing.MatLike]: The decoded frame or None if decoding failed
         """
-        eye_tracking_data: Dict = self.thread_data["eye_tracking"]
-        buffer = eye_tracking_data.get("video_frame", None)
-        if buffer is None:
-            return None
-
-        webcam_frame = img_helper.decode_frame(buffer)
-        return webcam_frame
+        return self.get_video_feed("eye_tracking", self.webcam_video_label)
     
     def get_drone_feed(self) -> Optional[cv2.typing.MatLike]:
         """
@@ -272,13 +274,7 @@ class MainApp(QMainWindow, CommonGUI):
         Returns:
             Optional[cv2.typing.MatLike]: The decoded frame or None if decoding failed
         """
-        drone_data: Dict = self.thread_data["drone"]
-        buffer = drone_data.get("video_frame", None)
-        if buffer is None:
-            return None
-
-        drone_frame = img_helper.decode_frame(buffer)
-        return drone_frame
+        return self.get_video_feed("drone", self.drone_video_label)
 
     def get_next_voice_command(self) -> Optional[List[Dict[str, Union[str, Tuple[str, int]]]]]:
         """
