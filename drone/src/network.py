@@ -127,8 +127,12 @@ def connect_to_wifi(ssid: str, password: str, network_interface: Optional[str] =
         logger.error("Failed to connect to wifi network '%s'. Details: %s", ssid, e)
         return False
 
-    logger.info("Successfully connected to wifi network '%s'", ssid)
-    return True
+    if "Connection request was completed successfully." in connect_cmd:
+        logger.info("Successfully connected to wifi network '%s'", ssid)
+        return True
+
+    logger.error("Failed to connect to wifi network '%s'", ssid)
+    return False
 
 
 if __name__ == "__main__":
