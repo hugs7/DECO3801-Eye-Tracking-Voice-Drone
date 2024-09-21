@@ -238,7 +238,7 @@ class Controller:
         logger.info("Performing action: %s", command)
 
         angle = 35
-        dist = 10
+        dist = 20
 
         try:
             match command:
