@@ -262,11 +262,11 @@ class GazeDetector:
 
             logger.debug("Set video frame in shared data.")
         else:
-            cv2.imshow(win_name, self.visualizer.image)
-
             # Render fps on the image
             if self.config.demo.show_fps:
                 self.visualizer.draw_fps(tick_rate)
+
+            cv2.imshow(win_name, self.visualizer.image)
 
     def _read_camera(self) -> Tuple[bool, np.ndarray]:
         """
