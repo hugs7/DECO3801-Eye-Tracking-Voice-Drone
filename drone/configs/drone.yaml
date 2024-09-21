@@ -4,6 +4,9 @@ mavic:
     port: 14551
     connection_timeout: 60 # Seconds
 tello:
+    wifi:
+        ssid: TELLO-C38725
+        password: ""
     poll_response: False
     default_speed: 50
     video_bitrate: auto

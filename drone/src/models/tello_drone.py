@@ -12,6 +12,8 @@ from omegaconf import OmegaConf
 
 from common.logger_helper import init_logger
 
+from .. import network
+
 from .drone import Drone
 
 logger = init_logger()
@@ -162,8 +164,10 @@ class TelloDrone(Drone):
         Returns:
             bool: True if the drone connected successfully, False otherwise
         """
-
         logger.info("Connecting to the Tello Drone...")
+
+        wifi_config = self.config.wifi
+        network.connect_to_wifi(wifi_config.ssid, wifi_config.password)
 
         try:
             self.drone.connect()
