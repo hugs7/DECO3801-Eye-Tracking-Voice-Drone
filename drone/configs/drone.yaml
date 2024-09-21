@@ -15,6 +15,7 @@ tello:
     camera_selection: forward
 controller:
     gui_only: False
+    max_tick_rate: 30
     keyboard_bindings:
         land: l
         takeoff: 32 # Space key

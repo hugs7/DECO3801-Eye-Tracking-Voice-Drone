@@ -5,7 +5,9 @@ Controller for the drone, handles the input of a drone from voice, Gaze or manua
 from typing import Union, Optional, Dict, List
 from threading import Event, Lock
 from queue import Queue
+from datetime import datetime
 import sys
+import time
 
 from omegaconf import OmegaConf
 import cv2
@@ -13,6 +15,7 @@ import cv2
 from common import constants as cc, keyboard
 from common.logger_helper import init_logger
 from common.omegaconf_helper import conf_key_from_value
+from common.gui_helper import fps_to_ms
 
 from .drone_actions import DroneActions
 from .models.tello_drone import TelloDrone
@@ -76,6 +79,7 @@ class Controller:
         self.model = drone
         self.config = controller_config
         self.gui_only = self.config.gui_only
+        self.min_loop_time = fps_to_ms(self.config.max_tick_rate)
 
         if not self.gui_only and self.model.success:
             self.drone_video_fps = self.model.video_fps
@@ -90,8 +94,16 @@ class Controller:
         if self.running_in_thread:
             logger.debug("Drone module running in thread mode. Local GUI disabled.")
 
+            last_loop_start_time = datetime.now()
             while True:
                 logger.debug(">>> Begin drone loop")
+                now = datetime.now()
+
+                diff = now - last_loop_start_time
+                if diff.total_seconds() * 1000 < self.min_loop_time:
+                    time.sleep((self.min_loop_time - diff.total_seconds() * 1000) / 1000)
+
+                last_loop_start_time = datetime.now()
 
                 self._wait_key()
 
