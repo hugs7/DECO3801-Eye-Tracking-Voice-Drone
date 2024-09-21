@@ -122,12 +122,13 @@ def connect_to_wifi(ssid: str, password: str, network_interface: Optional[str] =
     logger.debug("Running connection command: %s", connect_cmd)
 
     try:
-        subprocess.run(connect_cmd, shell=True, check=True)
+        result = subprocess.run(connect_cmd, shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        output = result.stdout.strip()  # Capture and clean up stdout
     except subprocess.CalledProcessError as e:
         logger.error("Failed to connect to wifi network '%s'. Details: %s", ssid, e)
         return False
 
-    if "Connection request was completed successfully." in connect_cmd:
+    if "Connection request was completed successfully." in output:
         logger.info("Successfully connected to wifi network '%s'", ssid)
         return True
 
