@@ -41,6 +41,8 @@ class DroneApp(QMainWindow, CommonGUI):
         self._init_gui()
         self.timers = self._init_timers()
 
+        logger.info("GUI initialised")
+
     def _init_gui(self) -> None:
         """
         Initialises the GUI window and widgets
@@ -127,7 +129,7 @@ class DroneApp(QMainWindow, CommonGUI):
             logger.debug("Running in limited mode. No controller provided")
             return
 
-        self.controller.handle_key_press(key_code)
+        self.controller._handle_key_event(key_code)
 
     def update_drone_feed(self):
         """

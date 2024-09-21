@@ -94,7 +94,8 @@ class Controller:
         with self.data_lock:
             self.thread_data["drone_feed"] = frame
 
-    def handle_key_press(self, key_code: int) -> None:
+
+    def _handle_key_event(self, key_code: int) -> bool:
         """
         Handles key press events for the drone controller.
 
@@ -102,7 +103,7 @@ class Controller:
             key_code (int): The key code of the pressed key.
 
         Returns:
-            None
+            True if a recognised key is pressed, False otherwise
         """
 
         key_chr = chr(key_code).lower()
@@ -112,18 +113,21 @@ class Controller:
             if self.drone.in_flight:
                 self.model.land()
 
-            return
+            return True
 
         keybindings = self.config.keyboard_bindings
         key_action = conf_key_from_value(keybindings, key_code, key_chr)
         if key_action is None:
             logger.trace("Key %s not found in keybindings", key_chr)
-            return
+            return False
 
-        if key_action in vars(DroneActions).values():
+        key_recognised = key_action in vars(DroneActions).values()
+        if key_recognised:
             self.perform_action(key_action)
         else:
             logger.warning("Key action %s not found in DroneActions", key_action)
+
+        return key_recognised
 
     def perform_action(self, command: str) -> None:
         """
