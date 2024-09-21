@@ -1,5 +1,4 @@
 drone_type: tello
-gui_only: False
 mavic:
     ip: 192.168.69.244
     port: 14551
@@ -12,6 +11,7 @@ tello:
     video_fps: 30
     camera_selection: forward
 controller:
+    gui_only: False
     keyboard_bindings:
         land: l
         takeoff: 32 # Space key

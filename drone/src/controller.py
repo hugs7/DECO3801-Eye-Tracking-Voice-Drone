@@ -2,10 +2,13 @@
 Controller for the drone, handles the input of a drone from voice, Gaze or manual input
 """
 
-from typing import Union, Optional, Dict
+from typing import Union, Optional, Dict, List
 from threading import Event, Lock
+from queue import Queue
+import sys
 
 from omegaconf import OmegaConf
+import cv2
 
 from common.logger_helper import init_logger
 from common import constants as cc
@@ -76,24 +79,92 @@ class Controller:
 
         logger.info("Drone controller initialised.")
 
-    def poll_video_feed(self) -> None:
+    def run(self) -> None:
         """
-        Polls the video feed from the drone. If in threaded mode, stores
-        the frame in the shared data dictionary.
+        Runs the main loop for the controller. Runs gui if in standalone mode.
+        """
+
+        running_in_thread = self.thread_data is not None
+        if running_in_thread:
+            logger.debug("Drone module running in thread mode. Local GUI disabled.")
+
+            while True:
+                logger.debug(">>> Begin drone loop")
+
+                self._wait_key()
+                ok, frame = self.model.read_camera()
+                if not ok:
+                    break
+
+                self._render_frame(frame)
+
+                self.thread_loop_handler(self.stop_event)
+                logger.debug("<<< End drone loop")
+        else:
+            logger.debug("Importing PyQt6...")
+
+            from PyQt6.QtWidgets import QApplication
+            from .gui import DroneApp
+
+            gui = QApplication(sys.argv)
+            drone_window = DroneApp(self)
+            drone_window.show()
+            gui.exec()
+
+    def _render_frame(self, frame: cv2.typing.MatLike) -> None:
+        """
+        Encodes the frame and sends it to the main GUI for rendering.
+        Should only be called in thread mode.
+
+        Args:
+            frame (cv2.typing.MatLike): The frame to render.
         """
 
         if not self.running_in_thread:
             logger.warning("Video feed polling should be disabled in main mode")
             return
 
-        frame = self.model.read_camera()
         if frame is None:
-            logger.trace("No frame returned from camera")
+            logger.debug("No frame returned from camera")
             return
 
         with self.data_lock:
             self.thread_data["drone_feed"] = frame
 
+    def _wait_key(self) -> bool:
+        """
+        Handles keyboard commands either from cv2 GUI if running as module or
+        from GUI if running in thread mode. Will handle multiple keys if there is more
+        than one in the queue.
+
+        Returns:
+            True if a recognised key is pressed (or any if there are multiple in the queue).
+            False otherwise.
+        """
+
+        if not self.running_in_thread:
+            logger.warning("_wait_key should not be called in main mode")
+            return False
+
+        # Define a buffer so that we are not locking the data for too long.
+        # Not critical while keyboard inputs are simple, however, this is good
+        # practice for more complex inputs.
+        key_buffer: List[int] = []
+        with self.data_lock:
+            keyboard_queue: Optional[Queue] = self.thread_data["keyboard_queue"]
+            if keyboard_queue is not None:
+                while not keyboard_queue.empty():
+                    key: int = keyboard_queue.get()
+                    key_buffer.append(key)
+            else:
+                logger.warning("Keyboard queue not initialised in shared data.")
+
+        accepted_keys = []
+        for key in key_buffer:
+            accepted_keys.append(self._handle_key_event(key))
+
+        # Accept if any valid key was pressed
+        return any(accepted_keys)
 
     def _handle_key_event(self, key_code: int) -> bool:
         """
