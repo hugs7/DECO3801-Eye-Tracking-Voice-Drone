@@ -173,7 +173,12 @@ class TelloDrone(Drone):
             return False
 
         logger.info("Connected to the Tello Drone")
-        logger.info("Drone battery: %d", self.drone.get_battery())
+        battery_level = self.drone.get_battery()
+        logger.info("Drone battery: %d", battery_level)
+
+        if battery_level < 20:
+            logger.warning("Battery level not sufficient for flight: %d", battery_level)
+
         return True
 
     def read_camera(self) -> Tuple[bool, cv2.typing.MatLike]:
