@@ -17,6 +17,7 @@ from omegaconf import OmegaConf
 
 from common import constants as cc
 from common.omegaconf_helper import conf_key_from_value
+from common import img_helper
 
 from . import constants as c
 from .face import Face
@@ -243,12 +244,10 @@ class GazeDetector:
                 logger.trace("No image to render.")
                 return
 
-            success, encoded_img = cv2.imencode(".jpg", self.visualizer.image)
-            if not success:
+            buffer = img_helper.encode_frame(self.visualizer.image)
+            if not buffer:
                 logger.error("Failed to encode image.")
                 return
-
-            buffer = encoded_img.tobytes()
 
             with self.data_lock:
                 self.thread_data["eye_tracking"]["video_frame"] = buffer

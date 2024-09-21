@@ -15,6 +15,7 @@ from queue import Queue
 
 from common.logger_helper import init_logger
 from common.common_gui import CommonGUI
+from common import img_helper
 
 from options import PreferencesDialog
 import constants as c
@@ -245,20 +246,20 @@ class MainApp(QMainWindow, CommonGUI):
         bytes_per_line = 3 * width
         return QImage(frame.data, width, height, bytes_per_line, QImage.Format.Format_RGB888)
 
-    def get_webcam_feed(self) -> np.ndarray:
+    def get_webcam_feed(self) -> Optional[cv2.typing.MatLike]:
         """
         Retrieves the webcam feed from the shared data of the eye tracking module.
         Decodes the buffer and returns the frame as a numpy array.
 
         Returns:
-            np.ndarray: The webcam feed as a numpy array
+            Optional[cv2.typing.MatLike]: The decoded frame or None if decoding failed
         """
         eye_tracking_data: Dict = self.thread_data["eye_tracking"]
         buffer = eye_tracking_data.get("video_frame", None)
         if buffer is None:
             return None
 
-        webcam_frame = self._decode_feed_buffer(buffer)
+        webcam_frame = img_helper.decode_frame(buffer)
         return webcam_frame
 
     def get_next_voice_command(self) -> Optional[List[Dict[str, Union[str, Tuple[str, int]]]]]:
@@ -290,29 +291,6 @@ class MainApp(QMainWindow, CommonGUI):
             logger.info(f"Next voice command: {next_command["text"]}")
 
             return next_command
-
-    def _decode_feed_buffer(self, buffer: bytes) -> np.ndarray:
-        """
-        Decodes the byte buffer into a numpy array then decodes the frame into an RGB format.
-
-        Args:
-            buffer (bytes): The buffer to decode
-
-        Returns:
-            np.ndarray: The decoded frame
-        """
-        try:
-            nparr = np.frombuffer(buffer, np.uint8)
-        except Exception as e:
-            logger.error(f"Error decoding buffer: {e}")
-            return None
-
-        try:
-            video_frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-            return cv2.cvtColor(video_frame, cv2.COLOR_BGR2RGB)
-        except Exception as e:
-            logger.error(f"Error decoding frame: {e}")
-            return None
 
     def _switch_feeds(self) -> None:
         """
