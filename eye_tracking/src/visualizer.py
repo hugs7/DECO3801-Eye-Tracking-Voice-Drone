@@ -62,7 +62,14 @@ class Visualizer:
         assert self.image is not None
         return self.image.shape[:2]
 
-    def draw_fps(self, fps: float, color: Tuple[int, int, int] = (0, 255, 0)) -> None:
+    def draw_fps(
+        self,
+        fps: float,
+        color: Tuple[int, int, int] = (0, 255, 0),
+        text_font_face: int = cv2.FONT_HERSHEY_SIMPLEX,
+        font_scale: float = 0.5,
+        thickness: int = 2,
+    ) -> None:
         """
         Draws the FPS on the image
 
@@ -77,9 +84,14 @@ class Visualizer:
 
         fps_text = "inf" if fps == float("inf") else f"{fps:.2f}"
 
-        padding = 50
-        top_right_corner = (self.image.shape[1] - padding, padding)
-        self.draw_text(f"FPS: {fps_text}", top_right_corner, color)
+        (text_width, text_height), text_bottom_y = cv2.getTextSize(fps_text, text_font_face, font_scale, thickness)
+
+        padding = 5
+
+        fps_offset = 42
+        top_right_corner = (self.image.shape[1] - padding - text_width - fps_offset, padding + text_height)
+        top_left_corner = (padding, padding + text_height)
+        self.draw_text(f"FPS: {fps_text}", top_right_corner, color, text_font_face, font_scale, thickness)
 
     def draw_bbox(self, bbox: np.ndarray, color: Tuple[int, int, int] = (0, 255, 0), lw: int = 1) -> None:
         """
