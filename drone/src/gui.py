@@ -134,8 +134,8 @@ class DroneApp(QMainWindow, CommonGUI):
         """
         Updates the video feed
         """
-        frame = self.controller.model.read_camera()
-        if frame is None:
+        ok, frame = self.controller.model.read_camera()
+        if not ok:
             logger.trace("No frame returned from camera")
             return
 
