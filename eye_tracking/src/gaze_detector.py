@@ -66,11 +66,12 @@ class GazeDetector:
 
             logger.debug("Initialising thread helper functions")
             # Lazily import thread helpers only if running in thread mode
-            from common.thread_helper import thread_loop_handler, thread_exit
+            from common.thread_helper import thread_loop_handler, thread_exit, run_loop_with_max_tickrate
 
             # Bind to class attributes so we can access them in class methods
             self.thread_loop_handler = thread_loop_handler
             self.thread_exit = thread_exit
+            self.run_loop_with_max_tickrate = run_loop_with_max_tickrate
 
             logger.debug("Thread initialisation complete")
         else:
@@ -199,25 +200,7 @@ class GazeDetector:
             else:
                 logger.info("Video feed will be displayed on screen")
 
-        while True:
-            logger.debug(">>> Begin eye tracking loop")
-            if self.config.demo.display_on_screen:
-                self._wait_key()
-                if self.stop:
-                    break
-
-            ok, frame = self._read_camera()
-            if not ok:
-                break
-            self._process_image(frame)
-
-            if self.config.demo.display_on_screen:
-                self._render_frame("frame")
-
-            if self.running_in_thread:
-                self.thread_loop_handler(self.stop_event)
-
-            logger.debug("<<< End eye tracking loop")
+        self.run_loop_with_max_tickrate(self.config.demo.max_tick_rate, self._gaze_loop)
 
         self.cap.release()
         if self.writer:
@@ -226,6 +209,34 @@ class GazeDetector:
         if self.running_in_thread:
             # Exit parent thread
             self.thread_exit(self.stop_event)
+
+    def _gaze_loop(self) -> bool:
+        """
+        A single iteration of the gaze loop in threaded mode.
+
+        Returns:
+            True if the gaze loop should continue, False otherwise
+        """
+        logger.debug(">>> Begin eye tracking loop")
+        if self.config.demo.display_on_screen:
+            self._wait_key()
+            if self.stop:
+                return False
+
+        ok, frame = self._read_camera()
+        if not ok:
+            return False
+
+        self._process_image(frame)
+
+        if self.config.demo.display_on_screen:
+            self._render_frame("frame")
+
+        if self.running_in_thread:
+            self.thread_loop_handler(self.stop_event)
+
+        logger.debug("<<< End eye tracking loop")
+        return not self.stop
 
     def _render_frame(self, win_name: str) -> None:
         """
