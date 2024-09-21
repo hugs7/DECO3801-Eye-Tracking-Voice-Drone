@@ -33,7 +33,7 @@ class DroneApp(QMainWindow, CommonGUI):
         super().__init__()
 
         self.controller = controller
-        self.limited_mode = not self.controller.connect_to_drone
+        self.limited_mode = not self.controller.connect_to_drone or not self.controller.model.success
         if self.limited_mode:
             logger.info("Running in limited mode.")
 
