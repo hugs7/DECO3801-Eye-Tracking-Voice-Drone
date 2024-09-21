@@ -29,13 +29,20 @@ def connect_to_wifi(ssid: str, password: str, network_interface: Optional[str] =
     logger.info("Connecting to wifi network '%s'...", ssid)
 
     if sys.platform == "win32":
-        connect_cmd = f"netsh wlan connect name={ssid} ssid={ssid} key={password}"
+        connect_cmd = f"netsh wlan connect name={ssid} ssid={ssid}"
+        if password:
+            connect_cmd += f" key={password}"
     elif sys.platform == "linux":
-        connect_cmd = f"nmcli device wifi connect {ssid} password {password}"
+        connect_cmd = f"nmcli device wifi connect {ssid}"
+        if password:
+            connect_cmd += f" password {password}"
     elif sys.platform == "darwin":
         if not network_interface:
             network_interface = "en0"
-        connect_cmd = f"networksetup -setairportnetwork {network_interface} {ssid} {password}"
+
+        connect_cmd = f"networksetup -setairportnetwork {network_interface} {ssid}"
+        if password:
+            connect_cmd += f" {password}"
 
     logger.debug("Running connection command: %s", connect_cmd)
 
