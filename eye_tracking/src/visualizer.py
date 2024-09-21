@@ -172,7 +172,6 @@ class Visualizer:
         bg_alpha: float,
         text: str,
         text_font_face: int = cv2.FONT_HERSHEY_SIMPLEX,
-        text_line_type: int = cv2.LINE_AA,
         font_scale: float = 1.0,
         border_color: Optional[Tuple[int, int, int]] = None,
         border_thickness: int = 2,
@@ -188,7 +187,6 @@ class Visualizer:
             bg_alpha: The transparency of the rectangle
             text: The text to be displayed
             text_font_face: The font face of the text
-            text_line_type: The line type of the text
             font_scale: The scale of the font
             border_color: The colour of the border
             border_thickness: The thickness of the border
@@ -212,7 +210,36 @@ class Visualizer:
 
         cv2.rectangle(overlay, top_left, bottom_right, bg_color, -1)
         self.create_opacity(overlay, bg_alpha)
-        cv2.putText(self.image, text, text_org, text_font_face, font_scale, bg_color, 2, text_line_type, False)
+        self.draw_text(text, text_org, color=(255, 255, 255), font_face=text_font_face, font_scale=font_scale)
+
+    def draw_text(
+        self,
+        text: str,
+        org: Tuple[int, int],
+        color: Tuple[int, int, int] = (0, 0, 255),
+        font_face=cv2.FONT_HERSHEY_SIMPLEX,
+        font_scale=1.0,
+        thickness=2,
+        line_type=cv2.LINE_AA,
+    ) -> None:
+        """
+        Draws text on the image
+
+        Args:
+            text: The text to be drawn
+            org: The origin of the text
+            color: The colour of the text
+            font_face: The font face of the text
+            font_scale: The scale of the font
+            thickness: The thickness of the text
+            line_type: The line type of the text
+
+        Returns:
+            None
+        """
+
+        assert self.image is not None
+        cv2.putText(self.image, text, org, font_face, font_scale, color, thickness, line_type)
 
     def draw_3d_point(
         self, point3d: np.ndarray, color: Tuple[int, int, int] = (255, 0, 255), size=3, clamp_to_screen: bool = False
