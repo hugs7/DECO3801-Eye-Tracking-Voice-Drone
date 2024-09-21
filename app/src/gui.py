@@ -227,9 +227,13 @@ class MainApp(QMainWindow, CommonGUI):
             QImage: The converted frame
         """
 
+        frame_data = np.require(frame, np.uint8, 'C')
         height, width, channel = frame.shape
-        bytes_per_line = 3 * width
-        return QImage(frame.data, width, height, bytes_per_line, QImage.Format.Format_RGB888)
+        bytes_per_line = channel * width
+        try:
+            return QImage(frame_data, width, height, bytes_per_line, QImage.Format.Format_RGB888)
+        except Exception as e:
+            logger.error(f"Error converting frame to QImage: {e}")
 
     def get_video_feed(self, source: str, label: QLabel) -> Optional[cv2.typing.MatLike]:
         """
