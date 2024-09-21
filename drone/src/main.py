@@ -35,12 +35,14 @@ def main(stop_event: Optional[Event] = None, thread_data: Optional[Dict] = None,
     if not drone_config.gui_only:
         drone = init.init_drone(drone_config)
         if drone.success:
-            controller = Controller(drone, drone_config.controller)
+            controller = Controller(drone, drone_config.controller, stop_event, thread_data, data_lock)
 
-    gui = QApplication(sys.argv)
-    drone_window = DroneApp(controller)
-    drone_window.show()
-    gui.exec()
+    running_in_thread = thread_data is not None
+    if not running_in_thread:
+        gui = QApplication(sys.argv)
+        drone_window = DroneApp(controller)
+        drone_window.show()
+        gui.exec()
 
 
 if __name__ == "__main__":

@@ -43,9 +43,6 @@ class GazeDetector:
             stop_event: Event object to stop the gaze detector
             thread_data: Shared data dictionary
             data_lock: Lock object for shared data
-
-        Returns:
-            None
         """
 
         logger.info("Initialising Gaze Detector")

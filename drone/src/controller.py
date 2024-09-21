@@ -2,7 +2,8 @@
 Controller for the drone, handles the input of a drone from voice, Gaze or manual input
 """
 
-from typing import Union
+from typing import Union, Optional, Dict
+from threading import Event, Lock
 
 from omegaconf import OmegaConf
 
@@ -22,19 +23,58 @@ class Controller:
     Controller for the drone, handles the input of a drone from voice, Gaze or manual input
     """
 
-    def __init__(self, drone: Union[TelloDrone, MavicDrone], controller_config: OmegaConf):
+    def __init__(
+        self,
+        drone: Union[TelloDrone, MavicDrone],
+        controller_config: OmegaConf,
+        stop_event: Optional[Event] = None,
+        thread_data: Optional[Dict] = None,
+        data_lock: Optional[Lock] = None,
+    ):
         """
         Initialises the drone controller
 
         Args:
             drone [Union[TelloDrone, MavicDrone]]: The drone to control.
             controller_config [OmegaConf]: The configuration for the controller.
+            stop_event: Event object to stop the gaze detector
+            thread_data: Shared data dictionary
+            data_lock: Lock object for shared data
         """
+
+        logger.info("Initialising drone controller...")
+
+        if self.running_in_thread:
+            # If running in thread mode, all or none of the required args must be provided
+            if not all(required_args):
+                raise ValueError("All or none of stop_event, thread_data, data_lock must be provided.")
+
+            logger.info("Running in thread mode")
+            self.stop_event = stop_event
+            self.thread_data = thread_data
+            self.data_lock = data_lock
+
+            logger.debug("Initialising thread helper functions")
+            # Lazily import thread helpers only if running in thread mode
+            from common.thread_helper import thread_loop_handler, thread_exit
+
+            # Bind to class attributes so we can access them in class methods
+            self.thread_loop_handler = thread_loop_handler
+            self.thread_exit = thread_exit
+
+            logger.debug("Thread initialisation complete")
+        else:
+            logger.info("Running in main mode")
 
         self.model = drone
         self.drone_video_fps = self.model.video_fps
 
         self.config = controller_config
+
+        required_args = [stop_event, thread_data, data_lock]
+        self.running_in_thread = any(required_args)
+
+        logger.info("Drone controller initialised.")
 
     def handle_key_press(self, key_code: int) -> None:
         """
