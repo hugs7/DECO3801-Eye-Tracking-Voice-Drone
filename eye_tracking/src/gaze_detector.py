@@ -442,20 +442,23 @@ class GazeDetector:
                 keyboard_queue: Optional[Queue] = self.thread_data["keyboard_queue"]
                 if keyboard_queue is not None:
                     while not keyboard_queue.empty():
-                        key: int = keyboard_queue.get()
-                        key_buffer.append(key)
+                        key_code: int = keyboard_queue.get()
+                        key_buffer.append(key_code)
                 else:
                     logger.warning("Keyboard queue not initialised in shared data.")
 
             accepted_keys = []
-            for key in key_buffer:
-                accepted_keys.append(self._handle_key_event(key))
+            for key_code in key_buffer:
+                accepted_keys.append(self._handle_key_event(key_code))
 
             # Accept if any valid key was pressed
             return any(accepted_keys)
         else:
-            key = cv2.waitKey(self.config.demo.wait_time) & 0xFF
-            return self._handle_key_event(key)
+            key_code = cv2.waitKey(self.config.demo.wait_time) & 0xFF
+            if key_code == 255:
+                return False
+
+            return self._handle_key_event(key_code)
 
     def _handle_key_event(self, key_code: int) -> bool:
         """
