@@ -78,7 +78,7 @@ class Controller:
         self.config = controller_config
         self.gui_only = self.config.gui_only
 
-        if not self.gui_only:
+        if not self.gui_only and self.model.success:
             self.drone_video_fps = self.model.video_fps
 
         logger.info("Drone controller initialised.")
