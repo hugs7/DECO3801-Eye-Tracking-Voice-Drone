@@ -207,7 +207,7 @@ class Controller:
         logger.info("Received key: %s (%d)", key_chr, key_code)
 
         if key_chr in cc.QUIT_KEYS:
-            if self.drone.in_flight:
+            if self.model.in_flight:
                 self.model.land()
 
             return True
