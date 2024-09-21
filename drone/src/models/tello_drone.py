@@ -174,7 +174,11 @@ class TelloDrone(Drone):
         logger.info("Connecting to the Tello Drone...")
 
         wifi_config = self.config.wifi
-        network.connect_to_wifi(wifi_config.ssid, wifi_config.password)
+        connected = network.connect_to_wifi(wifi_config.ssid, wifi_config.password)
+
+        if not connected:
+            logger.error("Could not connect to the drone. Check your WiFi connection.")
+            return False
 
         try:
             self.drone.connect()
