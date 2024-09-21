@@ -101,7 +101,8 @@ def run_loop_with_max_tickrate(max_fps: int, callback: callable, *args, **kwargs
     Args:
         max_fps (int): The maximum frames per second. If 0, the loop will run as
         fast as possible.
-        callback (callable): The function to be called in the loop.
+        callback (callable): The function to be called in the loop. If the callback returns False,
+                             the loop will exit.
         *args: Positional arguments to pass to the callback.
         **kwargs: Keyword arguments to pass to the callback.
     """
@@ -109,7 +110,10 @@ def run_loop_with_max_tickrate(max_fps: int, callback: callable, *args, **kwargs
     last_loop_start_time = datetime.now()
 
     while True:
-        callback(*args, **kwargs)
+        callback_res = callback(*args, **kwargs)
+        if callback_res is False:
+            logger.debug("Callback returned False. Exiting loop...")
+            break
 
         if min_loop_time == 0:
             continue

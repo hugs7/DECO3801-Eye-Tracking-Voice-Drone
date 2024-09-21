@@ -87,9 +87,12 @@ class Controller:
 
         logger.info("Drone controller initialised.")
 
-    def controller_loop(self) -> None:
+    def _controller_loop(self) -> bool:
         """
         One interation of the controller loop.
+
+        Returns:
+            True if the loop should continue, False otherwise
         """
 
         logger.debug(">>> Begin drone loop")
@@ -99,12 +102,13 @@ class Controller:
         if self.drone_connected:
             ok, frame = self.model.read_camera()
             if not ok:
-                return
+                return False
 
             self._render_frame(frame)
 
         self.thread_loop_handler(self.stop_event)
         logger.debug("<<< End drone loop")
+        return True
 
     def run(self) -> None:
         """
@@ -114,7 +118,7 @@ class Controller:
         if self.running_in_thread:
             logger.debug("Drone module running in thread mode. Local GUI disabled.")
 
-            self.run_loop_with_max_tickrate(self.config.max_tick_rate, self.controller_loop)
+            self.run_loop_with_max_tickrate(self.config.max_tick_rate, self._controller_loop)
         else:
             logger.debug("Importing PyQt6...")
 
