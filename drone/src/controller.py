@@ -125,16 +125,13 @@ class Controller:
         else:
             logger.warning("Key action %s not found in DroneActions", key_action)
 
-    def perform_action(self, command: str):
+    def perform_action(self, command: str) -> None:
         """
         Handler for sending an action to the drone given a command.
 
         Args:
             command (str): The command to send to the drone.
-        command - String involving either up, down, left, right, forward, backward,
-            cw(rotate clockwise), ccw (rotate counter clockwise)
-        value - an int of the amount to change the drones direction by, if command is rotational
-            use degrees and if a directional value use cm in direction
+            TODO: Add docstring for command format
         """
 
         try:
