@@ -83,18 +83,17 @@ class MainApp(QMainWindow, CommonGUI):
         self.side_video_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.layout.addWidget(self.side_video_label)
 
-        self.text_input = QLineEdit(self)
-        self.layout.addWidget(self.text_input)
-
         # Button to switch video feeds
         self.switch_button = QPushButton("Switch", self)
         self.switch_button.clicked.connect(self._switch_feeds)
         self.layout.addWidget(self.switch_button)
+        self.switch_button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
 
         # Quit button
         self.quit_button = QPushButton("Quit", self)
         self.quit_button.clicked.connect(self.close_app)
         self.layout.addWidget(self.quit_button)
+        self.quit_button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
 
         self._init_menu()
 
