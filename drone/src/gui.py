@@ -2,7 +2,7 @@
 Local drone GUI. Not used in threading mode.
 """
 
-from typing import Dict, Optional
+from typing import Dict
 from PyQt6.QtWidgets import QMainWindow, QVBoxLayout, QHBoxLayout, QWidget, QPushButton, QLabel
 from PyQt6.QtCore import QTimer, Qt
 from PyQt6.QtGui import QImage, QPixmap, QKeyEvent
@@ -66,6 +66,9 @@ class DroneApp(QMainWindow, CommonGUI):
 
         self.quit_button = QPushButton("Quit", self)
         self.quit_button.clicked.connect(self.close_app)
+        self.quit_button.clearFocus()
+        self.quit_button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+
         button_layout.addStretch()
         button_layout.addWidget(self.quit_button)
 
