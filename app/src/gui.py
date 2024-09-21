@@ -22,7 +22,6 @@ import constants as c
 import utils.file_handler as file_handler
 
 
-
 logger = init_logger("DEBUG")
 
 
@@ -132,7 +131,7 @@ class MainApp(QMainWindow, CommonGUI):
             Dict[str, QTimer]: The timers configuration in an OmegaConf object
         """
         timers_conf = {
-            "webcam": {"callback": self.update_webcam_feed, "fps": self.config.timers.webcam},
+            "webcam": {"callback": self.update_video_feeds, "fps": self.config.timers.webcam},
             "voice_command": {"callback": self.get_next_voice_command, "fps": self.config.timers.voice_command},
         }
 
@@ -196,7 +195,7 @@ class MainApp(QMainWindow, CommonGUI):
         dialog = PreferencesDialog()
         dialog.exec()
 
-    def update_webcam_feed(self) -> None:
+    def update_video_feeds(self) -> None:
         """
         Update the video feed on the GUI
 
@@ -211,7 +210,10 @@ class MainApp(QMainWindow, CommonGUI):
                 if self.swap_feeds:
                     main_frame, small_frame = small_frame, main_frame
 
+            if main_frame is not None:
                 self._set_pixmap(self.main_video_label, main_frame)
+
+            if small_frame is not None:
                 self._set_pixmap(self.side_video_label, small_frame)
         except KeyboardInterrupt:
             logger.critical("Interrupted! Stopping all threads...")
