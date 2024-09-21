@@ -30,6 +30,10 @@ logger = init_logger()
 
 
 class GazeDetector:
+    """
+    Gaze Detector class for eye tracking.
+    """
+
     def __init__(
         self,
         config: OmegaConf,
