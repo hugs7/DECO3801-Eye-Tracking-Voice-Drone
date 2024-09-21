@@ -13,6 +13,7 @@ import cv2
 from common.logger_helper import init_logger
 from common import constants as cc
 from common.omegaconf_helper import conf_key_from_value
+from common import img_helper
 
 from .drone_actions import DroneActions
 from .models.tello_drone import TelloDrone
@@ -128,8 +129,12 @@ class Controller:
             logger.debug("No frame returned from camera")
             return
 
+        buffer = img_helper.encode_frame(frame)
+        if not buffer:
+            return
+
         with self.data_lock:
-            self.thread_data["drone_feed"] = frame
+            self.thread_data["drone"]["video_frame"] = buffer
 
     def _wait_key(self) -> bool:
         """
