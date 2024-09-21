@@ -261,7 +261,6 @@ class MainApp(QMainWindow, CommonGUI):
     def get_webcam_feed(self) -> Optional[cv2.typing.MatLike]:
         """
         Retrieves the webcam feed from the shared data of the eye tracking module.
-        Decodes the buffer and returns the frame as a numpy array.
 
         Returns:
             Optional[cv2.typing.MatLike]: The decoded frame or None if decoding failed
@@ -271,7 +270,6 @@ class MainApp(QMainWindow, CommonGUI):
     def get_drone_feed(self) -> Optional[cv2.typing.MatLike]:
         """
         Retrieves the drone feed from the shared data of the drone module.
-        Decodes the buffer and returns the frame as a numpy array.
 
         Returns:
             Optional[cv2.typing.MatLike]: The decoded frame or None if decoding failed
