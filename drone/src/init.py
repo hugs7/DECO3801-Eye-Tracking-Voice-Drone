@@ -53,13 +53,17 @@ def init() -> DictConfig:
     return config
 
 
-def init_drone(config: OmegaConf) -> Union[models.TelloDrone, models.MavicDrone]:
+def init_drone(config: OmegaConf) -> Optional[Union[models.TelloDrone, models.MavicDrone]]:
     """
     Initialises the drone
 
     Returns:
         DictConfig: The drone config object
     """
+
+    if config.controller.gui_only:
+        logger.info("Running in GUI only mode. Not initialising drone.")
+        return None
 
     logger.info("Initialising drone vehicle...")
 

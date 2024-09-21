@@ -29,7 +29,7 @@ class Controller:
 
     def __init__(
         self,
-        drone: Union[TelloDrone, MavicDrone],
+        drone: Optional[Union[TelloDrone, MavicDrone]],
         controller_config: OmegaConf,
         stop_event: Optional[Event] = None,
         thread_data: Optional[Dict] = None,
@@ -39,7 +39,8 @@ class Controller:
         Initialises the drone controller
 
         Args:
-            drone [Union[TelloDrone, MavicDrone]]: The drone to control.
+            drone Optional[Union[TelloDrone, MavicDrone]]: The drone to control or none
+                                                        if running in limited mode.
             controller_config [OmegaConf]: The configuration for the controller.
             stop_event: Event object to stop the gaze detector
             thread_data: Shared data dictionary
@@ -47,6 +48,9 @@ class Controller:
         """
 
         logger.info("Initialising drone controller...")
+
+        required_args = [stop_event, thread_data, data_lock]
+        self.running_in_thread = any(required_args)
 
         if self.running_in_thread:
             # If running in thread mode, all or none of the required args must be provided
@@ -71,12 +75,11 @@ class Controller:
             logger.info("Running in main mode")
 
         self.model = drone
-        self.drone_video_fps = self.model.video_fps
-
         self.config = controller_config
+        self.gui_only = self.config.gui_only
 
-        required_args = [stop_event, thread_data, data_lock]
-        self.running_in_thread = any(required_args)
+        if not self.gui_only:
+            self.drone_video_fps = self.model.video_fps
 
         logger.info("Drone controller initialised.")
 
@@ -85,8 +88,7 @@ class Controller:
         Runs the main loop for the controller. Runs gui if in standalone mode.
         """
 
-        running_in_thread = self.thread_data is not None
-        if running_in_thread:
+        if self.running_in_thread:
             logger.debug("Drone module running in thread mode. Local GUI disabled.")
 
             while True:
