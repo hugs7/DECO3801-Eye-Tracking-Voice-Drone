@@ -43,12 +43,15 @@ class TelloDrone(Drone):
 
         logger.info("Initialising TelloDrone...")
         tello_drone = Tello()
+        # Must be assigned first to avoid circular reference
         self.drone = tello_drone
+
+        self.__init_config(tello_config)
+
         self.success = self.connect()
         if not self.success:
             return
 
-        self.__init_config(tello_config)
         self.__init_drone_params()
 
         self.last_command_time = datetime.now()
