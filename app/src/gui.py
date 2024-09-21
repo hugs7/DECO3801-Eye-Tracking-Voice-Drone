@@ -180,7 +180,7 @@ class MainApp(QMainWindow, CommonGUI):
         key = event.key()
         logger.info(f"Key pressed: {key}")
 
-        if key == Qt.Key.Key_Escape or key == Qt.Key.Key_Q:
+        if key == Qt.Key.Key_Escape:
             self.close_app()
 
         # Any other key goes into the keyboard queue
