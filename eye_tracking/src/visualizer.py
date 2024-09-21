@@ -90,7 +90,6 @@ class Visualizer:
 
         fps_offset = 42
         top_right_corner = (self.image.shape[1] - padding - text_width - fps_offset, padding + text_height)
-        top_left_corner = (padding, padding + text_height)
         self.draw_text(f"FPS: {fps_text}", top_right_corner, color, text_font_face, font_scale, thickness)
 
     def draw_bbox(self, bbox: np.ndarray, color: Tuple[int, int, int] = (0, 255, 0), lw: int = 1) -> None:
