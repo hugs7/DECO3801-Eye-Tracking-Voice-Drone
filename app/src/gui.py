@@ -204,7 +204,7 @@ class MainApp(QMainWindow, CommonGUI):
             None
         """
         try:
-            main_frame = self.get_webcam_feed()
+            main_frame = self.get_drone_feed()
             small_frame = self.get_webcam_feed()
 
             if main_frame is not None and small_frame is not None:
@@ -261,6 +261,22 @@ class MainApp(QMainWindow, CommonGUI):
 
         webcam_frame = img_helper.decode_frame(buffer)
         return webcam_frame
+    
+    def get_drone_feed(self) -> Optional[cv2.typing.MatLike]:
+        """
+        Retrieves the drone feed from the shared data of the drone module.
+        Decodes the buffer and returns the frame as a numpy array.
+
+        Returns:
+            Optional[cv2.typing.MatLike]: The decoded frame or None if decoding failed
+        """
+        drone_data: Dict = self.thread_data["drone"]
+        buffer = drone_data.get("video_frame", None)
+        if buffer is None:
+            return None
+
+        drone_frame = img_helper.decode_frame(buffer)
+        return drone_frame
 
     def get_next_voice_command(self) -> Optional[List[Dict[str, Union[str, Tuple[str, int]]]]]:
         """
