@@ -84,9 +84,12 @@ class Controller:
 
         logger.info("Drone controller initialised.")
 
-    def _controller_loop(self) -> bool:
+    def _controller_loop(self, tick_rate: float) -> bool:
         """
         One interation of the controller loop.
+
+        Args:
+            tick_rate (float): The tick rate of the loop
 
         Returns:
             True if the loop should continue, False otherwise
@@ -101,7 +104,7 @@ class Controller:
             if not ok:
                 return False
 
-            self._render_frame(frame)
+            self._render_frame(frame, tick_rate)
 
         self.thread_loop_handler(self.stop_event)
         logger.debug("<<< End drone loop")
@@ -127,13 +130,14 @@ class Controller:
             drone_window.show()
             gui.exec()
 
-    def _render_frame(self, frame: cv2.typing.MatLike) -> None:
+    def _render_frame(self, frame: cv2.typing.MatLike, tick_rate: float) -> None:
         """
         Encodes the frame and sends it to the main GUI for rendering.
         Should only be called in thread mode.
 
         Args:
             frame (cv2.typing.MatLike): The frame to render.
+            tick_rate (float): The tick rate of the loop.
         """
 
         if not self.running_in_thread:
@@ -146,6 +150,7 @@ class Controller:
 
         with self.data_lock:
             self.thread_data["drone"]["video_frame"] = frame
+            self.thread_data["drone"]["tick_rate"] = tick_rate
 
     def _wait_key(self) -> bool:
         """
