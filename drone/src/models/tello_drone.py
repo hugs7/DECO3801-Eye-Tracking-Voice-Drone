@@ -70,6 +70,7 @@ class TelloDrone(Drone):
         self.config = tello_config
 
         self.poll_response = self.config.poll_response
+        self.video_settings_supported = self.config.video_settings_supported
 
     def __init_drone_params(self) -> None:
         """
@@ -89,37 +90,38 @@ class TelloDrone(Drone):
 
         self.drone.set_speed(tello_speed)
 
-        logger.debug("Initialising video bitrate")
-        config_video_bitrate = self.config.video_bitrate
-        if config_video_bitrate == "auto":
-            tello_video_bitrate = Tello.BITRATE_AUTO
-        elif config_video_bitrate in range(MIN_VIDEO_BITRATE, MAX_VIDEO_BITRATE + 1):
-            tello_video_bitrate = eval(f"Tello.BITRATE_{config_video_bitrate}")
-            logger.debug("Setting video bitrate to %s", tello_video_bitrate)
-        else:
-            logger.warning("Invalid video bitrate '%s'. Defaulting to auto", config_video_bitrate)
-            tello_video_bitrate = Tello.BITRATE_AUTO
+        if self.video_settings_supported:
+            logger.debug("Initialising video bitrate")
+            config_video_bitrate = self.config.video_bitrate
+            if config_video_bitrate == "auto":
+                tello_video_bitrate = Tello.BITRATE_AUTO
+            elif config_video_bitrate in range(MIN_VIDEO_BITRATE, MAX_VIDEO_BITRATE + 1):
+                tello_video_bitrate = eval(f"Tello.BITRATE_{config_video_bitrate}")
+                logger.debug("Setting video bitrate to %s", tello_video_bitrate)
+            else:
+                logger.warning("Invalid video bitrate '%s'. Defaulting to auto", config_video_bitrate)
+                tello_video_bitrate = Tello.BITRATE_AUTO
 
-        try:
-            self.drone.set_video_bitrate(tello_video_bitrate)
-        except tello.TelloException as e:
-            logger.error("Failed to set video bitrate. Details: %s", e)
+            try:
+                self.drone.set_video_bitrate(tello_video_bitrate)
+            except tello.TelloException as e:
+                logger.error("Failed to set video bitrate. Details: %s", e)
 
-        logger.debug("Initialising video resolution...")
-        config_res = self.config.video_resolution
-        match config_res:
-            case "480p":
-                tello_res = Tello.RESOLUTION_480P
-            case "720p":
-                tello_res = Tello.RESOLUTION_720P
-            case _:
-                logger.warning("Invalid video resolution '%s'. Defaulting to 720p", config_res)
-                tello_res = Tello.RESOLUTION_720P
+            logger.debug("Initialising video resolution...")
+            config_res = self.config.video_resolution
+            match config_res:
+                case "480p":
+                    tello_res = Tello.RESOLUTION_480P
+                case "720p":
+                    tello_res = Tello.RESOLUTION_720P
+                case _:
+                    logger.warning("Invalid video resolution '%s'. Defaulting to 720p", config_res)
+                    tello_res = Tello.RESOLUTION_720P
 
-        try:
-            self.drone.set_video_resolution(tello_res)
-        except tello.TelloException as e:
-            logger.error("Failed to set video resolution. Details: %s", e)
+            try:
+                self.drone.set_video_resolution(tello_res)
+            except tello.TelloException as e:
+                logger.error("Failed to set video resolution. Details: %s", e)
 
         logger.debug("Initialising video fps...")
         config_fps = int(self.config.video_fps)
@@ -135,30 +137,32 @@ class TelloDrone(Drone):
                 tello_fps = Tello.FPS_30
                 config_fps = DEFAULT_FPS
 
-        try:
-            self.drone.set_video_fps(tello_fps)
-        except tello.TelloException as e:
-            logger.error("Failed to set video fps. Details: %s", e)
+        if self.video_settings_supported:
+            try:
+                self.drone.set_video_fps(tello_fps)
+            except tello.TelloException as e:
+                logger.error("Failed to set video fps. Details: %s", e)
 
         self.video_fps = config_fps
 
-        # Forward-facing 1080x720p colour camera or 320x240 greyscale
-        # IR down-facing camera
-        logger.debug("Initialising camera selection...")
-        config_camera = self.config.camera_selection
-        match config_camera:
-            case "forward":
-                camera_selection = Tello.CAMERA_FORWARD
-            case "downward":
-                camera_selection = Tello.CAMERA_DOWNWARD
-            case _:
-                logger.warning("Invalid camera selection '%s'. Defaulting to forward", config_camera)
-                camera_selection = Tello.CAMERA_FORWARD
+        if self.video_settings_supported:
+            # Forward-facing 1080x720p colour camera or 320x240 greyscale
+            # IR down-facing camera
+            logger.debug("Initialising camera selection...")
+            config_camera = self.config.camera_selection
+            match config_camera:
+                case "forward":
+                    camera_selection = Tello.CAMERA_FORWARD
+                case "downward":
+                    camera_selection = Tello.CAMERA_DOWNWARD
+                case _:
+                    logger.warning("Invalid camera selection '%s'. Defaulting to forward", config_camera)
+                    camera_selection = Tello.CAMERA_FORWARD
 
-        try:
-            self.drone.set_video_direction(camera_selection)
-        except tello.TelloException as e:
-            logger.error("Failed to set camera selection. Details: %s", e)
+            try:
+                self.drone.set_video_direction(camera_selection)
+            except tello.TelloException as e:
+                logger.error("Failed to set camera selection. Details: %s", e)
 
     def connect(self) -> bool:
         """

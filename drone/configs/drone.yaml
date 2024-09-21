@@ -9,6 +9,7 @@ tello:
         password: ""
     poll_response: false
     default_speed: 50
+    video_settings_supported: false
     video_bitrate: auto
     video_resolution: 720p
     video_fps: 30
