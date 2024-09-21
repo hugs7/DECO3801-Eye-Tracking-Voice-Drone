@@ -15,7 +15,7 @@ import cv2
 import numpy as np
 from omegaconf import OmegaConf
 
-from common import constants as cc, img_helper, keyboard
+from common import constants as cc, keyboard
 from common.omegaconf_helper import conf_key_from_value
 
 from . import constants as c
@@ -243,12 +243,8 @@ class GazeDetector:
                 logger.trace("No image to render.")
                 return
 
-            buffer = img_helper.encode_frame(self.visualizer.image)
-            if buffer is None:
-                return
-
             with self.data_lock:
-                self.thread_data["eye_tracking"]["video_frame"] = buffer
+                self.thread_data["eye_tracking"]["video_frame"] = self.visualizer.image
 
             logger.debug("Set video frame in shared data.")
         else:

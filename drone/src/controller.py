@@ -10,7 +10,7 @@ import sys
 from omegaconf import OmegaConf
 import cv2
 
-from common import constants as cc, img_helper, keyboard
+from common import constants as cc, keyboard
 from common.logger_helper import init_logger
 from common.omegaconf_helper import conf_key_from_value
 
@@ -132,12 +132,8 @@ class Controller:
             logger.debug("No frame returned from camera")
             return
 
-        buffer = img_helper.encode_frame(frame)
-        if buffer is None:
-            return
-
         with self.data_lock:
-            self.thread_data["drone"]["video_frame"] = buffer
+            self.thread_data["drone"]["video_frame"] = frame
 
     def _wait_key(self) -> bool:
         """

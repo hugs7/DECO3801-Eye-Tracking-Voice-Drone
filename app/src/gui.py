@@ -15,7 +15,6 @@ from queue import Queue
 
 from common.logger_helper import init_logger
 from common.common_gui import CommonGUI
-from common import img_helper
 
 from options import PreferencesDialog
 import constants as c
@@ -248,14 +247,11 @@ class MainApp(QMainWindow, CommonGUI):
         """
         try:
             data: Dict = self.thread_data[source]
-            buffer = data.get("video_frame", None)
-            if buffer is None:
+            frame = data.get("video_frame", None)
+            if frame is None:
                 return None
 
-            frame = img_helper.decode_frame(buffer)
-
-            if frame is not None:
-                self._set_pixmap(label, frame)
+            self._set_pixmap(label, frame)
         except KeyboardInterrupt:
             logger.critical("Interrupted! Stopping all threads...")
             self.close_app()
