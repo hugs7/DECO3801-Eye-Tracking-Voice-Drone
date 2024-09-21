@@ -15,4 +15,8 @@ def fps_to_ms(fps: int) -> int:
     Returns:
         Milliseconds per frame
     """
+
+    if fps == 0:
+        return 0
+
     return c.MILLISECONDS_PER_SECOND // fps
