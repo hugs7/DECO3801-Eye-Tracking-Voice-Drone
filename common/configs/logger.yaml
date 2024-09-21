@@ -1,5 +1,5 @@
 loggers:
     global: DEBUG
-    eye_tracking: False
+    eye_tracking: false
     voice_control: DEBUG
-    drone: False
+    drone: false

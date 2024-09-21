@@ -7,14 +7,14 @@ tello:
     wifi:
         ssid: TELLO-C38725
         password: ""
-    poll_response: False
+    poll_response: false
     default_speed: 50
     video_bitrate: auto
     video_resolution: 720p
     video_fps: 30
     camera_selection: forward
 controller:
-    connect_to_drone: False
+    connect_to_drone: false
     max_tick_rate: 30
     keyboard_bindings:
         land: l

@@ -1,15 +1,15 @@
 voice_control:
-    use_existing_recording: False
-    detect_voice: True
-    send_to_llm: True
+    use_existing_recording: false
+    detect_voice: true
+    send_to_llm: true
 audio:
-    save_recordings: False
+    save_recordings: false
     wake_command: "Ok Drone"
     listen_timeout: 60
     phrase_time_limit: 4
     ambient_noise_duration: 0.5
     sound_effects:
-        enable: True
+        enable: true
         files:
             wake: "sounds/wake.mp3"
             accept: "sounds/accept.mp3"
