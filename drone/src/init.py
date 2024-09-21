@@ -3,16 +3,17 @@ Init module for the drone package.
 06/09/2024
 """
 
+from typing import Union, Optional
+
 from omegaconf import DictConfig, OmegaConf
-import logging
-from typing import Union
+
+from common.logger_helper import init_logger
 
 from .utils import file_handler as fh
-
 from . import constants as c
 from . import models
 
-logger = logging.getLogger(__name__)
+logger = init_logger()
 
 
 def init_config() -> DictConfig:
