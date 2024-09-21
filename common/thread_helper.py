@@ -9,6 +9,7 @@ from threading import Event, current_thread
 
 from . import logger_helper as lh
 from .gui_helper import fps_to_ms
+from . import constants as c
 
 logger = lh.init_logger()
 
@@ -121,7 +122,7 @@ def run_loop_with_max_tickrate(max_fps: int, callback: callable, *args, **kwargs
         now = datetime.now()
         diff = now - last_loop_start_time
 
-        if diff.total_seconds() * 1000 < min_loop_time:
-            time.sleep((min_loop_time - diff.total_seconds() * 1000) / 1000)
+        if diff.total_seconds() * c.MILLISECONDS_PER_SECOND < min_loop_time:
+            time.sleep((min_loop_time - diff.total_seconds() * c.MILLISECONDS_PER_SECOND) / c.MILLISECONDS_PER_SECOND)
 
         last_loop_start_time = datetime.now()
