@@ -164,6 +164,10 @@ class Controller:
         # Not critical while keyboard inputs are simple, however, this is good
         # practice for more complex inputs.
         key_buffer: List[int] = []
+        if "keyboard_queue" not in self.thread_data:
+            logger.trace("Keyboard queue not yet initialised in shared data.")
+            return False
+
         with self.data_lock:
             keyboard_queue: Optional[Queue] = self.thread_data["keyboard_queue"]
             if keyboard_queue is not None:
