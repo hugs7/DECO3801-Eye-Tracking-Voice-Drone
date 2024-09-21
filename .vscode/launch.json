@@ -41,6 +41,14 @@
             "program": "drone/main.py",
             "console": "integratedTerminal",
             "justMyCode": true
+        },
+        {
+            "name": "Network",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "drone/src/network.py",
+            "console": "integratedTerminal",
+            "justMyCode": true
         }
     ]
 }
