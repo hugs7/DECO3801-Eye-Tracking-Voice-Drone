@@ -15,9 +15,8 @@ import cv2
 import numpy as np
 from omegaconf import OmegaConf
 
-from common import constants as cc
+from common import constants as cc, img_helper, keyboard
 from common.omegaconf_helper import conf_key_from_value
-from common import img_helper
 
 from . import constants as c
 from .face import Face
@@ -454,7 +453,8 @@ class GazeDetector:
 
         # Obtain lowercase version of key always. If we need to detect uppercase, we
         # can determine if the shift key is pressed.
-        key_chr = chr(key_code).lower()
+        key_chr = keyboard.get_key_chr(key_code)
+
         logger.info("Received key: %s (%d)", key_chr, key_code)
 
         if key_chr in cc.QUIT_KEYS:

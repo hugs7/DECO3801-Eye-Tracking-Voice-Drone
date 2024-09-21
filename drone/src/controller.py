@@ -10,10 +10,9 @@ import sys
 from omegaconf import OmegaConf
 import cv2
 
+from common import constants as cc, img_helper, keyboard
 from common.logger_helper import init_logger
-from common import constants as cc
 from common.omegaconf_helper import conf_key_from_value
-from common import img_helper
 
 from .drone_actions import DroneActions
 from .models.tello_drone import TelloDrone
@@ -95,11 +94,13 @@ class Controller:
                 logger.debug(">>> Begin drone loop")
 
                 self._wait_key()
-                ok, frame = self.model.read_camera()
-                if not ok:
-                    break
 
-                self._render_frame(frame)
+                if self.model.success:
+                    ok, frame = self.model.read_camera()
+                    if not ok:
+                        break
+
+                    self._render_frame(frame)
 
                 self.thread_loop_handler(self.stop_event)
                 logger.debug("<<< End drone loop")
@@ -184,7 +185,8 @@ class Controller:
             True if a recognised key is pressed, False otherwise
         """
 
-        key_chr = chr(key_code).lower()
+        key_chr = keyboard.get_key_chr(key_code)
+
         logger.info("Received key: %s (%d)", key_chr, key_code)
 
         if key_chr in cc.QUIT_KEYS:
