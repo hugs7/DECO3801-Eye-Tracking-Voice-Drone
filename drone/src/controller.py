@@ -235,24 +235,29 @@ class Controller:
             TODO: Add docstring for command format
         """
 
+        logger.info("Performing action: %s", command)
+
+        angle = 35
+        dist = 10
+
         try:
             match command:
                 case DroneActions.ROTATE_CW:
-                    self.model.rotate_clockwise(90)
+                    self.model.rotate_clockwise(angle)
                 case DroneActions.ROTATE_CCW:
-                    self.model.rotate_counter_clockwise(90)
+                    self.model.rotate_counter_clockwise(angle)
                 case DroneActions.UP:
-                    self.model.move_up(50)
+                    self.model.move_up(dist)
                 case DroneActions.DOWN:
-                    self.model.move_down(50)
+                    self.model.move_down(dist)
                 case DroneActions.LEFT:
-                    self.model.move_left(50)
+                    self.model.move_left(dist)
                 case DroneActions.RIGHT:
-                    self.model.move_right(50)
+                    self.model.move_right(dist)
                 case DroneActions.FORWARD:
-                    self.model.move_forward(50)
+                    self.model.move_forward(dist)
                 case DroneActions.BACKWARD:
-                    self.model.move_backward(50)
+                    self.model.move_backward(dist)
                 case DroneActions.TAKEOFF:
                     self.model.takeoff()
                 case DroneActions.LAND:
