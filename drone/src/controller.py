@@ -231,8 +231,8 @@ class Controller:
         Handler for sending an action to the drone given a command.
 
         Args:
-            command (str): The command to send to the drone.
-            TODO: Add docstring for command format
+            command (str): The command to send to the drone. Can be any of the
+                            commands defined in DroneActions.
         """
 
         logger.info("Performing action: %s", command)
