@@ -2,7 +2,7 @@
 Local drone GUI. Not used in threading mode.
 """
 
-from typing import Dict, Optional
+from typing import Dict
 from PyQt6.QtWidgets import QMainWindow, QVBoxLayout, QHBoxLayout, QWidget, QPushButton, QLabel
 from PyQt6.QtCore import QTimer, Qt
 from PyQt6.QtGui import QImage, QPixmap, QKeyEvent
@@ -22,30 +22,32 @@ class DroneApp(QMainWindow, CommonGUI):
     Local drone GUI
     """
 
-    def __init__(self, controller: Optional[Controller]):
+    def __init__(self, controller: Controller):
         """
         Initialises the drone app
 
         Args:
-            controller[Optional[Controller]]: The controller object or None.
-            If none, the GUI will run in limited mode.
+            controller [Controller]: The controller object.
         """
+        logger.info("Initialising GUI")
         super().__init__()
 
         self.controller = controller
-        self.limited_mode = controller is None
+        self.limited_mode = not self.controller.connect_to_drone or not self.controller.model.success
         if self.limited_mode:
-            logger.info("Running in limited mode. No controller provided")
+            logger.info("Running in limited mode.")
 
         self._init_gui()
         self.timers = self._init_timers()
+
+        logger.info("GUI initialised")
 
     def _init_gui(self) -> None:
         """
         Initialises the GUI window and widgets
         """
 
-        logger.info("Initialising GUI")
+        logger.info("Initialising GUI widgets")
 
         self.setWindowTitle("Drone App")
 
@@ -64,6 +66,9 @@ class DroneApp(QMainWindow, CommonGUI):
 
         self.quit_button = QPushButton("Quit", self)
         self.quit_button.clicked.connect(self.close_app)
+        self.quit_button.clearFocus()
+        self.quit_button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+
         button_layout.addStretch()
         button_layout.addWidget(self.quit_button)
 
@@ -119,21 +124,21 @@ class DroneApp(QMainWindow, CommonGUI):
         key_code = event.key()
         logger.info(f"Key pressed: {key_code}")
 
-        if key_code == Qt.Key.Key_Escape or key_code == Qt.Key.Key_Q:
+        if key_code == Qt.Key.Key_Escape:
             self.close_app()
 
         if self.limited_mode:
             logger.debug("Running in limited mode. No controller provided")
             return
 
-        self.controller.handle_key_press(key_code)
+        self.controller._handle_key_event(key_code)
 
     def update_drone_feed(self):
         """
         Updates the video feed
         """
-        frame = self.controller.model.read_camera()
-        if frame is None:
+        ok, frame = self.controller.model.read_camera()
+        if not ok:
             logger.trace("No frame returned from camera")
             return
 

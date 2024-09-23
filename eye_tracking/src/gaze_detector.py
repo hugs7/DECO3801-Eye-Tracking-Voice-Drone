@@ -15,8 +15,9 @@ import cv2
 import numpy as np
 from omegaconf import OmegaConf
 
-from common import constants as cc
+from common import constants as cc, keyboard
 from common.omegaconf_helper import conf_key_from_value
+from common.loop import run_loop_with_max_tickrate
 
 from . import constants as c
 from .face import Face
@@ -30,6 +31,10 @@ logger = init_logger()
 
 
 class GazeDetector:
+    """
+    Gaze Detector class for eye tracking.
+    """
+
     def __init__(
         self,
         config: OmegaConf,
@@ -43,9 +48,6 @@ class GazeDetector:
             stop_event: Event object to stop the gaze detector
             thread_data: Shared data dictionary
             data_lock: Lock object for shared data
-
-        Returns:
-            None
         """
 
         logger.info("Initialising Gaze Detector")
@@ -103,7 +105,6 @@ class GazeDetector:
         self.average_gaze_vector = None
 
         # Point on screen
-        self.point_on_screen_smoothing_factor = 8  # Number of frames to average over
         self.point_buffer = []
         self.gaze_2d_point = None
 
@@ -172,7 +173,7 @@ class GazeDetector:
                 if key_pressed:
                     self._process_image(image)
 
-                self._render_frame("image")
+                self._render_frame("image", 0.0)
 
         if self.config.demo.output_dir:
             name = pathlib.Path(self.config.demo.image_path).name
@@ -199,25 +200,7 @@ class GazeDetector:
             else:
                 logger.info("Video feed will be displayed on screen")
 
-        while True:
-            logger.debug(">>> Begin eye tracking loop")
-            if self.config.demo.display_on_screen:
-                self._wait_key()
-                if self.stop:
-                    break
-
-            ok, frame = self._read_camera()
-            if not ok:
-                break
-            self._process_image(frame)
-
-            if self.config.demo.display_on_screen:
-                self._render_frame("frame")
-
-            if self.running_in_thread:
-                self.thread_loop_handler(self.stop_event)
-
-            logger.debug("<<< End eye tracking loop")
+        run_loop_with_max_tickrate(self.config.demo.max_tick_rate, self._gaze_loop)
 
         self.cap.release()
         if self.writer:
@@ -227,26 +210,62 @@ class GazeDetector:
             # Exit parent thread
             self.thread_exit(self.stop_event)
 
-    def _render_frame(self, win_name: str) -> None:
+    def _gaze_loop(self, tick_rate: float) -> bool:
+        """
+        A single iteration of the gaze loop in threaded mode.
+
+        Returns:
+            True if the gaze loop should continue, False otherwise
+        """
+        logger.debug(">>> Begin eye tracking loop")
+
+        if self.config.demo.display_on_screen:
+            self._wait_key()
+            if self.stop:
+                return False
+
+        ok, frame = self._read_camera()
+        if not ok:
+            return False
+
+        self._process_image(frame)
+
+        if self.config.demo.display_on_screen:
+            self._render_frame("frame", tick_rate)
+
+        if self.running_in_thread:
+            self.thread_loop_handler(self.stop_event)
+
+        logger.debug("<<< End eye tracking loop")
+        return not self.stop
+
+    def _render_frame(self, win_name: str, tick_rate: float) -> None:
         """
         Renders a frame where it needs to go
 
         Args:
-            win_name: Window name
+            win_name [str]: Window name
+            tick_rate [float]: Tick rate of the gaze loop
 
         Returns:
             None
         """
 
         if self.running_in_thread:
+            if self.visualizer.image is None:
+                logger.trace("No image to render.")
+                return
+
             with self.data_lock:
-                if self.visualizer.image is not None:
-                    success, encoded_img = cv2.imencode(".jpg", self.visualizer.image)
-                    if success:
-                        buffer = encoded_img.tobytes()
-                        self.thread_data["eye_tracking"]["video_frame"] = buffer
-                    logger.debug("Set video frame in shared data.")
+                self.thread_data["eye_tracking"]["video_frame"] = self.visualizer.image
+                self.thread_data["eye_tracking"]["tick_rate"] = tick_rate
+
+            logger.debug("Set video frame in shared data.")
         else:
+            # Render fps on the image
+            if self.config.demo.show_fps:
+                self.visualizer.draw_fps(tick_rate)
+
             cv2.imshow(win_name, self.visualizer.image)
 
     def _read_camera(self) -> Tuple[bool, np.ndarray]:
@@ -423,22 +442,25 @@ class GazeDetector:
                 keyboard_queue: Optional[Queue] = self.thread_data["keyboard_queue"]
                 if keyboard_queue is not None:
                     while not keyboard_queue.empty():
-                        key: int = keyboard_queue.get()
-                        key_buffer.append(key)
+                        key_code: int = keyboard_queue.get()
+                        key_buffer.append(key_code)
                 else:
                     logger.warning("Keyboard queue not initialised in shared data.")
 
             accepted_keys = []
-            for key in key_buffer:
-                accepted_keys.append(self._keyboard_controller(key))
+            for key_code in key_buffer:
+                accepted_keys.append(self._handle_key_event(key_code))
 
             # Accept if any valid key was pressed
             return any(accepted_keys)
         else:
-            key = cv2.waitKey(self.config.demo.wait_time) & 0xFF
-            return self._keyboard_controller(key)
+            key_code = cv2.waitKey(self.config.demo.wait_time) & 0xFF
+            if key_code == 255:
+                return False
 
-    def _keyboard_controller(self, key_code: int) -> bool:
+            return self._handle_key_event(key_code)
+
+    def _handle_key_event(self, key_code: int) -> bool:
         """
         Keyboard controller for the gaze detector.
 
@@ -448,7 +470,8 @@ class GazeDetector:
 
         # Obtain lowercase version of key always. If we need to detect uppercase, we
         # can determine if the shift key is pressed.
-        key_chr = chr(key_code).lower()
+        key_chr = keyboard.get_key_chr(key_code)
+
         logger.info("Received key: %s (%d)", key_chr, key_code)
 
         if key_chr in cc.QUIT_KEYS:

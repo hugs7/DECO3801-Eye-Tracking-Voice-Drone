@@ -6,6 +6,7 @@ from typing import Optional, Union
 import logging
 import inspect
 import sys
+from pathlib import Path
 
 from omegaconf import OmegaConf
 
@@ -121,7 +122,23 @@ def get_caller_module_name(caller_frame: inspect.FrameInfo) -> str:
         Caller's module name
     """
     caller_module = inspect.getmodule(caller_frame[0])
-    return caller_module.__name__
+    caller_name = caller_module.__name__
+
+    if caller_name.startswith("src"):
+        # Running module standalone
+        # Determine module from path
+        relative_path = Path(caller_module.__file__)
+        rel_path_str = relative_path.as_posix()
+        caller_relative_path = caller_name.replace(".", "/") + ".py"
+        if rel_path_str.endswith(caller_relative_path):
+            rel_path_str = rel_path_str[: -len(caller_relative_path)]
+
+            if rel_path_str.endswith("/"):
+                rel_path_str = rel_path_str[:-1]
+
+        caller_name = rel_path_str.split("/")[-1]
+
+    return caller_name
 
 
 def map_log_level(level: str) -> int:

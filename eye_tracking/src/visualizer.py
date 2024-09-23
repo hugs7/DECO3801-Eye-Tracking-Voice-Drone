@@ -39,6 +39,7 @@ class Visualizer:
         Returns:
             None
         """
+        image = np.require(image, np.uint8, "C")
         self.image = image
 
     def flip_image(self) -> None:
@@ -60,6 +61,36 @@ class Visualizer:
         """
         assert self.image is not None
         return self.image.shape[:2]
+
+    def draw_fps(
+        self,
+        fps: float,
+        color: Tuple[int, int, int] = (0, 255, 0),
+        text_font_face: int = cv2.FONT_HERSHEY_SIMPLEX,
+        font_scale: float = 0.5,
+        thickness: int = 2,
+    ) -> None:
+        """
+        Draws the FPS on the image
+
+        Args:
+            fps: The FPS to be drawn
+            color: The colour of the FPS
+
+        Returns:
+            None
+        """
+        assert self.image is not None
+
+        fps_text = "inf" if fps == float("inf") else f"{fps:.2f}"
+
+        (text_width, text_height), text_bottom_y = cv2.getTextSize(fps_text, text_font_face, font_scale, thickness)
+
+        padding = 5
+
+        fps_offset = 42
+        top_right_corner = (self.image.shape[1] - padding - text_width - fps_offset, padding + text_height)
+        self.draw_text(f"FPS: {fps_text}", top_right_corner, color, text_font_face, font_scale, thickness)
 
     def draw_bbox(self, bbox: np.ndarray, color: Tuple[int, int, int] = (0, 255, 0), lw: int = 1) -> None:
         """
@@ -135,7 +166,7 @@ class Visualizer:
         thickness: int,
         top_left: Tuple[int, int],
         bottom_right: Tuple[int, int],
-    ):
+    ) -> Tuple[int, int]:
         """
         Calculates the origin of the text to be drawn in the centre of the rectangle
 
@@ -148,7 +179,7 @@ class Visualizer:
             bottom_right: The bottom right corner of the rectangle
 
         Returns:
-            The origin of the text
+            Tuple[int, int]: The origin of the text
         """
 
         (text_width, text_height), text_bottom_y = cv2.getTextSize(text, text_font_face, font_scale, thickness)
@@ -172,7 +203,6 @@ class Visualizer:
         bg_alpha: float,
         text: str,
         text_font_face: int = cv2.FONT_HERSHEY_SIMPLEX,
-        text_line_type: int = cv2.LINE_AA,
         font_scale: float = 1.0,
         border_color: Optional[Tuple[int, int, int]] = None,
         border_thickness: int = 2,
@@ -188,7 +218,6 @@ class Visualizer:
             bg_alpha: The transparency of the rectangle
             text: The text to be displayed
             text_font_face: The font face of the text
-            text_line_type: The line type of the text
             font_scale: The scale of the font
             border_color: The colour of the border
             border_thickness: The thickness of the border
@@ -212,7 +241,36 @@ class Visualizer:
 
         cv2.rectangle(overlay, top_left, bottom_right, bg_color, -1)
         self.create_opacity(overlay, bg_alpha)
-        cv2.putText(self.image, text, text_org, text_font_face, font_scale, bg_color, 2, text_line_type, False)
+        self.draw_text(text, text_org, color=(255, 255, 255), font_face=text_font_face, font_scale=font_scale)
+
+    def draw_text(
+        self,
+        text: str,
+        org: Tuple[int, int],
+        color: Tuple[int, int, int] = (0, 0, 255),
+        font_face=cv2.FONT_HERSHEY_SIMPLEX,
+        font_scale=1.0,
+        thickness=2,
+        line_type=cv2.LINE_AA,
+    ) -> None:
+        """
+        Draws text on the image
+
+        Args:
+            text: The text to be drawn
+            org: The origin of the text
+            color: The colour of the text
+            font_face: The font face of the text
+            font_scale: The scale of the font
+            thickness: The thickness of the text
+            line_type: The line type of the text
+
+        Returns:
+            None
+        """
+
+        assert self.image is not None
+        cv2.putText(self.image, text, org, font_face, font_scale, color, thickness, line_type)
 
     def draw_3d_point(
         self, point3d: np.ndarray, color: Tuple[int, int, int] = (255, 0, 255), size=3, clamp_to_screen: bool = False

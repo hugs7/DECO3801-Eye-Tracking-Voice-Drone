@@ -3,7 +3,7 @@ Handles GUI for the application using PyQt6
 """
 
 from typing import Dict, List, Union, Tuple, Optional
-from PyQt6.QtWidgets import QMainWindow, QVBoxLayout, QWidget, QPushButton, QLabel, QLineEdit, QMenuBar, QMenu
+from PyQt6.QtWidgets import QMainWindow, QVBoxLayout, QWidget, QPushButton, QLabel, QLineEdit
 from PyQt6.QtCore import QTimer, Qt
 from PyQt6.QtGui import QImage, QPixmap, QKeyEvent
 import cv2
@@ -21,7 +21,6 @@ import constants as c
 import utils.file_handler as file_handler
 
 
-
 logger = init_logger("DEBUG")
 
 
@@ -33,10 +32,9 @@ class MainApp(QMainWindow, CommonGUI):
         self.data_lock = data_lock
         self.interprocess_data = interprocess_data
 
-        self.swap_feeds = False
-
         self.config = self._init_config()
         self._init_gui()
+        self._init_feed_labels()
         self.timers: Dict[str, QTimer] = self._init_timers()
         self._init_keyboard_queue()
 
@@ -85,18 +83,17 @@ class MainApp(QMainWindow, CommonGUI):
         self.side_video_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.layout.addWidget(self.side_video_label)
 
-        self.text_input = QLineEdit(self)
-        self.layout.addWidget(self.text_input)
-
         # Button to switch video feeds
         self.switch_button = QPushButton("Switch", self)
         self.switch_button.clicked.connect(self._switch_feeds)
         self.layout.addWidget(self.switch_button)
+        self.switch_button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
 
         # Quit button
         self.quit_button = QPushButton("Quit", self)
         self.quit_button.clicked.connect(self.close_app)
         self.layout.addWidget(self.quit_button)
+        self.quit_button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
 
         self._init_menu()
 
@@ -123,6 +120,13 @@ class MainApp(QMainWindow, CommonGUI):
 
         logger.info("Menu bar initialised")
 
+    def _init_feed_labels(self) -> None:
+        """
+        Initialise the labels for the video feeds
+        """
+        self.drone_video_label = self.main_video_label
+        self.webcam_video_label = self.side_video_label
+
     def _init_timers(self) -> Dict[str, QTimer]:
         """
         Initialise the timers for the gui
@@ -131,7 +135,8 @@ class MainApp(QMainWindow, CommonGUI):
             Dict[str, QTimer]: The timers configuration in an OmegaConf object
         """
         timers_conf = {
-            "webcam": {"callback": self.update_webcam_feed, "fps": self.config.timers.webcam},
+            "webcam": {"callback": self.get_webcam_feed, "fps": self.config.timers.webcam},
+            "drone_feed": {"callback": self.get_drone_feed, "fps": self.config.timers.drone_video},
             "voice_command": {"callback": self.get_next_voice_command, "fps": self.config.timers.voice_command},
         }
 
@@ -175,7 +180,7 @@ class MainApp(QMainWindow, CommonGUI):
         key = event.key()
         logger.info(f"Key pressed: {key}")
 
-        if key == Qt.Key.Key_Escape or key == Qt.Key.Key_Q:
+        if key == Qt.Key.Key_Escape:
             self.close_app()
 
         # Any other key goes into the keyboard queue
@@ -194,27 +199,6 @@ class MainApp(QMainWindow, CommonGUI):
         logger.info("Opening options window")
         dialog = PreferencesDialog()
         dialog.exec()
-
-    def update_webcam_feed(self) -> None:
-        """
-        Update the video feed on the GUI
-
-        Returns:
-            None
-        """
-        try:
-            main_frame = self.get_webcam_feed()
-            small_frame = self.get_webcam_feed()
-
-            if main_frame is not None and small_frame is not None:
-                if self.swap_feeds:
-                    main_frame, small_frame = small_frame, main_frame
-
-                self._set_pixmap(self.main_video_label, main_frame)
-                self._set_pixmap(self.side_video_label, small_frame)
-        except KeyboardInterrupt:
-            logger.critical("Interrupted! Stopping all threads...")
-            self.close_app()
 
     def _set_pixmap(self, label: QLabel, frame: np.ndarray) -> None:
         """
@@ -241,25 +225,55 @@ class MainApp(QMainWindow, CommonGUI):
             QImage: The converted frame
         """
 
+        frame_data = np.require(frame, np.uint8, 'C')
         height, width, channel = frame.shape
-        bytes_per_line = 3 * width
-        return QImage(frame.data, width, height, bytes_per_line, QImage.Format.Format_RGB888)
+        bytes_per_line = channel * width
+        try:
+            return QImage(frame_data, width, height, bytes_per_line, QImage.Format.Format_RGB888)
+        except Exception as e:
+            logger.error(f"Error converting frame to QImage: {e}")
 
-    def get_webcam_feed(self) -> np.ndarray:
+    def get_video_feed(self, source: str, label: QLabel) -> Optional[cv2.typing.MatLike]:
         """
-        Retrieves the webcam feed from the shared data of the eye tracking module.
-        Decodes the buffer and returns the frame as a numpy array.
+        Retrieves the video feed from the specified module and updates the corresponding label.
+
+        Args:
+            source (str): The key in thread_data to retrieve the video frame from.
+            label (QLabel): The label to update with the video feed.
 
         Returns:
-            np.ndarray: The webcam feed as a numpy array
+            Optional[cv2.typing.MatLike]: The decoded frame or None if decoding failed
         """
-        eye_tracking_data: Dict = self.thread_data["eye_tracking"]
-        buffer = eye_tracking_data.get("video_frame", None)
-        if buffer is None:
-            return None
+        try:
+            data: Dict = self.thread_data[source]
+            frame = data.get("video_frame", None)
+            if frame is None:
+                return None
+            
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-        webcam_frame = self._decode_feed_buffer(buffer)
-        return webcam_frame
+            self._set_pixmap(label, frame)
+        except KeyboardInterrupt:
+            logger.critical("Interrupted! Stopping all threads...")
+            self.close_app()
+
+    def get_webcam_feed(self) -> Optional[cv2.typing.MatLike]:
+        """
+        Retrieves the webcam feed from the shared data of the eye tracking module.
+
+        Returns:
+            Optional[cv2.typing.MatLike]: The decoded frame or None if decoding failed
+        """
+        return self.get_video_feed("eye_tracking", self.webcam_video_label)
+    
+    def get_drone_feed(self) -> Optional[cv2.typing.MatLike]:
+        """
+        Retrieves the drone feed from the shared data of the drone module.
+
+        Returns:
+            Optional[cv2.typing.MatLike]: The decoded frame or None if decoding failed
+        """
+        return self.get_video_feed("drone", self.drone_video_label)
 
     def get_next_voice_command(self) -> Optional[List[Dict[str, Union[str, Tuple[str, int]]]]]:
         """
@@ -290,29 +304,6 @@ class MainApp(QMainWindow, CommonGUI):
             logger.info(f"Next voice command: {next_command["text"]}")
 
             return next_command
-
-    def _decode_feed_buffer(self, buffer: bytes) -> np.ndarray:
-        """
-        Decodes the byte buffer into a numpy array then decodes the frame into an RGB format.
-
-        Args:
-            buffer (bytes): The buffer to decode
-
-        Returns:
-            np.ndarray: The decoded frame
-        """
-        try:
-            nparr = np.frombuffer(buffer, np.uint8)
-        except Exception as e:
-            logger.error(f"Error decoding buffer: {e}")
-            return None
-
-        try:
-            video_frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-            return cv2.cvtColor(video_frame, cv2.COLOR_BGR2RGB)
-        except Exception as e:
-            logger.error(f"Error decoding frame: {e}")
-            return None
 
     def _switch_feeds(self) -> None:
         """

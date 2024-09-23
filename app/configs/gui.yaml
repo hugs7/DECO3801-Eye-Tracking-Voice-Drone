@@ -1,3 +1,4 @@
 timers:
     voice_command: 5
-    webcam: 60
+    webcam: 30
+    drone_video: 30

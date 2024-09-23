@@ -72,16 +72,10 @@ class MavicDrone(Drone):
         return vehicle
 
     def read_camera(self) -> cv2.typing.MatLike:
-        """
-        TODO: Read the camera feed from the mavic drone
-
-        Returns:
-            img: The image from the camera feed
-        """
-
+        ok = False
         img = None
 
-        return img
+        return ok, img
 
     def __set_vehicle_mode(self, mode: str) -> None:
         """

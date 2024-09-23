@@ -1,5 +1,6 @@
 loggers:
     global: DEBUG
-    eye_tracking: False
+    common: INFO
+    eye_tracking: false
     voice_control: DEBUG
-    drone: False
+    drone: DEBUG
