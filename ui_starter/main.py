@@ -79,3 +79,5 @@ class Ui_MainWindow(object):
         self.actionOptions.setText(_translate("MainWindow", "Options"))
         self.actionQuit.setText(_translate("MainWindow", "Quit"))
         self.actionAbout.setText(_translate("MainWindow", "About"))
+
+    
