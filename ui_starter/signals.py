@@ -5,3 +5,5 @@ from PyQt6.QtCore import pyqtSignal, QObject
 
 class Signals(QObject):
     updateCommand = pyqtSignal(str)
+    resize = pyqtSignal()
+    
