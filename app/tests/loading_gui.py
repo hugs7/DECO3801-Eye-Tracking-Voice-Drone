@@ -3,7 +3,15 @@ from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel, QProgressBar, QVB
 from PyQt6.QtGui import QPixmap
 from PyQt6.QtCore import QTimer, Qt
 
+
+from ..src.utils import file_handler
+
+
 class LoadingScreen(QMainWindow):
+    """
+    Loading GUI
+    """
+
     def __init__(self):
         super(LoadingScreen, self).__init__()
 
@@ -13,7 +21,8 @@ class LoadingScreen(QMainWindow):
 
         # Background label for displaying the image (placed behind)
         self.background_label = QLabel(self)
-        self.background_pixmap = QPixmap("drone\\assets\\ai_developed_drone_image.webp")
+        loading_img_path = file_handler.get_assets_folder() / "ai_developed_drone_image.webp"
+        self.background_pixmap = QPixmap(loading_img_path.as_posix())
         self.background_label.setPixmap(self.background_pixmap)
         self.background_label.setScaledContents(True)  # Make sure the image scales to fit the window
         self.background_label.setGeometry(0, 0, self.width(), self.height())  # Set the geometry
@@ -29,12 +38,14 @@ class LoadingScreen(QMainWindow):
 
         # Create a QProgressBar for the loading progress (foreground)
         self.progress_bar = QProgressBar(self.central_widget)
-        self.progress_bar.setStyleSheet("""
+        self.progress_bar.setStyleSheet(
+            """
             QProgressBar {
                 background-color: transparent;
                 color: black;
             }
-        """)
+        """
+        )
         self.progress_bar.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         # Create a vertical layout to manage label and progress bar
@@ -45,12 +56,12 @@ class LoadingScreen(QMainWindow):
 
         # Ensure the progress bar and label are raised above the background
         self.central_widget.raise_()
-        
+
         # Timer for simulating progress
         self.progress = 0
         self.timer = QTimer()
         self.timer.timeout.connect(self.update_progress)
-        self.timer.start(500) # delay for updating progress bar
+        self.timer.start(500)  # delay for updating progress bar
 
         # Show the loading screen
         self.show()
@@ -78,7 +89,11 @@ class LoadingScreen(QMainWindow):
         """Resize background image when the window is resized."""
         # Resize the background image to fit the entire window
         self.background_label.setGeometry(0, 0, self.width(), self.height())
-        self.background_label.setPixmap(self.background_pixmap.scaled(self.width(), self.height(), Qt.AspectRatioMode.KeepAspectRatioByExpanding, Qt.TransformationMode.SmoothTransformation))
+        self.background_label.setPixmap(
+            self.background_pixmap.scaled(
+                self.width(), self.height(), Qt.AspectRatioMode.KeepAspectRatioByExpanding, Qt.TransformationMode.SmoothTransformation
+            )
+        )
 
         # Make sure that central_widget stays on top of the background
         self.central_widget.raise_()
