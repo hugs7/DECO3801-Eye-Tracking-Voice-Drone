@@ -1,9 +1,17 @@
+import os
 import sys
+
+# Add the project root to the path
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
+print("Project root: ", project_root)
+sys.path.insert(0, project_root)
+
+
 from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel, QProgressBar, QVBoxLayout, QWidget
 from PyQt6.QtGui import QPixmap, QResizeEvent
 from PyQt6.QtCore import QTimer, Qt
 
-from ..src.utils import file_handler
+from app.src.utils import file_handler
 
 
 class LoadingScreen(QMainWindow):
