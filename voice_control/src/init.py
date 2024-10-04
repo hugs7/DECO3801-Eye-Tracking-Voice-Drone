@@ -19,7 +19,7 @@ logger = init_logger(logging.DEBUG)
 
 def init_config() -> DictConfig:
     """
-    Initializes the configuration for the voice control program.
+    Initialises the configuration for the voice control program.
 
     Returns:
         The configuration object.

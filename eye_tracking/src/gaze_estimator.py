@@ -32,7 +32,7 @@ class GazeEstimator:
 
     def __init__(self, config: DictConfig):
         """
-        Initialize the GazeEstimator
+        Initialise the GazeEstimator
 
         Args:
             config: Gaze estimator configuration object

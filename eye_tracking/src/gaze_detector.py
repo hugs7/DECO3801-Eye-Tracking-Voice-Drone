@@ -113,7 +113,7 @@ class GazeDetector:
 
     def _init_hitboxes(self) -> Dict[str, Tuple[Tuple[int, int], Tuple[int, int]]]:
         """
-        Initialize the left and right hit-boxes.
+        Initialise the left and right hit-boxes.
 
         Returns:
             Dictionary of hit-boxes: {"left": (top_left, bottom_right), "right": (top_left, bottom_right)}
