@@ -13,8 +13,10 @@ from PyQt6.QtCore import QTimer, Qt
 
 from app.src.utils import file_handler
 
+from common.common_gui import CommonGUI
 
-class LoadingScreen(QMainWindow):
+
+class LoadingGUI(QMainWindow, CommonGUI):
     """
     Loading GUI
     """
@@ -44,7 +46,7 @@ class LoadingScreen(QMainWindow):
         self.__init_layout()
 
     def __init_bg_image(self):
-        """Initialize the background image."""
+        """Initialise the background image."""
         self.background_label = QLabel(self)
         loading_img_path = file_handler.get_assets_folder() / "ai_developed_drone_image.webp"
         self.background_pixmap = QPixmap(loading_img_path.as_posix())
@@ -58,6 +60,7 @@ class LoadingScreen(QMainWindow):
         self.message_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
     def __init_progress_bar(self):
+        """Initialise the progress bar."""
         self.progress_bar = QProgressBar(self.central_widget)
         self.progress_bar.setStyleSheet(
             """
@@ -70,23 +73,37 @@ class LoadingScreen(QMainWindow):
         self.progress_bar.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
     def __init_layout(self):
+        """
+        Initialise layout for the loading screen.
+        """
         self.layout = QVBoxLayout(self.central_widget)
         self.layout.addWidget(self.message_label)
         self.layout.addWidget(self.progress_bar)
         self.central_widget.setLayout(self.layout)
         self.central_widget.raise_()
 
-    def __init_timers(self):
-        self.begin_progress()
+    def __init_timers(self) -> Dict[str, QTimer]:
+        """
+        Initialise timers loading GUI.
 
-    def begin_progress(self):
-        self.progress = 0
-        self.timer = QTimer()
-        self.timer.timeout.connect(self.update_progress)
-        self.timer.start(500)  # delay for updating progress bar
+        Returns:
+            Dict[str, QTimer]: Timers for the loading GUI
+        """
+
+        timers_conf = {
+            "progress": {"callback": self.update_progress, "fps": 2},
+        }
+
+        if self.running_in_thread:
+            thread_check = {"callback": self.thread_check, "fps": 30}
+            timers_conf["thread_check"] = thread_check
+
+        return {name: self._configure_timer(name, **conf) for name, conf in timers_conf.items()}
 
     def update_progress(self):
-        """Update progress bar and display different messages based on progress."""
+        """
+        Update progress bar and display different messages based on progress.
+        """
         self.progress += 2
         self.progress_bar.setValue(self.progress)
 
@@ -102,7 +119,21 @@ class LoadingScreen(QMainWindow):
 
         if self.progress >= 100:
             self.timer.stop()
-            self.close()  # Close the loading screen when complete
+            self.close()
+
+    def thread_check(self):
+        """
+        Check if the main thread is still alive. Exits the loading
+        screen if the main thread is not alive.
+
+        Raises:
+            ValueError: If the main thread is not alive
+        """
+        if not self.running_in_thread:
+            raise ValueError("This function should only be called when running in a thread.")
+
+        if not self.loading_stop_event.is_set():
+            self.close()
 
     def resizeEvent(self, event: QResizeEvent) -> None:
         """
@@ -125,5 +156,5 @@ class LoadingScreen(QMainWindow):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    loading_screen = LoadingScreen()
+    loading_screen = LoadingGUI()
     sys.exit(app.exec())
