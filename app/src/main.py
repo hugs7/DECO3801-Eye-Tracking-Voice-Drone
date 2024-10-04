@@ -13,8 +13,10 @@ from PyQt6.QtWidgets import QApplication
 
 # Must go before any other user imports to ensure project directory is added to sys.path
 from utils.import_helper import dynamic_import
+from utils.loading import set_loading_status
 
 from gui import MainApp
+from loading_gui import LoadingGUI
 
 from common.logger_helper import init_logger
 from common.thread_helper import get_function_module
@@ -26,9 +28,19 @@ logger = init_logger()
 if __name__ == "__main__":
     logger.info(">>> Begin")
 
-    logger.info("Initialising modules...")
+    loading_gui = QApplication(sys.argv)
+    loading_data_lock = Lock()
+    loading_stop_event = Event()
+    loading_shared_data = {"status": ""}
+    loading_window = LoadingGUI(loading_shared_data, loading_data_lock, loading_stop_event)
+    loading_gui_thread = Thread(target=loading_gui.exec, name="loading_gui_thread")
+    loading_gui_thread.start()
+
+    set_loading_status(loading_shared_data, loading_data_lock, "Initialising eye tracking module")
     eye_tracking = dynamic_import("eye_tracking.src.main", "main")
+    set_loading_status(loading_shared_data, loading_data_lock, "Initialising voice control module")
     voice_control = dynamic_import("voice_control.src.main", "main")
+    set_loading_status(loading_shared_data, loading_data_lock, "Initialising drone module")
     drone = dynamic_import("drone.src.main", "main")
     logger.info("Modules initialised.")
 elif __name__ == "__mp_main__":
@@ -40,6 +52,22 @@ def is_any_thread_alive(threads: List[Thread]):
     Check if any thread is alive.
     """
     return any(t.is_alive() for t in threads)
+
+
+def wrap_set_loading_status(status: str):
+    """
+    Wrapper for set_loading_status which uses shared loading data and lock as globals.
+
+    Args:
+        status: New status
+    """
+    # Check args are defined
+    global_vars = globals()
+    if "loading_shared_data" not in global_vars or "loading_data_lock" not in global_vars:
+        raise ValueError("Loading shared data and lock must be defined as globals.")
+
+    global loading_shared_data, loading_data_lock
+    set_loading_status(loading_shared_data, loading_data_lock, status)
 
 
 def main():
@@ -57,7 +85,7 @@ def main():
         # (instead of a Thread) to allow for parallel execution and termination on
         # parent process exit. As a result, the shared data is managed by a Manager
         # object to allow for inter-process communication.
-        logger.info("Initialising voice process")
+        wrap_set_loading_status("Initialising voice process")
         manager = Manager()
         interprocess_data = manager.dict()
         process_functions = {voice_control: {"command_queue": manager.Queue()}}
@@ -67,7 +95,7 @@ def main():
             Process(target=func, args=(interprocess_data,), name=f"process_{get_function_module(func)}") for func in process_functions
         ]
 
-        logger.info("Initialising processes")
+        wrap_set_loading_status("Initialising processes")
         for process in processes:
             logger.debug(f"Starting process {process.name}")
             process.start()
@@ -83,12 +111,18 @@ def main():
             Thread(target=lambda func=func: func(stop_event, thread_data, data_lock), name=f"thread_{get_function_module(func)}")
             for func in thread_functions
         ]
-        logger.info("Initialising threads")
+        wrap_set_loading_status("Starting threads")
+
         for thread in threads:
             logger.debug(f"Starting thread {thread.name}")
             thread.start()
 
-        # GUI
+        # Exit loading GUI
+        loading_stop_event.set()
+        loading_gui.quit()
+        loading_gui_thread.join()
+
+        # Main GUI
         # Keeps the main thread alive so we do not need a secondary while loop
         logger.info("Initialising GUI")
         gui = QApplication(sys.argv)
