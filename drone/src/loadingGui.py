@@ -50,7 +50,7 @@ class LoadingScreen(QMainWindow):
         self.progress = 0
         self.timer = QTimer()
         self.timer.timeout.connect(self.update_progress)
-        self.timer.start(500)  # Update every 100 ms
+        self.timer.start(500) # delay for updating progress bar
 
         # Show the loading screen
         self.show()
