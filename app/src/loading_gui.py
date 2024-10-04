@@ -16,6 +16,10 @@ from PyQt6.QtCore import QTimer, Qt
 from app.src.utils import file_handler
 
 from common.common_gui import CommonGUI
+from common.logger_helper import init_logger
+
+
+logger = init_logger()
 
 
 class LoadingGUI(QMainWindow, CommonGUI):
@@ -32,6 +36,8 @@ class LoadingGUI(QMainWindow, CommonGUI):
             loading_data_lock: Lock for shared data
             loading_stop_event: Stop event for loading screen
         """
+
+        logger.info(">>> LoadingGUI Begin Init")
 
         super(LoadingGUI, self).__init__()
 
@@ -51,12 +57,15 @@ class LoadingGUI(QMainWindow, CommonGUI):
         self.__init_gui()
         self.timers = self.__init_timers()
 
+        logger.info("<<< LoadingGUI End Init")
+
         self.show()
 
     def __init_gui(self) -> None:
         """
         Initialise GUI components
         """
+        logger.info(">>> LoadingGUI Begin Init GUI")
         self.__init_bg_image()
 
         self.central_widget = QWidget(self)
@@ -65,6 +74,8 @@ class LoadingGUI(QMainWindow, CommonGUI):
         self.__init_messages()
         self.__init_progress_bar()
         self.__init_layout()
+
+        logger.info("<<< LoadingGUI End Init GUI")
 
     def __init_bg_image(self):
         """Initialise the background image."""
@@ -112,6 +123,8 @@ class LoadingGUI(QMainWindow, CommonGUI):
             Dict[str, QTimer]: Timers for the loading GUI
         """
 
+        logger.info("Initialising timers")
+
         timers_conf = {
             "progress": {"callback": self.update_progress, "fps": 2},
         }
@@ -120,13 +133,16 @@ class LoadingGUI(QMainWindow, CommonGUI):
             thread_check = {"callback": self.thread_check, "fps": 30}
             timers_conf["thread_check"] = thread_check
 
-        return {name: self._configure_timer(name, **conf) for name, conf in timers_conf.items()}
+        timers = {name: self._configure_timer(name, **conf) for name, conf in timers_conf.items()}
+        logger.info("Timers initialised")
+        return timers
 
     def update_progress(self):
         """
         Update progress bar and display different messages based on progress.
         """
         self.progress += 2
+        logger.info(f"Progress: {self.progress}")
         self.progress_bar.setValue(self.progress)
 
         # Update messages based on progress
