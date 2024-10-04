@@ -11,6 +11,13 @@ class MainApp (QMainWindow, Ui_MainWindow):
         self.window = QMainWindow()
         self.setupUi(self)
 
+        self.central_widget = QWidget(self)
+        self.setCentralWidget(self.central_widget)
+        layout = QVBoxLayout()
+        layout.addWidget(self.recentCommand)
+  
+
+
         # sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Preferred, QtWidgets.QSizePolicy.Policy.Preferred)
         # layoutGrid = QGridLayout()
         # self.setLayout(layoutGrid)
@@ -25,7 +32,7 @@ class MainApp (QMainWindow, Ui_MainWindow):
         self.signals = Signals()
         # updateRecentCommand of this class is called when updateCommand event triggered
         self.signals.updateCommand.connect(self.updateRecentCommand)
-        self.signals.resize.connect(self.resize)
+        self.signals.resize.connect(self.AH)
         self.original_height = self.geometry().height()
         self.original_recentCommand = self.recentCommand.geometry().top()
         self.droneFeed_original = self.geometry().top()
@@ -36,7 +43,7 @@ class MainApp (QMainWindow, Ui_MainWindow):
         # print("Window has been resized")
         # QtWidgets.QMainWindow.resizeEvent(self, event)
     
-    def resize(self):
+    def AH(self):
         print (self.contentsRect())
         print ("Window has been resized")
         coords = self.contentsRect().getCoords()
