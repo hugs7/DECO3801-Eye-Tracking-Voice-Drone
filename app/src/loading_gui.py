@@ -82,6 +82,7 @@ class LoadingGUI(QMainWindow, CommonGUI):
 
     def __init_progress_bar(self):
         """Initialise the progress bar."""
+        self.progress = 0
         self.progress_bar = QProgressBar(self.central_widget)
         self.progress_bar.setStyleSheet(
             """
