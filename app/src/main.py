@@ -25,29 +25,6 @@ from common.thread_helper import get_function_module
 logger = init_logger()
 
 
-if __name__ == "__main__":
-    logger.info(">>> Begin")
-
-    loading_gui = QApplication(sys.argv)
-    loading_data_lock = Lock()
-    loading_stop_event = Event()
-    loading_shared_data = {"status": ""}
-    loading_window = LoadingGUI(loading_shared_data, loading_data_lock, loading_stop_event)
-    loading_gui_thread = Thread(target=loading_gui.exec, name="loading_gui_thread")
-    loading_gui_thread.start()
-
-    loading_helper = LoadingHelper(loading_shared_data, loading_data_lock)
-    loading_helper.set_loading_status("Initialising eye tracking module")
-    eye_tracking = dynamic_import("eye_tracking.src.main", "main")
-    loading_helper.set_loading_status("Initialising voice control module")
-    voice_control = dynamic_import("voice_control.src.main", "main")
-    loading_helper.set_loading_status("Initialising drone module")
-    drone = dynamic_import("drone.src.main", "main")
-    logger.info("Modules initialised.")
-elif __name__ == "__mp_main__":
-    logger.info(">>> Begin Multiprocessing")
-
-
 def is_any_thread_alive(threads: List[Thread]):
     """
     Check if any thread is alive.
@@ -57,6 +34,26 @@ def is_any_thread_alive(threads: List[Thread]):
 
 def main():
     logger.info(">>> Main Begin")
+
+    loading_gui = QApplication(sys.argv)
+    loading_data_lock = Lock()
+    loading_stop_event = Event()
+    loading_shared_data = {"status": ""}
+    loading_window = LoadingGUI(loading_shared_data, loading_data_lock, loading_stop_event)
+    loading_helper = LoadingHelper(loading_shared_data, loading_data_lock)
+    loading_gui_thread = Thread(target=loading_gui.exec, name="loading_gui_thread")
+    loading_gui_thread.start()
+
+    loading_helper.set_loading_status("Initialising eye tracking module")
+    eye_tracking = dynamic_import("eye_tracking.src.main", "main")
+
+    loading_helper.set_loading_status("Initialising voice control module")
+    voice_control = dynamic_import("voice_control.src.main", "main")
+
+    loading_helper.set_loading_status("Initialising drone module")
+    drone = dynamic_import("drone.src.main", "main")
+
+    logger.info("Modules initialised.")
 
     # Define lock and stop event early to ensure KeyboardInterrupt
     # can signal all threads to stop.
@@ -80,7 +77,7 @@ def main():
             Process(target=func, args=(interprocess_data,), name=f"process_{get_function_module(func)}") for func in process_functions
         ]
 
-        loading_helper.set_loading_status("Initialising processes")
+        loading_helper.set_loading_status("Starting processes")
         for process in processes:
             logger.debug(f"Starting process {process.name}")
             process.start()
@@ -90,20 +87,22 @@ def main():
         # The remaining components (eye tracking and drone) are run in threads.
         # Threads use a different thread_data object because threads share memory.
         # but also require a lock to prevent race conditions when accessing shared data.
+        loading_helper.set_loading_status("Initialising threads")
         thread_functions = [eye_tracking, drone]
         thread_data = {get_function_module(func): {} for func in thread_functions}
         threads = [
             Thread(target=lambda func=func: func(stop_event, thread_data, data_lock), name=f"thread_{get_function_module(func)}")
             for func in thread_functions
         ]
-        loading_helper.set_loading_status("Starting threads")
 
+        loading_helper.set_loading_status("Starting threads")
         for thread in threads:
             logger.debug(f"Starting thread {thread.name}")
             thread.start()
 
         # Exit loading GUI
         loading_stop_event.set()
+        loading_window.close()
         loading_gui.quit()
         loading_gui_thread.join()
 
