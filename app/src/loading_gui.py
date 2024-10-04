@@ -6,6 +6,8 @@ project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
 print("Project root: ", project_root)
 sys.path.insert(0, project_root)
 
+from typing import Dict
+from threading import Lock, Event
 
 from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel, QProgressBar, QVBoxLayout, QWidget
 from PyQt6.QtGui import QPixmap, QResizeEvent
@@ -21,14 +23,33 @@ class LoadingGUI(QMainWindow, CommonGUI):
     Loading GUI
     """
 
-    def __init__(self):
-        super(LoadingScreen, self).__init__()
+    def __init__(self, loading_shared_data: Dict = None, loading_data_lock: Lock = None, loading_stop_event: Event = None):
+        """
+        Initialise the loading screen.
+
+        Args (optional):
+            loading_shared_data: Shared data between loading screen and main app
+            loading_data_lock: Lock for shared data
+            loading_stop_event: Stop event for loading screen
+        """
+
+        super(LoadingGUI, self).__init__()
+
+        required_args = [loading_shared_data, loading_data_lock, loading_stop_event]
+        self.running_in_thread = all(required_args)
+        if self.running_in_thread:
+            if not all(required_args):
+                raise ValueError("All or none of the optional arguments must be provided.")
+
+            self.loading_shared_data = loading_shared_data
+            self.loading_data_lock = loading_data_lock
+            self.loading_stop_event = loading_stop_event
 
         self.setWindowTitle("Loading Screen")
         self.setGeometry(100, 100, 800, 600)
 
         self.__init_gui()
-        self.__init_timers()
+        self.timers = self.__init_timers()
 
         self.show()
 
