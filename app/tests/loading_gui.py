@@ -1,8 +1,7 @@
 import sys
 from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel, QProgressBar, QVBoxLayout, QWidget
-from PyQt6.QtGui import QPixmap
+from PyQt6.QtGui import QPixmap, QResizeEvent
 from PyQt6.QtCore import QTimer, Qt
-
 
 from ..src.utils import file_handler
 
@@ -15,28 +14,42 @@ class LoadingScreen(QMainWindow):
     def __init__(self):
         super(LoadingScreen, self).__init__()
 
-        # Set window title and size
         self.setWindowTitle("Loading Screen")
-        self.setGeometry(100, 100, 800, 600)  # Set window size
+        self.setGeometry(100, 100, 800, 600)
 
-        # Background label for displaying the image (placed behind)
+        self.__init_gui()
+        self.__init_timers()
+
+        self.show()
+
+    def __init_gui(self) -> None:
+        """
+        Initialise GUI components
+        """
+        self.__init_bg_image()
+
+        self.central_widget = QWidget(self)
+        self.setCentralWidget(self.central_widget)
+
+        self.__init_messages()
+        self.__init_progress_bar()
+        self.__init_layout()
+
+    def __init_bg_image(self):
+        """Initialize the background image."""
         self.background_label = QLabel(self)
         loading_img_path = file_handler.get_assets_folder() / "ai_developed_drone_image.webp"
         self.background_pixmap = QPixmap(loading_img_path.as_posix())
         self.background_label.setPixmap(self.background_pixmap)
-        self.background_label.setScaledContents(True)  # Make sure the image scales to fit the window
-        self.background_label.setGeometry(0, 0, self.width(), self.height())  # Set the geometry
+        self.background_label.setScaledContents(True)
+        self.background_label.setGeometry(0, 0, self.width(), self.height())
 
-        # Central widget and layout
-        self.central_widget = QWidget(self)
-        self.setCentralWidget(self.central_widget)
-
-        # Create a QLabel for the messages with black font (foreground)
+    def __init_messages(self):
         self.message_label = QLabel("Starting...", self.central_widget)
         self.message_label.setStyleSheet("color: black; font-size: 24px;")
         self.message_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        # Create a QProgressBar for the loading progress (foreground)
+    def __init_progress_bar(self):
         self.progress_bar = QProgressBar(self.central_widget)
         self.progress_bar.setStyleSheet(
             """
@@ -48,23 +61,21 @@ class LoadingScreen(QMainWindow):
         )
         self.progress_bar.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        # Create a vertical layout to manage label and progress bar
+    def __init_layout(self):
         self.layout = QVBoxLayout(self.central_widget)
         self.layout.addWidget(self.message_label)
         self.layout.addWidget(self.progress_bar)
         self.central_widget.setLayout(self.layout)
-
-        # Ensure the progress bar and label are raised above the background
         self.central_widget.raise_()
 
-        # Timer for simulating progress
+    def __init_timers(self):
+        self.begin_progress()
+
+    def begin_progress(self):
         self.progress = 0
         self.timer = QTimer()
         self.timer.timeout.connect(self.update_progress)
         self.timer.start(500)  # delay for updating progress bar
-
-        # Show the loading screen
-        self.show()
 
     def update_progress(self):
         """Update progress bar and display different messages based on progress."""
@@ -85,9 +96,13 @@ class LoadingScreen(QMainWindow):
             self.timer.stop()
             self.close()  # Close the loading screen when complete
 
-    def resizeEvent(self, event):
-        """Resize background image when the window is resized."""
-        # Resize the background image to fit the entire window
+    def resizeEvent(self, event: QResizeEvent) -> None:
+        """
+        Handle resize of the window
+
+        Args:
+            event: Resize event
+        """
         self.background_label.setGeometry(0, 0, self.width(), self.height())
         self.background_label.setPixmap(
             self.background_pixmap.scaled(
@@ -95,7 +110,6 @@ class LoadingScreen(QMainWindow):
             )
         )
 
-        # Make sure that central_widget stays on top of the background
         self.central_widget.raise_()
 
         return super().resizeEvent(event)
