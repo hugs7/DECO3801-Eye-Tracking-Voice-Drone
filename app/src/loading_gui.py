@@ -192,7 +192,8 @@ class LoadingGUI(QMainWindow, CommonGUI):
         self.progress = progress
         self.progress_bar.setValue(progress)
 
-        logger.info(f"Progress: {self.progress}")
+        if progress % 10 == 0:
+            logger.info(f"Progress: {self.progress}")
 
     def thread_check(self):
         """
