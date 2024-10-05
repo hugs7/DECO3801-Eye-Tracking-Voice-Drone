@@ -10,11 +10,10 @@ from threading import Thread, Event, Lock
 from multiprocessing import Manager, Process
 
 from PyQt6.QtWidgets import QApplication
-from PyQt6.QtCore import QObject, pyqtSignal
 
 # Must go before any other user imports to ensure project directory is added to sys.path
 from utils.import_helper import dynamic_import
-from utils.loading import LoadingHelper
+from app.src.utils.progress_controller import ProgressController
 
 from gui import MainApp
 from loading_gui import LoadingGUI
@@ -33,7 +32,7 @@ def is_any_thread_alive(threads: List[Thread]):
     return any(t.is_alive() for t in threads)
 
 
-def initialise_modules(loading_shared_data: Dict, loading_helper: LoadingHelper, stop_event: Event, data_lock: Lock) -> None:
+def initialise_modules(loading_shared_data: Dict, progress: ProgressController, stop_event: Event, data_lock: Lock) -> None:
     """
     Initialise the modules, and emit a signal when complete.
 
@@ -43,15 +42,15 @@ def initialise_modules(loading_shared_data: Dict, loading_helper: LoadingHelper,
         stop_event: Stop event
         data_lock: Lock for shared data
     """
-    loading_helper.set_stage("Initialising Modules", 3)
+    progress.set_stage("Initialising Modules", 3)
 
-    loading_helper.set_loading_task("Initialising eye tracking module")
+    progress.set_loading_task("Initialising eye tracking module")
     eye_tracking = dynamic_import("eye_tracking.src.main", "main")
 
-    loading_helper.set_loading_task("Initialising voice control module")
+    progress.set_loading_task("Initialising voice control module")
     voice_control = dynamic_import("voice_control.src.main", "main")
 
-    loading_helper.set_loading_task("Initialising drone module")
+    progress.set_loading_task("Initialising drone module")
     drone = dynamic_import("drone.src.main", "main")
 
     logger.info("Modules initialised.")
@@ -63,13 +62,13 @@ def initialise_modules(loading_shared_data: Dict, loading_helper: LoadingHelper,
         # (instead of a Thread) to allow for parallel execution and termination on
         # parent process exit. As a result, the shared data is managed by a Manager
         # object to allow for inter-process communication.
-        loading_helper.set_stage("Initialising processes", 3)
-        loading_helper.set_loading_task("Initialising IPC data manager")
+        progress.set_stage("Initialising processes", 3)
+        progress.set_loading_task("Initialising IPC data manager")
         manager = Manager()
         interprocess_data = manager.dict()
-        loading_helper.set_loading_task("Configuring IPC data")
+        progress.set_loading_task("Configuring IPC data")
         loading_shared_data["interprocess_data"] = interprocess_data
-        loading_helper.set_loading_task("Initialising process functions")
+        progress.set_loading_task("Initialising process functions")
         process_functions = {voice_control: {"command_queue": manager.Queue()}}
         process_shared_dict = {get_function_module(func): init_val for func, init_val in process_functions.items()}
         interprocess_data.update(process_shared_dict)
@@ -78,9 +77,9 @@ def initialise_modules(loading_shared_data: Dict, loading_helper: LoadingHelper,
         ]
         loading_shared_data["processes"] = processes
 
-        loading_helper.set_stage("Starting processes", len(processes))
+        progress.set_stage("Starting processes", len(processes))
         for process in processes:
-            loading_helper.set_loading_task(f"Starting process {process.name}")
+            progress.set_loading_task(f"Starting process {process.name}")
             process.start()
 
         # =========== Threads ===========
@@ -88,21 +87,21 @@ def initialise_modules(loading_shared_data: Dict, loading_helper: LoadingHelper,
         # The remaining components (eye tracking and drone) are run in threads.
         # Threads use a different thread_data object because threads share memory.
         # but also require a lock to prevent race conditions when accessing shared data.
-        loading_helper.set_stage("Initialising threads", 2)
+        progress.set_stage("Initialising threads", 2)
         thread_functions = [eye_tracking, drone]
-        loading_helper.set_loading_task("Initialising shared data dictionary")
+        progress.set_loading_task("Initialising shared data dictionary")
         thread_data = {get_function_module(func): {} for func in thread_functions}
         loading_shared_data["thread_data"] = thread_data
-        loading_helper.set_loading_task("Initialising thread functions")
+        progress.set_loading_task("Initialising thread functions")
         threads = [
             Thread(target=lambda func=func: func(stop_event, thread_data, data_lock), name=f"thread_{get_function_module(func)}")
             for func in thread_functions
         ]
         loading_shared_data["threads"] = threads
 
-        loading_helper.set_stage("Starting threads", len(threads))
+        progress.set_stage("Starting threads", len(threads))
         for thread in threads:
-            loading_helper.set_loading_task(f"Starting thread {thread.name}")
+            progress.set_loading_task(f"Starting thread {thread.name}")
             thread.start()
     except KeyboardInterrupt:
         logger.info("Keyboard interrupt detected, stopping threads and processes.")
@@ -118,7 +117,7 @@ def main():
     loading_stop_event = Event()
     loading_shared_data = {"status": dict()}
     loading_window = LoadingGUI(loading_shared_data, loading_data_lock, loading_stop_event)
-    loading_helper = LoadingHelper(loading_shared_data, loading_data_lock, 6)
+    loading_helper = ProgressController(loading_shared_data, loading_data_lock, 6)
 
     try:
         stop_event = Event()

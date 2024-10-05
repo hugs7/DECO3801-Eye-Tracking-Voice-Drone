@@ -1,5 +1,5 @@
 """
-Helper functions for handling loading / progress
+Controller for handling progress.
 """
 
 from typing import Dict, Any
@@ -10,7 +10,7 @@ from common.logger_helper import init_logger
 logger = init_logger()
 
 
-class LoadingHelper:
+class ProgressController:
     def __init__(self, loading_shared_data: Dict, data_lock: Lock, num_stages: int):
         """
         Initialise the loading helper
