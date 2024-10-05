@@ -95,7 +95,7 @@ def initialise_modules(loading_shared_data: Dict, progress: ProgressController, 
         loading_shared_data["thread_data"] = thread_data
         progress.set_loading_task("Initialising thread functions", 0.2)
         threads = [
-            Thread(target=lambda func=func: func(stop_event, thread_data, data_lock), name=f"thread_{get_function_module(func)}")
+            Thread(target=func, args=(stop_event, thread_data, data_lock), name=f"thread_{get_function_module(func)}")
             for func in thread_functions
         ]
         loading_shared_data["threads"] = threads
