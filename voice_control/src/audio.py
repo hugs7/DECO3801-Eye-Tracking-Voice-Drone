@@ -28,7 +28,7 @@ class AudioRecogniser:
 
     def __init__(self, audio_config: OmegaConf):
         """
-        Initializes the AudioRecogniser.
+        Initialises the AudioRecogniser.
 
         Args:
             audio_config (OmegaConf): The audio configuration settings.

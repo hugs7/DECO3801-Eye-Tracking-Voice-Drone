@@ -113,7 +113,7 @@ class GazeDetector:
 
     def _init_hitboxes(self) -> Dict[str, Tuple[Tuple[int, int], Tuple[int, int]]]:
         """
-        Initialize the left and right hit-boxes.
+        Initialise the left and right hit-boxes.
 
         Returns:
             Dictionary of hit-boxes: {"left": (top_left, bottom_right), "right": (top_left, bottom_right)}
@@ -434,6 +434,10 @@ class GazeDetector:
         """
 
         if self.running_in_thread:
+            if "keyboard_queue" not in self.thread_data.keys():
+                logger.trace("Keyboard queue not yet initialised in shared data.")
+                return False
+
             # Define a buffer so that we are not locking the data for too long.
             # Not critical while keyboard inputs are simple, however, this is good
             # practice for more complex inputs.

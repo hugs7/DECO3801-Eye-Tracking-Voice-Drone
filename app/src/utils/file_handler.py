@@ -33,3 +33,17 @@ def get_configs_folder() -> Path:
     configs_folder = app_folder / "configs"
 
     return configs_folder
+
+
+def get_assets_folder() -> Path:
+    """
+    Gets the path to the main app's assets folder.
+
+    Returns:
+        Path to the assets folder
+    """
+
+    app_folder = get_app_folder()
+    assets_folder = app_folder / "assets"
+
+    return assets_folder

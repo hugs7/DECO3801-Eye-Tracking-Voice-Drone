@@ -31,7 +31,7 @@ class HeadPoseNormalizer:
 
     def __init__(self, camera: Camera, normalized_camera: Camera, normalized_distance: float):
         """
-        Initializes the HeadPoseNormalizer.
+        Initialises the HeadPoseNormalizer.
 
         Args:
             camera (Camera): The camera used to capture the image.

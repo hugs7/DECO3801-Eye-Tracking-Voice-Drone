@@ -10,7 +10,7 @@ from ..file_handler import get_data_folder, get_context_file
 
 def init_context() -> list[dict]:
     """
-    Initializes the context for the LLM model.
+    Initialises the context for the LLM model.
 
     This function reads the initial context from the 'context.jsonl' file in the 'data' folder.
 
