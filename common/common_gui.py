@@ -25,12 +25,12 @@ class CommonGUI:
         """Initialise the palette and theme"""
         palette = QApplication.palette()
         # Determine if the theme is dark or light
-        self.theme = "dark" if palette.color(QPalette.ColorRole.Window).lightness() < 128 else "light"
+        self.theme = cc.DARK_THEME if palette.color(QPalette.ColorRole.Window).lightness() < 128 else cc.LIGHT_THEME
 
-        if self.theme == "dark":
-            self.text_color = "white"
+        if self.theme == cc.DARK_THEME:
+            self.text_color = cc.TEXT_WHITE
         else:
-            self.text_color = "black"
+            self.text_color = cc.TEXT_BLACK
 
     def __check_layout(self):
         if self.layout is None:
