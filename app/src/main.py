@@ -128,7 +128,7 @@ def main():
         )
         init_thread.start()
 
-        loading_window.show()
+        loading_window.wrap_show()
         gui.exec()
 
         init_thread.join()
@@ -151,7 +151,7 @@ def main():
         logger.info("Launching Main GUI")
         gui = QApplication(sys.argv)
         main_window = MainApp(stop_event, thread_data, data_lock, interprocess_data)
-        main_window.show()
+        main_window.wrap_show()
         gui.exec()
     except KeyboardInterrupt:
         logger.critical("Interrupted! Stopping all threads...")

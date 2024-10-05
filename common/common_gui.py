@@ -134,3 +134,13 @@ class CommonGUI:
             logger.error(f"Timer not found: {name}")
 
         return timer
+
+    def wrap_show(self) -> None:
+        """
+        Wrapper for showing the current window, raising it to the front
+        of the window stack and activating it.
+        """
+
+        self.show()
+        self.raise_()
+        self.activateWindow()

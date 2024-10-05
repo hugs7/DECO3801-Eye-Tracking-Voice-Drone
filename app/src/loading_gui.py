@@ -59,8 +59,6 @@ class LoadingGUI(QMainWindow, CommonGUI):
 
         logger.info("<<< LoadingGUI End Init")
 
-        self.show()
-
     def __init_gui(self) -> None:
         """
         Initialise GUI components
