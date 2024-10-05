@@ -70,6 +70,9 @@ class LoadingHelper:
         task_progress = round((self.current_task / self.num_tasks) * (100 / self.num_stages))
 
         overall_progress = stage_progress + task_progress
+        if not overall_progress in range(0, 101):
+            raise ValueError("Overall progress is not within the range 0-100: %d", overall_progress)
+
         self.__set_progress_value("progress", overall_progress)
 
     def __set_progress_value(self, key: str, value: Any) -> None:
