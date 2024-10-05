@@ -3,8 +3,8 @@ Handles GUI for the application using PyQt6
 """
 
 from typing import Dict, List, Union, Tuple, Optional
-from PyQt6.QtWidgets import QMainWindow, QVBoxLayout, QWidget, QPushButton, QLabel, QLineEdit
-from PyQt6.QtCore import QTimer, Qt
+from PyQt6.QtWidgets import QMainWindow, QVBoxLayout, QWidget, QPushButton, QLabel
+from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QImage, QPixmap, QKeyEvent
 import cv2
 import numpy as np
@@ -245,7 +245,7 @@ class MainApp(QMainWindow, CommonGUI):
         Returns:
             Optional[cv2.typing.MatLike]: The decoded frame or None if decoding failed
         """
-        return self.get_video_feed("eye_tracking", self.webcam_video_label)
+        return self.get_video_feed(cc.EYE_TRACKING, self.webcam_video_label)
 
     def get_drone_feed(self) -> Optional[cv2.typing.MatLike]:
         """
@@ -254,7 +254,7 @@ class MainApp(QMainWindow, CommonGUI):
         Returns:
             Optional[cv2.typing.MatLike]: The decoded frame or None if decoding failed
         """
-        return self.get_video_feed("drone", self.drone_video_label)
+        return self.get_video_feed(cc.DRONE, self.drone_video_label)
 
     def get_next_voice_command(self) -> Optional[List[Dict[str, Union[str, Tuple[str, int]]]]]:
         """
