@@ -434,6 +434,10 @@ class GazeDetector:
         """
 
         if self.running_in_thread:
+            if "keyboard_queue" not in self.thread_data.keys():
+                logger.trace("Keyboard queue not yet initialised in shared data.")
+                return False
+
             # Define a buffer so that we are not locking the data for too long.
             # Not critical while keyboard inputs are simple, however, this is good
             # practice for more complex inputs.
