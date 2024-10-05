@@ -20,6 +20,7 @@ from loading_gui import LoadingGUI
 
 from common.logger_helper import init_logger
 from common.thread_helper import get_function_module
+from common import constants as cc
 
 
 logger = init_logger()
@@ -153,15 +154,13 @@ def main():
         main_window = MainApp(stop_event, thread_data, data_lock, interprocess_data)
         main_window.wrap_show()
         main_gui.exec()
-    except KeyboardInterrupt:
-        logger.critical("Interrupted! Stopping all threads...")
 
-    logger.info("Signalling all threads to stop")
-    stop_event.set()
+        logger.info("Signalling all threads to stop")
+        stop_event.set()
 
     # Ensure all threads and processes are properly joined after signaling them to stop.
     for process in processes:
-        process.join()
+            process.join(cc.PROCESS_TIMEOUT)
         if process.is_alive():
             logger.info(f"Terminating process {process.name}")
             process.terminate()
@@ -171,6 +170,8 @@ def main():
 
     logger.info("Closing GUI")
     main_gui.quit()
+    except KeyboardInterrupt:
+        logger.critical("Interrupted! Stopping all threads...")
 
     logger.debug("<<< End")
 
