@@ -115,9 +115,21 @@ class LoadingGUI(QMainWindow, CommonGUI):
         Initialise layout for the loading screen.
         """
         self.layout = QVBoxLayout(self.central_widget)
-        self.layout.addWidget(self.title_label)
-        self.layout.addWidget(self.task_label)
+
+        self.layout.setContentsMargins(0, 0, 0, 0)
+        self.layout.setSpacing(0)
+
+        self.label_container = QWidget(self.central_widget)
+        label_layout = QVBoxLayout(self.label_container)
+        label_layout.setContentsMargins(0, 0, 0, 0)
+        label_layout.setSpacing(0)
+
+        label_layout.addWidget(self.title_label, alignment=Qt.AlignmentFlag.AlignCenter)
+        label_layout.addWidget(self.task_label, alignment=Qt.AlignmentFlag.AlignCenter)
+
+        self.layout.addWidget(self.label_container, alignment=Qt.AlignmentFlag.AlignCenter)
         self.layout.addWidget(self.progress_bar)
+
         self.central_widget.setLayout(self.layout)
         self.central_widget.raise_()
 
