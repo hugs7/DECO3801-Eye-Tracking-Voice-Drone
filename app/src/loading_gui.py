@@ -11,7 +11,7 @@ from threading import Lock, Event
 
 from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel, QProgressBar, QVBoxLayout, QWidget
 from PyQt6.QtGui import QPixmap, QResizeEvent
-from PyQt6.QtCore import QTimer, Qt
+from PyQt6.QtCore import QTimer, Qt, pyqtSignal
 
 from app.src.utils import file_handler
 
@@ -26,6 +26,8 @@ class LoadingGUI(QMainWindow, CommonGUI):
     """
     Loading GUI
     """
+
+    progress_update_signal = pyqtSignal(int, str)
 
     def __init__(self, loading_shared_data: Dict = None, loading_data_lock: Lock = None, loading_stop_event: Event = None):
         """
@@ -56,6 +58,7 @@ class LoadingGUI(QMainWindow, CommonGUI):
 
         self.__init_gui()
         self.timers = self.__init_timers()
+        self.progress_update_signal.connect(self.update_progress_bar)
 
         logger.info("<<< LoadingGUI End Init")
 
@@ -134,6 +137,19 @@ class LoadingGUI(QMainWindow, CommonGUI):
         timers = {name: self._configure_timer(name, **conf) for name, conf in timers_conf.items()}
         logger.info("Timers initialised")
         return timers
+
+    def update_progress_bar(self, progress: int, task: str):
+        """
+        Slot to update the progress bar and message label when the signal is emitted.
+
+        Args:
+            progress (int): Progress value
+            task (str): Task message
+        """
+        self.message_label.setText(task)
+        self.progress_bar.setValue(progress)
+        if progress >= 100:
+            self.close()
 
     def update_progress(self):
         """

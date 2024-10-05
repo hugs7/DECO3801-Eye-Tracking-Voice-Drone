@@ -4,6 +4,9 @@ Controller for handling progress.
 
 from typing import Dict, Any
 from threading import Lock
+import asyncio
+
+from PyQt6.QtCore import pyqtSignal
 
 from common.logger_helper import init_logger
 
@@ -11,7 +14,7 @@ logger = init_logger()
 
 
 class ProgressController:
-    def __init__(self, loading_shared_data: Dict, data_lock: Lock, num_stages: int):
+    def __init__(self, loading_shared_data: Dict, data_lock: Lock, num_stages: int, progress_signal: pyqtSignal):
         """
         Initialise the loading helper
 
@@ -22,6 +25,8 @@ class ProgressController:
         self.loading_shared_data = loading_shared_data
         self.data_lock = data_lock
         self.num_stages = num_stages
+        self.progress_signal = progress_signal
+
         self.num_tasks = 0
 
         self.current_stage_name = ""
@@ -30,6 +35,9 @@ class ProgressController:
         self.current_task = 0
 
         self.overall_progress = 0.0
+
+        self.loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(self.loop)
 
     def set_stage(self, title: str, num_tasks: int) -> None:
         """
@@ -60,17 +68,38 @@ class ProgressController:
             task: The message to set for the current task
             estimated_time: The estimated time to complete the task in seconds
         """
-        self.current_task_name = task
-        logger.info("Status: %s", task)
-        self.__set_status_value("task", task)
-        self.__set_status_value("estimated_time", estimated_time)
-        self.current_task += 1
+        if self.loop.is_running():
+            asyncio.create_task(self.async_increment_progress(task, estimated_time))
+        else:
+            self.loop.run_until_complete(self.async_increment_progress(task, estimated_time))
 
+    async def async_increment_progress(self, task: str, estimated_time: float, steps: int = 100) -> None:
+        """
+        Asynchronously increments progress over the estimated time.
+
+        Args:
+            task: The message to set for the current task
+            estimated_time: The estimated time to complete the task in seconds
+            steps: The number of steps to increment progress
+        """
+        self.current_task_name = task
+        self.__set_status_value("task", task)
+
+        self.current_task += 1
         if self.current_task > self.num_tasks:
-            raise ValueError("Current task exceeds number of tasks for stage %s", self.current_stage_name)
+            raise ValueError(f"Current task exceeds number of tasks for stage {self.current_stage_name}")
 
         self.__calculate_base_progress()
-        self.set_progress(self.overall_progress)
+
+        steps = 100
+        time_per_step = estimated_time / steps
+        scaling = 1 / (self.num_stages * self.num_tasks)
+
+        for i in range(steps):
+            progress_increment = self.__calculate_percentage(i, steps, scaling)
+            new_progress = self.overall_progress + progress_increment
+            self.set_progress(new_progress)
+            await asyncio.sleep(time_per_step)
 
     def __calculate_base_progress(self) -> None:
         """
@@ -90,7 +119,7 @@ class ProgressController:
             progress: The progress value
         """
         int_progress = int(progress)
-        if not int_progress in range(0, 101):
+        if not 0 <= int_progress <= 100:
             raise ValueError("Overall progress is not within the range 0-100: %d", int_progress)
         self.__set_status_value("progress", int_progress)
 

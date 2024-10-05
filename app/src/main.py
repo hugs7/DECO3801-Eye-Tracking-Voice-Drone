@@ -117,7 +117,7 @@ def main():
     loading_stop_event = Event()
     loading_shared_data = {"status": dict()}
     loading_window = LoadingGUI(loading_shared_data, loading_data_lock, loading_stop_event)
-    progress = ProgressController(loading_shared_data, loading_data_lock, 6)
+    progress = ProgressController(loading_shared_data, loading_data_lock, 5, loading_window.progress_update_signal)
 
     try:
         stop_event = Event()
