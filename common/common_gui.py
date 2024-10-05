@@ -93,11 +93,11 @@ class CommonGUI:
             timers_conf: Configuration dictionary
         """
 
-        for timer, conf in timers_conf.items():
-            if timer["callback"] is None:
-                raise ValueError(f"Timer callback not found: {timer}")
+        for timer_name, conf in timers_conf.items():
+            if conf.get("callback") is None:
+                raise ValueError(f"Timer callback not found: {timer_name}")
 
-            self._configure_timer(**conf)
+            self._configure_timer(timer_name, **conf)
 
     def _configure_timer(self, name: str, callback: Callable, fps: int, *args) -> QTimer:
         """
