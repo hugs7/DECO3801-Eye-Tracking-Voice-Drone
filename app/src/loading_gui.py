@@ -140,10 +140,15 @@ class LoadingGUI(QMainWindow, CommonGUI):
         Gets the latest progress and updates the view to correspond.
         """
         if self.running_in_thread:
-            status = self.loading_shared_data["status"]
-            title = status["title"]
-            task = status["task"]
-            self.progress = status["progress"]
+            try:
+                status = self.loading_shared_data["status"]
+                title = status["title"]
+                task = status["task"]
+                self.progress = status["progress"]
+            except KeyError:
+                logger.debug("Progress not set yet.")
+                return
+
             self.message_label.setText(task)
         else:
             self.progress += 2
