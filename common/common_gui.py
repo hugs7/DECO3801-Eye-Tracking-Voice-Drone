@@ -8,6 +8,8 @@ from PyQt6.QtWidgets import QApplication, QMenu, QPushButton, QLabel, QVBoxLayou
 from PyQt6.QtGui import QAction, QPalette
 from PyQt6.QtCore import Qt, QTimer
 
+from common import constants as cc
+
 from .logger_helper import init_logger
 from .gui_helper import fps_to_ms
 
@@ -23,12 +25,12 @@ class CommonGUI:
         """Initialise the palette and theme"""
         palette = QApplication.palette()
         # Determine if the theme is dark or light
-        self.theme = "dark" if palette.color(QPalette.ColorRole.Window).lightness() < 128 else "light"
+        self.theme = cc.DARK_THEME if palette.color(QPalette.ColorRole.Window).lightness() < 128 else cc.LIGHT_THEME
 
-        if self.theme == "dark":
-            self.text_color = "white"
+        if self.theme == cc.DARK_THEME:
+            self.text_color = cc.TEXT_WHITE
         else:
-            self.text_color = "black"
+            self.text_color = cc.TEXT_BLACK
 
     def __check_layout(self):
         if self.layout is None:
@@ -105,8 +107,11 @@ class CommonGUI:
         """
 
         for timer_name, conf in timers_conf.items():
-            if conf.get("callback") is None:
+            if conf.get(cc.THREAD_CALLBACK) is None:
                 raise ValueError(f"Timer callback not found: {timer_name}")
+
+            if conf.get(cc.THREAD_FPS) is None:
+                raise ValueError(f"Timer fps not found: {timer_name}")
 
             self._configure_timer(timer_name, **conf)
 

@@ -116,7 +116,7 @@ class GazeDetector:
         Initialise the left and right hit-boxes.
 
         Returns:
-            Dictionary of hit-boxes: {"left": (top_left, bottom_right), "right": (top_left, bottom_right)}
+            Dictionary of hit-boxes: {LEFT: (top_left, bottom_right), RIGHT: (top_left, bottom_right)}
         """
         logger.info("Initializing hit-boxes")
 
@@ -129,16 +129,16 @@ class GazeDetector:
         # Left hit-box
         left_hitbox_top_left = (0, 0)
         left_hitbox_bottom_right = (hitbox_width, out_height)
-        left_hitbox = {"top_left": left_hitbox_top_left, "bottom_right": left_hitbox_bottom_right}
+        left_hitbox = {c.TOP_LEFT: left_hitbox_top_left, c.BOTTOM_RIGHT: left_hitbox_bottom_right}
         logger.debug(f"Left hit-box: {left_hitbox}")
 
         # Right hit-box
         right_hitbox_top_left = (int(out_width - hitbox_width), 0)
         right_hitbox_bottom_right = (out_width, out_height)
-        right_hitbox = {"top_left": right_hitbox_top_left, "bottom_right": right_hitbox_bottom_right}
+        right_hitbox = {c.TOP_LEFT: right_hitbox_top_left, c.BOTTOM_RIGHT: right_hitbox_bottom_right}
         logger.debug(f"Right hit-box: {right_hitbox}")
 
-        return {"left": left_hitbox, "right": right_hitbox}
+        return {cc.LEFT: left_hitbox, cc.RIGHT: right_hitbox}
 
     def run(self) -> None:
         """
@@ -257,8 +257,8 @@ class GazeDetector:
                 return
 
             with self.data_lock:
-                self.thread_data["eye_tracking"]["video_frame"] = self.visualizer.image
-                self.thread_data["eye_tracking"]["tick_rate"] = tick_rate
+                self.thread_data[cc.EYE_TRACKING][cc.VIDEO_FRAME] = self.visualizer.image
+                self.thread_data[cc.EYE_TRACKING][cc.TICK_RATE] = tick_rate
 
             logger.debug("Set video frame in shared data.")
         else:
@@ -714,7 +714,6 @@ class GazeDetector:
         if not self.show_gaze_vector:
             return
 
-        sides = ["left", "right"]
         base_bg_alpha = 0.05
         bg_alpha_boost_hitbox = 0.2
         bg_color = (0, 0, 255)
@@ -725,10 +724,10 @@ class GazeDetector:
         # Set only when looking at a hitbox
         gaze_side = None
 
-        for side in sides:
+        for side in cc.SIDES:
             looking_hitbox = None
             side_hitbox = self.hitboxes[side]
-            if side_hitbox["top_left"][0] <= self.gaze_2d_point[0] <= side_hitbox["bottom_right"][0]:
+            if side_hitbox[c.TOP_LEFT][0] <= self.gaze_2d_point[0] <= side_hitbox[c.BOTTOM_RIGHT][0]:
                 looking_hitbox = side
                 gaze_side = side
 
@@ -740,13 +739,13 @@ class GazeDetector:
             else:
                 bg_alpha = base_bg_alpha
 
-            top_left = side_hitbox["top_left"]
-            bottom_right = side_hitbox["bottom_right"]
+            top_left = side_hitbox[c.TOP_LEFT]
+            bottom_right = side_hitbox[c.BOTTOM_RIGHT]
             self.visualizer.draw_labelled_rectangle(top_left, bottom_right, bg_color, bg_alpha, text, border_color=border)
 
         if self.running_in_thread:
             logger.info(f"Setting gaze side to {gaze_side} in shared data.")
             with self.data_lock:
-                self.thread_data["eye_tracking"]["gaze_side"] = gaze_side
+                self.thread_data[cc.EYE_TRACKING][cc.GAZE_SIDE] = gaze_side
 
             logger.debug("Shared data updated.")

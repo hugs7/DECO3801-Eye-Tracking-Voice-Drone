@@ -10,6 +10,7 @@ import numpy as np
 
 from common.logger_helper import init_logger
 from common.common_gui import CommonGUI
+from common import constants as cc
 
 from . import constants as c
 from .controller import Controller
@@ -103,7 +104,7 @@ class DroneApp(QMainWindow, CommonGUI):
             return {}
 
         timers_conf = {
-            "drone_feed": {"callback": self.update_drone_feed, "fps": self.controller.model.video_fps},
+            "drone_feed": {cc.THREAD_CALLBACK: self.update_drone_feed, cc.THREAD_FPS: self.controller.model.video_fps},
         }
 
         self._configure_timers(timers_conf)

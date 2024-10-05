@@ -3,8 +3,8 @@ Handles GUI for the application using PyQt6
 """
 
 from typing import Dict, List, Union, Tuple, Optional
-from PyQt6.QtWidgets import QMainWindow, QVBoxLayout, QWidget, QPushButton, QLabel, QLineEdit
-from PyQt6.QtCore import QTimer, Qt
+from PyQt6.QtWidgets import QMainWindow, QVBoxLayout, QWidget, QPushButton, QLabel
+from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QImage, QPixmap, QKeyEvent
 import cv2
 import numpy as np
@@ -15,6 +15,7 @@ from queue import Queue
 
 from common.logger_helper import init_logger
 from common.common_gui import CommonGUI
+from common import constants as cc
 
 from options import PreferencesDialog
 import constants as c
@@ -132,9 +133,9 @@ class MainApp(QMainWindow, CommonGUI):
         Initialise the timers for the gui
         """
         timers_conf = {
-            "webcam": {"callback": self.get_webcam_feed, "fps": self.config.timers.webcam},
-            "drone_feed": {"callback": self.get_drone_feed, "fps": self.config.timers.drone_video},
-            "voice_command": {"callback": self.get_next_voice_command, "fps": self.config.timers.voice_command},
+            "webcam": {cc.THREAD_CALLBACK: self.get_webcam_feed, cc.THREAD_FPS: self.config.timers.webcam},
+            "drone_feed": {cc.THREAD_CALLBACK: self.get_drone_feed, cc.THREAD_FPS: self.config.timers.drone_video},
+            "voice_command": {cc.THREAD_CALLBACK: self.get_next_voice_command, cc.THREAD_FPS: self.config.timers.voice_command},
         }
 
         self._configure_timers(timers_conf)
@@ -145,7 +146,7 @@ class MainApp(QMainWindow, CommonGUI):
         particular module since any thread can "subscribe" to this queue.
         """
         with self.data_lock:
-            self.thread_data["keyboard_queue"] = Queue()
+            self.thread_data[cc.KEYBOARD_QUEUE] = Queue()
 
     def keyPressEvent(self, event: QKeyEvent) -> None:
         """
@@ -166,7 +167,7 @@ class MainApp(QMainWindow, CommonGUI):
         # Any other key goes into the keyboard queue
         with self.data_lock:
             logger.debug(f"Adding key to queue: {key}")
-            keyboard_queue: Queue = self.thread_data["keyboard_queue"]
+            keyboard_queue: Queue = self.thread_data[cc.KEYBOARD_QUEUE]
             keyboard_queue.put(key)
 
     def _open_options(self) -> None:
@@ -205,7 +206,7 @@ class MainApp(QMainWindow, CommonGUI):
             QImage: The converted frame
         """
 
-        frame_data = np.require(frame, np.uint8, 'C')
+        frame_data = np.require(frame, np.uint8, "C")
         height, width, channel = frame.shape
         bytes_per_line = channel * width
         try:
@@ -226,10 +227,10 @@ class MainApp(QMainWindow, CommonGUI):
         """
         try:
             data: Dict = self.thread_data[source]
-            frame = data.get("video_frame", None)
+            frame = data.get(cc.VIDEO_FRAME, None)
             if frame is None:
                 return None
-            
+
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
             self._set_pixmap(label, frame)
@@ -244,8 +245,8 @@ class MainApp(QMainWindow, CommonGUI):
         Returns:
             Optional[cv2.typing.MatLike]: The decoded frame or None if decoding failed
         """
-        return self.get_video_feed("eye_tracking", self.webcam_video_label)
-    
+        return self.get_video_feed(cc.EYE_TRACKING, self.webcam_video_label)
+
     def get_drone_feed(self) -> Optional[cv2.typing.MatLike]:
         """
         Retrieves the drone feed from the shared data of the drone module.
@@ -253,7 +254,7 @@ class MainApp(QMainWindow, CommonGUI):
         Returns:
             Optional[cv2.typing.MatLike]: The decoded frame or None if decoding failed
         """
-        return self.get_video_feed("drone", self.drone_video_label)
+        return self.get_video_feed(cc.DRONE, self.drone_video_label)
 
     def get_next_voice_command(self) -> Optional[List[Dict[str, Union[str, Tuple[str, int]]]]]:
         """
@@ -262,26 +263,28 @@ class MainApp(QMainWindow, CommonGUI):
 
         Returns:
             Optional[
-                List[Dict[str, 
-                          Union[str, 
-                                Tuple[str, int]]]]]: A dictionary of the voice as 
-                                                     text and parsed command The 
+                List[Dict[str,
+                          Union[str,
+                                Tuple[str, int]]]]]: A dictionary of the voice as
+                                                     text and parsed command The
                                                      voice command.
         """
 
-        voice_data = self.interprocess_data["voice_control"]
+        voice_data: Dict = self.interprocess_data[cc.VOICE_CONTROL]
         if not voice_data:
             return None
 
-        command_queue: MPQueue = voice_data.get("command_queue", None)
+        command_queue: MPQueue = voice_data.get(cc.COMMAND_QUEUE, None)
         if command_queue is None:
             logger.error("Voice command queue not found")
             return None
 
         if not command_queue.empty():
-            logger.info(f"Voice command queue size: {command_queue.qsize()}")
+            queue_size = command_queue.qsize()
+            logger.info("Voice command queue size %d", queue_size)
             next_command = command_queue.get()
-            logger.info(f"Next voice command: {next_command["text"]}")
+            command_text = next_command.get(cc.COMMAND_TEXT, None)
+            logger.info("Next voice command %s", command_text)
 
             return next_command
 

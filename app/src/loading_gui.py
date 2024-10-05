@@ -13,11 +13,12 @@ from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel, QProgressBar, QVB
 from PyQt6.QtGui import QPixmap, QResizeEvent
 from PyQt6.QtCore import QTimer, Qt, pyqtSignal
 
-from app.src.utils import file_handler
-
 from common.common_gui import CommonGUI
 from common.logger_helper import init_logger
+from common import constants as cc
 
+from utils import file_handler
+import constants as c
 
 logger = init_logger()
 
@@ -155,7 +156,7 @@ class LoadingGUI(QMainWindow, CommonGUI):
         timers_conf = dict()
 
         if self.running_in_thread:
-            thread_check = {"callback": self.thread_check, "fps": 30}
+            thread_check = {cc.THREAD_CALLBACK: self.thread_check, cc.THREAD_FPS: 30}
             timers_conf["thread_check"] = thread_check
 
         timers = self._configure_timers(timers_conf)
@@ -171,16 +172,16 @@ class LoadingGUI(QMainWindow, CommonGUI):
             value: Value to update
         """
         match key:
-            case "stage":
+            case c.LOADING_STAGE:
                 self.set_stage(value)
-            case "task":
+            case c.LOADING_TASK:
                 self.set_task(value)
-            case "progress":
+            case c.LOADING_PROGRESS:
                 progress = int(value)
                 self.set_progress(progress)
-            case "action":
+            case c.LOADING_ACTION:
                 match value:
-                    case "close":
+                    case c.LOADING_CLOSE:
                         self.close()
 
     def set_stage(self, stage: str) -> None:

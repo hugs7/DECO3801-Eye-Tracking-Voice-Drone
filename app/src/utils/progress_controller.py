@@ -10,6 +10,8 @@ from PyQt6.QtCore import pyqtSignal
 from common.logger_helper import init_logger
 from common.thread_helper import thread_loop_handler
 
+from app.src import constants as c
+
 logger = init_logger()
 
 
@@ -52,7 +54,7 @@ class ProgressController:
 
         self.current_stage_name = title
         logger.info("Title: %s", title)
-        self.progress_signal.emit("stage", title)
+        self.progress_signal.emit(c.LOADING_STAGE, title)
         self.num_tasks = num_tasks
         self.current_task = 0
         self.current_stage += 1
@@ -80,7 +82,7 @@ class ProgressController:
             self.stop_event.clear()
 
         self.current_task_name = task
-        self.progress_signal.emit("task", task)
+        self.progress_signal.emit(c.LOADING_TASK, task)
 
         if self.current_task > self.num_tasks:
             raise ValueError(f"Current task exceeds number of tasks for stage {self.current_stage_name}")
@@ -147,10 +149,10 @@ class ProgressController:
             # No change in progress
             return
 
-        self.progress_signal.emit("progress", str(progress))
+        self.progress_signal.emit(c.LOADING_PROGRESS, str(progress))
         self.previous_progress = progress
         if progress >= 100:
-            self.progress_signal.emit("action", "close")
+            self.progress_signal.emit(c.LOADING_ACTION, c.LOADING_CLOSE)
             self.complete = True
 
     def __calculate_percentage(self, current: int, total: int, scaling: float = 1.0) -> float:
