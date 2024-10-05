@@ -158,18 +158,18 @@ def main():
         logger.info("Signalling all threads to stop")
         stop_event.set()
 
-    # Ensure all threads and processes are properly joined after signaling them to stop.
-    for process in processes:
+        # Ensure all threads and processes are properly joined after signaling them to stop.
+        for process in processes:
             process.join(cc.PROCESS_TIMEOUT)
-        if process.is_alive():
-            logger.info(f"Terminating process {process.name}")
-            process.terminate()
+            if process.is_alive():
+                logger.info(f"Terminating process {process.name}")
+                process.terminate()
 
-    for thread in threads:
-        thread.join()
+        for thread in threads:
+            thread.join()
 
-    logger.info("Closing GUI")
-    main_gui.quit()
+        logger.info("Closing GUI")
+        main_gui.quit()
     except KeyboardInterrupt:
         logger.critical("Interrupted! Stopping all threads...")
 
