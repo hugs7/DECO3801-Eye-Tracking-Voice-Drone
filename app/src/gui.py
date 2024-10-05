@@ -147,9 +147,6 @@ class MainApp(QMainWindow, CommonGUI):
         with self.data_lock:
             self.thread_data["keyboard_queue"] = Queue()
 
-
-
-
     def keyPressEvent(self, event: QKeyEvent) -> None:
         """
         Handle key press events
