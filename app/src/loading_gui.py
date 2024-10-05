@@ -170,7 +170,7 @@ class LoadingGUI(QMainWindow, CommonGUI):
         if not self.running_in_thread:
             raise ValueError("This function should only be called when running in a thread.")
 
-        if not self.loading_stop_event.is_set():
+        if self.loading_stop_event.is_set():
             self.close()
 
     def resizeEvent(self, event: QResizeEvent) -> None:
