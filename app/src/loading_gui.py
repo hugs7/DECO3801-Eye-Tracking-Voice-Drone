@@ -189,7 +189,7 @@ class LoadingGUI(QMainWindow, CommonGUI):
             stage: The stage value
         """
         self.current_stage_name = stage
-        self.title_label.setText(stage)
+        self.title_label.setText(f"{stage}...")
 
     def set_task(self, task: str) -> None:
         """
@@ -199,7 +199,7 @@ class LoadingGUI(QMainWindow, CommonGUI):
             task: The task value
         """
         self.current_task_name = task
-        self.task_label.setText(task)
+        self.task_label.setText(f"{task}...")
 
     def set_progress(self, progress: int) -> None:
         """
