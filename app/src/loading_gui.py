@@ -156,7 +156,7 @@ class LoadingGUI(QMainWindow, CommonGUI):
             self.message_label.setText("Almost done...")
 
         if self.progress >= 100:
-            self.timer.stop()
+            self._get_timer("progress").stop()
             self.close()
 
     def thread_check(self):
