@@ -121,6 +121,8 @@ def main():
     progress = ProgressController(5, loading_window.progress_update_signal)
 
     try:
+        # Define lock and stop event early to ensure KeyboardInterrupt
+        # can signal all threads to stop.
         stop_event = Event()
         data_lock = Lock()
         init_thread = Thread(target=initialise_modules, args=(loading_shared_data, progress, stop_event, data_lock), name="init_thread")
@@ -137,11 +139,6 @@ def main():
         loading_gui.quit()
         loading_gui = None
         progress.stop_progress_simulation()
-
-        # Define lock and stop event early to ensure KeyboardInterrupt
-        # can signal all threads to stop.
-        stop_event = Event()
-        data_lock = Lock()
 
         # Gather data from initialisation thread.
         thread_data: Dict[str, Any] = loading_shared_data["thread_data"]
