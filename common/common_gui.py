@@ -8,6 +8,8 @@ from PyQt6.QtWidgets import QApplication, QMenu, QPushButton, QLabel, QVBoxLayou
 from PyQt6.QtGui import QAction, QPalette
 from PyQt6.QtCore import Qt, QTimer
 
+from common import constants as cc
+
 from .logger_helper import init_logger
 from .gui_helper import fps_to_ms
 
@@ -105,8 +107,11 @@ class CommonGUI:
         """
 
         for timer_name, conf in timers_conf.items():
-            if conf.get("callback") is None:
+            if conf.get(cc.THREAD_CALLBACK) is None:
                 raise ValueError(f"Timer callback not found: {timer_name}")
+
+            if conf.get(cc.THREAD_FPS) is None:
+                raise ValueError(f"Timer fps not found: {timer_name}")
 
             self._configure_timer(timer_name, **conf)
 

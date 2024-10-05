@@ -15,6 +15,7 @@ from queue import Queue
 
 from common.logger_helper import init_logger
 from common.common_gui import CommonGUI
+from common import constants as cc
 
 from options import PreferencesDialog
 import constants as c
@@ -132,9 +133,9 @@ class MainApp(QMainWindow, CommonGUI):
         Initialise the timers for the gui
         """
         timers_conf = {
-            "webcam": {"callback": self.get_webcam_feed, "fps": self.config.timers.webcam},
-            "drone_feed": {"callback": self.get_drone_feed, "fps": self.config.timers.drone_video},
-            "voice_command": {"callback": self.get_next_voice_command, "fps": self.config.timers.voice_command},
+            "webcam": {cc.THREAD_CALLBACK: self.get_webcam_feed, cc.THREAD_FPS: self.config.timers.webcam},
+            "drone_feed": {cc.THREAD_CALLBACK: self.get_drone_feed, cc.THREAD_FPS: self.config.timers.drone_video},
+            "voice_command": {cc.THREAD_CALLBACK: self.get_next_voice_command,cc.THREAD_FPS: self.config.timers.voice_command},
         }
 
         self._configure_timers(timers_conf)

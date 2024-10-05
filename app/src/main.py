@@ -17,6 +17,7 @@ from utils.progress_controller import ProgressController
 
 from gui import MainApp
 from loading_gui import LoadingGUI
+from . import constants as c
 
 from common.logger_helper import init_logger
 from common.thread_helper import get_function_module
@@ -68,7 +69,7 @@ def initialise_modules(loading_shared_data: Dict, progress: ProgressController, 
         manager = Manager()
         interprocess_data = manager.dict()
         progress.set_loading_task("Configuring IPC data", 0.5)
-        loading_shared_data["interprocess_data"] = interprocess_data
+        loading_shared_data[c.IPC_DATA] = interprocess_data
         progress.set_loading_task("Initialising process functions", 0.1)
         process_functions = {voice_control: {"command_queue": manager.Queue()}}
         process_shared_dict = {get_function_module(func): init_val for func, init_val in process_functions.items()}
@@ -76,7 +77,7 @@ def initialise_modules(loading_shared_data: Dict, progress: ProgressController, 
         processes = [
             Process(target=func, args=(interprocess_data,), name=f"process_{get_function_module(func)}") for func in process_functions
         ]
-        loading_shared_data["processes"] = processes
+        loading_shared_data[c.PROCESSES] = processes
 
         progress.set_stage("Starting processes", len(processes))
         for process in processes:
@@ -92,13 +93,13 @@ def initialise_modules(loading_shared_data: Dict, progress: ProgressController, 
         thread_functions = [eye_tracking, drone]
         progress.set_loading_task("Initialising shared data dictionary", 0.5)
         thread_data = {get_function_module(func): {} for func in thread_functions}
-        loading_shared_data["thread_data"] = thread_data
+        loading_shared_data[c.THREAD_DATA] = thread_data
         progress.set_loading_task("Initialising thread functions", 0.2)
         threads = [
             Thread(target=func, args=(stop_event, thread_data, data_lock), name=f"thread_{get_function_module(func)}")
             for func in thread_functions
         ]
-        loading_shared_data["threads"] = threads
+        loading_shared_data[c.THREADS] = threads
 
         progress.set_stage("Starting threads", len(threads))
         for thread in threads:
@@ -141,10 +142,10 @@ def main():
         progress.stop_progress_simulation()
 
         # Gather data from initialisation thread.
-        thread_data: Dict[str, Any] = loading_shared_data["thread_data"]
-        interprocess_data: Dict[str, Any] = loading_shared_data["interprocess_data"]
-        threads: List[Thread] = loading_shared_data["threads"]
-        processes: List[Process] = loading_shared_data["processes"]
+        thread_data: Dict[str, Any] = loading_shared_data[c.THREAD_DATA]
+        interprocess_data: Dict[str, Any] = loading_shared_data[c.IPC_DATA]
+        threads: List[Thread] = loading_shared_data[c.THREADS]
+        processes: List[Process] = loading_shared_data[c.PROCESSES]
 
         logger.info("Launching Main GUI")
         main_gui = QApplication(sys.argv)

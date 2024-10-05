@@ -15,3 +15,8 @@ MILLISECONDS_PER_SECOND = 1000
 # Process handling
 
 PROCESS_TIMEOUT = 3  # seconds
+
+# Threads
+
+THREAD_CALLBACK = "callback"
+THREAD_FPS = "fps"
