@@ -10,7 +10,7 @@ from typing import Dict, Union
 from threading import Lock, Event
 
 from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel, QProgressBar, QVBoxLayout, QWidget
-from PyQt6.QtGui import QPixmap, QResizeEvent
+from PyQt6.QtGui import QPixmap, QResizeEvent, QPalette
 from PyQt6.QtCore import QTimer, Qt, pyqtSignal
 
 from app.src.utils import file_handler
@@ -67,6 +67,8 @@ class LoadingGUI(QMainWindow, CommonGUI):
         Initialise GUI components
         """
         logger.info(">>> LoadingGUI Begin Init GUI")
+
+        self.__init_palette()
         self.__init_bg_image()
 
         self.central_widget = QWidget(self)
@@ -77,6 +79,17 @@ class LoadingGUI(QMainWindow, CommonGUI):
         self.__init_layout()
 
         logger.info("<<< LoadingGUI End Init GUI")
+
+    def __init_palette(self) -> None:
+        """Initialise the palette for the loading screen."""
+        palette = QApplication.palette()
+        # Determine if the theme is dark or light
+        self.theme = "dark" if palette.color(QPalette.ColorRole.Window).lightness() < 128 else "light"
+
+        if self.theme == "dark":
+            self.text_color = "white"
+        else:
+            self.text_color = "black"
 
     def __init_bg_image(self):
         """Initialise the background image."""
@@ -90,11 +103,11 @@ class LoadingGUI(QMainWindow, CommonGUI):
     def __init_messages(self):
         """Initialise the messages for the loading screen."""
         self.title_label = QLabel("Starting...", self.central_widget)
-        self.title_label.setStyleSheet("color: black; font-size: 24px;")
+        self.title_label.setStyleSheet(f"color: {self.text_color}; font-size: 24px;")
         self.title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         self.task_label = QLabel("", self.central_widget)
-        self.task_label.setStyleSheet("color: black; font-size: 18px;")
+        self.task_label.setStyleSheet(f"color: {self.text_color}; font-size: 18px;")
         self.task_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
     def __init_progress_bar(self):
@@ -102,17 +115,17 @@ class LoadingGUI(QMainWindow, CommonGUI):
         self.progress = 0
         self.progress_bar = QProgressBar(self.central_widget)
         self.progress_bar.setStyleSheet(
-            """
-        QProgressBar {
+            f"""
+        QProgressBar {{
             border: 2px solid #8f8f8f;
             border-radius: 5px;
             min-height: 30px;
-            color: white;
-        }
-        QProgressBar::chunk {
+            color: {self.text_color};
+        }}
+        QProgressBar::chunk {{
             background-color: #76c7c0;
             border-radius: 5px;
-        }
+        }}
         """
         )
         self.progress_bar.setAlignment(Qt.AlignmentFlag.AlignCenter)
