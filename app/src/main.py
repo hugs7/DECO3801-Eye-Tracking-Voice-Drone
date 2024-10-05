@@ -33,25 +33,15 @@ def is_any_thread_alive(threads: List[Thread]):
     return any(t.is_alive() for t in threads)
 
 
-class InitSignals(QObject):
-    initialisation_complete = pyqtSignal(dict)
-
-
-def initialise_modules(
-    loading_shared_data: Dict, loading_helper: LoadingHelper, signals: List[pyqtSignal], stop_event: Event, data_lock: Lock
-) -> Tuple[Any, Any, Any]:
+def initialise_modules(loading_shared_data: Dict, loading_helper: LoadingHelper, stop_event: Event, data_lock: Lock) -> None:
     """
     Initialise the modules, and emit a signal when complete.
 
     Args:
         loading_shared_data: Shared data
         loading_helper: Loading helper
-        signals: Signals to emit
         stop_event: Stop event
         data_lock: Lock for shared data
-
-    Returns:
-        Tuple of initialised modules
     """
     logger.info("Initialising modules...")
 
@@ -114,20 +104,6 @@ def initialise_modules(
 
     logger.info("Modules initialised.")
 
-    signals.initialisation_complete.emit(
-        {
-            "eye_tracking": eye_tracking,
-            "voice_control": voice_control,
-            "drone": drone,
-            "threads": threads,
-            "processes": processes,
-            "interprocess_data": interprocess_data,
-            "thread_data": thread_data,
-        }
-    )
-
-    return eye_tracking, voice_control, drone
-
 
 def main():
     logger.info(">>> Main Begin")
@@ -139,13 +115,11 @@ def main():
     loading_window = LoadingGUI(loading_shared_data, loading_data_lock, loading_stop_event)
     loading_helper = LoadingHelper(loading_shared_data, loading_data_lock)
 
-    init_signals = InitSignals()
-
     try:
         stop_event = Event()
         data_lock = Lock()
         init_thread = Thread(
-            target=initialise_modules, args=(loading_shared_data, loading_helper, init_signals, stop_event, data_lock), name="init_thread"
+            target=initialise_modules, args=(loading_shared_data, loading_helper, stop_event, data_lock), name="init_thread"
         )
         init_thread.start()
 
