@@ -52,7 +52,7 @@ class ProgressController:
 
         self.current_stage_name = title
         logger.info("Title: %s", title)
-        self.progress_signal.emit("title", title)
+        self.progress_signal.emit("stage", title)
         self.num_tasks = num_tasks
         self.current_task = 0
         self.current_stage += 1
