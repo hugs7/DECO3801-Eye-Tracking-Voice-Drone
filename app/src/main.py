@@ -112,7 +112,7 @@ def initialise_modules(loading_shared_data: Dict, progress: ProgressController, 
 def main():
     logger.info(">>> Main Begin")
 
-    gui = QApplication(sys.argv)
+    loading_gui = QApplication(sys.argv)
     loading_data_lock = Lock()
     loading_stop_event = Event()
     loading_shared_data = dict()
@@ -126,7 +126,9 @@ def main():
         init_thread.start()
 
         loading_window.wrap_show()
-        gui.exec()
+        loading_gui.exec()
+        loading_gui.quit()
+        loading_gui = None
 
         init_thread.join()
 
@@ -147,10 +149,10 @@ def main():
         processes: List[Process] = loading_shared_data["processes"]
 
         logger.info("Launching Main GUI")
-        gui = QApplication(sys.argv)
+        main_gui = QApplication(sys.argv)
         main_window = MainApp(stop_event, thread_data, data_lock, interprocess_data)
         main_window.wrap_show()
-        gui.exec()
+        main_gui.exec()
     except KeyboardInterrupt:
         logger.critical("Interrupted! Stopping all threads...")
 
@@ -168,7 +170,7 @@ def main():
         thread.join()
 
     logger.info("Closing GUI")
-    gui.quit()
+    main_gui.quit()
 
     logger.debug("<<< End")
 
