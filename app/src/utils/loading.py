@@ -85,4 +85,4 @@ class LoadingHelper:
         """
 
         with self.data_lock:
-            self.loading_shared_data["progress"][key] = value
+            self.loading_shared_data["status"][key] = value

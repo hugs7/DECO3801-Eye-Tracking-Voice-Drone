@@ -17,7 +17,7 @@ logger = init_logger()
 class CommonGUI:
     def __init__(self):
         self.layout: Optional[QVBoxLayout] = None
-        self.timers: Dict[str, QTimer] = {}
+        self.timers: Dict[str, QTimer] = dict()
 
     def __check_layout(self):
         if self.layout is None:

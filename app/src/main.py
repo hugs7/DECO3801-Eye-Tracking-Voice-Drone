@@ -116,7 +116,7 @@ def main():
     gui = QApplication(sys.argv)
     loading_data_lock = Lock()
     loading_stop_event = Event()
-    loading_shared_data = {"status": ""}
+    loading_shared_data = {"status": dict()}
     loading_window = LoadingGUI(loading_shared_data, loading_data_lock, loading_stop_event)
     loading_helper = LoadingHelper(loading_shared_data, loading_data_lock, 6)
 
