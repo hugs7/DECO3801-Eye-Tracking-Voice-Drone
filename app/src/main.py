@@ -17,7 +17,7 @@ from utils.progress_controller import ProgressController
 
 from gui import MainApp
 from loading_gui import LoadingGUI
-from . import constants as c
+import constants as c
 
 from common.logger_helper import init_logger
 from common.thread_helper import get_function_module

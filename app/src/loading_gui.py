@@ -17,8 +17,8 @@ from common.common_gui import CommonGUI
 from common.logger_helper import init_logger
 from common import constants as cc
 
-from .utils import file_handler
-from . import constants as c
+from utils import file_handler
+import constants as c
 
 logger = init_logger()
 

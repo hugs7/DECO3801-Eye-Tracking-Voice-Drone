@@ -10,7 +10,7 @@ from PyQt6.QtCore import pyqtSignal
 from common.logger_helper import init_logger
 from common.thread_helper import thread_loop_handler
 
-from .. import constants as c
+from app.src import constants as c
 
 logger = init_logger()
 
