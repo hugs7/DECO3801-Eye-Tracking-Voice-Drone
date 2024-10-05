@@ -8,6 +8,7 @@ from multiprocessing import Queue
 
 from omegaconf import OmegaConf
 
+from common import constants as cc
 from common.logger_helper import init_logger
 
 from .audio import AudioRecogniser
@@ -88,7 +89,7 @@ class VoiceController:
         else:
             text = input("Enter command: ")
 
-        command_data = {"text": text}
+        command_data = {cc.COMMAND_TEXT: text}
 
         parsed_command = None
         if self.config.voice_control.send_to_llm:
@@ -145,7 +146,8 @@ class VoiceController:
             logger.trace("Not running in process mode. Not saving command to shared data.")
             return
 
-        logger.info(f"Setting voice command to '%s'", command_data["text"])
-        command_queue: Queue = self.manager_data["voice_control"]["command_queue"]
+        command_text = command_data[cc.COMMAND_TEXT]
+        logger.info(f"Setting voice command to '%s'", command_text)
+        command_queue: Queue = self.manager_data[cc.VOICE_CONTROL][cc.COMMAND_QUEUE]
         command_queue.put(command_data)
         logger.debug("Voice command added to command queue of length %d.", command_queue.qsize())

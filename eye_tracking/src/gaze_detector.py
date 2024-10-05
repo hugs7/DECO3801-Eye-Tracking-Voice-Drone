@@ -257,8 +257,8 @@ class GazeDetector:
                 return
 
             with self.data_lock:
-                self.thread_data["eye_tracking"]["video_frame"] = self.visualizer.image
-                self.thread_data["eye_tracking"]["tick_rate"] = tick_rate
+                self.thread_data[cc.EYE_TRACKING][cc.VIDEO_FRAME] = self.visualizer.image
+                self.thread_data[cc.EYE_TRACKING][cc.TICK_RATE] = tick_rate
 
             logger.debug("Set video frame in shared data.")
         else:
@@ -714,7 +714,6 @@ class GazeDetector:
         if not self.show_gaze_vector:
             return
 
-        sides = ["left", "right"]
         base_bg_alpha = 0.05
         bg_alpha_boost_hitbox = 0.2
         bg_color = (0, 0, 255)
@@ -725,7 +724,7 @@ class GazeDetector:
         # Set only when looking at a hitbox
         gaze_side = None
 
-        for side in sides:
+        for side in cc.SIDES:
             looking_hitbox = None
             side_hitbox = self.hitboxes[side]
             if side_hitbox["top_left"][0] <= self.gaze_2d_point[0] <= side_hitbox["bottom_right"][0]:
@@ -747,6 +746,6 @@ class GazeDetector:
         if self.running_in_thread:
             logger.info(f"Setting gaze side to {gaze_side} in shared data.")
             with self.data_lock:
-                self.thread_data["eye_tracking"]["gaze_side"] = gaze_side
+                self.thread_data[cc.EYE_TRACKING][cc.GAZE_SIDE] = gaze_side
 
             logger.debug("Shared data updated.")

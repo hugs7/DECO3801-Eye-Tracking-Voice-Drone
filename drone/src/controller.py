@@ -149,8 +149,8 @@ class Controller:
             return
 
         with self.data_lock:
-            self.thread_data["drone"]["video_frame"] = frame
-            self.thread_data["drone"]["tick_rate"] = tick_rate
+            self.thread_data[cc.DRONE][cc.VIDEO_FRAME] = frame
+            self.thread_data[cc.DRONE][cc.TICK_RATE] = tick_rate
 
     def _wait_key(self) -> bool:
         """
@@ -176,7 +176,7 @@ class Controller:
             return False
 
         with self.data_lock:
-            keyboard_queue: Optional[Queue] = self.thread_data["keyboard_queue"]
+            keyboard_queue: Optional[Queue] = self.thread_data[cc.KEYBOARD_QUEUE]
             if keyboard_queue is not None:
                 while not keyboard_queue.empty():
                     key: int = keyboard_queue.get()

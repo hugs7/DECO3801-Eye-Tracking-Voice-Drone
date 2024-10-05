@@ -135,7 +135,7 @@ class MainApp(QMainWindow, CommonGUI):
         timers_conf = {
             "webcam": {cc.THREAD_CALLBACK: self.get_webcam_feed, cc.THREAD_FPS: self.config.timers.webcam},
             "drone_feed": {cc.THREAD_CALLBACK: self.get_drone_feed, cc.THREAD_FPS: self.config.timers.drone_video},
-            "voice_command": {cc.THREAD_CALLBACK: self.get_next_voice_command,cc.THREAD_FPS: self.config.timers.voice_command},
+            "voice_command": {cc.THREAD_CALLBACK: self.get_next_voice_command, cc.THREAD_FPS: self.config.timers.voice_command},
         }
 
         self._configure_timers(timers_conf)
@@ -146,7 +146,7 @@ class MainApp(QMainWindow, CommonGUI):
         particular module since any thread can "subscribe" to this queue.
         """
         with self.data_lock:
-            self.thread_data["keyboard_queue"] = Queue()
+            self.thread_data[cc.KEYBOARD_QUEUE] = Queue()
 
     def keyPressEvent(self, event: QKeyEvent) -> None:
         """
@@ -167,7 +167,7 @@ class MainApp(QMainWindow, CommonGUI):
         # Any other key goes into the keyboard queue
         with self.data_lock:
             logger.debug(f"Adding key to queue: {key}")
-            keyboard_queue: Queue = self.thread_data["keyboard_queue"]
+            keyboard_queue: Queue = self.thread_data[cc.KEYBOARD_QUEUE]
             keyboard_queue.put(key)
 
     def _open_options(self) -> None:
@@ -206,7 +206,7 @@ class MainApp(QMainWindow, CommonGUI):
             QImage: The converted frame
         """
 
-        frame_data = np.require(frame, np.uint8, 'C')
+        frame_data = np.require(frame, np.uint8, "C")
         height, width, channel = frame.shape
         bytes_per_line = channel * width
         try:
@@ -227,10 +227,10 @@ class MainApp(QMainWindow, CommonGUI):
         """
         try:
             data: Dict = self.thread_data[source]
-            frame = data.get("video_frame", None)
+            frame = data.get(cc.VIDEO_FRAME, None)
             if frame is None:
                 return None
-            
+
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
             self._set_pixmap(label, frame)
@@ -246,7 +246,7 @@ class MainApp(QMainWindow, CommonGUI):
             Optional[cv2.typing.MatLike]: The decoded frame or None if decoding failed
         """
         return self.get_video_feed("eye_tracking", self.webcam_video_label)
-    
+
     def get_drone_feed(self) -> Optional[cv2.typing.MatLike]:
         """
         Retrieves the drone feed from the shared data of the drone module.
@@ -263,26 +263,28 @@ class MainApp(QMainWindow, CommonGUI):
 
         Returns:
             Optional[
-                List[Dict[str, 
-                          Union[str, 
-                                Tuple[str, int]]]]]: A dictionary of the voice as 
-                                                     text and parsed command The 
+                List[Dict[str,
+                          Union[str,
+                                Tuple[str, int]]]]]: A dictionary of the voice as
+                                                     text and parsed command The
                                                      voice command.
         """
 
-        voice_data = self.interprocess_data["voice_control"]
+        voice_data: Dict = self.interprocess_data[cc.VOICE_CONTROL]
         if not voice_data:
             return None
 
-        command_queue: MPQueue = voice_data.get("command_queue", None)
+        command_queue: MPQueue = voice_data.get(cc.COMMAND_QUEUE, None)
         if command_queue is None:
             logger.error("Voice command queue not found")
             return None
 
         if not command_queue.empty():
-            logger.info(f"Voice command queue size: {command_queue.qsize()}")
+            queue_size = command_queue.qsize()
+            logger.info("Voice command queue size %d", queue_size)
             next_command = command_queue.get()
-            logger.info(f"Next voice command: {next_command["text"]}")
+            command_text = next_command.get(cc.COMMAND_TEXT, None)
+            logger.info("Next voice command %s", command_text)
 
             return next_command
 

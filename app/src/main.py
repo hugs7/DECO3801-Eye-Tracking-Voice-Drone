@@ -71,7 +71,7 @@ def initialise_modules(loading_shared_data: Dict, progress: ProgressController, 
         progress.set_loading_task("Configuring IPC data", 0.5)
         loading_shared_data[c.IPC_DATA] = interprocess_data
         progress.set_loading_task("Initialising process functions", 0.1)
-        process_functions = {voice_control: {"command_queue": manager.Queue()}}
+        process_functions = {voice_control: {cc.COMMAND_QUEUE: manager.Queue()}}
         process_shared_dict = {get_function_module(func): init_val for func, init_val in process_functions.items()}
         interprocess_data.update(process_shared_dict)
         processes = [
