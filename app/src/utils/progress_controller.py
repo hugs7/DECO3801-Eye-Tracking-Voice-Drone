@@ -25,14 +25,14 @@ class ProgressController:
         self.loading_shared_data = loading_shared_data
         self.data_lock = data_lock
         self.num_stages = num_stages
-        self.progress_signal = progress_signal
+        self.progress_signal: pyqtSignal = progress_signal
 
         self.num_tasks = 0
 
         self.current_stage_name = ""
-        self.current_stage = 0
+        self.current_stage = -1
         self.current_task_name = ""
-        self.current_task = 0
+        self.current_task = -1
 
         self.overall_progress = 0.0
 
@@ -85,7 +85,6 @@ class ProgressController:
         self.current_task_name = task
         self.__set_status_value("task", task)
 
-        self.current_task += 1
         if self.current_task > self.num_tasks:
             raise ValueError(f"Current task exceeds number of tasks for stage {self.current_stage_name}")
 
@@ -94,12 +93,15 @@ class ProgressController:
         steps = 100
         time_per_step = estimated_time / steps
         scaling = 1 / (self.num_stages * self.num_tasks)
+        begin_progress = self.overall_progress
 
         for i in range(steps):
             progress_increment = self.__calculate_percentage(i, steps, scaling)
             new_progress = self.overall_progress + progress_increment
             self.set_progress(new_progress)
             await asyncio.sleep(time_per_step)
+
+        self.current_task += 1
 
     def __calculate_base_progress(self) -> None:
         """
@@ -121,7 +123,8 @@ class ProgressController:
         int_progress = int(progress)
         if not 0 <= int_progress <= 100:
             raise ValueError("Overall progress is not within the range 0-100: %d", int_progress)
-        self.__set_status_value("progress", int_progress)
+        self.progress_signal.emit("progress", int_progress)
+        # self.__set_status_value("progress", int_progress)
 
     def __calculate_percentage(self, current: int, total: int, scaling: float = 1.0) -> float:
         """

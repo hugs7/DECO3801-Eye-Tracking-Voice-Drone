@@ -6,7 +6,7 @@ project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
 print("Project root: ", project_root)
 sys.path.insert(0, project_root)
 
-from typing import Dict
+from typing import Dict, Union
 from threading import Lock, Event
 
 from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel, QProgressBar, QVBoxLayout, QWidget
@@ -27,7 +27,8 @@ class LoadingGUI(QMainWindow, CommonGUI):
     Loading GUI
     """
 
-    progress_update_signal = pyqtSignal(int, str)
+    progress_update_signal = pyqtSignal(str, str)
+    progress_update_signal = pyqtSignal(str, int)
 
     def __init__(self, loading_shared_data: Dict = None, loading_data_lock: Lock = None, loading_stop_event: Event = None):
         """
@@ -58,7 +59,7 @@ class LoadingGUI(QMainWindow, CommonGUI):
 
         self.__init_gui()
         self.timers = self.__init_timers()
-        self.progress_update_signal.connect(self.update_progress_bar)
+        self.progress_update_signal.connect(self.accept_signal)
 
         logger.info("<<< LoadingGUI End Init")
 
@@ -126,36 +127,43 @@ class LoadingGUI(QMainWindow, CommonGUI):
 
         logger.info("Initialising timers")
 
-        timers_conf = {
-            "progress": {"callback": self.update_progress, "fps": 10},
-        }
+        timers_conf = dict()
 
         if self.running_in_thread:
             thread_check = {"callback": self.thread_check, "fps": 30}
             timers_conf["thread_check"] = thread_check
+        else:
+            progress = {"callback": self.update_progress, "fps": 10}
+            timers_conf["progress"] = progress
 
-        timers = {name: self._configure_timer(name, **conf) for name, conf in timers_conf.items()}
+        timers = self._configure_timers(timers_conf)
         logger.info("Timers initialised")
         return timers
 
-    def update_progress_bar(self, progress: int, task: str):
+    def accept_signal(self, key: str, value: Union[str, int]):
         """
-        Slot to update the progress bar and message label when the signal is emitted.
+        Event handler for progress update signal.
 
         Args:
-            progress (int): Progress value
-            task (str): Task message
+            key: Key to update
+            value: Value to update
         """
-        self.message_label.setText(task)
-        self.progress_bar.setValue(progress)
-        if progress >= 100:
-            self.close()
+        match key:
+            case "stage":
+                self.set_stage(value)
+                pass
+            case "task":
+                self.set_task(value)
+                pass
+            case "progress":
+                self.set_progress(value)
 
     def update_progress(self):
         """
         Gets the latest progress and updates the view to correspond.
         """
         if self.running_in_thread:
+            return
             try:
                 status = self.loading_shared_data["status"]
                 title = status["title"]
@@ -179,12 +187,42 @@ class LoadingGUI(QMainWindow, CommonGUI):
             else:
                 self.message_label.setText("Almost done...")
 
-        self.progress_bar.setValue(self.progress)
+        self.set_progress(self.progress)
 
         logger.info(f"Progress: {self.progress}")
         if self.progress >= 100:
             self._get_timer("progress").stop()
             self.close()
+
+    def set_stage(self, stage: str) -> None:
+        """
+        Set the stage of the loading screen.
+
+        Args:
+            stage: The stage value
+        """
+        self.current_stage_name = stage
+        self.message_label.setText(stage)
+
+    def set_task(self, task: str) -> None:
+        """
+        Set the task of the loading screen.
+
+        Args:
+            task: The task value
+        """
+        self.current_task_name = task
+        self.message_label.setText(task)
+
+    def set_progress(self, progress: int) -> None:
+        """
+        Set the progress of the loading screen.
+
+        Args:
+            progress: The progress value
+        """
+        self.progress = progress
+        self.progress_bar.setValue(progress)
 
     def thread_check(self):
         """
