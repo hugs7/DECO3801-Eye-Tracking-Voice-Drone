@@ -44,7 +44,7 @@ def initialise_modules(loading_shared_data: Dict, progress: ProgressController, 
     """
     progress.set_stage("Initialising Modules", 3)
 
-    progress.set_loading_task("Initialising eye tracking module", 20)
+    progress.set_loading_task("Initialising eye tracking module", 200)
     eye_tracking = dynamic_import("eye_tracking.src.main", "main")
 
     progress.set_loading_task("Initialising voice control module", 10)
@@ -115,9 +115,9 @@ def main():
     gui = QApplication(sys.argv)
     loading_data_lock = Lock()
     loading_stop_event = Event()
-    loading_shared_data = {"status": dict()}
+    loading_shared_data = dict()
     loading_window = LoadingGUI(loading_shared_data, loading_data_lock, loading_stop_event)
-    progress = ProgressController(loading_shared_data, loading_data_lock, 5, loading_window.progress_update_signal)
+    progress = ProgressController(5, loading_window.progress_update_signal)
 
     try:
         stop_event = Event()

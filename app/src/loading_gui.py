@@ -28,7 +28,6 @@ class LoadingGUI(QMainWindow, CommonGUI):
     """
 
     progress_update_signal = pyqtSignal(str, str)
-    progress_update_signal = pyqtSignal(str, int)
 
     def __init__(self, loading_shared_data: Dict = None, loading_data_lock: Lock = None, loading_stop_event: Event = None):
         """
@@ -89,9 +88,13 @@ class LoadingGUI(QMainWindow, CommonGUI):
         self.background_label.setGeometry(0, 0, self.width(), self.height())
 
     def __init_messages(self):
-        self.message_label = QLabel("Starting...", self.central_widget)
-        self.message_label.setStyleSheet("color: black; font-size: 24px;")
-        self.message_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.title_label = QLabel("Starting...", self.central_widget)
+        self.title_label.setStyleSheet("color: black; font-size: 24px;")
+        self.title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.task_label = QLabel("", self.central_widget)
+        self.task_label.setStyleSheet("color: black; font-size: 18px;")
+        self.task_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
     def __init_progress_bar(self):
         """Initialise the progress bar."""
@@ -112,7 +115,8 @@ class LoadingGUI(QMainWindow, CommonGUI):
         Initialise layout for the loading screen.
         """
         self.layout = QVBoxLayout(self.central_widget)
-        self.layout.addWidget(self.message_label)
+        self.layout.addWidget(self.title_label)
+        self.layout.addWidget(self.task_label)
         self.layout.addWidget(self.progress_bar)
         self.central_widget.setLayout(self.layout)
         self.central_widget.raise_()
@@ -132,9 +136,6 @@ class LoadingGUI(QMainWindow, CommonGUI):
         if self.running_in_thread:
             thread_check = {"callback": self.thread_check, "fps": 30}
             timers_conf["thread_check"] = thread_check
-        else:
-            progress = {"callback": self.update_progress, "fps": 10}
-            timers_conf["progress"] = progress
 
         timers = self._configure_timers(timers_conf)
         logger.info("Timers initialised")
@@ -156,43 +157,8 @@ class LoadingGUI(QMainWindow, CommonGUI):
                 self.set_task(value)
                 pass
             case "progress":
-                self.set_progress(value)
-
-    def update_progress(self):
-        """
-        Gets the latest progress and updates the view to correspond.
-        """
-        if self.running_in_thread:
-            return
-            try:
-                status = self.loading_shared_data["status"]
-                title = status["title"]
-                task = status["task"]
-                self.progress = status["progress"]
-            except KeyError:
-                logger.debug("Progress not set yet.")
-                return
-
-            self.message_label.setText(task)
-        else:
-            self.progress += 2
-
-            # Update messages based on progress
-            if self.progress < 30:
-                self.message_label.setText("Initializing...")
-            elif self.progress < 60:
-                self.message_label.setText("Loading assets...")
-            elif self.progress < 90:
-                self.message_label.setText("Finalizing setup...")
-            else:
-                self.message_label.setText("Almost done...")
-
-        self.set_progress(self.progress)
-
-        logger.info(f"Progress: {self.progress}")
-        if self.progress >= 100:
-            self._get_timer("progress").stop()
-            self.close()
+                progress = int(value)
+                self.set_progress(progress)
 
     def set_stage(self, stage: str) -> None:
         """
@@ -202,7 +168,7 @@ class LoadingGUI(QMainWindow, CommonGUI):
             stage: The stage value
         """
         self.current_stage_name = stage
-        self.message_label.setText(stage)
+        self.title_label.setText(stage)
 
     def set_task(self, task: str) -> None:
         """
@@ -212,7 +178,7 @@ class LoadingGUI(QMainWindow, CommonGUI):
             task: The task value
         """
         self.current_task_name = task
-        self.message_label.setText(task)
+        self.task_label.setText(task)
 
     def set_progress(self, progress: int) -> None:
         """
@@ -223,6 +189,11 @@ class LoadingGUI(QMainWindow, CommonGUI):
         """
         self.progress = progress
         self.progress_bar.setValue(progress)
+
+        logger.info(f"Progress: {self.progress}")
+        if self.progress >= 100:
+            self._get_timer("progress").stop()
+            self.close()
 
     def thread_check(self):
         """

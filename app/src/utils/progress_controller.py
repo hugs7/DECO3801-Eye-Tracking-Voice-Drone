@@ -14,7 +14,7 @@ logger = init_logger()
 
 
 class ProgressController:
-    def __init__(self, loading_shared_data: Dict, data_lock: Lock, num_stages: int, progress_signal: pyqtSignal):
+    def __init__(self, num_stages: int, progress_signal: pyqtSignal):
         """
         Initialise the loading helper
 
@@ -22,8 +22,6 @@ class ProgressController:
             loading_shared_data: Shared data
             data_lock: Lock for shared data
         """
-        self.loading_shared_data = loading_shared_data
-        self.data_lock = data_lock
         self.num_stages = num_stages
         self.progress_signal: pyqtSignal = progress_signal
 
@@ -36,9 +34,6 @@ class ProgressController:
 
         self.overall_progress = 0.0
 
-        self.loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(self.loop)
-
     def set_stage(self, title: str, num_tasks: int) -> None:
         """
         Sets a new stage in the loading process
@@ -49,7 +44,7 @@ class ProgressController:
         """
         self.current_stage_name = title
         logger.info("Title: %s", title)
-        self.__set_status_value("title", title)
+        self.progress_signal.emit("title", title)
         self.num_tasks = num_tasks
         self.current_task = 0
         self.current_stage += 1
@@ -68,10 +63,7 @@ class ProgressController:
             task: The message to set for the current task
             estimated_time: The estimated time to complete the task in seconds
         """
-        if self.loop.is_running():
-            asyncio.create_task(self.async_increment_progress(task, estimated_time))
-        else:
-            self.loop.run_until_complete(self.async_increment_progress(task, estimated_time))
+        asyncio.create_task(self.async_increment_progress(task, estimated_time))
 
     async def async_increment_progress(self, task: str, estimated_time: float, steps: int = 100) -> None:
         """
@@ -83,7 +75,7 @@ class ProgressController:
             steps: The number of steps to increment progress
         """
         self.current_task_name = task
-        self.__set_status_value("task", task)
+        self.progress_signal.emit("task", task)
 
         if self.current_task > self.num_tasks:
             raise ValueError(f"Current task exceeds number of tasks for stage {self.current_stage_name}")
@@ -123,8 +115,7 @@ class ProgressController:
         int_progress = int(progress)
         if not 0 <= int_progress <= 100:
             raise ValueError("Overall progress is not within the range 0-100: %d", int_progress)
-        self.progress_signal.emit("progress", int_progress)
-        # self.__set_status_value("progress", int_progress)
+        self.progress_signal.emit("progress", str(int_progress))
 
     def __calculate_percentage(self, current: int, total: int, scaling: float = 1.0) -> float:
         """
@@ -140,15 +131,3 @@ class ProgressController:
             int: The percentage
         """
         return (current / total) * 100 * scaling
-
-    def __set_status_value(self, key: str, value: Any) -> None:
-        """
-        Sets a value within the status dictionary
-
-        Args:
-            key: The key to set
-            value: The value to set
-        """
-
-        with self.data_lock:
-            self.loading_shared_data["status"][key] = value
