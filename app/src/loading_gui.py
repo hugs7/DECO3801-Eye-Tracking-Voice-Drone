@@ -126,7 +126,7 @@ class LoadingGUI(QMainWindow, CommonGUI):
         logger.info("Initialising timers")
 
         timers_conf = {
-            "progress": {"callback": self.update_progress, "fps": 10},
+            "progress": {"callback": self.update_progress, "fps": 20},
         }
 
         if self.running_in_thread:
@@ -139,21 +139,29 @@ class LoadingGUI(QMainWindow, CommonGUI):
 
     def update_progress(self):
         """
-        Update progress bar and display different messages based on progress.
+        Gets the latest progress and updates the view to correspond.
         """
-        self.progress += 2
-        logger.info(f"Progress: {self.progress}")
-        self.progress_bar.setValue(self.progress)
-
-        # Update messages based on progress
-        if self.progress < 30:
-            self.message_label.setText("Initializing...")
-        elif self.progress < 60:
-            self.message_label.setText("Loading assets...")
-        elif self.progress < 90:
-            self.message_label.setText("Finalizing setup...")
+        if self.running_in_thread:
+            status = self.loading_shared_data["status"]
+            title = status["title"]
+            task = status["task"]
+            self.progress = status["progress"]
+            self.message_label.setText(task)
         else:
-            self.message_label.setText("Almost done...")
+            self.progress += 2
+            self.progress_bar.setValue(self.progress)
+
+            # Update messages based on progress
+            if self.progress < 30:
+                self.message_label.setText("Initializing...")
+            elif self.progress < 60:
+                self.message_label.setText("Loading assets...")
+            elif self.progress < 90:
+                self.message_label.setText("Finalizing setup...")
+            else:
+                self.message_label.setText("Almost done...")
+
+        logger.info(f"Progress: {self.progress}")
 
         if self.progress >= 100:
             self._get_timer("progress").stop()
