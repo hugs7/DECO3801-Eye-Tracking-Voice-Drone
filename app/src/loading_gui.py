@@ -88,6 +88,7 @@ class LoadingGUI(QMainWindow, CommonGUI):
         self.background_label.setGeometry(0, 0, self.width(), self.height())
 
     def __init_messages(self):
+        """Initialise the messages for the loading screen."""
         self.title_label = QLabel("Starting...", self.central_widget)
         self.title_label.setStyleSheet("color: black; font-size: 24px;")
         self.title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -102,10 +103,16 @@ class LoadingGUI(QMainWindow, CommonGUI):
         self.progress_bar = QProgressBar(self.central_widget)
         self.progress_bar.setStyleSheet(
             """
-            QProgressBar {
-                background-color: transparent;
-                color: black;
-            }
+        QProgressBar {
+            border: 2px solid #8f8f8f;
+            border-radius: 5px;
+            min-height: 30px;
+            color: white;
+        }
+        QProgressBar::chunk {
+            background-color: #76c7c0;
+            border-radius: 5px;
+        }
         """
         )
         self.progress_bar.setAlignment(Qt.AlignmentFlag.AlignCenter)
