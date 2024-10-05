@@ -133,6 +133,7 @@ def main():
         logger.info("Initialisation complete, closing loading screen.")
         loading_stop_event.set()
         loading_window.close()
+        progress.stop_progress_simulation()
 
         # Define lock and stop event early to ensure KeyboardInterrupt
         # can signal all threads to stop.

@@ -152,13 +152,15 @@ class LoadingGUI(QMainWindow, CommonGUI):
         match key:
             case "stage":
                 self.set_stage(value)
-                pass
             case "task":
                 self.set_task(value)
-                pass
             case "progress":
                 progress = int(value)
                 self.set_progress(progress)
+            case "action":
+                match value:
+                    case "close":
+                        self.close()
 
     def set_stage(self, stage: str) -> None:
         """
@@ -191,8 +193,6 @@ class LoadingGUI(QMainWindow, CommonGUI):
         self.progress_bar.setValue(progress)
 
         logger.info(f"Progress: {self.progress}")
-        if self.progress >= 100:
-            self.close()
 
     def thread_check(self):
         """

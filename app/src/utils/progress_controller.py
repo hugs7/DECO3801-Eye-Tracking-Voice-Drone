@@ -24,6 +24,7 @@ class ProgressController:
         """
         self.num_stages = num_stages
         self.progress_signal: pyqtSignal = progress_signal
+        self.complete: bool = False
 
         self.num_tasks = 0
 
@@ -33,7 +34,7 @@ class ProgressController:
         self.current_task = -1
 
         self.previous_progress: int = 0
-        self.overall_progress: int = 0
+        self.base_progress: int = 0
 
         self.progress_sim_thread = None
         self.stop_event = Event()
@@ -46,6 +47,9 @@ class ProgressController:
             title: New title
             num_tasks: Number of tasks in this stage
         """
+        if self.complete:
+            raise ValueError("Progress is already complete")
+
         self.current_stage_name = title
         logger.info("Title: %s", title)
         self.progress_signal.emit("title", title)
@@ -57,7 +61,7 @@ class ProgressController:
             raise ValueError("Current stage exceeds number of stages %d", self.num_stages)
 
         self.__calculate_base_progress()
-        self.set_progress(self.overall_progress)
+        self.set_progress(self.base_progress)
 
     def set_loading_task(self, task: str, estimated_time: float) -> None:
         """
@@ -67,9 +71,11 @@ class ProgressController:
             task: The message to set for the current task
             estimated_time: The estimated time to complete the task in seconds
         """
+        if self.complete:
+            raise ValueError("Progress is already complete")
+
         if self.progress_sim_thread is not None:
-            self.stop_event.set()
-            self.progress_sim_thread.join()
+            self.stop_progress_simulation()
             self.current_task += 1
             self.stop_event.clear()
 
@@ -82,7 +88,7 @@ class ProgressController:
         self.__calculate_base_progress()
 
         scaling = 1 / (self.num_stages * self.num_tasks)
-        begin_progress = self.overall_progress
+        begin_progress = self.base_progress
         logger.info("Begin progress for task %s: %d", task, begin_progress)
 
         self.progress_sim_thread = Thread(
@@ -105,12 +111,19 @@ class ProgressController:
 
         for i in range(steps):
             progress_increment = self.__calculate_percentage(i, steps, scaling)
-            new_progress = self.overall_progress + progress_increment
-            self.set_progress(new_progress)
+            new_progress = self.base_progress + progress_increment
+            self.set_progress(int(new_progress))
             time.sleep(time_per_step)
             keep_running = thread_loop_handler(stop_event, True)
-            if not keep_running:
+            if not keep_running or self.complete:
                 return
+
+    def stop_progress_simulation(self) -> None:
+        """
+        Stops the progress simulation thread
+        """
+        self.stop_event.set()
+        self.progress_sim_thread.join()
 
     def __calculate_base_progress(self) -> None:
         """
@@ -120,24 +133,25 @@ class ProgressController:
         stage_progress = self.__calculate_percentage(self.current_stage, self.num_stages)
         task_progress = self.__calculate_percentage(self.current_task, self.num_tasks, 1 / self.num_stages)
 
-        self.overall_progress = int(stage_progress + task_progress)
+        self.base_progress = int(stage_progress + task_progress)
 
-    def set_progress(self, progress: float) -> None:
+    def set_progress(self, progress: int) -> None:
         """
         Sets the progress value
 
         Args:
-            progress: The progress value
+            progress [int]: The progress value
         """
 
-        int_progress = int(progress)
-
-        if int_progress == self.previous_progress:
+        if progress == self.previous_progress:
             # No change in progress
             return
 
-        self.progress_signal.emit("progress", str(int_progress))
-        self.previous_progress = int_progress
+        self.progress_signal.emit("progress", str(progress))
+        self.previous_progress = progress
+        if progress >= 100:
+            self.progress_signal.emit("action", "close")
+            self.complete = True
 
     def __calculate_percentage(self, current: int, total: int, scaling: float = 1.0) -> float:
         """
