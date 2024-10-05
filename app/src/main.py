@@ -5,11 +5,12 @@ Hugo Burton
 """
 
 import sys
-from typing import List
+from typing import List, Dict, Any, Tuple
 from threading import Thread, Event, Lock
 from multiprocessing import Manager, Process
 
 from PyQt6.QtWidgets import QApplication
+from PyQt6.QtCore import QObject, pyqtSignal
 
 # Must go before any other user imports to ensure project directory is added to sys.path
 from utils.import_helper import dynamic_import
@@ -32,17 +33,27 @@ def is_any_thread_alive(threads: List[Thread]):
     return any(t.is_alive() for t in threads)
 
 
-def main():
-    logger.info(">>> Main Begin")
+class InitSignals(QObject):
+    initialisation_complete = pyqtSignal(dict)
 
-    loading_gui = QApplication(sys.argv)
-    loading_data_lock = Lock()
-    loading_stop_event = Event()
-    loading_shared_data = {"status": ""}
-    loading_window = LoadingGUI(loading_shared_data, loading_data_lock, loading_stop_event)
-    loading_helper = LoadingHelper(loading_shared_data, loading_data_lock)
-    loading_gui_thread = Thread(target=loading_gui.exec, name="loading_gui_thread")
-    loading_gui_thread.start()
+
+def initialise_modules(
+    loading_shared_data: Dict, loading_helper: LoadingHelper, signals: List[pyqtSignal], stop_event: Event, data_lock: Lock
+) -> Tuple[Any, Any, Any]:
+    """
+    Initialise the modules, and emit a signal when complete.
+
+    Args:
+        loading_shared_data: Shared data
+        loading_helper: Loading helper
+        signals: Signals to emit
+        stop_event: Stop event
+        data_lock: Lock for shared data
+
+    Returns:
+        Tuple of initialised modules
+    """
+    logger.info("Initialising modules...")
 
     loading_helper.set_loading_status("Initialising eye tracking module")
     eye_tracking = dynamic_import("eye_tracking.src.main", "main")
@@ -55,11 +66,6 @@ def main():
 
     logger.info("Modules initialised.")
 
-    # Define lock and stop event early to ensure KeyboardInterrupt
-    # can signal all threads to stop.
-    stop_event = Event()
-    data_lock = Lock()
-
     try:
         # =========== Processes ===========
 
@@ -70,12 +76,14 @@ def main():
         loading_helper.set_loading_status("Initialising voice process")
         manager = Manager()
         interprocess_data = manager.dict()
+        loading_shared_data["interprocess_data"] = interprocess_data
         process_functions = {voice_control: {"command_queue": manager.Queue()}}
         process_shared_dict = {get_function_module(func): init_val for func, init_val in process_functions.items()}
         interprocess_data.update(process_shared_dict)
         processes = [
             Process(target=func, args=(interprocess_data,), name=f"process_{get_function_module(func)}") for func in process_functions
         ]
+        loading_shared_data["processes"] = processes
 
         loading_helper.set_loading_status("Starting processes")
         for process in processes:
@@ -90,25 +98,78 @@ def main():
         loading_helper.set_loading_status("Initialising threads")
         thread_functions = [eye_tracking, drone]
         thread_data = {get_function_module(func): {} for func in thread_functions}
+        loading_shared_data["thread_data"] = thread_data
         threads = [
             Thread(target=lambda func=func: func(stop_event, thread_data, data_lock), name=f"thread_{get_function_module(func)}")
             for func in thread_functions
         ]
+        loading_shared_data["threads"] = threads
 
         loading_helper.set_loading_status("Starting threads")
         for thread in threads:
             logger.debug(f"Starting thread {thread.name}")
             thread.start()
+    except KeyboardInterrupt:
+        logger.info("Keyboard interrupt detected, stopping threads and processes.")
 
-        # Exit loading GUI
+    logger.info("Modules initialised.")
+
+    signals.initialisation_complete.emit(
+        {
+            "eye_tracking": eye_tracking,
+            "voice_control": voice_control,
+            "drone": drone,
+            "threads": threads,
+            "processes": processes,
+            "interprocess_data": interprocess_data,
+            "thread_data": thread_data,
+        }
+    )
+
+    return eye_tracking, voice_control, drone
+
+
+def main():
+    logger.info(">>> Main Begin")
+
+    gui = QApplication(sys.argv)
+    loading_data_lock = Lock()
+    loading_stop_event = Event()
+    loading_shared_data = {"status": ""}
+    loading_window = LoadingGUI(loading_shared_data, loading_data_lock, loading_stop_event)
+    loading_helper = LoadingHelper(loading_shared_data, loading_data_lock)
+
+    init_signals = InitSignals()
+
+    try:
+        stop_event = Event()
+        data_lock = Lock()
+        init_thread = Thread(
+            target=initialise_modules, args=(loading_shared_data, loading_helper, init_signals, stop_event, data_lock), name="init_thread"
+        )
+        init_thread.start()
+
+        loading_window.show()
+        gui.exec()
+
+        init_thread.join()
+
+        logger.info("Initialisation complete, closing loading screen.")
         loading_stop_event.set()
         loading_window.close()
-        loading_gui.quit()
-        loading_gui_thread.join()
 
-        # Main GUI
-        # Keeps the main thread alive so we do not need a secondary while loop
-        logger.info("Initialising GUI")
+        # Define lock and stop event early to ensure KeyboardInterrupt
+        # can signal all threads to stop.
+        stop_event = Event()
+        data_lock = Lock()
+
+        # Gather data from initialisation thread.
+        thread_data: Dict[str, Any] = loading_shared_data["thread_data"]
+        interprocess_data: Dict[str, Any] = loading_shared_data["interprocess_data"]
+        threads: List[Thread] = loading_shared_data["threads"]
+        processes: List[Process] = loading_shared_data["processes"]
+
+        logger.info("Launching Main GUI")
         gui = QApplication(sys.argv)
         main_window = MainApp(stop_event, thread_data, data_lock, interprocess_data)
         main_window.show()
@@ -119,7 +180,7 @@ def main():
     logger.info("Signalling all threads to stop")
     stop_event.set()
 
-    # Ensure all threads and processes are properly joined after signaling them to stop
+    # Ensure all threads and processes are properly joined after signaling them to stop.
     for process in processes:
         process.join()
         if process.is_alive():

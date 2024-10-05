@@ -126,7 +126,7 @@ class LoadingGUI(QMainWindow, CommonGUI):
         logger.info("Initialising timers")
 
         timers_conf = {
-            "progress": {"callback": self.update_progress, "fps": 2},
+            "progress": {"callback": self.update_progress, "fps": 10},
         }
 
         if self.running_in_thread:
