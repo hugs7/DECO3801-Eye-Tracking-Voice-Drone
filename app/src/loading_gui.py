@@ -126,7 +126,7 @@ class LoadingGUI(QMainWindow, CommonGUI):
         logger.info("Initialising timers")
 
         timers_conf = {
-            "progress": {"callback": self.update_progress, "fps": 20},
+            "progress": {"callback": self.update_progress, "fps": 10},
         }
 
         if self.running_in_thread:
@@ -149,7 +149,6 @@ class LoadingGUI(QMainWindow, CommonGUI):
             self.message_label.setText(task)
         else:
             self.progress += 2
-            self.progress_bar.setValue(self.progress)
 
             # Update messages based on progress
             if self.progress < 30:
@@ -161,8 +160,9 @@ class LoadingGUI(QMainWindow, CommonGUI):
             else:
                 self.message_label.setText("Almost done...")
 
-        logger.info(f"Progress: {self.progress}")
+        self.progress_bar.setValue(self.progress)
 
+        logger.info(f"Progress: {self.progress}")
         if self.progress >= 100:
             self._get_timer("progress").stop()
             self.close()
