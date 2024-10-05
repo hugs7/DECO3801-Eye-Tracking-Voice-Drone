@@ -38,7 +38,7 @@ class DroneApp(QMainWindow, CommonGUI):
             logger.info("Running in limited mode.")
 
         self._init_gui()
-        self.timers = self._init_timers()
+        self._init_timers()
 
         logger.info("GUI initialised")
 
@@ -94,12 +94,9 @@ class DroneApp(QMainWindow, CommonGUI):
 
         logger.info("Menu bar initialised")
 
-    def _init_timers(self) -> Dict[str, QTimer]:
+    def _init_timers(self) -> None:
         """
         Initialise the timers for the gui
-
-        Returns:
-            Dict[str, QTimer]: The timers configuration in an OmegaConf object
         """
         if self.limited_mode:
             logger.info("Running in limited mode. No timers required")
@@ -109,7 +106,7 @@ class DroneApp(QMainWindow, CommonGUI):
             "drone_feed": {"callback": self.update_drone_feed, "fps": self.controller.model.video_fps},
         }
 
-        return {name: self._configure_timer(name, **conf) for name, conf in timers_conf.items()}
+        self._configure_timers(timers_conf)
 
     def keyPressEvent(self, event: QKeyEvent) -> None:
         """

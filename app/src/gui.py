@@ -35,7 +35,7 @@ class MainApp(QMainWindow, CommonGUI):
         self.config = self._init_config()
         self._init_gui()
         self._init_feed_labels()
-        self.timers: Dict[str, QTimer] = self._init_timers()
+        self._init_timers()
         self._init_keyboard_queue()
 
     def _init_config(self) -> OmegaConf:
@@ -127,12 +127,9 @@ class MainApp(QMainWindow, CommonGUI):
         self.drone_video_label = self.main_video_label
         self.webcam_video_label = self.side_video_label
 
-    def _init_timers(self) -> Dict[str, QTimer]:
+    def _init_timers(self) -> None:
         """
         Initialise the timers for the gui
-
-        Returns:
-            Dict[str, QTimer]: The timers configuration in an OmegaConf object
         """
         timers_conf = {
             "webcam": {"callback": self.get_webcam_feed, "fps": self.config.timers.webcam},
@@ -140,7 +137,7 @@ class MainApp(QMainWindow, CommonGUI):
             "voice_command": {"callback": self.get_next_voice_command, "fps": self.config.timers.voice_command},
         }
 
-        return {name: self._configure_timer(name, **conf) for name, conf in timers_conf.items()}
+        self._configure_timers(timers_conf)
 
     def _init_keyboard_queue(self) -> None:
         """
@@ -150,21 +147,7 @@ class MainApp(QMainWindow, CommonGUI):
         with self.data_lock:
             self.thread_data["keyboard_queue"] = Queue()
 
-    def get_timer(self, name: str) -> QTimer:
-        """
-        Get the timer with the given name
 
-        Args:
-            name: The name of the timer
-
-        Returns:
-            QTimer: The timer
-        """
-        timer = self.timers.get(name, None)
-        if timer is None:
-            logger.error(f"Timer not found: {name}")
-
-        return timer
 
 
     def keyPressEvent(self, event: QKeyEvent) -> None:
