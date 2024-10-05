@@ -321,7 +321,7 @@ class MainApp(QMainWindow, CommonGUI):
         self._stop_all_timers()
 
         if not self.stop_event.is_set():
-            logger.info("Stopping threads from GUI")
+            logger.info("Signalling all threads to stop")
             self.stop_event.set()
 
         logger.info("Closing GUI")
