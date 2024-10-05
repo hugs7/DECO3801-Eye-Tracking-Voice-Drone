@@ -4,8 +4,8 @@ Defines common methods for the GUI
 
 from typing import Optional, Dict, Union, Callable
 
-from PyQt6.QtWidgets import QMenu, QPushButton, QLabel, QVBoxLayout
-from PyQt6.QtGui import QAction
+from PyQt6.QtWidgets import QApplication, QMenu, QPushButton, QLabel, QVBoxLayout
+from PyQt6.QtGui import QAction, QPalette
 from PyQt6.QtCore import Qt, QTimer
 
 from .logger_helper import init_logger
@@ -18,6 +18,17 @@ class CommonGUI:
     def __init__(self):
         self.layout: Optional[QVBoxLayout] = None
         self.timers: Dict[str, QTimer] = dict()
+
+    def init_palette(self) -> None:
+        """Initialise the palette and theme"""
+        palette = QApplication.palette()
+        # Determine if the theme is dark or light
+        self.theme = "dark" if palette.color(QPalette.ColorRole.Window).lightness() < 128 else "light"
+
+        if self.theme == "dark":
+            self.text_color = "white"
+        else:
+            self.text_color = "black"
 
     def __check_layout(self):
         if self.layout is None:

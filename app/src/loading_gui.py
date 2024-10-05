@@ -10,7 +10,7 @@ from typing import Dict, Union
 from threading import Lock, Event
 
 from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel, QProgressBar, QVBoxLayout, QWidget
-from PyQt6.QtGui import QPixmap, QResizeEvent, QPalette
+from PyQt6.QtGui import QPixmap, QResizeEvent
 from PyQt6.QtCore import QTimer, Qt, pyqtSignal
 
 from app.src.utils import file_handler
@@ -68,7 +68,7 @@ class LoadingGUI(QMainWindow, CommonGUI):
         """
         logger.info(">>> LoadingGUI Begin Init GUI")
 
-        self.__init_palette()
+        self.init_palette()
         self.__init_bg_image()
 
         self.central_widget = QWidget(self)
@@ -79,17 +79,6 @@ class LoadingGUI(QMainWindow, CommonGUI):
         self.__init_layout()
 
         logger.info("<<< LoadingGUI End Init GUI")
-
-    def __init_palette(self) -> None:
-        """Initialise the palette for the loading screen."""
-        palette = QApplication.palette()
-        # Determine if the theme is dark or light
-        self.theme = "dark" if palette.color(QPalette.ColorRole.Window).lightness() < 128 else "light"
-
-        if self.theme == "dark":
-            self.text_color = "white"
-        else:
-            self.text_color = "black"
 
     def __init_bg_image(self):
         """Initialise the background image."""
