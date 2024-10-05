@@ -5,7 +5,7 @@ Hugo Burton
 """
 
 import sys
-from typing import List, Dict, Any, Tuple
+from typing import List, Dict, Any
 from threading import Thread, Event, Lock
 from multiprocessing import Manager, Process
 
@@ -13,7 +13,7 @@ from PyQt6.QtWidgets import QApplication
 
 # Must go before any other user imports to ensure project directory is added to sys.path
 from utils.import_helper import dynamic_import
-from app.src.utils.progress_controller import ProgressController
+from utils.progress_controller import ProgressController
 
 from gui import MainApp
 from loading_gui import LoadingGUI
@@ -44,13 +44,13 @@ def initialise_modules(loading_shared_data: Dict, progress: ProgressController, 
     """
     progress.set_stage("Initialising Modules", 3)
 
-    progress.set_loading_task("Initialising eye tracking module")
+    progress.set_loading_task("Initialising eye tracking module", 20)
     eye_tracking = dynamic_import("eye_tracking.src.main", "main")
 
-    progress.set_loading_task("Initialising voice control module")
+    progress.set_loading_task("Initialising voice control module", 10)
     voice_control = dynamic_import("voice_control.src.main", "main")
 
-    progress.set_loading_task("Initialising drone module")
+    progress.set_loading_task("Initialising drone module", 10)
     drone = dynamic_import("drone.src.main", "main")
 
     logger.info("Modules initialised.")
@@ -63,12 +63,12 @@ def initialise_modules(loading_shared_data: Dict, progress: ProgressController, 
         # parent process exit. As a result, the shared data is managed by a Manager
         # object to allow for inter-process communication.
         progress.set_stage("Initialising processes", 3)
-        progress.set_loading_task("Initialising IPC data manager")
+        progress.set_loading_task("Initialising IPC data manager", 15)
         manager = Manager()
         interprocess_data = manager.dict()
-        progress.set_loading_task("Configuring IPC data")
+        progress.set_loading_task("Configuring IPC data", 0.5)
         loading_shared_data["interprocess_data"] = interprocess_data
-        progress.set_loading_task("Initialising process functions")
+        progress.set_loading_task("Initialising process functions", 0.1)
         process_functions = {voice_control: {"command_queue": manager.Queue()}}
         process_shared_dict = {get_function_module(func): init_val for func, init_val in process_functions.items()}
         interprocess_data.update(process_shared_dict)
@@ -79,7 +79,7 @@ def initialise_modules(loading_shared_data: Dict, progress: ProgressController, 
 
         progress.set_stage("Starting processes", len(processes))
         for process in processes:
-            progress.set_loading_task(f"Starting process {process.name}")
+            progress.set_loading_task(f"Starting process {process.name}", 0.2)
             process.start()
 
         # =========== Threads ===========
@@ -89,10 +89,10 @@ def initialise_modules(loading_shared_data: Dict, progress: ProgressController, 
         # but also require a lock to prevent race conditions when accessing shared data.
         progress.set_stage("Initialising threads", 2)
         thread_functions = [eye_tracking, drone]
-        progress.set_loading_task("Initialising shared data dictionary")
+        progress.set_loading_task("Initialising shared data dictionary", 0.5)
         thread_data = {get_function_module(func): {} for func in thread_functions}
         loading_shared_data["thread_data"] = thread_data
-        progress.set_loading_task("Initialising thread functions")
+        progress.set_loading_task("Initialising thread functions", 0.2)
         threads = [
             Thread(target=lambda func=func: func(stop_event, thread_data, data_lock), name=f"thread_{get_function_module(func)}")
             for func in thread_functions
@@ -101,7 +101,7 @@ def initialise_modules(loading_shared_data: Dict, progress: ProgressController, 
 
         progress.set_stage("Starting threads", len(threads))
         for thread in threads:
-            progress.set_loading_task(f"Starting thread {thread.name}")
+            progress.set_loading_task(f"Starting thread {thread.name}", 0.1)
             thread.start()
     except KeyboardInterrupt:
         logger.info("Keyboard interrupt detected, stopping threads and processes.")
@@ -117,14 +117,12 @@ def main():
     loading_stop_event = Event()
     loading_shared_data = {"status": dict()}
     loading_window = LoadingGUI(loading_shared_data, loading_data_lock, loading_stop_event)
-    loading_helper = ProgressController(loading_shared_data, loading_data_lock, 6)
+    progress = ProgressController(loading_shared_data, loading_data_lock, 6)
 
     try:
         stop_event = Event()
         data_lock = Lock()
-        init_thread = Thread(
-            target=initialise_modules, args=(loading_shared_data, loading_helper, stop_event, data_lock), name="init_thread"
-        )
+        init_thread = Thread(target=initialise_modules, args=(loading_shared_data, progress, stop_event, data_lock), name="init_thread")
         init_thread.start()
 
         loading_window.wrap_show()
