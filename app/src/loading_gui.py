@@ -192,7 +192,6 @@ class LoadingGUI(QMainWindow, CommonGUI):
 
         logger.info(f"Progress: {self.progress}")
         if self.progress >= 100:
-            self._get_timer("progress").stop()
             self.close()
 
     def thread_check(self):

@@ -2,13 +2,13 @@
 Controller for handling progress.
 """
 
-from typing import Dict, Any
-from threading import Lock
-import asyncio
+import time
+from threading import Thread, Event
 
 from PyQt6.QtCore import pyqtSignal
 
 from common.logger_helper import init_logger
+from common.thread_helper import thread_loop_handler
 
 logger = init_logger()
 
@@ -32,7 +32,11 @@ class ProgressController:
         self.current_task_name = ""
         self.current_task = -1
 
-        self.overall_progress = 0.0
+        self.previous_progress: int = 0
+        self.overall_progress: int = 0
+
+        self.progress_sim_thread = None
+        self.stop_event = Event()
 
     def set_stage(self, title: str, num_tasks: int) -> None:
         """
@@ -63,17 +67,12 @@ class ProgressController:
             task: The message to set for the current task
             estimated_time: The estimated time to complete the task in seconds
         """
-        asyncio.create_task(self.async_increment_progress(task, estimated_time))
+        if self.progress_sim_thread is not None:
+            self.stop_event.set()
+            self.progress_sim_thread.join()
+            self.current_task += 1
+            self.stop_event.clear()
 
-    async def async_increment_progress(self, task: str, estimated_time: float, steps: int = 100) -> None:
-        """
-        Asynchronously increments progress over the estimated time.
-
-        Args:
-            task: The message to set for the current task
-            estimated_time: The estimated time to complete the task in seconds
-            steps: The number of steps to increment progress
-        """
         self.current_task_name = task
         self.progress_signal.emit("task", task)
 
@@ -82,18 +81,36 @@ class ProgressController:
 
         self.__calculate_base_progress()
 
-        steps = 100
-        time_per_step = estimated_time / steps
         scaling = 1 / (self.num_stages * self.num_tasks)
         begin_progress = self.overall_progress
+        logger.info("Begin progress for task %s: %d", task, begin_progress)
+
+        self.progress_sim_thread = Thread(
+            target=self._simulate_progress, args=(estimated_time, scaling, self.stop_event), name="progress_sim_thread"
+        )
+        self.progress_sim_thread.start()
+
+    def _simulate_progress(self, estimated_time: float, scaling: float, stop_event: Event, steps: int = 100) -> None:
+        """
+        Asynchronously increments progress over the estimated time.
+
+        Args:
+            estimated_time: The estimated time to complete the task in seconds
+            stop_event: Event to stop the progress simulation
+            scaling: Scaling factor for the progress
+            steps: The number of steps to increment progress
+        """
+
+        time_per_step = estimated_time / steps
 
         for i in range(steps):
             progress_increment = self.__calculate_percentage(i, steps, scaling)
             new_progress = self.overall_progress + progress_increment
             self.set_progress(new_progress)
-            await asyncio.sleep(time_per_step)
-
-        self.current_task += 1
+            time.sleep(time_per_step)
+            keep_running = thread_loop_handler(stop_event, True)
+            if not keep_running:
+                return
 
     def __calculate_base_progress(self) -> None:
         """
@@ -103,7 +120,7 @@ class ProgressController:
         stage_progress = self.__calculate_percentage(self.current_stage, self.num_stages)
         task_progress = self.__calculate_percentage(self.current_task, self.num_tasks, 1 / self.num_stages)
 
-        self.overall_progress = stage_progress + task_progress
+        self.overall_progress = int(stage_progress + task_progress)
 
     def set_progress(self, progress: float) -> None:
         """
@@ -112,10 +129,15 @@ class ProgressController:
         Args:
             progress: The progress value
         """
+
         int_progress = int(progress)
-        if not 0 <= int_progress <= 100:
-            raise ValueError("Overall progress is not within the range 0-100: %d", int_progress)
+
+        if int_progress == self.previous_progress:
+            # No change in progress
+            return
+
         self.progress_signal.emit("progress", str(int_progress))
+        self.previous_progress = int_progress
 
     def __calculate_percentage(self, current: int, total: int, scaling: float = 1.0) -> float:
         """

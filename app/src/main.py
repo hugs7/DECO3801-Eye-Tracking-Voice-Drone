@@ -44,7 +44,7 @@ def initialise_modules(loading_shared_data: Dict, progress: ProgressController, 
     """
     progress.set_stage("Initialising Modules", 3)
 
-    progress.set_loading_task("Initialising eye tracking module", 200)
+    progress.set_loading_task("Initialising eye tracking module", 10)
     eye_tracking = dynamic_import("eye_tracking.src.main", "main")
 
     progress.set_loading_task("Initialising voice control module", 10)
