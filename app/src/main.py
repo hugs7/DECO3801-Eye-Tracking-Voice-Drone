@@ -128,14 +128,14 @@ def main():
 
         loading_window.wrap_show()
         loading_gui.exec()
-        loading_gui.quit()
-        loading_gui = None
 
         init_thread.join()
 
         logger.info("Initialisation complete, closing loading screen.")
         loading_stop_event.set()
         loading_window.close()
+        loading_gui.quit()
+        loading_gui = None
         progress.stop_progress_simulation()
 
         # Define lock and stop event early to ensure KeyboardInterrupt
