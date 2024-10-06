@@ -94,7 +94,7 @@ def is_wifi_connected() -> bool:
     if sys.platform == "win32":
         result = subprocess.run(["netsh", "wlan", "show", "interfaces"], capture_output=True, text=True, shell=True)
         pattern = r"State\s+:\s+connected"
-        return re.search(pattern, result.stdout) is not None
+        return re.search(pattern, result.stdout, re.MULTILINE) is not None
     elif sys.platform == "linux":
         result = subprocess.run(["iwgetid"], capture_output=True, text=True, shell=True)
         return "ESSID" in result.stdout
@@ -103,7 +103,7 @@ def is_wifi_connected() -> bool:
         return "Current Wi-Fi Network" in result.stdout
 
 
-def connect_to_wifi(ssid: str, password: str, network_interface: Optional[str] = None) -> bool:
+def connect_to_wifi(ssid: str, password: str, network_interface: Optional[str] = None, max_attempts: int = 3) -> bool:
     """
     Connects to the specified wifi network
 
@@ -113,6 +113,7 @@ def connect_to_wifi(ssid: str, password: str, network_interface: Optional[str] =
                         network is open, pass an empty string
         network_interface (Optional[str], optional): The network interface to connect from.
                                                      Only required for MacOS. Defaults to None.
+        max_attempts (int, optional): The maximum number of attempts to connect. Defaults to 3.
 
     Returns:
         bool: True if connection was successful, False otherwise
@@ -139,19 +140,25 @@ def connect_to_wifi(ssid: str, password: str, network_interface: Optional[str] =
         if password:
             connect_cmd += f' "{password}"'
 
-    logger.debug("Running connection command: %s", connect_cmd)
+    logger.debug("Running connection command: %s for a maximum of %d connection attempts", connect_cmd, max_attempts)
 
-    try:
-        subprocess.run(connect_cmd, shell=True, check=True)
-    except subprocess.CalledProcessError as e:
-        logger.error("Failed to connect to wifi network '%s'. Details: %s", ssid, e)
-        return False
+    connected = False
+    attempts = 0
 
-    connected = is_wifi_connected()
-    if connected:
-        logger.info("Successfully connected to wifi network '%s'", ssid)
-    else:
-        logger.error("Failed to connect to wifi network '%s'", ssid)
+    while not connected and attempts < max_attempts:
+        try:
+            subprocess.run(connect_cmd, shell=True, check=True)
+        except subprocess.CalledProcessError as e:
+            logger.error("Failed to connect to wifi network '%s'. Details: %s", ssid, e)
+            continue
+
+        connected = is_wifi_connected()
+        if connected:
+            attempt = attempts + 1
+            logger.info("Successfully connected to wifi network '%s' on attempt %d", ssid, attempt)
+            connected = True
+        else:
+            logger.error("Failed to connect to wifi network '%s'", ssid)
 
     return connected
 
