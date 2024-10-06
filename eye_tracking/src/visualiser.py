@@ -9,6 +9,7 @@ import cv2
 from scipy.spatial.transform import Rotation
 
 from common.logger_helper import init_logger
+from common import image
 
 from . import constants as c
 from .camera import Camera
@@ -154,8 +155,7 @@ class Visualiser:
             None
         """
 
-        img = np.zeros_like(self.image, np.uint8)
-        cv2.addWeighted(overlay, opacity, self.image, 1 - opacity, 0, img)
+        img = image.blend_frame(self.image, overlay, opacity)
         self.set_image(img)
 
     def calculate_text_org(
