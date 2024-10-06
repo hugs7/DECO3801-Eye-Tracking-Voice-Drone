@@ -94,7 +94,7 @@ def is_wifi_connected() -> bool:
     if sys.platform == "win32":
         result = subprocess.run(["netsh", "wlan", "show", "interfaces"], capture_output=True, text=True, shell=True)
         pattern = r"State\s+:\s+connected"
-        return re.search(pattern, result.stdout) is not None
+        return re.search(pattern, result.stdout, re.MULTILINE) is not None
     elif sys.platform == "linux":
         result = subprocess.run(["iwgetid"], capture_output=True, text=True, shell=True)
         return "ESSID" in result.stdout
