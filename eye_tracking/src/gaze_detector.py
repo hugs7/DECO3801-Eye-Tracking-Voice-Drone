@@ -299,6 +299,7 @@ class GazeDetector:
         """
         undistorted = self._undistort_image(image)
         self.camera_visualiser.set_image(image.copy())
+        self.gaze_visualiser.set_image(np.zeros_like(image))
 
         if self.loop_enabled:
             if self.hitboxes is None:
@@ -737,7 +738,7 @@ class GazeDetector:
 
             top_left = side_hitbox[c.TOP_LEFT]
             bottom_right = side_hitbox[c.BOTTOM_RIGHT]
-            gaze_overlay = self.camera_visualiser.draw_labelled_rectangle(
+            gaze_overlay = self.gaze_visualiser.draw_labelled_rectangle(
                 top_left, bottom_right, bg_color, bg_alpha, text, border_color=border, blend=not self.running_in_thread
             )
 
