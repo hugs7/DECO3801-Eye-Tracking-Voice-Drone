@@ -140,6 +140,7 @@ def connect_to_wifi(ssid: str, password: str, network_interface: Optional[str] =
         if password:
             connect_cmd += f' "{password}"'
 
+    logger.debug("Running connection command: %s for a maximum of %d connection attempts", connect_cmd, max_attempts)
 
     connected = False
     attempts = 0
@@ -153,7 +154,8 @@ def connect_to_wifi(ssid: str, password: str, network_interface: Optional[str] =
 
         connected = is_wifi_connected()
         if connected:
-            logger.info("Successfully connected to wifi network '%s'", ssid)
+            attempt = attempts + 1
+            logger.info("Successfully connected to wifi network '%s' on attempt %d", ssid, attempt)
             connected = True
         else:
             logger.error("Failed to connect to wifi network '%s'", ssid)
