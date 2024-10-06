@@ -10,15 +10,15 @@ from scipy.spatial.transform import Rotation
 
 from common.logger_helper import init_logger
 
+from . import constants as c
 from .camera import Camera
 from .face import Face
 from .utils import transforms
 
 logger = init_logger()
-AXIS_COLORS = [(0, 0, 255), (0, 255, 0), (255, 0, 0)]
 
 
-class Visualizer:
+class Visualiser:
     """
     The Visualizer class is responsible for visualising the output of the eye tracking system.
     """
@@ -207,24 +207,27 @@ class Visualizer:
         border_color: Optional[Tuple[int, int, int]] = None,
         border_thickness: int = 2,
         text_org: Optional[Tuple[int, int]] = None,
-    ):
+        blend: bool = True,
+    ) -> np.ndarray:
         """
         Draws a labelled rectangle on the specified overlay
 
         Args:
-            top_left: The top left corner of the rectangle
-            bottom_right: The bottom right corner of the rectangle
-            bg_color: The background colour of the rectangle
-            bg_alpha: The transparency of the rectangle
-            text: The text to be displayed
-            text_font_face: The font face of the text
-            font_scale: The scale of the font
-            border_color: The colour of the border
-            border_thickness: The thickness of the border
-            text_org: The origin of the text
+            top_left: The top left corner of the rectangle.
+            bottom_right: The bottom right corner of the rectangle.
+            bg_color: The background colour of the rectangle.
+            bg_alpha: The transparency of the rectangle.
+            text: The text to be displayed.
+            text_font_face: The font face of the text.
+            font_scale: The scale of the font.
+            border_color: The colour of the border.
+            border_thickness: The thickness of the border.
+            text_org: The origin of the text.
+            blend: Whether to overlay the rectangle on the image or
+                   return it on a blank canvas. Default is True.
 
         Returns:
-            None
+            np.ndarray: The overlay with the labelled rectangle.
         """
 
         assert self.image is not None
@@ -240,8 +243,15 @@ class Visualizer:
             bottom_right = transforms.add_2d_point(bottom_right, (-border_thickness, -border_thickness))
 
         cv2.rectangle(overlay, top_left, bottom_right, bg_color, -1)
-        self.create_opacity(overlay, bg_alpha)
-        self.draw_text(text, text_org, color=(255, 255, 255), font_face=text_font_face, font_scale=font_scale)
+        if blend:
+            on_image = self.image
+            self.create_opacity(overlay, bg_alpha)
+        else:
+            on_image = overlay
+
+        self.draw_text(text, text_org, color=(255, 255, 255), font_face=text_font_face, font_scale=font_scale, on_image=on_image)
+
+        return overlay
 
     def draw_text(
         self,
@@ -252,6 +262,7 @@ class Visualizer:
         font_scale=1.0,
         thickness=2,
         line_type=cv2.LINE_AA,
+        on_image: Optional[np.ndarray] = None,
     ) -> None:
         """
         Draws text on the image
@@ -264,13 +275,17 @@ class Visualizer:
             font_scale: The scale of the font
             thickness: The thickness of the text
             line_type: The line type of the text
+            on_image: The image to draw the text on. Default is None
 
         Returns:
             None
         """
 
-        assert self.image is not None
-        cv2.putText(self.image, text, org, font_face, font_scale, color, thickness, line_type)
+        if on_image is None:
+            on_image = self.image
+
+        assert on_image is not None
+        cv2.putText(on_image, text, org, font_face, font_scale, color, thickness, line_type)
 
     def draw_3d_point(
         self, point3d: np.ndarray, color: Tuple[int, int, int] = (255, 0, 255), size=3, clamp_to_screen: bool = False
@@ -365,7 +380,7 @@ class Visualizer:
         axes2d = self._camera.project_points(axes3d, face.head_pose_rot.as_rotvec(), face.head_position)
         center = face.landmarks[self._center_point_index]
         center = self._convert_pt(center)
-        for pt, color in zip(axes2d, AXIS_COLORS):
+        for pt, color in zip(axes2d, c.AXIS_COLORS):
             pt = self._convert_pt(pt)
             cv2.line(self.image, center, pt, color, lw, cv2.LINE_AA)
 

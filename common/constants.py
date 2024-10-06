@@ -41,6 +41,7 @@ TICK_RATE = "tick_rate"
 LEFT = "left"
 RIGHT = "right"
 SIDES = [LEFT, RIGHT]
+GAZE_OVERLAY = "gaze_overlay"
 GAZE_SIDE = "gaze_side"
 
 # Voice Control
