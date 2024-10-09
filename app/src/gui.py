@@ -122,8 +122,8 @@ class MainApp(CommonGUI, MainGui):
         Returns:
             None
         """
-        key = event.key()
-        logger.info(f"Key pressed: {key}")
+        key = {"key_code": event.key()}
+        logger.info(f"Key pressed: {key["key_code"]}")
 
         if key == Qt.Key.Key_Escape:
             self.close_app()
@@ -231,7 +231,8 @@ class MainApp(CommonGUI, MainGui):
         """
         self.drone_pixmap = self.update_video_feed(cc.DRONE, self.drone_video_label)
 
-    def get_next_voice_command(self) -> Optional[List[Dict[str, Union[str, Tuple[str, int]]]]]:
+    # -> Optional[List[Dict[str, Union[str, Tuple[str, int]]]]]:
+    def get_next_voice_command(self):
         """
         Gets the voice command from the IPC shared data of the voice control
         module.
@@ -258,10 +259,23 @@ class MainApp(CommonGUI, MainGui):
             queue_size = command_queue.qsize()
             logger.info("Voice command queue size %d", queue_size)
             next_command = command_queue.get()
+
             command_text = next_command.get(cc.COMMAND_TEXT, None)
             logger.info("Next voice command %s", command_text)
 
-            return next_command
+            with self.data_lock:
+                if "keyboard_queue" in self.thread_data:
+                    keyboard_queue: Optional[Queue] = self.thread_data["keyboard_queue"]
+                    if keyboard_queue is not None:
+                        keyboard_queue.put(
+                            {"voice_command": next_command.get("command")})
+                        logger.info("Voice command added to keyboard queue")
+                    else:
+                        logger.warning(
+                            "Keyboard queue not initialised in shared data.")
+                else:
+                    logger.warning("Keyboard queue not found in thread data.")
+            # return next_command
 
     def _switch_feeds(self) -> None:
         """
