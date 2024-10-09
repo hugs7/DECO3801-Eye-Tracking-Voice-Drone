@@ -127,7 +127,7 @@ class Controller:
 
             gui = QApplication(sys.argv)
             drone_window = DroneApp(self)
-            drone_window.wrap_show()
+            drone_window.show()
             gui.exec()
 
     def _render_frame(self, frame: cv2.typing.MatLike, tick_rate: float) -> None:
@@ -149,8 +149,8 @@ class Controller:
             return
 
         with self.data_lock:
-            self.thread_data[cc.DRONE][cc.VIDEO_FRAME] = frame
-            self.thread_data[cc.DRONE][cc.TICK_RATE] = tick_rate
+            self.thread_data["drone"]["video_frame"] = frame
+            self.thread_data["drone"]["tick_rate"] = tick_rate
 
     def _wait_key(self) -> bool:
         """
@@ -170,7 +170,7 @@ class Controller:
         # Define a buffer so that we are not locking the data for too long.
         # Not critical while keyboard inputs are simple, however, this is good
         # practice for more complex inputs.
-        key_buffer: List[int] = []
+        key_buffer: List[Dict] = []
         if "keyboard_queue" not in self.thread_data:
             logger.trace("Keyboard queue not yet initialised in shared data.")
             return False
@@ -179,7 +179,7 @@ class Controller:
             keyboard_queue: Optional[PeekableQueue] = self.thread_data[cc.KEYBOARD_QUEUE]
             if keyboard_queue is not None:
                 while not keyboard_queue.empty():
-                    key: int = keyboard_queue.get()
+                    key: Dict = keyboard_queue.get()
                     key_buffer.append(key)
             else:
                 logger.warning("Keyboard queue not initialised in shared data.")
@@ -191,42 +191,67 @@ class Controller:
         # Accept if any valid key was pressed
         return any(accepted_keys)
 
-    def _handle_key_event(self, key_code: int) -> bool:
+    def _handle_key_event(self, input_data: Dict) -> bool:
         """
         Handles key press events for the drone controller.
 
         Args:
-            key_code (int): The key code of the pressed key.
+            key_code (Dict): A dictionary containing either a 'key_code' for keyboard input
+                           or a 'voice_command' for voice input..
 
         Returns:
             True if a recognised key is pressed, False otherwise
         """
 
-        key_chr = keyboard.get_key_chr(key_code)
+        if "key_code" in input_data:
+            key_code = input_data["key_code"]
+            key_chr = keyboard.get_key_chr(key_code)
 
-        logger.info("Received key: %s (%d)", key_chr, key_code)
+            logger.info("Received key: %s (%d)", key_chr, key_code)
 
-        if key_chr in cc.QUIT_KEYS:
-            if self.model.in_flight:
-                self.model.land()
+            if key_chr in cc.QUIT_KEYS:
+                if self.model.in_flight:
+                    self.model.land()
+                return True
+            key_chr = keyboard.get_key_chr(key_code)
 
-            return True
+            keybindings = self.config.keyboard_bindings
+            key_action = conf_key_from_value(keybindings, key_code, key_chr)
+            if key_action is None:
+                logger.trace("Key %s not found in keybindings", key_chr)
+                return False
 
-        keybindings = self.config.keyboard_bindings
-        key_action = conf_key_from_value(keybindings, key_code, key_chr)
-        if key_action is None:
-            logger.trace("Key %s not found in keybindings", key_chr)
-            return False
+            key_recognised = key_action in vars(DroneActions).values()
+            if key_recognised:
+                self.perform_action(key_action)
+            else:
+                logger.warning("Key action %s not found in DroneActions", key_action)
+            return key_recognised
 
-        key_recognised = key_action in vars(DroneActions).values()
-        if key_recognised:
-            self.perform_action(key_action)
-        else:
-            logger.warning("Key action %s not found in DroneActions", key_action)
+        elif "voice_command" in input_data:
+            voice_command = input_data["voice_command"]
 
-        return key_recognised
+            if isinstance(voice_command, tuple):
 
-    def perform_action(self, command: str) -> None:
+                action, distance = voice_command
+            else:
+                action = voice_command
+                distance = None
+
+            logger.info("Received voice command: %s with distance: %s", action, distance)
+
+            voice_recognised = action in vars(DroneActions).values()
+
+            if voice_recognised:
+                self.perform_action(action, distance)
+            else:
+                logger.warning("Voice command %s not found in DroneActions", action)
+
+            return voice_recognised
+
+        return False
+
+    def perform_action(self, command: str, measurement: Optional[int]) -> None:
         """
         Handler for sending an action to the drone given a command.
 
@@ -239,6 +264,9 @@ class Controller:
 
         angle = 35
         dist = 20
+
+        angle = measurement if measurement is not None else angle
+        dist = measurement if measurement is not None else dist
 
         try:
             match command:
