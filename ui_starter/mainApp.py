@@ -4,6 +4,13 @@ from PyQt6.QtGui import QFontMetrics
 from windows import Window
 from main import Ui_MainWindow
 from signals import Signals
+from PyQt6 import QtCore, QtGui, QtWidgets
+from signals import Signals
+from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel, QProgressBar, QVBoxLayout, QWidget
+import sys
+from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel, QProgressBar, QVBoxLayout, QWidget
+from PyQt6.QtGui import QPixmap
+from PyQt6.QtCore import QTimer, Qt
 
 class MainApp (QMainWindow, Ui_MainWindow):
     def __init__(self):
@@ -11,10 +18,10 @@ class MainApp (QMainWindow, Ui_MainWindow):
         self.window = QMainWindow()
         self.setupUi(self)
 
-        self.central_widget = QWidget(self)
-        self.setCentralWidget(self.central_widget)
-        layout = QVBoxLayout()
-        layout.addWidget(self.recentCommand)
+        # self.central_widget = QWidget(self)
+        # self.setCentralWidget(self.central_widget)
+        # layout = QVBoxLayout()
+        # layout.addWidget(self.recentCommand)
   
 
 
@@ -33,33 +40,43 @@ class MainApp (QMainWindow, Ui_MainWindow):
         # updateRecentCommand of this class is called when updateCommand event triggered
         self.signals.updateCommand.connect(self.updateRecentCommand)
         self.signals.resize.connect(self.AH)
-        self.original_height = self.geometry().height()
-        self.original_recentCommand = self.recentCommand.geometry().top()
-        self.droneFeed_original = self.geometry().top()
 
     
     def resizeEvent(self, event):
+               # Resize the background image to fit the entire window
+        self.droneFeed.setGeometry(0, 0, self.width(), self.height())
+        self.droneFeed.setPixmap(self.background.scaled(self.width(), self.height(), Qt.AspectRatioMode.KeepAspectRatioByExpanding, Qt.TransformationMode.SmoothTransformation))
+
+        # Make sure that central_widget stays on top of the background
+        self.centralwidget.raise_()
         self.signals.resize.emit()
-        # print("Window has been resized")
-        # QtWidgets.QMainWindow.resizeEvent(self, event)
-    
+
     def AH(self):
-        print (self.contentsRect())
-        print ("Window has been resized")
-        coords = self.contentsRect().getCoords()
-        new_height = coords[3] - self.original_height
-        new_centre_recent_command = (coords[2] // 2) - (self.recentCommand.geometry().width() // 2)
-        new_centre_drone = (coords[2] // 2) - (self.droneFeed.geometry().width() // 2)
-        new_centre_video = (coords[2] // 2) - (self.videoFeed.geometry().width() // 2)
-        new_centre_progress_bar = (coords[2] // 2) - (self.progressBar.geometry().width() // 2)
+        print ("AH")
+
+    
+    # def resizeEvent(self, event):
+    #     self.signals.resize.emit()
+    #     # print("Window has been resized")
+    #     # QtWidgets.QMainWindow.resizeEvent(self, event)
+    
+    # def AH(self):
+    #     print (self.contentsRect())
+    #     print ("Window has been resized")
+    #     coords = self.contentsRect().getCoords()
+    #     new_height = coords[3] - self.original_height
+    #     new_centre_recent_command = (coords[2] // 2) - (self.recentCommand.geometry().width() // 2)
+    #     new_centre_drone = (coords[2] // 2) - (self.droneFeed.geometry().width() // 2)
+    #     new_centre_video = (coords[2] // 2) - (self.videoFeed.geometry().width() // 2)
+    #     new_centre_progress_bar = (coords[2] // 2) - (self.progressBar.geometry().width() // 2)
 
     
 
-        # self.recentCommand.setGeometry(QtCore.QRect(new_centre_recent_command, 10, 261, 31))
-        self.recentCommand.setGeometry(new_centre_recent_command, self.recentCommand.geometry().top(), self.recentCommand.geometry().width(), self.recentCommand.geometry().height())
-        self.droneFeed.setGeometry(new_centre_drone, self.droneFeed.geometry().top(), self.droneFeed.geometry().width(), self.droneFeed.geometry().height())
-        self.videoFeed.setGeometry(new_centre_video, self.videoFeed.geometry().top(), self.videoFeed.geometry().width(), self.videoFeed.geometry().height())
-        self.progressBar.setGeometry(new_centre_progress_bar, self.progressBar.geometry().top(), self.progressBar.geometry().width(), self.progressBar.geometry().height())
+    #     # self.recentCommand.setGeometry(QtCore.QRect(new_centre_recent_command, 10, 261, 31))
+    #     self.recentCommand.setGeometry(new_centre_recent_command, self.recentCommand.geometry().top(), self.recentCommand.geometry().width(), self.recentCommand.geometry().height())
+    #     self.droneFeed.setGeometry(new_centre_drone, self.droneFeed.geometry().top(), self.droneFeed.geometry().width(), self.droneFeed.geometry().height())
+    #     self.videoFeed.setGeometry(new_centre_video, self.videoFeed.geometry().top(), self.videoFeed.geometry().width(), self.videoFeed.geometry().height())
+    #     self.progressBar.setGeometry(new_centre_progress_bar, self.progressBar.geometry().top(), self.progressBar.geometry().width(), self.progressBar.geometry().height())
 
     def aboutWindow(self):
         """
