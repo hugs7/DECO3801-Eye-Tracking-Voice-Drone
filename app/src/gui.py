@@ -10,8 +10,8 @@ from queue import Queue
 import cv2
 import numpy as np
 from omegaconf import OmegaConf
-from PyQt6.QtWidgets import QMainWindow, QVBoxLayout, QWidget, QPushButton, QLabel, QDialog
-from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QLabel
+from PyQt6.QtCore import Qt, QRect
 from PyQt6.QtGui import QImage, QPixmap, QKeyEvent
 
 from common.logger_helper import init_logger
@@ -19,8 +19,7 @@ from common.common_gui import CommonGUI
 from common import constants as cc
 
 from options import PreferencesDialog
-from windows import Window
-from gui_signals import GuiSignals
+from about import AboutDialog
 from main_gui import MainGui
 import constants as c
 import utils.file_handler as file_handler
@@ -29,7 +28,7 @@ import utils.file_handler as file_handler
 logger = init_logger("DEBUG")
 
 
-class MainApp(QMainWindow, CommonGUI, MainGui):
+class MainApp(CommonGUI, MainGui):
     def __init__(self, stop_event: Event, thread_data: Dict, data_lock: Lock, interprocess_data: Dict):
         super().__init__()
         self.stop_event = stop_event
@@ -42,12 +41,6 @@ class MainApp(QMainWindow, CommonGUI, MainGui):
         self._init_feed_labels()
         self._init_timers()
         self._init_keyboard_queue()
-
-        self.actionAbout.triggered.connect(self.aboutWindow)
-        self.actionOptions.triggered.connect(self.optionsWindow)
-
-        self.signals = GuiSignals()
-        self.signals.updateCommand.connect(self.updateRecentCommand)
 
     def _init_config(self) -> OmegaConf:
         """
@@ -77,12 +70,17 @@ class MainApp(QMainWindow, CommonGUI, MainGui):
         logger.info("Initialising menu bar")
 
         menu_bar = self.menuBar()
+        menu_bar.setGeometry(QRect(0, 0, 626, 18))
         self.file_menu = menu_bar.addMenu("File")
 
         self._add_menu_action(self.file_menu, "Options", self._open_options)
         self.file_menu.addSeparator()
         self._add_menu_action(self.file_menu, "Quit", self.close_app)
 
+        self.help_menu = menu_bar.addMenu("Help")
+        self._add_menu_action(self.help_menu, "About", self._open_about)
+
+        self.retranslateUi(self)
         logger.info("Menu bar initialised")
 
     def _init_feed_labels(self) -> None:
@@ -111,45 +109,6 @@ class MainApp(QMainWindow, CommonGUI, MainGui):
         """
         with self.data_lock:
             self.thread_data[cc.KEYBOARD_QUEUE] = Queue()
-
-    def resizeEvent(self, event):
-        """
-        Handles the event where the window gets resized
-        """
-        # Resize the background image to fit the entire window
-        self.droneFeed.setGeometry(0, 0, self.width(), self.height())
-        self.droneFeed.setPixmap(self.background.scaled(self.width(), self.height(
-        ), Qt.AspectRatioMode.KeepAspectRatioByExpanding, Qt.TransformationMode.SmoothTransformation))
-
-        # Make sure that centralwidget stays on top of the background
-        self.centralwidget.raise_()
-        self.signals.resize.emit()
-
-    def aboutWindow(self):
-        """
-        Handles the event in which 'about' in the file menu is pressed. 
-        Currently, this method also triggers the 'updateCommand' event, just to show its usage
-        Some references
-        https://stackoverflow.com/questions/1807299/open-a-second-window-in-pyqt
-        https://pythonpyqt.com/pyqt-events/#:~:text=You%20can%20use%20any%20key,event%20that%20quits%20the%20program.&text=In%20our%20example%2C%20we%20reimplement%20the%20keyPressEvent()%20event%20handler.&text=If%20we%20press%20the%20Esc,the%20keyboard%2C%20the%20application%20terminates.
-        """
-        dialog = QDialog()
-        dialog.ui = Window()
-        dialog.ui.setupUi(dialog, "About text")
-        # Here is how to trigger the "updateCommand" event
-        self.signals.updateCommand.emit("Hello")
-        dialog.exec()
-
-    def optionsWindow(self):
-        """
-        Handles the event in which 'options' in the file menu is pressed. 
-        """
-        dialog = QDialog()
-        # Create a new pop-up dialog window
-        dialog.ui = Window()
-        # Edit options window to say some text
-        dialog.ui.setupUi(dialog, "Options text")
-        dialog.exec()
 
     def updateRecentCommand(self, newCommand):
         """
@@ -185,13 +144,18 @@ class MainApp(QMainWindow, CommonGUI, MainGui):
     def _open_options(self) -> None:
         """
         Open the options window
-
-        Returns:
-            None
         """
         logger.info("Opening options window")
-        dialog = PreferencesDialog()
-        dialog.exec()
+        options_dialog = PreferencesDialog()
+        options_dialog.exec()
+
+    def _open_about(self) -> None:
+        """
+        Opens the about window
+        """
+        logger.info("Opening about window")
+        about_dialog = AboutDialog()
+        about_dialog.exec()
 
     def _set_pixmap(self, label: QLabel, frame: np.ndarray) -> None:
         """

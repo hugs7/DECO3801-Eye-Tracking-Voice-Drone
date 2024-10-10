@@ -2,8 +2,8 @@
 Defines the options window for the gui
 """
 
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QComboBox, QPushButton, QCheckBox, QDialog
-from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QDialogButtonBox, QVBoxLayout, QLabel,  QDialog
+from PyQt6.QtCore import Qt, QMetaObject, QCoreApplication, QRect
 
 from common.common_gui import CommonGUI
 
@@ -20,34 +20,16 @@ class PreferencesDialog(QDialog, CommonGUI):
 
         self.__init_ui()
 
-    def __init_ui(self) -> None:
-        """
-        Initialise the UI elements for the preferences dialog
-        """
+    def __init_ui(self):
+        self.setObjectName("Options")
+        self.resize(389, 300)
 
-        # === Title ===
-        title = QLabel("Preferences")
-        title.setAlignment(Qt.AlignCenter)
-        self.layout.addWidget(title)
-
-        self.setLayout(self.layout)
-
-        # === Options ===
-
-        # === Gaze Tracking ===
-
-        self._add_label("Gaze Tracking")
-
-        # === Voice Control ===
-
-        self._add_label("Voice Control")
-
-        # === Drone Control ===
-
-        self._add_label("Drone Control")
-
-        # === OK Button ===
         self.ok_button = self._add_button("OK", self.accept)
-
-        # === Cancel Button ===
         self.cancel_button = self._add_button("Cancel", self.reject)
+
+        self.retranslateUi()
+        QMetaObject.connectSlotsByName(self)
+
+    def retranslateUi(self, ):
+        _translate = QCoreApplication.translate
+        self.setWindowTitle(_translate("Dialog", "Dialog"))
