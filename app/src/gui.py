@@ -260,15 +260,15 @@ class MainApp(CommonGUI, MainGui):
             logger.info("Voice command queue size %d", queue_size)
             next_command = command_queue.get()
 
-            command_text = next_command.get(cc.COMMAND_TEXT, None)
-            logger.info("Next voice command %s", command_text)
+            command: Tuple[str, int] = next_command.get(cc.COMMAND_TEXT, None)
+            logger.info("Next voice command %s", command)
 
             with self.data_lock:
                 if "keyboard_queue" in self.thread_data:
                     keyboard_queue: Optional[Queue] = self.thread_data["keyboard_queue"]
                     if keyboard_queue is not None:
                         keyboard_queue.put(
-                            {"voice_command": next_command.get("command")})
+                            {"voice_command": command})
                         logger.info("Voice command added to keyboard queue")
                     else:
                         logger.warning(

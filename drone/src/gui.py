@@ -120,7 +120,7 @@ class DroneApp(QMainWindow, CommonGUI):
             None
         """
         key_code = {"key_code": event.key()}
-        logger.info(f"Key pressed: {key_code[key_code]}")
+        logger.info(f"Key pressed: {key_code}")
 
         if key_code == Qt.Key.Key_Escape:
             self.close_app()
