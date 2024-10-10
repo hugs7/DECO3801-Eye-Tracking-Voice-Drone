@@ -1,21 +1,4 @@
-"""
-Run basic gui
-"""
-# from mainApp import MainApp
-# from PyQt6.QtWidgets import QApplication
-# import sys
-
-# app = QApplication(sys.argv)
-# app.setStyle('Fusion')
-# window = MainApp()
-# sys.exit(app.exec())
-
-
-# from mainApp import MainApp
-# from PyQt6.QtWidgets import QApplication, QMainWindow
-# import sys
-# from main import Ui_MainWindow
-from mainApp import MainApp
+from ui_starter.main_app import MainApp
 from PyQt6.QtWidgets import QApplication
 import sys
 

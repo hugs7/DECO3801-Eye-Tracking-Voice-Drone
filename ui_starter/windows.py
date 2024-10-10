@@ -34,17 +34,3 @@ class Window(object):
 
 
 
-# from PyQt6.QtWidgets import QApplication, QMainWindow, QPushButton, QLabel, QVBoxLayout, QWidget
-# import sys
-
-
-# class AboutWindow(QWidget):
-
-#     def __init__(self):
-#         super().__init__()
-#         layout = QVBoxLayout()
-#         self.label = QLabel("About ;jdglbluhjvslaufhvs")
-        
-#         layout.addWidget(self.label)
-#         self.setLayout(layout)
-    
