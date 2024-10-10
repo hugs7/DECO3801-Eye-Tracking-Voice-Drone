@@ -3,9 +3,9 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtGui import QFontMetrics
 from app.src.windows import Window
 from main import Ui_MainWindow
-from app.src.signals import Signals
+from app.src.gui_signals import GuiSignals
 from PyQt6 import QtCore, QtGui, QtWidgets
-from app.src.signals import Signals
+from app.src.gui_signals import GuiSignals
 from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel, QProgressBar, QVBoxLayout, QWidget
 import sys
 from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel, QProgressBar, QVBoxLayout, QWidget
@@ -22,7 +22,7 @@ class MainApp (QMainWindow, Ui_MainWindow):
         self.actionOptions.triggered.connect(self.optionsWindow)
 
         # Event handling from anywhere/anytime
-        self.signals = Signals()
+        self.signals = GuiSignals()
 
         # updateRecentCommand method of this class is called when "updateCommand" event triggered
         self.signals.updateCommand.connect(self.updateRecentCommand)

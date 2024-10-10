@@ -20,6 +20,8 @@ from common import constants as cc
 
 from options import PreferencesDialog
 from windows import Window
+from gui_signals import GuiSignals
+from main_gui import MainGui
 import constants as c
 import utils.file_handler as file_handler
 
@@ -27,7 +29,7 @@ import utils.file_handler as file_handler
 logger = init_logger("DEBUG")
 
 
-class MainApp(QMainWindow, CommonGUI):
+class MainApp(QMainWindow, CommonGUI, MainGui):
     def __init__(self, stop_event: Event, thread_data: Dict, data_lock: Lock, interprocess_data: Dict):
         super().__init__()
         self.stop_event = stop_event
@@ -40,6 +42,12 @@ class MainApp(QMainWindow, CommonGUI):
         self._init_feed_labels()
         self._init_timers()
         self._init_keyboard_queue()
+
+        self.actionAbout.triggered.connect(self.aboutWindow)
+        self.actionOptions.triggered.connect(self.optionsWindow)
+
+        self.signals = GuiSignals()
+        self.signals.updateCommand.connect(self.updateRecentCommand)
 
     def _init_config(self) -> OmegaConf:
         """

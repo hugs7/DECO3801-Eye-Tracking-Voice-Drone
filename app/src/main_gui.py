@@ -7,7 +7,7 @@
 
 
 from PyQt6 import QtCore, QtGui, QtWidgets
-from signals import Signals
+from app.src.gui_signals import GuiSignals
 from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel, QProgressBar, QVBoxLayout, QWidget
 import sys
 from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel, QProgressBar, QVBoxLayout, QWidget
@@ -15,7 +15,7 @@ from PyQt6.QtGui import QPixmap
 from PyQt6.QtCore import QTimer, Qt
 
 
-class Ui_MainWindow(object):
+class MainGui(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(635, 523)
