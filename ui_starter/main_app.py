@@ -1,11 +1,11 @@
 from PyQt6.QtWidgets import *
 from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtGui import QFontMetrics
-from windows import Window
+from app.src.windows import Window
 from main import Ui_MainWindow
-from signals import Signals
+from app.src.signals import Signals
 from PyQt6 import QtCore, QtGui, QtWidgets
-from signals import Signals
+from app.src.signals import Signals
 from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel, QProgressBar, QVBoxLayout, QWidget
 import sys
 from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel, QProgressBar, QVBoxLayout, QWidget

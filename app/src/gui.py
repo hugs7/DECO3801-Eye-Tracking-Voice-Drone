@@ -3,21 +3,23 @@ Handles GUI for the application using PyQt6
 """
 
 from typing import Dict, List, Union, Tuple, Optional
-from PyQt6.QtWidgets import QMainWindow, QVBoxLayout, QWidget, QPushButton, QLabel
-from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QImage, QPixmap, QKeyEvent
-import cv2
-import numpy as np
 from threading import Event, Lock
-from omegaconf import OmegaConf
 from multiprocessing import Queue as MPQueue
 from queue import Queue
+
+import cv2
+import numpy as np
+from omegaconf import OmegaConf
+from PyQt6.QtWidgets import QMainWindow, QVBoxLayout, QWidget, QPushButton, QLabel, QDialog
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QImage, QPixmap, QKeyEvent
 
 from common.logger_helper import init_logger
 from common.common_gui import CommonGUI
 from common import constants as cc
 
 from options import PreferencesDialog
+from windows import Window
 import constants as c
 import utils.file_handler as file_handler
 
@@ -147,6 +149,53 @@ class MainApp(QMainWindow, CommonGUI):
         """
         with self.data_lock:
             self.thread_data[cc.KEYBOARD_QUEUE] = Queue()
+
+    def resizeEvent(self, event):
+        """
+        Handles the event where the window gets resized
+        """
+        # Resize the background image to fit the entire window
+        self.droneFeed.setGeometry(0, 0, self.width(), self.height())
+        self.droneFeed.setPixmap(self.background.scaled(self.width(), self.height(), Qt.AspectRatioMode.KeepAspectRatioByExpanding, Qt.TransformationMode.SmoothTransformation))
+
+        # Make sure that centralwidget stays on top of the background
+        self.centralwidget.raise_()
+        self.signals.resize.emit()
+
+    def aboutWindow(self):
+        """
+        Handles the event in which 'about' in the file menu is pressed. 
+        Currently, this method also triggers the 'updateCommand' event, just to show its usage
+        Some references
+        https://stackoverflow.com/questions/1807299/open-a-second-window-in-pyqt
+        https://pythonpyqt.com/pyqt-events/#:~:text=You%20can%20use%20any%20key,event%20that%20quits%20the%20program.&text=In%20our%20example%2C%20we%20reimplement%20the%20keyPressEvent()%20event%20handler.&text=If%20we%20press%20the%20Esc,the%20keyboard%2C%20the%20application%20terminates.
+        """
+        dialog = QDialog()
+        dialog.ui = Window()
+        dialog.ui.setupUi(dialog, "About text")
+        self.signals.updateCommand.emit("Hello")  #Here is how to trigger the "updateCommand" event
+        dialog.exec()
+
+    def optionsWindow(self):        
+        """
+        Handles the event in which 'options' in the file menu is pressed. 
+        """
+        dialog = QDialog()
+        #Create a new pop-up dialog window
+        dialog.ui = Window()
+        #Edit options window to say some text
+        dialog.ui.setupUi(dialog, "Options text")
+        dialog.exec()
+
+    def updateRecentCommand(self, newCommand):
+        """
+        Updates the recent command at the top, to some given new command
+
+        Args:
+            newCommand (string): the new command to be updated to
+        """
+        self.recentCommand.setText(newCommand)
+ 
 
     def keyPressEvent(self, event: QKeyEvent) -> None:
         """
