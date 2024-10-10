@@ -61,59 +61,13 @@ class MainApp(QMainWindow, CommonGUI, MainGui):
         configs_folder = file_handler.get_configs_folder()
         gui_config = configs_folder / "gui.yaml"
         if not gui_config.exists():
-            raise FileNotFoundError(f"GUI configuration file not found: {gui_config}")
+            raise FileNotFoundError(
+                f"GUI configuration file not found: {gui_config}")
 
         config = OmegaConf.load(gui_config)
         logger.info("Configuration initialised")
 
         return config
-
-    def _init_gui(self) -> None:
-        """
-        Initialises the main window layout
-        """
-
-        logger.info("Initialising GUI")
-
-        # Set up the main window layout
-        self.setWindowTitle(c.WINDOW_TITLE)
-
-        # Main widget container
-        self.main_widget = QWidget(self)
-        self.setCentralWidget(self.main_widget)
-
-        self.layout = QVBoxLayout(self.main_widget)
-
-        # Main video feed display
-        self.main_video_label = QLabel(self)
-        self.main_video_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.layout.addWidget(self.main_video_label)
-
-        # Side video feed display
-        self.side_video_label = QLabel(self)
-        self.side_video_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.layout.addWidget(self.side_video_label)
-
-        # Button to switch video feeds
-        self.switch_button = QPushButton("Switch", self)
-        self.switch_button.clicked.connect(self._switch_feeds)
-        self.layout.addWidget(self.switch_button)
-        self.switch_button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-
-        # Quit button
-        self.quit_button = QPushButton("Quit", self)
-        self.quit_button.clicked.connect(self.close_app)
-        self.layout.addWidget(self.quit_button)
-        self.quit_button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-
-        self._init_menu()
-
-        # Window size
-        logger.info("Configuring window size")
-        self.setGeometry(100, 100, 800, 600)
-        self.setMinimumSize(c.WIN_MIN_HEIGHT, c.WIN_MIN_WIDTH)
-
-        logger.info("GUI initialised")
 
     def _init_menu(self) -> None:
         """
@@ -164,7 +118,8 @@ class MainApp(QMainWindow, CommonGUI, MainGui):
         """
         # Resize the background image to fit the entire window
         self.droneFeed.setGeometry(0, 0, self.width(), self.height())
-        self.droneFeed.setPixmap(self.background.scaled(self.width(), self.height(), Qt.AspectRatioMode.KeepAspectRatioByExpanding, Qt.TransformationMode.SmoothTransformation))
+        self.droneFeed.setPixmap(self.background.scaled(self.width(), self.height(
+        ), Qt.AspectRatioMode.KeepAspectRatioByExpanding, Qt.TransformationMode.SmoothTransformation))
 
         # Make sure that centralwidget stays on top of the background
         self.centralwidget.raise_()
@@ -181,17 +136,18 @@ class MainApp(QMainWindow, CommonGUI, MainGui):
         dialog = QDialog()
         dialog.ui = Window()
         dialog.ui.setupUi(dialog, "About text")
-        self.signals.updateCommand.emit("Hello")  #Here is how to trigger the "updateCommand" event
+        # Here is how to trigger the "updateCommand" event
+        self.signals.updateCommand.emit("Hello")
         dialog.exec()
 
-    def optionsWindow(self):        
+    def optionsWindow(self):
         """
         Handles the event in which 'options' in the file menu is pressed. 
         """
         dialog = QDialog()
-        #Create a new pop-up dialog window
+        # Create a new pop-up dialog window
         dialog.ui = Window()
-        #Edit options window to say some text
+        # Edit options window to say some text
         dialog.ui.setupUi(dialog, "Options text")
         dialog.exec()
 
@@ -203,7 +159,6 @@ class MainApp(QMainWindow, CommonGUI, MainGui):
             newCommand (string): the new command to be updated to
         """
         self.recentCommand.setText(newCommand)
- 
 
     def keyPressEvent(self, event: QKeyEvent) -> None:
         """
