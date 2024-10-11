@@ -434,7 +434,7 @@ class GazeDetector:
         """
 
         if self.running_in_thread:
-            if "keyboard_queue" not in self.thread_data.keys():
+            if cc.KEYBOARD_QUEUE not in self.thread_data.keys():
                 logger.trace("Keyboard queue not yet initialised in shared data.")
                 return False
 
@@ -443,7 +443,11 @@ class GazeDetector:
             # practice for more complex inputs.
             key_buffer: List[int] = []
             with self.data_lock:
+<<<<<<< HEAD
                 keyboard_queue: Optional[PeekableQueue] = self.thread_data["keyboard_queue"]
+=======
+                keyboard_queue: Optional[Queue] = self.thread_data[cc.KEYBOARD_QUEUE]
+>>>>>>> 4cd5385 (Use constants for keyboard queue key)
                 if keyboard_queue is not None:
                     while not keyboard_queue.empty():
                         key_code: Dict = keyboard_queue.get()

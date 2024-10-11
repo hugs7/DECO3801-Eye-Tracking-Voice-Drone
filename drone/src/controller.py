@@ -171,7 +171,7 @@ class Controller:
         # Not critical while keyboard inputs are simple, however, this is good
         # practice for more complex inputs.
         key_buffer: List[Dict] = []
-        if "keyboard_queue" not in self.thread_data:
+        if cc.KEYBOARD_QUEUE not in self.thread_data:
             logger.trace("Keyboard queue not yet initialised in shared data.")
             return False
 
