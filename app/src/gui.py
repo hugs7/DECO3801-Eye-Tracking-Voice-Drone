@@ -35,6 +35,8 @@ class MainApp(CommonGUI, MainGui):
         self.data_lock = data_lock
         self.interprocess_data = interprocess_data
 
+        super().__init__()
+
         self.config = self._init_config()
         self._init_gui()
         self._init_qpixmaps()

@@ -18,6 +18,9 @@ logger = init_logger()
 
 
 class MainGui(QMainWindow):
+    def __init__(self):
+        self.timers = dict()
+
     def _init_gui(self):
         super().__init__()
         self.setObjectName("MainWindow")
