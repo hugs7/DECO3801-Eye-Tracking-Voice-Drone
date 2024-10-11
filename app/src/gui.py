@@ -20,7 +20,6 @@ from common.PeekableQueue import PeekableQueue
 
 from options import PreferencesDialog
 from about import AboutDialog
-import constants as c
 import utils.file_handler as file_handler
 
 
