@@ -181,7 +181,7 @@ class Controller:
         # Not critical while keyboard inputs are simple, however, this is good
         # practice for more complex inputs.
         key_buffer: List[Dict] = []
-        if cc.KEYBOARD_QUEUE not in self.thread_data:
+        if cc.KEYBOARD_QUEUE not in self.thread_data.keys():
             logger.trace("Keyboard queue not yet initialised in shared data.")
             return False
 
@@ -312,20 +312,21 @@ class Controller:
             logger.warning("_wait_voice_command should not be called in main mode")
             return False
 
-        if cc.VOICE_CONTROL not in self.thread_data:
-            logger.trace("Voice control not yet initialised in shared data.")
+        if cc.DRONE not in self.thread_data.keys():
+            logger.trace("Drone not yet initialised in shared data.")
             return False
 
         command_buffer: List[List] = []
         with self.data_lock:
-            voice_control_data: Optional[Dict] = self.thread_data[cc.VOICE_CONTROL]
-            command_queue: PeekableQueue = voice_control_data[cc.COMMAND_QUEUE]
+            drone_data: Optional[Dict] = self.thread_data[cc.DRONE]
+            if cc.COMMAND_QUEUE not in drone_data:
+                logger.trace("Command queue not yet initialised in shared data.")
+                return False
+
+            command_queue: PeekableQueue = drone_data[cc.COMMAND_QUEUE]
             while not command_queue.empty():
                 voice_command = command_queue.get()
                 command_buffer.append(voice_command)
-            else:
-                logger.warning("Voice control data not initialised in shared data.")
-                return False
 
         accepted_commands = []
         if not self.drone_connected:
