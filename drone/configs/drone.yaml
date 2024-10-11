@@ -15,7 +15,7 @@ tello:
     video_fps: 30
     camera_selection: forward
 controller:
-    connect_to_drone: true
+    connect_to_drone: false
     max_tick_rate: 30
     keyboard_bindings:
         land: l
