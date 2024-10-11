@@ -6,7 +6,7 @@ Last Updated: 21/08/2024
 
 import datetime
 import pathlib
-from typing import Optional, Tuple, Dict, List
+from typing import Optional, Tuple, Dict
 from threading import Event, Lock
 
 import cv2
@@ -441,24 +441,8 @@ class GazeDetector:
                 logger.trace("Keyboard queue not yet initialised in shared data.")
                 return False
 
-            # Define a buffer so that we are not locking the data for too long.
-            # Not critical while keyboard inputs are simple, however, this is good
-            # practice for more complex inputs.
-            key_buffer: List[int] = []
-            with self.data_lock:
-                keyboard_queue: Optional[PeekableQueue] = self.thread_data[cc.KEYBOARD_QUEUE]
-                if keyboard_queue is not None:
-                    while not keyboard_queue.empty():
-                        key_code = keyboard_queue.peek()
-                        is_bound = keyboard.is_key_bound(self.keyboard_bindings, key)
-                        if is_bound:
-                            key = keyboard_queue.get()
-                            key_buffer.append(key)
-                        else:
-                            logger.trace("Key %s not bound in keybindings", keyboard.get_key_chr(key_code))
-
-                else:
-                    logger.warning("Keyboard queue not initialised in shared data.")
+            keyboard_queue: PeekableQueue = self.thread_data[cc.KEYBOARD_QUEUE]
+            key_buffer = keyboard.keyboard_event_loop(self.data_lock, keyboard_queue, self.keyboard_bindings)
 
             accepted_keys = []
             for key_code in key_buffer:

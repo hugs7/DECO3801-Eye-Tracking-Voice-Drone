@@ -180,32 +180,16 @@ class Controller:
             logger.warning("_wait_key should not be called in main mode")
             return False
 
-        # Define a buffer so that we are not locking the data for too long.
-        # Not critical while keyboard inputs are simple, however, this is good
-        # practice for more complex inputs.
-        key_buffer: List[int] = []
         if cc.KEYBOARD_QUEUE not in self.thread_data.keys():
             logger.trace("Keyboard queue not yet initialised in shared data.")
             return False
 
-        with self.data_lock:
-            keyboard_queue: Optional[PeekableQueue] = self.thread_data[cc.KEYBOARD_QUEUE]
-            if keyboard_queue is not None:
-                while not keyboard_queue.empty():
-                    key_code = keyboard_queue.peek()
-                    is_bound = keyboard.is_key_bound(self.keyboard_bindings, key_code)
-                    if is_bound:
-                        key_code = keyboard_queue.get()
-                        key_buffer.append(key_code)
-                    else:
-                        logger.trace("Key %s not bound in keybindings", keyboard.get_key_chr(key_code))
-            else:
-                logger.warning("Keyboard queue not initialised in shared data.")
-
-        accepted_keys = []
+        keyboard_queue: PeekableQueue = self.thread_data[cc.KEYBOARD_QUEUE]
+        key_buffer = keyboard.keyboard_event_loop(self.data_lock, keyboard_queue, self.keyboard_bindings)
         if not self.drone_connected:
             return
 
+        accepted_keys = []
         for key_code in key_buffer:
             accepted_keys.append(self._handle_key_event(key_code))
 
