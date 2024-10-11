@@ -41,6 +41,7 @@ class MainGui(QMainWindow):
 
         self.webcam_video_label = QLabel("webcam", self.centralwidget)
         self.webcam_video_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.webcam_video_label.setScaledContents(True)
         self.webcam_video_label.setStyleSheet("color: red; font-size: 14px;")
 
         self.layout = QVBoxLayout(self.centralwidget)

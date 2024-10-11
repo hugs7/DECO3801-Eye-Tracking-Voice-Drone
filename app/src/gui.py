@@ -151,19 +151,28 @@ class MainApp(CommonGUI, MainGui):
         about_dialog = AboutDialog()
         about_dialog.exec()
 
-    def _set_pixmap(self, label: QLabel, frame: np.ndarray) -> QPixmap:
+    def _set_pixmap(self, label: QLabel, frame: np.ndarray, retain_label_size: bool = True) -> QPixmap:
         """
         Set the pixmap of the label to the frame
 
         Args:
             label: The QLabel to update
             frame: The frame to display
+            retain_label_size: If true, updated frame will scale to size of label.
 
         Returns:
             [QPixmap]: Converted qpix map from frame
         """
         q_img = self._convert_frame_to_qimage(frame)
         pixmap = QPixmap.fromImage(q_img)
+        if retain_label_size:
+            if not label.hasScaledContents():
+                logger.warning(
+                    "Label %s does not have scaled contents. Setting true", label.objectName())
+                label.setScaledContents(True)
+            pixmap = pixmap.scaled(label.size(
+            ), Qt.AspectRatioMode.KeepAspectRatio,  Qt.TransformationMode.SmoothTransformation)
+
         label.setPixmap(pixmap)
         return pixmap
 
