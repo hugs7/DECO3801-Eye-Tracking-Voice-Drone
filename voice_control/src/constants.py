@@ -26,6 +26,3 @@ READ_BINARY_MODE = "rb"
 WAV = ".wav"
 AUDIO_FILE_EXTENSIONS = [WAV]
 MAX_VOLUME_THRESHOLD = 10
-
-# Voice Control
-LOOP_TOGGLE = "loop_toggle"

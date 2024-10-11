@@ -46,8 +46,6 @@ class VoiceController:
         if self.running_in_process:
             logger.info("Running in process mode")
             self.interprocess_data = interprocess_data
-            if c.LOOP_TOGGLE not in interprocess_data:
-                self.interprocess_data[c.LOOP_TOGGLE] = self.loop_toggle
         else:
             logger.info("Running in main mode")
 
@@ -124,7 +122,6 @@ class VoiceController:
         match key_action:
             case VoiceActions.LOOP_TOGGLE:
                 self.loop_toggle = not self.loop_toggle
-                self.interprocess_data[cc.VOICE_CONTROL][c.LOOP_TOGGLE] = self.loop_toggle
 
     def audio_loop(self) -> bool:
         """
