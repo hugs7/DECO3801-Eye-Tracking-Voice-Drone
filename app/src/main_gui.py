@@ -40,11 +40,10 @@ class MainGui(QMainWindow):
         self.recentCommand.setStyleSheet("color: red; font-size: 14px;")
 
         self.webcam_video_label = QLabel("webcam", self.centralwidget)
-        self.webcam_video_label.setFixedSize(200, 150)
         self.webcam_video_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.webcam_video_label.setScaledContents(True)
         self.webcam_video_label.setStyleSheet("color: red; font-size: 14px;")
-        self._position_webcam_label()
+        self._resize_and_position_webcam_label()
 
         self.layout = QVBoxLayout(self.centralwidget)
         self.layout.addWidget(self.recentCommand)
@@ -62,16 +61,30 @@ class MainGui(QMainWindow):
         self.webcam_pixmap: Optional[QPixmap] = None
         self.drone_pixmap: Optional[QPixmap] = None
 
-    def _position_webcam_label(self):
+    def _resize_and_position_webcam_label(self):
         """
-        Position the webcam label at the bottom center of the window.
+        Resize and position the webcam label at the bottom center of the window,
+        keeping the 16:9 aspect ratio and using 20% of the window's area.
         """
+        # Get the current window size
         window_width = self.width()
         window_height = self.height()
 
+        # Set the desired area percentage (20% of window's area)
+        desired_area_fraction = 0.20
+        target_area = window_width * window_height * desired_area_fraction
+
+        # Maintain the 16:9 aspect ratio
+        aspect_ratio = 16 / 9
+        target_height = int((target_area / aspect_ratio) ** 0.5)
+        target_width = int(target_height * aspect_ratio)
+
         # Calculate the position for bottom center alignment
-        x_pos = (window_width - self.webcam_video_label.width()) // 2
-        y_pos = window_height - self.webcam_video_label.height() - 20
+        x_pos = (window_width - target_width) // 2
+        y_pos = window_height - target_height - 20  # 20 pixels above the bottom
+
+        # Resize the webcam label to the new size
+        self.webcam_video_label.setFixedSize(target_width, target_height)
 
         # Move the webcam label to the calculated position
         self.webcam_video_label.move(x_pos, y_pos)
@@ -100,6 +113,6 @@ class MainGui(QMainWindow):
         """
 
         self.__resize_drone_frame()
-        self._position_webcam_label()
+        self._resize_and_position_webcam_label()
 
         return super().resizeEvent(event)
