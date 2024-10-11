@@ -30,7 +30,6 @@ logger = init_logger("DEBUG")
 
 class MainApp(CommonGUI, MainGui):
     def __init__(self, stop_event: Event, thread_data: Dict, data_lock: Lock, interprocess_data: Dict):
-        super().__init__()
         self.stop_event = stop_event
         self.thread_data = thread_data
         self.data_lock = data_lock

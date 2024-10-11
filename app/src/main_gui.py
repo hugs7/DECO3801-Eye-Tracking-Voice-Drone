@@ -19,6 +19,7 @@ logger = init_logger()
 
 class MainGui(QMainWindow):
     def _init_gui(self):
+        super().__init__()
         self.setObjectName("MainWindow")
         self.resize(635, 523)
 
