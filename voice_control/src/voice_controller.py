@@ -204,6 +204,6 @@ class VoiceController:
 
         command_text = command_data[cc.COMMAND_TEXT]
         logger.info("Setting voice command to '%s'", command_text)
-        command_queue: MPQueue = self.manager_data[cc.VOICE_CONTROL][cc.COMMAND_QUEUE]
+        command_queue: MPQueue = self.interprocess_data[cc.VOICE_CONTROL][cc.COMMAND_QUEUE]
         command_queue.put(command_data)
         logger.debug("Voice command added to command queue of length %d.", command_queue.qsize())
