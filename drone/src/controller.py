@@ -15,6 +15,7 @@ from common.omegaconf_helper import conf_key_from_value
 from common.loop import run_loop_with_max_tickrate
 from common.PeekableQueue import PeekableQueue
 
+from . import constants as c
 from .drone_actions import DroneActions
 from .models.tello_drone import TelloDrone
 from .models.mavic_drone import MavicDrone
@@ -287,8 +288,6 @@ class Controller:
                 action = voice_command
                 distance = None
 
-            logger.info("Received voice command: %s with distance: %s", action, distance)
-
             voice_recognised = action in vars(DroneActions).values()
 
             if voice_recognised:
@@ -350,13 +349,22 @@ class Controller:
             accepted (bool): True if the command was accepted, False otherwise.
         """
 
-        logger.info("Performing action: %s", command)
-
         angle = 35
         dist = 20
 
         angle = measurement or angle
         dist = measurement or dist
+
+        magnitude = None
+        if command in c.DRONE_MOVEMENT_ACTIONS:
+            magnitude = dist
+        elif command in c.DRONE_ROTATION_ACTIONS:
+            magnitude = angle
+        else:
+            logger.info("Performing action: %s", command)
+
+        if magnitude is not None:
+            logger.info("Performing action: %s with magnitude", command, magnitude)
 
         try:
             match command:
