@@ -344,6 +344,8 @@ class Controller:
         Args:
             command (str): The command to send to the drone. Can be any of the
                             commands defined in DroneActions.
+            measurement (Optional[int]): The measurement to send with the command.
+                                         Default is None.
 
         Returns:
             accepted (bool): True if the command was accepted, False otherwise.
