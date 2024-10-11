@@ -89,7 +89,6 @@ class VoiceController:
             logger.warning("Keyboard queue not initialised in shared data.")
 
     def _keyboard_controller(self, key_code: int) -> None:
-
         key_chr = chr(key_code).lower()
         logger.info(f"Received key: %s (%d)", key_chr, key_code)
 
