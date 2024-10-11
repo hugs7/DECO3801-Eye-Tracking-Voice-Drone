@@ -4,7 +4,6 @@ Controller for the drone, handles the input of a drone from voice, Gaze or manua
 
 from typing import Union, Optional, Dict, List
 from threading import Event, Lock
-from queue import Queue
 import sys
 
 from omegaconf import OmegaConf
@@ -14,6 +13,7 @@ from common import constants as cc, keyboard
 from common.logger_helper import init_logger
 from common.omegaconf_helper import conf_key_from_value
 from common.loop import run_loop_with_max_tickrate
+from common.PeekableQueue import PeekableQueue
 
 from .drone_actions import DroneActions
 from .models.tello_drone import TelloDrone
@@ -176,7 +176,7 @@ class Controller:
             return False
 
         with self.data_lock:
-            keyboard_queue: Optional[Queue] = self.thread_data[cc.KEYBOARD_QUEUE]
+            keyboard_queue: Optional[PeekableQueue] = self.thread_data[cc.KEYBOARD_QUEUE]
             if keyboard_queue is not None:
                 while not keyboard_queue.empty():
                     key: int = keyboard_queue.get()
