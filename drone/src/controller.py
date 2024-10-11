@@ -319,7 +319,7 @@ class Controller:
         command_buffer: List[List] = []
         with self.data_lock:
             voice_control_data: Optional[Dict] = self.thread_data[cc.VOICE_CONTROL]
-            command_queue: Optional[PeekableQueue] = voice_control_data[cc.COMMAND_QUEUE]
+            command_queue: PeekableQueue = voice_control_data[cc.COMMAND_QUEUE]
             while not command_queue.empty():
                 voice_command = command_queue.get()
                 command_buffer.append(voice_command)
