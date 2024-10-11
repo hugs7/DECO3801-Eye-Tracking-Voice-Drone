@@ -3,21 +3,24 @@ Handles GUI for the application using PyQt6
 """
 
 from typing import Dict, List, Union, Tuple, Optional
-from PyQt6.QtWidgets import QMainWindow, QVBoxLayout, QWidget, QPushButton, QLabel
-from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QImage, QPixmap, QKeyEvent
-import cv2
-import numpy as np
 from threading import Event, Lock
-from omegaconf import OmegaConf
 from multiprocessing import Queue as MPQueue
 from queue import Queue
+
+import cv2
+import numpy as np
+from omegaconf import OmegaConf
+from PyQt6.QtWidgets import QLabel
+from PyQt6.QtCore import Qt, QRect
+from PyQt6.QtGui import QImage, QPixmap, QKeyEvent
 
 from common.logger_helper import init_logger
 from common.common_gui import CommonGUI
 from common import constants as cc
 
 from options import PreferencesDialog
+from about import AboutDialog
+from main_gui import MainGui
 import constants as c
 import utils.file_handler as file_handler
 
@@ -25,17 +28,18 @@ import utils.file_handler as file_handler
 logger = init_logger("DEBUG")
 
 
-class MainApp(QMainWindow, CommonGUI):
+class MainApp(CommonGUI, MainGui):
     def __init__(self, stop_event: Event, thread_data: Dict, data_lock: Lock, interprocess_data: Dict):
-        super().__init__()
         self.stop_event = stop_event
         self.thread_data = thread_data
         self.data_lock = data_lock
         self.interprocess_data = interprocess_data
 
+        super().__init__()
+
         self.config = self._init_config()
         self._init_gui()
-        self._init_feed_labels()
+        self._init_qpixmaps()
         self._init_timers()
         self._init_keyboard_queue()
 
@@ -51,59 +55,13 @@ class MainApp(QMainWindow, CommonGUI):
         configs_folder = file_handler.get_configs_folder()
         gui_config = configs_folder / "gui.yaml"
         if not gui_config.exists():
-            raise FileNotFoundError(f"GUI configuration file not found: {gui_config}")
+            raise FileNotFoundError(
+                f"GUI configuration file not found: {gui_config}")
 
         config = OmegaConf.load(gui_config)
         logger.info("Configuration initialised")
 
         return config
-
-    def _init_gui(self) -> None:
-        """
-        Initialises the main window layout
-        """
-
-        logger.info("Initialising GUI")
-
-        # Set up the main window layout
-        self.setWindowTitle(c.WINDOW_TITLE)
-
-        # Main widget container
-        self.main_widget = QWidget(self)
-        self.setCentralWidget(self.main_widget)
-
-        self.layout = QVBoxLayout(self.main_widget)
-
-        # Main video feed display
-        self.main_video_label = QLabel(self)
-        self.main_video_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.layout.addWidget(self.main_video_label)
-
-        # Side video feed display
-        self.side_video_label = QLabel(self)
-        self.side_video_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.layout.addWidget(self.side_video_label)
-
-        # Button to switch video feeds
-        self.switch_button = QPushButton("Switch", self)
-        self.switch_button.clicked.connect(self._switch_feeds)
-        self.layout.addWidget(self.switch_button)
-        self.switch_button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-
-        # Quit button
-        self.quit_button = QPushButton("Quit", self)
-        self.quit_button.clicked.connect(self.close_app)
-        self.layout.addWidget(self.quit_button)
-        self.quit_button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-
-        self._init_menu()
-
-        # Window size
-        logger.info("Configuring window size")
-        self.setGeometry(100, 100, 800, 600)
-        self.setMinimumSize(c.WIN_MIN_HEIGHT, c.WIN_MIN_WIDTH)
-
-        logger.info("GUI initialised")
 
     def _init_menu(self) -> None:
         """
@@ -113,20 +71,18 @@ class MainApp(QMainWindow, CommonGUI):
         logger.info("Initialising menu bar")
 
         menu_bar = self.menuBar()
+        menu_bar.setGeometry(QRect(0, 0, 626, 18))
         self.file_menu = menu_bar.addMenu("File")
 
         self._add_menu_action(self.file_menu, "Options", self._open_options)
         self.file_menu.addSeparator()
         self._add_menu_action(self.file_menu, "Quit", self.close_app)
 
-        logger.info("Menu bar initialised")
+        self.help_menu = menu_bar.addMenu("Help")
+        self._add_menu_action(self.help_menu, "About", self._open_about)
 
-    def _init_feed_labels(self) -> None:
-        """
-        Initialise the labels for the video feeds
-        """
-        self.drone_video_label = self.main_video_label
-        self.webcam_video_label = self.side_video_label
+        self.retranslateUi(self)
+        logger.info("Menu bar initialised")
 
     def _init_timers(self) -> None:
         """
@@ -147,6 +103,15 @@ class MainApp(QMainWindow, CommonGUI):
         """
         with self.data_lock:
             self.thread_data[cc.KEYBOARD_QUEUE] = Queue()
+
+    def updateRecentCommand(self, newCommand):
+        """
+        Updates the recent command at the top, to some given new command
+
+        Args:
+            newCommand (string): the new command to be updated to
+        """
+        self.recentCommand.setText(newCommand)
 
     def keyPressEvent(self, event: QKeyEvent) -> None:
         """
@@ -173,27 +138,43 @@ class MainApp(QMainWindow, CommonGUI):
     def _open_options(self) -> None:
         """
         Open the options window
-
-        Returns:
-            None
         """
         logger.info("Opening options window")
-        dialog = PreferencesDialog()
-        dialog.exec()
+        options_dialog = PreferencesDialog()
+        options_dialog.exec()
 
-    def _set_pixmap(self, label: QLabel, frame: np.ndarray) -> None:
+    def _open_about(self) -> None:
+        """
+        Opens the about window
+        """
+        logger.info("Opening about window")
+        about_dialog = AboutDialog()
+        about_dialog.exec()
+
+    def _set_pixmap(self, label: QLabel, frame: np.ndarray, retain_label_size: bool = True) -> QPixmap:
         """
         Set the pixmap of the label to the frame
 
         Args:
             label: The QLabel to update
             frame: The frame to display
+            retain_label_size: If true, updated frame will scale to size of label.
 
         Returns:
-            None
+            [QPixmap]: Converted qpix map from frame
         """
         q_img = self._convert_frame_to_qimage(frame)
-        label.setPixmap(QPixmap.fromImage(q_img))
+        pixmap = QPixmap.fromImage(q_img)
+        if retain_label_size:
+            if not label.hasScaledContents():
+                logger.warning(
+                    "Label %s does not have scaled contents. Setting true", label.objectName())
+                label.setScaledContents(True)
+            pixmap = pixmap.scaled(label.size(
+            ), Qt.AspectRatioMode.KeepAspectRatio,  Qt.TransformationMode.SmoothTransformation)
+
+        label.setPixmap(pixmap)
+        return pixmap
 
     def _convert_frame_to_qimage(self, frame: np.ndarray) -> QImage:
         """
@@ -214,7 +195,7 @@ class MainApp(QMainWindow, CommonGUI):
         except Exception as e:
             logger.error(f"Error converting frame to QImage: {e}")
 
-    def get_video_feed(self, source: str, label: QLabel) -> Optional[cv2.typing.MatLike]:
+    def update_video_feed(self, source: str, label: QLabel) -> Optional[QPixmap]:
         """
         Retrieves the video feed from the specified module and updates the corresponding label.
 
@@ -223,7 +204,8 @@ class MainApp(QMainWindow, CommonGUI):
             label (QLabel): The label to update with the video feed.
 
         Returns:
-            Optional[cv2.typing.MatLike]: The decoded frame or None if decoding failed
+            frame_qpixmap Optional[QPixmap]: Converted qpix map from frame or None
+            if it fails to convert.
         """
         try:
             data: Dict = self.thread_data[source]
@@ -233,28 +215,26 @@ class MainApp(QMainWindow, CommonGUI):
 
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-            self._set_pixmap(label, frame)
+            frame_qpixmap = self._set_pixmap(label, frame)
         except KeyboardInterrupt:
             logger.critical("Interrupted! Stopping all threads...")
             self.close_app()
 
-    def get_webcam_feed(self) -> Optional[cv2.typing.MatLike]:
+        return frame_qpixmap
+
+    def get_webcam_feed(self) -> None:
         """
         Retrieves the webcam feed from the shared data of the eye tracking module.
-
-        Returns:
-            Optional[cv2.typing.MatLike]: The decoded frame or None if decoding failed
         """
-        return self.get_video_feed(cc.EYE_TRACKING, self.webcam_video_label)
+        self.webcam_pixmap = self.update_video_feed(
+            cc.EYE_TRACKING, self.webcam_video_label)
 
-    def get_drone_feed(self) -> Optional[cv2.typing.MatLike]:
+    def get_drone_feed(self) -> None:
         """
         Retrieves the drone feed from the shared data of the drone module.
-
-        Returns:
-            Optional[cv2.typing.MatLike]: The decoded frame or None if decoding failed
         """
-        return self.get_video_feed(cc.DRONE, self.drone_video_label)
+        self.drone_pixmap = self.update_video_feed(
+            cc.DRONE, self.drone_video_label)
 
     def get_next_voice_command(self) -> Optional[List[Dict[str, Union[str, Tuple[str, int]]]]]:
         """
