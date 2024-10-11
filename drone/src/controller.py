@@ -240,65 +240,6 @@ class Controller:
 
         return key_recognised
 
-    def _handle_key_event_tmp(self, input_data: Dict) -> bool:
-        """
-        Handles key press events for the drone controller.
-
-        Args:
-            key_code (Dict): A dictionary containing either a 'key_code' for keyboard input
-                           or a 'voice_command' for voice input..
-
-        Returns:
-            True if a recognised key is pressed, False otherwise
-        """
-
-        if "key_code" in input_data:
-            key_code = input_data["key_code"]
-            key_chr = keyboard.get_key_chr(key_code)
-
-            logger.info("Received key: %s (%d)", key_chr, key_code)
-
-            if key_chr in cc.QUIT_KEYS:
-                if self.model.in_flight:
-                    self.model.land()
-                return True
-
-            key_chr = keyboard.get_key_chr(key_code)
-
-            keybindings = self.config.keyboard_bindings
-            key_action = conf_key_from_value(keybindings, key_code, key_chr)
-            if key_action is None:
-                logger.trace("Key %s not found in keybindings", key_chr)
-                return False
-
-            key_recognised = key_action in vars(DroneActions).values()
-            if key_recognised:
-                self.perform_action(key_action)
-            else:
-                logger.warning("Key action %s not found in DroneActions", key_action)
-            return key_recognised
-
-        elif "voice_command" in input_data:
-            voice_command = input_data["voice_command"]
-
-            if isinstance(voice_command, tuple):
-
-                action, distance = voice_command
-            else:
-                action = voice_command
-                distance = None
-
-            voice_recognised = action in vars(DroneActions).values()
-
-            if voice_recognised:
-                self.perform_action(action, distance)
-            else:
-                logger.warning("Voice command %s not found in DroneActions", action)
-
-            return voice_recognised
-
-        return False
-
     def _wait_voice_command(self) -> bool:
         """
         Handles voice commands. If the voice command is recognised, it will be performed.
