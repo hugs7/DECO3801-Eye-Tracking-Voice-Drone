@@ -3,6 +3,7 @@ Local drone GUI. Not used in threading mode.
 """
 
 from typing import Dict
+
 from PyQt6.QtWidgets import QMainWindow, QVBoxLayout, QHBoxLayout, QWidget, QPushButton, QLabel
 from PyQt6.QtCore import QTimer, Qt
 from PyQt6.QtGui import QImage, QPixmap, QKeyEvent
