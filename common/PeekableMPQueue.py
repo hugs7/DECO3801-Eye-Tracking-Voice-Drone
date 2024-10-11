@@ -7,13 +7,32 @@ Hugo Burton
 
 from typing import Any, Optional
 import time
-from multiprocessing import Queue as MPQueue, context
+from multiprocessing import Queue as MPQueue, context, Manager
 from queue import Empty
 
 _ForkingPickler = context.reduction.ForkingPickler
 
 
-class PeekableMPQueue(MPQueue):
+class PeekableMPQueue:
+    def __init__(self, manager=None):
+        """
+        Initialize a manager and a queue.
+
+        Args:
+            manager (Optional[Manager]): An optional Manager instance.
+        """
+        self.manager = manager if manager is not None else Manager()
+        self.queue = self.manager.Queue()
+
+    def __getattr__(self, name):
+        """
+        Delegate attribute access to the internal queue object,
+        unless the attribute is 'peek'.
+        """
+        if name == "peek":
+            return self.peek
+        return getattr(self.queue, name)
+
     def peek(self, block: bool = True, timeout: Optional[float] = None) -> Any:
         """
         Peek at the next item in the queue without removing it.

@@ -4,12 +4,12 @@ Controller for voice processing
 
 from typing import Optional, Tuple, List, Dict, Union
 import ast
-from multiprocessing import Queue
 
 from omegaconf import OmegaConf
 
 from common import constants as cc
 from common.logger_helper import init_logger
+from common.PeekableMPQueue import PeekableMPQueue
 
 from .audio import AudioRecogniser
 from .LLM import LLM
@@ -148,6 +148,6 @@ class VoiceController:
 
         command_text = command_data[cc.COMMAND_TEXT]
         logger.info(f"Setting voice command to '%s'", command_text)
-        command_queue: Queue = self.manager_data[cc.VOICE_CONTROL][cc.COMMAND_QUEUE]
+        command_queue: PeekableMPQueue = self.manager_data[cc.VOICE_CONTROL][cc.COMMAND_QUEUE]
         command_queue.put(command_data)
         logger.debug("Voice command added to command queue of length %d.", command_queue.qsize())

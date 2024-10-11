@@ -4,8 +4,6 @@ Handles GUI for the application using PyQt6
 
 from typing import Dict, List, Union, Tuple, Optional
 from threading import Event, Lock
-from multiprocessing import Queue as MPQueue
-from queue import Queue
 
 import cv2
 import numpy as np
@@ -17,6 +15,8 @@ from PyQt6.QtGui import QImage, QPixmap, QKeyEvent
 from common.logger_helper import init_logger
 from common.common_gui import CommonGUI
 from common import constants as cc
+from common.PeekableMPQueue import PeekableMPQueue
+from common.PeekableQueue import PeekableQueue
 
 from options import PreferencesDialog
 from about import AboutDialog
@@ -55,8 +55,7 @@ class MainApp(CommonGUI, MainGui):
         configs_folder = file_handler.get_configs_folder()
         gui_config = configs_folder / "gui.yaml"
         if not gui_config.exists():
-            raise FileNotFoundError(
-                f"GUI configuration file not found: {gui_config}")
+            raise FileNotFoundError(f"GUI configuration file not found: {gui_config}")
 
         config = OmegaConf.load(gui_config)
         logger.info("Configuration initialised")
@@ -102,7 +101,7 @@ class MainApp(CommonGUI, MainGui):
         particular module since any thread can "subscribe" to this queue.
         """
         with self.data_lock:
-            self.thread_data[cc.KEYBOARD_QUEUE] = Queue()
+            self.thread_data[cc.KEYBOARD_QUEUE] = PeekableQueue()
 
     def updateRecentCommand(self, newCommand):
         """
@@ -132,7 +131,7 @@ class MainApp(CommonGUI, MainGui):
         # Any other key goes into the keyboard queue
         with self.data_lock:
             logger.debug(f"Adding key to queue: {key}")
-            keyboard_queue: Queue = self.thread_data[cc.KEYBOARD_QUEUE]
+            keyboard_queue: PeekableQueue = self.thread_data[cc.KEYBOARD_QUEUE]
             keyboard_queue.put(key)
 
     def _open_options(self) -> None:
@@ -167,11 +166,9 @@ class MainApp(CommonGUI, MainGui):
         pixmap = QPixmap.fromImage(q_img)
         if retain_label_size:
             if not label.hasScaledContents():
-                logger.warning(
-                    "Label %s does not have scaled contents. Setting true", label.objectName())
+                logger.warning("Label %s does not have scaled contents. Setting true", label.objectName())
                 label.setScaledContents(True)
-            pixmap = pixmap.scaled(label.size(
-            ), Qt.AspectRatioMode.KeepAspectRatio,  Qt.TransformationMode.SmoothTransformation)
+            pixmap = pixmap.scaled(label.size(), Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
 
         label.setPixmap(pixmap)
         return pixmap
@@ -226,15 +223,13 @@ class MainApp(CommonGUI, MainGui):
         """
         Retrieves the webcam feed from the shared data of the eye tracking module.
         """
-        self.webcam_pixmap = self.update_video_feed(
-            cc.EYE_TRACKING, self.webcam_video_label)
+        self.webcam_pixmap = self.update_video_feed(cc.EYE_TRACKING, self.webcam_video_label)
 
     def get_drone_feed(self) -> None:
         """
         Retrieves the drone feed from the shared data of the drone module.
         """
-        self.drone_pixmap = self.update_video_feed(
-            cc.DRONE, self.drone_video_label)
+        self.drone_pixmap = self.update_video_feed(cc.DRONE, self.drone_video_label)
 
     def get_next_voice_command(self) -> Optional[List[Dict[str, Union[str, Tuple[str, int]]]]]:
         """
@@ -254,7 +249,7 @@ class MainApp(CommonGUI, MainGui):
         if not voice_data:
             return None
 
-        command_queue: MPQueue = voice_data.get(cc.COMMAND_QUEUE, None)
+        command_queue: PeekableMPQueue = voice_data.get(cc.COMMAND_QUEUE, None)
         if command_queue is None:
             logger.error("Voice command queue not found")
             return None
