@@ -191,7 +191,42 @@ class Controller:
         # Accept if any valid key was pressed
         return any(accepted_keys)
 
-    def _handle_key_event(self, input_data: Dict) -> bool:
+    def _handle_key_event(self, key_code: int) -> bool:
+        """
+        Handles key press events for the drone controller.
+
+        Args:
+            key_code (int): The key code of the pressed key.
+
+        Returns:
+            True if a recognised key is pressed, False otherwise
+        """
+
+        key_chr = keyboard.get_key_chr(key_code)
+
+        logger.info("Received key: %s (%d)", key_chr, key_code)
+
+        if key_chr in cc.QUIT_KEYS:
+            if self.model.in_flight:
+                self.model.land()
+
+            return True
+
+        keybindings = self.config.keyboard_bindings
+        key_action = conf_key_from_value(keybindings, key_code, key_chr)
+        if key_action is None:
+            logger.trace("Key %s not found in keybindings", key_chr)
+            return False
+
+        key_recognised = key_action in vars(DroneActions).values()
+        if key_recognised:
+            self.perform_action(key_action)
+        else:
+            logger.warning("Key action %s not found in DroneActions", key_action)
+
+        return key_recognised
+
+    def _handle_key_event_tmp(self, input_data: Dict) -> bool:
         """
         Handles key press events for the drone controller.
 
