@@ -185,6 +185,9 @@ class Controller:
                 logger.warning("Keyboard queue not initialised in shared data.")
 
         accepted_keys = []
+        if not self.drone_connected:
+            return
+
         for key in key_buffer:
             accepted_keys.append(self._handle_key_event(key))
 
