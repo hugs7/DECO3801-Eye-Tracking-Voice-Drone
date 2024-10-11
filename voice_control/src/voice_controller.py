@@ -184,7 +184,6 @@ class VoiceController:
 
         logger.info(f"Parsed voice command: '%s'", parsed_commands)
         logger.trace(f"Parsed voice command of type %s", type(parsed_commands))
-        self.save_command_to_thread_data(parsed_commands)
 
         return parsed_commands
 
