@@ -40,9 +40,11 @@ class MainGui(QMainWindow):
         self.recentCommand.setStyleSheet("color: red; font-size: 14px;")
 
         self.webcam_video_label = QLabel("webcam", self.centralwidget)
+        self.webcam_video_label.setFixedSize(200, 150)
         self.webcam_video_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.webcam_video_label.setScaledContents(True)
         self.webcam_video_label.setStyleSheet("color: red; font-size: 14px;")
+        self._position_webcam_label()
 
         self.layout = QVBoxLayout(self.centralwidget)
         self.layout.addWidget(self.recentCommand)
@@ -59,6 +61,20 @@ class MainGui(QMainWindow):
 
         self.webcam_pixmap: Optional[QPixmap] = None
         self.drone_pixmap: Optional[QPixmap] = None
+
+    def _position_webcam_label(self):
+        """
+        Position the webcam label at the bottom center of the window.
+        """
+        window_width = self.width()
+        window_height = self.height()
+
+        # Calculate the position for bottom center alignment
+        x_pos = (window_width - self.webcam_video_label.width()) // 2
+        y_pos = window_height - self.webcam_video_label.height() - 20
+
+        # Move the webcam label to the calculated position
+        self.webcam_video_label.move(x_pos, y_pos)
 
     def retranslateUi(self):
         _translate = QtCore.QCoreApplication.translate
@@ -84,5 +100,6 @@ class MainGui(QMainWindow):
         """
 
         self.__resize_drone_frame()
+        self._position_webcam_label()
 
         return super().resizeEvent(event)
