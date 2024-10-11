@@ -83,6 +83,8 @@ class Controller:
         if self.drone_connected:
             self.drone_video_fps = self.model.video_fps
 
+        self.keyboard_bindings = self.config.keyboard_bindings
+
         logger.info("Drone controller initialised.")
 
     def _controller_loop(self, tick_rate: float) -> bool:
@@ -181,7 +183,7 @@ class Controller:
         # Define a buffer so that we are not locking the data for too long.
         # Not critical while keyboard inputs are simple, however, this is good
         # practice for more complex inputs.
-        key_buffer: List[Dict] = []
+        key_buffer: List[int] = []
         if cc.KEYBOARD_QUEUE not in self.thread_data.keys():
             logger.trace("Keyboard queue not yet initialised in shared data.")
             return False
@@ -190,8 +192,13 @@ class Controller:
             keyboard_queue: Optional[PeekableQueue] = self.thread_data[cc.KEYBOARD_QUEUE]
             if keyboard_queue is not None:
                 while not keyboard_queue.empty():
-                    key: Dict = keyboard_queue.get()
-                    key_buffer.append(key)
+                    key = keyboard_queue.peek()
+                    is_bound = keyboard.is_key_bound(self.keyboard_bindings, key)
+                    if is_bound:
+                        key = keyboard_queue.get()
+                        key_buffer.append(key)
+                    else:
+                        logger.trace("Key %s not bound in keybindings", keyboard.get_key_chr(key))
             else:
                 logger.warning("Keyboard queue not initialised in shared data.")
 
@@ -226,8 +233,7 @@ class Controller:
 
             return True
 
-        keybindings = self.config.keyboard_bindings
-        key_action = conf_key_from_value(keybindings, key_code, key_chr)
+        key_action = conf_key_from_value(self.keyboard_bindings, key_code, key_chr)
         if key_action is None:
             logger.trace("Key %s not found in keybindings", key_chr)
             return False
