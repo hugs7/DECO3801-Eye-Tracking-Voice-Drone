@@ -151,7 +151,7 @@ class VoiceController:
         if self.voice_control_config.send_to_llm:
             parsed_command = self.process_voice_command(text)
 
-        command_data["parsed_command"] = parsed_command
+        command_data[cc.PARSED_COMMAND] = parsed_command
 
         self.save_command_to_thread_data(command_data)
 
