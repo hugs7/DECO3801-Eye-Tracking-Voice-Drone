@@ -39,7 +39,7 @@ class MainApp(QMainWindow, CommonGUI):
         self._init_gui()
         self._init_qpixmaps()
         self._init_timers()
-        self._init_keyboard_queue()
+        self._init_queues()
 
     def _init_gui(self):
         self.setObjectName("MainWindow")
@@ -133,13 +133,14 @@ class MainApp(QMainWindow, CommonGUI):
 
         self._configure_timers(timers_conf)
 
-    def _init_keyboard_queue(self) -> None:
+    def _init_queues(self) -> None:
         """
         Initialise the keyboard queue. Not assigned to any
         particular module since any thread can "subscribe" to this queue.
         """
         with self.data_lock:
             self.thread_data[cc.KEYBOARD_QUEUE] = PeekableQueue()
+            self.thread_data[cc.DRONE][cc.COMMAND_QUEUE] = PeekableQueue()
 
     def _resize_and_position_webcam_label(self):
         """
