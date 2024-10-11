@@ -98,8 +98,6 @@ class VoiceController:
                 self.voice_toggle = not self.voice_toggle
                 self.interprocess_data[cc.VOICE_CONTROL]["voice_toggle"] = self.voice_toggle
 
-    # def _update_interprocess_data(self):
-
     def audio_loop(self) -> bool:
         """
         The main loop for the voice control program. Captures the user's voice and processes it.
