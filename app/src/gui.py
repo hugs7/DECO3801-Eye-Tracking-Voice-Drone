@@ -38,7 +38,6 @@ class MainApp(CommonGUI, MainGui):
         self.config = self._init_config()
         self._init_gui()
         self._init_qpixmaps()
-        self._init_feed_labels()
         self._init_timers()
         self._init_keyboard_queue()
 
@@ -82,13 +81,6 @@ class MainApp(CommonGUI, MainGui):
 
         self.retranslateUi(self)
         logger.info("Menu bar initialised")
-
-    def _init_feed_labels(self) -> None:
-        """
-        Initialise the labels for the video feeds
-        """
-        self.drone_video_label = self.main_video_label
-        self.webcam_video_label = self.side_video_label
 
     def _init_timers(self) -> None:
         """
