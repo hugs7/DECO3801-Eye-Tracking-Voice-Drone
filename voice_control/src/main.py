@@ -2,18 +2,18 @@
 Entry point for the voice control module.
 """
 
+from .voice_controller import VoiceController
+from . import init
+from common.logger_helper import init_logger
 from typing import Optional, Dict
 import os
 import sys
 
 # Add the project root to the path. Must execute prior to common imports.
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
+project_root = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), "../.."))
 sys.path.insert(0, project_root)
 
-from common.logger_helper import init_logger
-
-from . import init
-from .voice_controller import VoiceController
 
 logger = init_logger()
 

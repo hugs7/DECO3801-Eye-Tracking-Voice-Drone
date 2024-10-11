@@ -2,8 +2,9 @@
 Handles GUI for the application using PyQt6
 """
 
-from typing import Dict, List, Union, Tuple, Optional
+from typing import Dict, Tuple, Optional
 from threading import Event, Lock
+from multiprocessing import Queue as MPQueue
 
 import cv2
 import numpy as np
@@ -15,7 +16,6 @@ from PyQt6.QtGui import QImage, QPixmap, QKeyEvent
 from common.logger_helper import init_logger
 from common.common_gui import CommonGUI
 from common import constants as cc
-from common.PeekableMPQueue import PeekableMPQueue
 from common.PeekableQueue import PeekableQueue
 
 from options import PreferencesDialog
@@ -123,7 +123,7 @@ class MainApp(CommonGUI, MainGui):
             None
         """
         key = {"key_code": event.key()}
-        logger.info(f"Key pressed: {key["key_code"]}")
+        logger.info(f"Key pressed: {key}")
 
         if key == Qt.Key.Key_Escape:
             self.close_app()
@@ -250,7 +250,7 @@ class MainApp(CommonGUI, MainGui):
         if not voice_data:
             return None
 
-        command_queue: PeekableMPQueue = voice_data.get(cc.COMMAND_QUEUE, None)
+        command_queue: MPQueue = voice_data.get(cc.COMMAND_QUEUE, None)
         if command_queue is None:
             logger.error("Voice command queue not found")
             return None
@@ -265,14 +265,12 @@ class MainApp(CommonGUI, MainGui):
 
             with self.data_lock:
                 if "keyboard_queue" in self.thread_data:
-                    keyboard_queue: Optional[Queue] = self.thread_data["keyboard_queue"]
+                    keyboard_queue: Optional[PeekableQueue] = self.thread_data["keyboard_queue"]
                     if keyboard_queue is not None:
-                        keyboard_queue.put(
-                            {"voice_command": command})
+                        keyboard_queue.put({"voice_command": command})
                         logger.info("Voice command added to keyboard queue")
                     else:
-                        logger.warning(
-                            "Keyboard queue not initialised in shared data.")
+                        logger.warning("Keyboard queue not initialised in shared data.")
                 else:
                     logger.warning("Keyboard queue not found in thread data.")
             # return next_command

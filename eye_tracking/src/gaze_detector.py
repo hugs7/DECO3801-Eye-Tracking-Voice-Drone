@@ -446,7 +446,7 @@ class GazeDetector:
                 keyboard_queue: Optional[PeekableQueue] = self.thread_data["keyboard_queue"]
                 if keyboard_queue is not None:
                     while not keyboard_queue.empty():
-                        key_code: int = keyboard_queue.get()
+                        key_code: Dict = keyboard_queue.get()
                         key_buffer.append(key_code)
                 else:
                     logger.warning("Keyboard queue not initialised in shared data.")
@@ -464,7 +464,7 @@ class GazeDetector:
 
             return self._handle_key_event(key_code)
 
-    def _handle_key_event(self, key_code: int) -> bool:
+    def _handle_key_event(self, key_code: Dict) -> bool:
         """
         Keyboard controller for the gaze detector.
 
@@ -474,7 +474,7 @@ class GazeDetector:
 
         # Obtain lowercase version of key always. If we need to detect uppercase, we
         # can determine if the shift key is pressed.
-        key_chr = keyboard.get_key_chr(key_code)
+        key_chr = keyboard.get_key_chr(key_code["key_code"])
 
         logger.info("Received key: %s (%d)", key_chr, key_code)
 

@@ -213,6 +213,7 @@ class Controller:
                 if self.model.in_flight:
                     self.model.land()
                 return True
+
             key_chr = keyboard.get_key_chr(key_code)
 
             keybindings = self.config.keyboard_bindings
@@ -251,7 +252,7 @@ class Controller:
 
         return False
 
-    def perform_action(self, command: str, measurement: Optional[int]) -> None:
+    def perform_action(self, command: str, measurement: Optional[int] = None) -> None:
         """
         Handler for sending an action to the drone given a command.
 

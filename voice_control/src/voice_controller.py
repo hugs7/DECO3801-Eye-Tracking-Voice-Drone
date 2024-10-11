@@ -5,6 +5,7 @@ Controller for voice processing
 from typing import Optional, Tuple, List, Dict, Union
 import ast
 from omegaconf import OmegaConf
+from multiprocessing import Queue as MPQueue
 
 from common import constants as cc
 from common.logger_helper import init_logger
@@ -60,6 +61,7 @@ class VoiceController:
             run = True
             try:
                 while run:
+
                     self._wait_key()
 
                     if self.voice_toggle:
@@ -72,16 +74,20 @@ class VoiceController:
                 run = False
 
     def _wait_key(self) -> None:
-        keyboard_queue: Optional[MPQueue] = self.interprocess_data["keyboard_queue"]
+        if not self.running_in_process:
+            return
+
+        vc_ipc = self.interprocess_data[cc.VOICE_CONTROL]
+        if vc_ipc is None:
+            return
+
+        keyboard_queue: Optional[MPQueue] = vc_ipc[cc.COMMAND_QUEUE]
         if keyboard_queue is not None:
             while not keyboard_queue.empty():
                 key: int = keyboard_queue.get()
                 self._keyboard_controller(key)
         else:
             logger.warning("Keyboard queue not initialised in shared data.")
-
-        if self.running_in_process:
-            self.interprocess_data["voice_toggle"] = self.voice_toggle
 
     def _keyboard_controller(self, key_code: int) -> None:
 
@@ -91,6 +97,7 @@ class VoiceController:
         match key_chr:
             case "v":
                 self.voice_toggle = not self.voice_toggle
+                self.interprocess_data[cc.VOICE_CONTROL]["voice_toggle"] = self.voice_toggle
 
     # def _update_interprocess_data(self):
 

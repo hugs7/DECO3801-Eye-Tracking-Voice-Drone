@@ -22,7 +22,8 @@ def get_key_chr(key_code: int) -> str:
         try:
             key_chr = chr(key_code).lower()
         except ValueError:
-            logger.error("Failed to obtain character from key code %d", key_code)
+            logger.error(
+                "Failed to obtain character from key code %d", key_code)
             key_chr = ""
     else:
         key_chr = ""
