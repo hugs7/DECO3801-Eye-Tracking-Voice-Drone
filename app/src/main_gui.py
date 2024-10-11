@@ -7,8 +7,8 @@
 
 from typing import Optional
 
-from PyQt6 import QtCore, QtWidgets
-from PyQt6.QtWidgets import QMainWindow, QLabel, QWidget
+from PyQt6 import QtCore
+from PyQt6.QtWidgets import QMainWindow, QLabel, QWidget, QVBoxLayout
 from PyQt6.QtGui import QPixmap
 from PyQt6.QtCore import Qt
 
@@ -26,34 +26,29 @@ class MainGui(QMainWindow):
         self.setObjectName("MainWindow")
         self.resize(635, 523)
 
-        # Create the background drone feed
-        self.drone_video_label = QLabel("drone feed", self)
+        self.drone_video_label = QLabel("drone_feed", self)
         self.drone_video_label.setScaledContents(True)
-        self.drone_video_label.setGeometry(0, 0, 635, 523)
         self.drone_video_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        # Create a new central widget
+        self.__resize_drone_frame()
+
         self.centralwidget = QWidget(self)
         self.setCentralWidget(self.centralwidget)
 
-        # Create a new label for the recent command
-        # Note: May also require setting a pixmap and setting the size
         self.recentCommand = QLabel("Recent command", self.centralwidget)
         self.recentCommand.setAlignment(Qt.AlignmentFlag.AlignHCenter)
         self.recentCommand.setStyleSheet("color: red; font-size: 14px;")
 
-        # Create a new label for the recent command
-        # Note: May also require setting a pixmap and setting the size
         self.webcam_video_label = QLabel("webcam", self.centralwidget)
         self.webcam_video_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.webcam_video_label.setStyleSheet("color: red; font-size: 14px;")
 
-        # Add recent command and video feed labels to the central widget layout
-        # Create a layout for central widget
-        self.layout = QtWidgets.QVBoxLayout(self.centralwidget)
+        self.layout = QVBoxLayout(self.centralwidget)
         self.layout.addWidget(self.recentCommand)
         self.layout.addWidget(self.webcam_video_label)
         self.centralwidget.setLayout(self.layout)
+
+        self.drone_video_label.lower()
         self.centralwidget.raise_()
 
     def _init_qpixmaps(self) -> None:
@@ -78,20 +73,15 @@ class MainGui(QMainWindow):
         # self.actionQuit.setText(_translate("MainWindow", "Quit"))
         # self.actionAbout.setText(_translate("MainWindow", "About"))
 
+    def __resize_drone_frame(self) -> None:
+        """Resizes the drone label to the frame size"""
+        self.drone_video_label.resize(self.width(), self.height())
+
     def resizeEvent(self, event):
         """
         Handles the event where the window gets resized
         """
 
-        if self.drone_pixmap is not None:
-            self.drone_video_label.setGeometry(
-                0, 0, self.width(), self.height())
-            scaled_drone_pixmap = self.drone_pixmap.scaled(self.width(), self.height(
-            ), Qt.AspectRatioMode.KeepAspectRatioByExpanding, Qt.TransformationMode.SmoothTransformation)
-            self.drone_video_label.setPixmap(scaled_drone_pixmap)
-        else:
-            logger.debug(
-                "Drone pixmap not defined. Not handling resize event.")
+        self.__resize_drone_frame()
 
-        # Make sure that centralwidget stays on top of the background
-        self.centralwidget.raise_()
+        return super().resizeEvent(event)
