@@ -51,20 +51,23 @@ def keyboard_event_loop(data_lock: Lock, keyboard_queue: PeekableQueue, keyboard
     """
     if keyboard_queue is None:
         logger.warning("Keyboard queue not initialised in shared data.")
-        return
+        return []
 
     # Define a buffer so that we are not locking the data for too long.
     # Not critical while keyboard inputs are simple, however, this is good
     # practice for more complex inputs.
     key_buffer: List[int] = []
+
     with data_lock:
-        while not keyboard_queue.empty():
+        i = 0
+        while i < keyboard_queue.qsize():
             key_code = keyboard_queue.peek()
             is_bound = is_key_bound(keyboard_bindings, key_code)
             if is_bound:
                 key_code = keyboard_queue.get()
                 key_buffer.append(key_code)
             else:
+                i += 1
                 logger.trace("Key %s not bound in keybindings", get_key_chr(key_code))
 
     return key_buffer
