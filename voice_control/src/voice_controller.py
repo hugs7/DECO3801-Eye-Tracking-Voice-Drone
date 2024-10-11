@@ -10,9 +10,11 @@ from omegaconf import OmegaConf
 
 from common import constants as cc
 from common.logger_helper import init_logger
+from common.omegaconf_helper import conf_key_from_value
 
 from . import constants as c
 from .audio import AudioRecogniser
+from .voice_actions import VoiceActions
 from .LLM import LLM
 
 logger = init_logger()
@@ -33,6 +35,7 @@ class VoiceController:
         """
 
         self.config = config
+        self.voice_control_config = config.voice_control
         self.running_in_process = interprocess_data is not None
         self.loop_toggle = False
 
@@ -47,6 +50,8 @@ class VoiceController:
         self.audio_recogniser = AudioRecogniser(config.audio)
         self.llm = LLM(config.llm)
 
+        self.keybindings = self.voice_control_config.keyboard_bindings
+
     def run(self) -> None:
         """
         Runs the voice processor.
@@ -55,7 +60,7 @@ class VoiceController:
             None
         """
 
-        if self.config.voice_control.use_existing_recording:
+        if self.voice_control_config.use_existing_recording:
             # For testing. Runs the audio once and then exits.
             user_audio = self.audio_recogniser.load_audio()
             self.process_voice_command(user_audio)
@@ -87,11 +92,33 @@ class VoiceController:
             logger.warning("Keyboard queue not initialised in shared data.")
 
     def _keyboard_controller(self, key_code: int) -> None:
+        """
+        Controller for keyboard input.
+
+        Args:
+            key_code (int): The key code received from the keyboard.
+        """
         key_chr = chr(key_code).lower()
         logger.info(f"Received key: %s (%d)", key_chr, key_code)
 
-        match key_chr:
-            case "v":
+        key_action = conf_key_from_value(self.keybindings, key_code, key_chr)
+        if key_action is None:
+            logger.trace("Key %s not found in keybindings", key_chr)
+            return False
+
+        key_recognised = key_action in vars(VoiceActions).values()
+        if key_recognised:
+            self.perform_action(key_action)
+
+    def perform_action(self, key_action: str) -> None:
+        """
+        Performs the action associated with the key action.
+
+        Args:
+            key_action (str): The action to perform.
+        """
+        match key_action:
+            case VoiceActions.LOOP_TOGGLE:
                 self.loop_toggle = not self.loop_toggle
                 self.interprocess_data[cc.VOICE_CONTROL][c.LOOP_TOGGLE] = self.loop_toggle
 
@@ -104,7 +131,7 @@ class VoiceController:
             bool: True if the loop should continue, False otherwise.
         """
 
-        if self.config.voice_control.detect_voice:
+        if self.voice_control_config.detect_voice:
             if not self.audio_recogniser.microphone_available:
                 return False
 
@@ -120,7 +147,7 @@ class VoiceController:
         command_data = {cc.COMMAND_TEXT: text}
 
         parsed_command = None
-        if self.config.voice_control.send_to_llm:
+        if self.voice_control_config.send_to_llm:
             parsed_command = self.process_voice_command(text)
 
         command_data["parsed_command"] = parsed_command
