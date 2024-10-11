@@ -39,7 +39,7 @@ demo:
     hitbox_width_proprtion: 0.2
 keyboard_bindings:
     bbox: b
-    landmark: l
+    landmark: ;
     head_pose: h
     normalized_image: n
     template_model: t
