@@ -97,7 +97,7 @@ class Controller:
 
         logger.debug(">>> Begin drone loop")
 
-        self._wait_key()
+        self._event_loop()
 
         if self.drone_connected:
             ok, frame = self.model.read_camera()
@@ -151,6 +151,16 @@ class Controller:
         with self.data_lock:
             self.thread_data[cc.DRONE][cc.VIDEO_FRAME] = frame
             self.thread_data[cc.DRONE][cc.TICK_RATE] = tick_rate
+
+    def _event_loop(self) -> None:
+        """
+        Wraps all event handling for the drone controller.
+        """
+        if not self.running_in_thread:
+            return
+
+        self._wait_key()
+        self._wait_voice_command()
 
     def _wait_key(self) -> bool:
         """
@@ -290,13 +300,53 @@ class Controller:
 
         return False
 
-    def perform_action(self, command: str, measurement: Optional[int] = None) -> None:
+    def _wait_voice_command(self) -> bool:
+        """
+        Handles voice commands. If the voice command is recognised, it will be performed.
+
+        Returns:
+            True if a recognised voice command is received, False otherwise.
+        """
+
+        if not self.running_in_thread:
+            logger.warning("_wait_voice_command should not be called in main mode")
+            return False
+
+        if cc.VOICE_CONTROL not in self.thread_data:
+            logger.trace("Voice control not yet initialised in shared data.")
+            return False
+
+        command_buffer: List[List] = []
+        with self.data_lock:
+            voice_control_data: Optional[Dict] = self.thread_data[cc.VOICE_CONTROL]
+            command_queue: Optional[PeekableQueue] = voice_control_data[cc.COMMAND_QUEUE]
+            while not command_queue.empty():
+                voice_command = command_queue.get()
+                command_buffer.append(voice_command)
+            else:
+                logger.warning("Voice control data not initialised in shared data.")
+                return False
+
+        accepted_commands = []
+        if not self.drone_connected:
+            return
+
+        for command in command_buffer:
+            accepted_commands.append(self.perform_action(*command))
+
+        # Accept if any valid command was received
+        return any(accepted_commands)
+
+    def perform_action(self, command: str, measurement: Optional[int] = None) -> bool:
         """
         Handler for sending an action to the drone given a command.
 
         Args:
             command (str): The command to send to the drone. Can be any of the
                             commands defined in DroneActions.
+
+        Returns:
+            accepted (bool): True if the command was accepted, False otherwise.
         """
 
         logger.info("Performing action: %s", command)
@@ -304,8 +354,8 @@ class Controller:
         angle = 35
         dist = 20
 
-        angle = measurement if measurement is not None else angle
-        dist = measurement if measurement is not None else dist
+        angle = measurement or angle
+        dist = measurement or dist
 
         try:
             match command:
@@ -339,5 +389,9 @@ class Controller:
                     self.model.motor_off()
                 case _:
                     logger.warning("Command %s not recognised", command)
+                    return False
         except Exception as e:
             logger.error("Error sending command %s: %s", command, e)
+            return False
+
+        return True
