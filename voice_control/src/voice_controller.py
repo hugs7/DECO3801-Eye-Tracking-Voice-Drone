@@ -175,6 +175,10 @@ class VoiceController:
         logger.info(f"Voice command: '%s'", user_command)
         logger.trace(f"Voice command of type %s", type(user_command))
 
+        if result is None:
+            logger.debug("No voice command detected.")
+            return None
+
         # Parse the result into a list of tuples
         parsed_commands = None
         try:
