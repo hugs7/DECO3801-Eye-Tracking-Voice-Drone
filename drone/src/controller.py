@@ -192,13 +192,13 @@ class Controller:
             keyboard_queue: Optional[PeekableQueue] = self.thread_data[cc.KEYBOARD_QUEUE]
             if keyboard_queue is not None:
                 while not keyboard_queue.empty():
-                    key = keyboard_queue.peek()
-                    is_bound = keyboard.is_key_bound(self.keyboard_bindings, key)
+                    key_code = keyboard_queue.peek()
+                    is_bound = keyboard.is_key_bound(self.keyboard_bindings, key_code)
                     if is_bound:
-                        key = keyboard_queue.get()
-                        key_buffer.append(key)
+                        key_code = keyboard_queue.get()
+                        key_buffer.append(key_code)
                     else:
-                        logger.trace("Key %s not bound in keybindings", keyboard.get_key_chr(key))
+                        logger.trace("Key %s not bound in keybindings", keyboard.get_key_chr(key_code))
             else:
                 logger.warning("Keyboard queue not initialised in shared data.")
 
@@ -206,8 +206,8 @@ class Controller:
         if not self.drone_connected:
             return
 
-        for key in key_buffer:
-            accepted_keys.append(self._handle_key_event(key))
+        for key_code in key_buffer:
+            accepted_keys.append(self._handle_key_event(key_code))
 
         # Accept if any valid key was pressed
         return any(accepted_keys)

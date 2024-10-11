@@ -111,6 +111,9 @@ class GazeDetector:
         # Hitboxes
         self.hitboxes = None
 
+        # Keyboard bindings
+        self.keyboard_bindings = self.config.keyboard_bindings
+
     def _init_hitboxes(self) -> Dict[str, Tuple[Tuple[int, int], Tuple[int, int]]]:
         """
         Initialise the left and right hit-boxes.
@@ -443,11 +446,17 @@ class GazeDetector:
             # practice for more complex inputs.
             key_buffer: List[int] = []
             with self.data_lock:
-                keyboard_queue: Optional[PeekableQueue] = self.thread_data["keyboard_queue"]
+                keyboard_queue: Optional[PeekableQueue] = self.thread_data[cc.KEYBOARD_QUEUE]
                 if keyboard_queue is not None:
                     while not keyboard_queue.empty():
-                        key_code: Dict = keyboard_queue.get()
-                        key_buffer.append(key_code)
+                        key_code = keyboard_queue.peek()
+                        is_bound = keyboard.is_key_bound(self.keyboard_bindings, key)
+                        if is_bound:
+                            key = keyboard_queue.get()
+                            key_buffer.append(key)
+                        else:
+                            logger.trace("Key %s not bound in keybindings", keyboard.get_key_chr(key_code))
+
                 else:
                     logger.warning("Keyboard queue not initialised in shared data.")
 
@@ -485,27 +494,26 @@ class GazeDetector:
             self.stop = True
             return True
 
-        keybindings = self.config.keyboard_bindings
-        key_action = conf_key_from_value(keybindings, key_chr)
+        key_action = conf_key_from_value(self.keyboard_bindings, key_chr)
         if key_action is None:
             logger.trace("Key %s not found in keybindings", key_chr)
             return False
 
         if key_action in c.LOOP_ACTIONS:
             match key_chr:
-                case keybindings.bbox:
+                case self.keyboard_bindings.bbox:
                     self.show_bbox = not self.show_bbox
-                case keybindings.landmark:
+                case self.keyboard_bindings.landmark:
                     self.show_landmarks = not self.show_landmarks
-                case keybindings.head_pose:
+                case self.keyboard_bindings.head_pose:
                     self.show_head_pose = not self.show_head_pose
-                case keybindings.normalized_image:
+                case self.keyboard_bindings.normalized_image:
                     self.show_normalized_image = not self.show_normalized_image
-                case keybindings.template_model:
+                case self.keyboard_bindings.template_model:
                     self.show_template_model = not self.show_template_model
-                case keybindings.gaze_vector:
+                case self.keyboard_bindings.gaze_vector:
                     self.show_gaze_vector = not self.show_gaze_vector
-                case keybindings.calibrate:
+                case self.keyboard_bindings.calibrate:
                     # Calibrate
                     logger.info("Setting calibrated to False")
                     self.calibrated = False
@@ -514,7 +522,7 @@ class GazeDetector:
                     return False
 
         match key_chr:
-            case keybindings.loop_toggle:
+            case self.keyboard_bindings.loop_toggle:
                 self.loop_enabled = not self.loop_enabled
 
         return True
