@@ -26,7 +26,7 @@ import utils.file_handler as file_handler
 logger = init_logger("DEBUG")
 
 
-class MainApp(CommonGUI, QMainWindow):
+class MainApp(QMainWindow, CommonGUI):
     def __init__(self, stop_event: Event, thread_data: Dict, data_lock: Lock, interprocess_data: Dict):
         self.stop_event = stop_event
         self.thread_data = thread_data
@@ -42,7 +42,6 @@ class MainApp(CommonGUI, QMainWindow):
         self._init_keyboard_queue()
 
     def _init_gui(self):
-        super().__init__()
         self.setObjectName("MainWindow")
         self.resize(635, 523)
 
