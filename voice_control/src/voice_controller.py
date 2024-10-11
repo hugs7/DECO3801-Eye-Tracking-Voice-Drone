@@ -4,12 +4,14 @@ Controller for voice processing
 
 from typing import Optional, Tuple, List, Dict, Union
 import ast
-from omegaconf import OmegaConf
 from multiprocessing import Queue as MPQueue
+
+from omegaconf import OmegaConf
 
 from common import constants as cc
 from common.logger_helper import init_logger
 
+from . import constants as c
 from .audio import AudioRecogniser
 from .LLM import LLM
 
@@ -37,8 +39,8 @@ class VoiceController:
         if self.running_in_process:
             logger.info("Running in process mode")
             self.interprocess_data = interprocess_data
-            if "voice_toggle" not in interprocess_data:
-                self.interprocess_data["voice_toggle"] = self.voice_toggle
+            if c.LOOP_TOGGLE not in interprocess_data:
+                self.interprocess_data[c.LOOP_TOGGLE] = self.voice_toggle
         else:
             logger.info("Running in main mode")
 
@@ -91,7 +93,7 @@ class VoiceController:
         match key_chr:
             case "v":
                 self.voice_toggle = not self.voice_toggle
-                self.interprocess_data[cc.VOICE_CONTROL]["voice_toggle"] = self.voice_toggle
+                self.interprocess_data[cc.VOICE_CONTROL][c.LOOP_TOGGLE] = self.voice_toggle
 
     def audio_loop(self) -> bool:
         """
