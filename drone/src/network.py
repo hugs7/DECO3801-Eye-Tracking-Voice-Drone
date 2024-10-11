@@ -7,6 +7,7 @@ import sys
 import subprocess
 import re
 import os
+import time
 
 if __name__ == "__main__":
 
@@ -109,7 +110,7 @@ def is_wifi_connected() -> bool:
         return "Current Wi-Fi Network" in result.stdout
 
 
-def connect_to_wifi(ssid: str, password: str, network_interface: Optional[str] = None, max_attempts: int = 3) -> bool:
+def connect_to_wifi(ssid: str, password: str, network_interface: Optional[str] = None, max_attempts: int = 3, delay: float = 10.0) -> bool:
     """
     Connects to the specified wifi network
 
@@ -120,6 +121,7 @@ def connect_to_wifi(ssid: str, password: str, network_interface: Optional[str] =
         network_interface (Optional[str], optional): The network interface to connect from.
                                                      Only required for MacOS. Defaults to None.
         max_attempts (int, optional): The maximum number of attempts to connect. Defaults to 3.
+        delay (float, optional): Delay when checking WiFi Connection
 
     Returns:
         bool: True if connection was successful, False otherwise
@@ -160,6 +162,7 @@ def connect_to_wifi(ssid: str, password: str, network_interface: Optional[str] =
                 "Failed to connect to wifi network '%s'. Details: %s", ssid, e)
             continue
 
+        time.sleep(delay)
         connected = is_wifi_connected()
         if connected:
             attempt = attempts + 1
