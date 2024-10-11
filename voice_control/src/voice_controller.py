@@ -21,6 +21,10 @@ logger = init_logger()
 
 
 class VoiceController:
+    """
+    Controller for drone voice command module.
+    """
+
     def __init__(self, config: OmegaConf, interprocess_data: Optional[Dict] = None):
         """
         Initialises the voice controller.
