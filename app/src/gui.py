@@ -38,6 +38,7 @@ class MainApp(CommonGUI, MainGui):
 
         self.config = self._init_config()
         self._init_gui()
+        self._init_qpixmaps()
         self._init_feed_labels()
         self._init_timers()
         self._init_keyboard_queue()
@@ -157,7 +158,7 @@ class MainApp(CommonGUI, MainGui):
         about_dialog = AboutDialog()
         about_dialog.exec()
 
-    def _set_pixmap(self, label: QLabel, frame: np.ndarray) -> None:
+    def _set_pixmap(self, label: QLabel, frame: np.ndarray) -> QPixmap:
         """
         Set the pixmap of the label to the frame
 
@@ -166,10 +167,12 @@ class MainApp(CommonGUI, MainGui):
             frame: The frame to display
 
         Returns:
-            None
+            [QPixmap]: Converted qpix map from frame
         """
         q_img = self._convert_frame_to_qimage(frame)
-        label.setPixmap(QPixmap.fromImage(q_img))
+        pixmap = QPixmap.fromImage(q_img)
+        label.setPixmap(pixmap)
+        return pixmap
 
     def _convert_frame_to_qimage(self, frame: np.ndarray) -> QImage:
         """
@@ -190,7 +193,7 @@ class MainApp(CommonGUI, MainGui):
         except Exception as e:
             logger.error(f"Error converting frame to QImage: {e}")
 
-    def get_video_feed(self, source: str, label: QLabel) -> Optional[cv2.typing.MatLike]:
+    def update_video_feed(self, source: str, label: QLabel) -> Optional[QPixmap]:
         """
         Retrieves the video feed from the specified module and updates the corresponding label.
 
@@ -199,7 +202,8 @@ class MainApp(CommonGUI, MainGui):
             label (QLabel): The label to update with the video feed.
 
         Returns:
-            Optional[cv2.typing.MatLike]: The decoded frame or None if decoding failed
+            frame_qpixmap Optional[QPixmap]: Converted qpix map from frame or None
+            if it fails to convert.
         """
         try:
             data: Dict = self.thread_data[source]
@@ -209,28 +213,26 @@ class MainApp(CommonGUI, MainGui):
 
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-            self._set_pixmap(label, frame)
+            frame_qpixmap = self._set_pixmap(label, frame)
         except KeyboardInterrupt:
             logger.critical("Interrupted! Stopping all threads...")
             self.close_app()
 
-    def get_webcam_feed(self) -> Optional[cv2.typing.MatLike]:
+        return frame_qpixmap
+
+    def get_webcam_feed(self) -> None:
         """
         Retrieves the webcam feed from the shared data of the eye tracking module.
-
-        Returns:
-            Optional[cv2.typing.MatLike]: The decoded frame or None if decoding failed
         """
-        return self.get_video_feed(cc.EYE_TRACKING, self.webcam_video_label)
+        self.webcam_pixmap = self.update_video_feed(
+            cc.EYE_TRACKING, self.webcam_video_label)
 
-    def get_drone_feed(self) -> Optional[cv2.typing.MatLike]:
+    def get_drone_feed(self) -> None:
         """
         Retrieves the drone feed from the shared data of the drone module.
-
-        Returns:
-            Optional[cv2.typing.MatLike]: The decoded frame or None if decoding failed
         """
-        return self.get_video_feed(cc.DRONE, self.drone_video_label)
+        self.drone_pixmap = self.update_video_feed(
+            cc.DRONE, self.drone_video_label)
 
     def get_next_voice_command(self) -> Optional[List[Dict[str, Union[str, Tuple[str, int]]]]]:
         """
