@@ -32,15 +32,15 @@ class VoiceController:
 
         self.config = config
         self.running_in_process = interprocess_data is not None
+        self.voice_toggle = False
+
         if self.running_in_process:
             logger.info("Running in process mode")
             self.interprocess_data = interprocess_data
             if "voice_toggle" not in interprocess_data:
-                self.interprocess_data["voice_toggle"] = True
-            self.voice_toggle = self.interprocess_data["voice_toggle"]
+                self.interprocess_data["voice_toggle"] = self.voice_toggle
         else:
             logger.info("Running in main mode")
-            self.voice_toggle = True
 
         self.audio_recogniser = AudioRecogniser(config.audio)
         self.llm = LLM(config.llm)
