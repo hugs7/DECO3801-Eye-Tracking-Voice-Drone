@@ -6,4 +6,4 @@ from . import constants as c
 
 
 class VoiceActions:
-    LOOP_TOGGLE: str = c.LOOP_TOGGLE
+    LOOP_TOGGLE: str = "loop_toggle"
