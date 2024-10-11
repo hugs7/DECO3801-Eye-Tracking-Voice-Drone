@@ -2,7 +2,7 @@
 Handles GUI for the application using PyQt6
 """
 
-from typing import Dict, Tuple, Optional
+from typing import Dict, List, Union, Tuple, Optional
 from threading import Event, Lock
 from multiprocessing import Queue as MPQueue
 
@@ -122,7 +122,7 @@ class MainApp(CommonGUI, MainGui):
         Returns:
             None
         """
-        key = {"key_code": event.key()}
+        key = event.key()
         logger.info(f"Key pressed: {key}")
 
         if key == Qt.Key.Key_Escape:
@@ -231,8 +231,7 @@ class MainApp(CommonGUI, MainGui):
         """
         self.drone_pixmap = self.update_video_feed(cc.DRONE, self.drone_video_label)
 
-    # -> Optional[List[Dict[str, Union[str, Tuple[str, int]]]]]:
-    def get_next_voice_command(self):
+    def get_next_voice_command(self) -> Optional[List[Dict[str, Union[str, Tuple[str, int]]]]]:
         """
         Gets the voice command from the IPC shared data of the voice control
         module.
@@ -259,21 +258,10 @@ class MainApp(CommonGUI, MainGui):
             queue_size = command_queue.qsize()
             logger.info("Voice command queue size %d", queue_size)
             next_command = command_queue.get()
+            command_text = next_command.get(cc.COMMAND_TEXT, None)
+            logger.info("Next voice command %s", command_text)
 
-            command: Tuple[str, int] = next_command.get(cc.COMMAND_TEXT, None)
-            logger.info("Next voice command %s", command)
-
-            with self.data_lock:
-                if "keyboard_queue" in self.thread_data:
-                    keyboard_queue: Optional[PeekableQueue] = self.thread_data["keyboard_queue"]
-                    if keyboard_queue is not None:
-                        keyboard_queue.put({"voice_command": command})
-                        logger.info("Voice command added to keyboard queue")
-                    else:
-                        logger.warning("Keyboard queue not initialised in shared data.")
-                else:
-                    logger.warning("Keyboard queue not found in thread data.")
-            # return next_command
+            return next_command
 
     def _switch_feeds(self) -> None:
         """
