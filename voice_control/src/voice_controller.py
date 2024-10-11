@@ -61,6 +61,7 @@ class VoiceController:
             run = True
             try:
                 while run:
+
                     self._wait_key()
 
                     if self.voice_toggle:
