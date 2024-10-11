@@ -7,18 +7,22 @@ Hugo Burton
 
 from typing import Any, Optional
 import time
-from multiprocessing import Queue as MPQueue, context
+from multiprocessing import Queue as MPQueue, context, Manager
 from queue import Empty
 
 _ForkingPickler = context.reduction.ForkingPickler
 
 
 class PeekableMPQueue:
-    def __init__(self, *args, **kwargs):
+    def __init__(self, manager=None):
         """
-        Initialize a wrapper around multiprocessing.Queue
+        Initialize a manager and a queue.
+
+        Args:
+            manager (Optional[Manager]): An optional Manager instance.
         """
-        self.queue = MPQueue(*args, **kwargs)
+        self.manager = manager if manager is not None else Manager()
+        self.queue = self.manager.Queue()
 
     def __getattr__(self, name):
         """
