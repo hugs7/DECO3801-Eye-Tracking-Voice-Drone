@@ -13,7 +13,22 @@ from queue import Empty
 _ForkingPickler = context.reduction.ForkingPickler
 
 
-class PeekableMPQueue(MPQueue):
+class PeekableMPQueue:
+    def __init__(self, *args, **kwargs):
+        """
+        Initialize a wrapper around multiprocessing.Queue
+        """
+        self.queue = MPQueue(*args, **kwargs)
+
+    def __getattr__(self, name):
+        """
+        Delegate attribute access to the internal queue object,
+        unless the attribute is 'peek'.
+        """
+        if name == "peek":
+            return self.peek
+        return getattr(self.queue, name)
+
     def peek(self, block: bool = True, timeout: Optional[float] = None) -> Any:
         """
         Peek at the next item in the queue without removing it.
