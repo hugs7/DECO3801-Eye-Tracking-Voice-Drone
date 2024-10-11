@@ -47,7 +47,6 @@ class MainGui(QMainWindow):
 
         self.layout = QVBoxLayout(self.centralwidget)
         self.layout.addWidget(self.recentCommand)
-        self.layout.addWidget(self.webcam_video_label)
         self.centralwidget.setLayout(self.layout)
 
         self.drone_video_label.lower()
@@ -70,24 +69,18 @@ class MainGui(QMainWindow):
         window_width = self.width()
         window_height = self.height()
 
-        # Set the desired area percentage (20% of window's area)
         desired_area_fraction = 0.20
         target_area = window_width * window_height * desired_area_fraction
 
-        # Maintain the 16:9 aspect ratio
         aspect_ratio = 16 / 9
         target_height = int((target_area / aspect_ratio) ** 0.5)
         target_width = int(target_height * aspect_ratio)
 
-        # Calculate the position for bottom center alignment
         x_pos = (window_width - target_width) // 2
-        y_pos = window_height - target_height - 20  # 20 pixels above the bottom
+        y_pos = window_height - target_height - 20
 
-        # Resize the webcam label to the new size
-        self.webcam_video_label.setFixedSize(target_width, target_height)
-
-        # Move the webcam label to the calculated position
-        self.webcam_video_label.move(x_pos, y_pos)
+        self.webcam_video_label.setGeometry(
+            x_pos, y_pos, target_width, target_height)
 
     def retranslateUi(self):
         _translate = QtCore.QCoreApplication.translate
