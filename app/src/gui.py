@@ -2,7 +2,7 @@
 Handles GUI for the application using PyQt6
 """
 
-from typing import Dict, List, Union, Tuple, Optional
+from typing import Dict, List, Union, Tuple, Optional, Any
 from threading import Event, Lock
 from multiprocessing import Queue as MPQueue
 
@@ -348,11 +348,34 @@ class MainApp(QMainWindow, CommonGUI):
         if not command_queue.empty():
             queue_size = command_queue.qsize()
             logger.info("Voice command queue size %d", queue_size)
-            next_command = command_queue.get()
+            next_command: Dict[str, Any] = command_queue.get()
             command_text = next_command.get(cc.COMMAND_TEXT, None)
-            logger.info("Next voice command %s", command_text)
+            parsed_command: Optional[List[Tuple[str, int]]] = next_command.get(cc.PARSED_COMMAND, None)
+            logger.info("Next voice command %s with parsed command %s", command_text, parsed_command)
 
-            return next_command
+            self._send_voice_command_to_drone(parsed_command)
+
+    def _send_voice_command_to_drone(self, parsed_command: Optional[List[Tuple[str, int]]]) -> None:
+        """
+        Sends the voice command to the drone module.
+
+        Args:
+            parsed_command (Optional[List[Tuple[str, int]]]): The parsed command to send to the drone.
+
+        Returns:
+            None
+        """
+        if parsed_command is None:
+            return
+
+        with self.data_lock:
+            drone_cmd_queue: Optional[PeekableQueue] = self.thread_data[cc.DRONE][cc.COMMAND_QUEUE]
+            if drone_cmd_queue is None:
+                logger.error("Drone command queue not found")
+                return
+
+            logger.debug("Adding parsed command to drone command queue")
+            drone_cmd_queue.put(parsed_command)
 
     def _switch_feeds(self) -> None:
         """
