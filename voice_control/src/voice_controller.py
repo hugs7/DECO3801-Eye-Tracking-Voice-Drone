@@ -34,13 +34,13 @@ class VoiceController:
 
         self.config = config
         self.running_in_process = interprocess_data is not None
-        self.voice_toggle = False
+        self.loop_toggle = False
 
         if self.running_in_process:
             logger.info("Running in process mode")
             self.interprocess_data = interprocess_data
             if c.LOOP_TOGGLE not in interprocess_data:
-                self.interprocess_data[c.LOOP_TOGGLE] = self.voice_toggle
+                self.interprocess_data[c.LOOP_TOGGLE] = self.loop_toggle
         else:
             logger.info("Running in main mode")
 
@@ -65,7 +65,7 @@ class VoiceController:
                 while run:
                     self._wait_key()
 
-                    if self.voice_toggle:
+                    if self.loop_toggle:
                         logger.info(" >>> Begin voice control loop")
                         run = self.audio_loop()
                         logger.info(" <<< End voice control loop")
@@ -92,8 +92,8 @@ class VoiceController:
 
         match key_chr:
             case "v":
-                self.voice_toggle = not self.voice_toggle
-                self.interprocess_data[cc.VOICE_CONTROL][c.LOOP_TOGGLE] = self.voice_toggle
+                self.loop_toggle = not self.loop_toggle
+                self.interprocess_data[cc.VOICE_CONTROL][c.LOOP_TOGGLE] = self.loop_toggle
 
     def audio_loop(self) -> bool:
         """
