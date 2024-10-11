@@ -73,6 +73,7 @@ def initialise_modules(loading_shared_data: Dict, progress: ProgressController, 
         progress.set_loading_task("Initialising process functions", 0.1)
         process_functions = {voice_control: {cc.COMMAND_QUEUE: manager.Queue()}}
         process_shared_dict = {get_function_module(func): init_val for func, init_val in process_functions.items()}
+        process_shared_dict[cc.KEYBOARD_QUEUE] = manager.Queue()
         interprocess_data.update(process_shared_dict)
         processes = [
             Process(target=func, args=(interprocess_data,), name=f"process_{get_function_module(func)}") for func in process_functions

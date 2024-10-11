@@ -220,6 +220,9 @@ class MainApp(QMainWindow, CommonGUI):
             keyboard_queue: PeekableQueue = self.thread_data[cc.KEYBOARD_QUEUE]
             keyboard_queue.put(key)
 
+        keyboard_mp_queue: MPQueue = self.interprocess_data["keyboard_queue"]
+        keyboard_mp_queue.put(key)
+
     def _open_options(self) -> None:
         """
         Open the options window
