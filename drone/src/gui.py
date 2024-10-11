@@ -100,7 +100,7 @@ class DroneApp(QMainWindow, CommonGUI):
         """
         Initialise the timers for the gui
         """
-        if self.limited_mode:
+        if not self.limited_mode:
             logger.info("Running in limited mode. No timers required")
             return {}
 
