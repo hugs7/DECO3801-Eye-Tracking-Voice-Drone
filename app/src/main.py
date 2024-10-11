@@ -22,7 +22,6 @@ import constants as c
 from common.logger_helper import init_logger
 from common.thread_helper import get_function_module
 from common import constants as cc
-from common.PeekableMPQueue import PeekableMPQueue
 
 logger = init_logger()
 
