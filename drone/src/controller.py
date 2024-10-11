@@ -127,7 +127,7 @@ class Controller:
 
             gui = QApplication(sys.argv)
             drone_window = DroneApp(self)
-            drone_window.show()
+            drone_window.wrap_show()
             gui.exec()
 
     def _render_frame(self, frame: cv2.typing.MatLike, tick_rate: float) -> None:
