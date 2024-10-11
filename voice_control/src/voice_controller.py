@@ -76,11 +76,7 @@ class VoiceController:
         if not self.running_in_process:
             return
 
-        vc_ipc = self.interprocess_data[cc.VOICE_CONTROL]
-        if vc_ipc is None:
-            return
-
-        keyboard_queue: Optional[MPQueue] = vc_ipc[cc.COMMAND_QUEUE]
+        keyboard_queue: Optional[MPQueue] = self.interprocess_data[cc.KEYBOARD_QUEUE]
         if keyboard_queue is not None:
             while not keyboard_queue.empty():
                 key: int = keyboard_queue.get()
