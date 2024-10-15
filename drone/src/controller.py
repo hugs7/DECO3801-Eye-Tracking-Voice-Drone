@@ -15,6 +15,7 @@ from common.omegaconf_helper import conf_key_from_value
 from common.loop import run_loop_with_max_tickrate
 from common.PeekableQueue import PeekableQueue
 
+from . import constants as c
 from .drone_actions import DroneActions
 from .models.tello_drone import TelloDrone
 from .models.mavic_drone import MavicDrone
@@ -82,6 +83,8 @@ class Controller:
         if self.drone_connected:
             self.drone_video_fps = self.model.video_fps
 
+        self.keyboard_bindings = self.config.keyboard_bindings
+
         logger.info("Drone controller initialised.")
 
     def _controller_loop(self, tick_rate: float) -> bool:
@@ -97,7 +100,7 @@ class Controller:
 
         logger.debug(">>> Begin drone loop")
 
-        self._wait_key()
+        self._event_loop()
 
         if self.drone_connected:
             ok, frame = self.model.read_camera()
@@ -152,6 +155,16 @@ class Controller:
             self.thread_data[cc.DRONE][cc.VIDEO_FRAME] = frame
             self.thread_data[cc.DRONE][cc.TICK_RATE] = tick_rate
 
+    def _event_loop(self) -> None:
+        """
+        Wraps all event handling for the drone controller.
+        """
+        if not self.running_in_thread:
+            return
+
+        self._wait_key()
+        self._wait_voice_command()
+
     def _wait_key(self) -> bool:
         """
         Handles keyboard commands either from cv2 GUI if running as module or
@@ -167,26 +180,18 @@ class Controller:
             logger.warning("_wait_key should not be called in main mode")
             return False
 
-        # Define a buffer so that we are not locking the data for too long.
-        # Not critical while keyboard inputs are simple, however, this is good
-        # practice for more complex inputs.
-        key_buffer: List[int] = []
-        if "keyboard_queue" not in self.thread_data:
+        if cc.KEYBOARD_QUEUE not in self.thread_data.keys():
             logger.trace("Keyboard queue not yet initialised in shared data.")
             return False
 
-        with self.data_lock:
-            keyboard_queue: Optional[PeekableQueue] = self.thread_data[cc.KEYBOARD_QUEUE]
-            if keyboard_queue is not None:
-                while not keyboard_queue.empty():
-                    key: int = keyboard_queue.get()
-                    key_buffer.append(key)
-            else:
-                logger.warning("Keyboard queue not initialised in shared data.")
+        keyboard_queue: PeekableQueue = self.thread_data[cc.KEYBOARD_QUEUE]
+        key_buffer = keyboard.keyboard_event_loop(self.data_lock, keyboard_queue, self.keyboard_bindings)
+        if not self.drone_connected:
+            return
 
         accepted_keys = []
-        for key in key_buffer:
-            accepted_keys.append(self._handle_key_event(key))
+        for key_code in key_buffer:
+            accepted_keys.append(self._handle_key_event(key_code))
 
         # Accept if any valid key was pressed
         return any(accepted_keys)
@@ -212,8 +217,7 @@ class Controller:
 
             return True
 
-        keybindings = self.config.keyboard_bindings
-        key_action = conf_key_from_value(keybindings, key_code, key_chr)
+        key_action = conf_key_from_value(self.keyboard_bindings, key_code, key_chr)
         if key_action is None:
             logger.trace("Key %s not found in keybindings", key_chr)
             return False
@@ -226,19 +230,74 @@ class Controller:
 
         return key_recognised
 
-    def perform_action(self, command: str) -> None:
+    def _wait_voice_command(self) -> bool:
+        """
+        Handles voice commands. If the voice command is recognised, it will be performed.
+
+        Returns:
+            True if a recognised voice command is received, False otherwise.
+        """
+
+        if not self.running_in_thread:
+            logger.warning("_wait_voice_command should not be called in main mode")
+            return False
+
+        if cc.DRONE not in self.thread_data.keys():
+            logger.trace("Drone not yet initialised in shared data.")
+            return False
+
+        command_buffer: List[List] = []
+        with self.data_lock:
+            drone_data: Optional[Dict] = self.thread_data[cc.DRONE]
+            if cc.COMMAND_QUEUE not in drone_data:
+                logger.trace("Command queue not yet initialised in shared data.")
+                return False
+
+            command_queue: PeekableQueue = drone_data[cc.COMMAND_QUEUE]
+            while not command_queue.empty():
+                voice_command = command_queue.get()
+                command_buffer.append(voice_command)
+
+        accepted_commands = []
+        if not self.drone_connected:
+            return
+
+        for command in command_buffer:
+            accepted_commands.append(self.perform_action(*command))
+
+        # Accept if any valid command was received
+        return any(accepted_commands)
+
+    def perform_action(self, command: str, measurement: Optional[int] = None) -> bool:
         """
         Handler for sending an action to the drone given a command.
 
         Args:
             command (str): The command to send to the drone. Can be any of the
                             commands defined in DroneActions.
-        """
+            measurement (Optional[int]): The measurement to send with the command.
+                                         Default is None.
 
-        logger.info("Performing action: %s", command)
+        Returns:
+            accepted (bool): True if the command was accepted, False otherwise.
+        """
 
         angle = 35
         dist = 20
+
+        angle = measurement or angle
+        dist = measurement or dist
+
+        magnitude = None
+        if command in c.DRONE_MOVEMENT_ACTIONS:
+            magnitude = dist
+        elif command in c.DRONE_ROTATION_ACTIONS:
+            magnitude = angle
+        else:
+            logger.info("Performing action: %s", command)
+
+        if magnitude is not None:
+            logger.info("Performing action: %s with magnitude", command, magnitude)
 
         try:
             match command:
@@ -272,5 +331,9 @@ class Controller:
                     self.model.motor_off()
                 case _:
                     logger.warning("Command %s not recognised", command)
+                    return False
         except Exception as e:
             logger.error("Error sending command %s: %s", command, e)
+            return False
+
+        return True

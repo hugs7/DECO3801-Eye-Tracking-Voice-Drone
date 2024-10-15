@@ -3,6 +3,7 @@ Local drone GUI. Not used in threading mode.
 """
 
 from typing import Dict
+
 from PyQt6.QtWidgets import QMainWindow, QVBoxLayout, QHBoxLayout, QWidget, QPushButton, QLabel
 from PyQt6.QtCore import QTimer, Qt
 from PyQt6.QtGui import QImage, QPixmap, QKeyEvent
@@ -120,7 +121,7 @@ class DroneApp(QMainWindow, CommonGUI):
             None
         """
         key_code = event.key()
-        logger.info(f"Key pressed: {key_code}")
+        logger.info("Key pressed: %s", key_code)
 
         if key_code == Qt.Key.Key_Escape:
             self.close_app()

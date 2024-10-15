@@ -2,8 +2,8 @@
 OmegaConf helper functions
 """
 
-from typing import Dict, Optional, Any
-from omegaconf import DictConfig, OmegaConf
+from typing import Optional, Any
+from omegaconf import OmegaConf
 
 
 def safe_get(conf: OmegaConf, attr: str) -> any:

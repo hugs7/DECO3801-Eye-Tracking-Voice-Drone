@@ -22,7 +22,6 @@ import constants as c
 from common.logger_helper import init_logger
 from common.thread_helper import get_function_module
 from common import constants as cc
-from common.PeekableMPQueue import PeekableMPQueue
 
 logger = init_logger()
 
@@ -73,6 +72,7 @@ def initialise_modules(loading_shared_data: Dict, progress: ProgressController, 
         progress.set_loading_task("Initialising process functions", 0.1)
         process_functions = {voice_control: {cc.COMMAND_QUEUE: manager.Queue()}}
         process_shared_dict = {get_function_module(func): init_val for func, init_val in process_functions.items()}
+        process_shared_dict[cc.KEYBOARD_QUEUE] = manager.Queue()
         interprocess_data.update(process_shared_dict)
         processes = [
             Process(target=func, args=(interprocess_data,), name=f"process_{get_function_module(func)}") for func in process_functions

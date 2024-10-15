@@ -2,33 +2,31 @@
 Handles GUI for the application using PyQt6
 """
 
-from typing import Dict, List, Union, Tuple, Optional
+from typing import Dict, List, Union, Tuple, Optional, Any
 from threading import Event, Lock
+from multiprocessing import Queue as MPQueue
 
 import cv2
 import numpy as np
 from omegaconf import OmegaConf
-from PyQt6.QtWidgets import QLabel
-from PyQt6.QtCore import Qt, QRect
+from PyQt6.QtWidgets import QMainWindow, QLabel, QVBoxLayout, QWidget
+from PyQt6.QtCore import Qt, QRect, QCoreApplication
 from PyQt6.QtGui import QImage, QPixmap, QKeyEvent
 
 from common.logger_helper import init_logger
 from common.common_gui import CommonGUI
 from common import constants as cc
-from common.PeekableMPQueue import PeekableMPQueue
 from common.PeekableQueue import PeekableQueue
 
 from options import PreferencesDialog
 from about import AboutDialog
-from main_gui import MainGui
-import constants as c
 import utils.file_handler as file_handler
 
 
 logger = init_logger("DEBUG")
 
 
-class MainApp(CommonGUI, MainGui):
+class MainApp(QMainWindow, CommonGUI):
     def __init__(self, stop_event: Event, thread_data: Dict, data_lock: Lock, interprocess_data: Dict):
         self.stop_event = stop_event
         self.thread_data = thread_data
@@ -41,7 +39,45 @@ class MainApp(CommonGUI, MainGui):
         self._init_gui()
         self._init_qpixmaps()
         self._init_timers()
-        self._init_keyboard_queue()
+        self._init_queues()
+
+    def _init_gui(self):
+        self.setObjectName("MainWindow")
+        self.resize(635, 523)
+
+        self.drone_video_label = QLabel("drone_feed", self)
+        self.drone_video_label.setScaledContents(True)
+        self.drone_video_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.__resize_drone_frame()
+
+        self.centralwidget = QWidget(self)
+        self.setCentralWidget(self.centralwidget)
+
+        self.recentCommand = QLabel("Recent command", self.centralwidget)
+        self.recentCommand.setAlignment(Qt.AlignmentFlag.AlignHCenter)
+        self.recentCommand.setStyleSheet("color: red; font-size: 14px;")
+
+        self.webcam_video_label = QLabel("webcam", self.centralwidget)
+        self.webcam_video_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.webcam_video_label.setScaledContents(True)
+        self.webcam_video_label.setStyleSheet("color: red; font-size: 14px;")
+        self._resize_and_position_webcam_label()
+
+        self.layout = QVBoxLayout(self.centralwidget)
+        self.layout.addWidget(self.recentCommand)
+        self.centralwidget.setLayout(self.layout)
+
+        self.drone_video_label.lower()
+        self.centralwidget.raise_()
+
+    def _init_qpixmaps(self) -> None:
+        """
+        Initialises qpixmaps for the video feeds.
+        """
+
+        self.webcam_pixmap: Optional[QPixmap] = None
+        self.drone_pixmap: Optional[QPixmap] = None
 
     def _init_config(self) -> OmegaConf:
         """
@@ -87,6 +123,8 @@ class MainApp(CommonGUI, MainGui):
         """
         Initialise the timers for the gui
         """
+        self.timers = dict()
+
         timers_conf = {
             "webcam": {cc.THREAD_CALLBACK: self.get_webcam_feed, cc.THREAD_FPS: self.config.timers.webcam},
             "drone_feed": {cc.THREAD_CALLBACK: self.get_drone_feed, cc.THREAD_FPS: self.config.timers.drone_video},
@@ -95,13 +133,62 @@ class MainApp(CommonGUI, MainGui):
 
         self._configure_timers(timers_conf)
 
-    def _init_keyboard_queue(self) -> None:
+    def _init_queues(self) -> None:
         """
         Initialise the keyboard queue. Not assigned to any
         particular module since any thread can "subscribe" to this queue.
         """
         with self.data_lock:
             self.thread_data[cc.KEYBOARD_QUEUE] = PeekableQueue()
+            self.thread_data[cc.DRONE][cc.COMMAND_QUEUE] = PeekableQueue()
+
+    def _resize_and_position_webcam_label(self):
+        """
+        Resize and position the webcam label at the bottom center of the window,
+        keeping the 16:9 aspect ratio and using 20% of the window's area.
+        """
+        # Get the current window size
+        window_width = self.width()
+        window_height = self.height()
+
+        desired_area_fraction = 0.20
+        target_area = window_width * window_height * desired_area_fraction
+
+        aspect_ratio = 16 / 9
+        target_height = int((target_area / aspect_ratio) ** 0.5)
+        target_width = int(target_height * aspect_ratio)
+
+        x_pos = (window_width - target_width) // 2
+        y_pos = window_height - target_height - 20
+
+        self.webcam_video_label.setGeometry(x_pos, y_pos, target_width, target_height)
+
+    def resizeEvent(self, event):
+        """
+        Handles the event where the window gets resized
+        """
+
+        self.__resize_drone_frame()
+        self._resize_and_position_webcam_label()
+
+        return super().resizeEvent(event)
+
+    def retranslateUi(self):
+        _translate = QCoreApplication.translate
+        self.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        self.drone_video_label.setText(_translate("MainWindow", "Main drone feed"))
+        self.webcam_video_label.setText(_translate("MainWindow", "Video feed"))
+        self.recentCommand.setText(_translate("MainWindow", "Recent command"))
+        # self.menuFile.setTitle(_translate("MainWindow", "File"))
+        # self.menuHelp.setTitle(_translate("MainWindow", "Help"))
+        # self.actionNew.setText(_translate("MainWindow", "New "))
+        # self.actionOptions.setText(_translate("MainWindow", "Options"))
+        # self.actionQuit.setText(_translate("MainWindow", "Quit"))
+        # self.actionAbout.setText(_translate("MainWindow", "About"))
+
+    def __resize_drone_frame(self) -> None:
+        """Resizes the drone label to the frame size"""
+        self.drone_video_label.resize(self.width(), self.height())
 
     def updateRecentCommand(self, newCommand):
         """
@@ -133,6 +220,11 @@ class MainApp(CommonGUI, MainGui):
             logger.debug(f"Adding key to queue: {key}")
             keyboard_queue: PeekableQueue = self.thread_data[cc.KEYBOARD_QUEUE]
             keyboard_queue.put(key)
+
+        keyboard_mp_queue: MPQueue = self.interprocess_data[cc.KEYBOARD_QUEUE]
+        keyboard_mp_queue.put(key)
+
+        logger.info(f"Key {key} added to keyboard queue")
 
     def _open_options(self) -> None:
         """
@@ -249,7 +341,7 @@ class MainApp(CommonGUI, MainGui):
         if not voice_data:
             return None
 
-        command_queue: PeekableMPQueue = voice_data.get(cc.COMMAND_QUEUE, None)
+        command_queue: MPQueue = voice_data.get(cc.COMMAND_QUEUE, None)
         if command_queue is None:
             logger.error("Voice command queue not found")
             return None
@@ -257,11 +349,34 @@ class MainApp(CommonGUI, MainGui):
         if not command_queue.empty():
             queue_size = command_queue.qsize()
             logger.info("Voice command queue size %d", queue_size)
-            next_command = command_queue.get()
+            next_command: Dict[str, Any] = command_queue.get()
             command_text = next_command.get(cc.COMMAND_TEXT, None)
-            logger.info("Next voice command %s", command_text)
+            parsed_command: Optional[List[Tuple[str, int]]] = next_command.get(cc.PARSED_COMMAND, None)
+            logger.info("Next voice command %s with parsed command %s", command_text, parsed_command)
 
-            return next_command
+            self._send_voice_command_to_drone(parsed_command)
+
+    def _send_voice_command_to_drone(self, parsed_command: Optional[List[Tuple[str, int]]]) -> None:
+        """
+        Sends the voice command to the drone module.
+
+        Args:
+            parsed_command (Optional[List[Tuple[str, int]]]): The parsed command to send to the drone.
+
+        Returns:
+            None
+        """
+        if parsed_command is None:
+            return
+
+        with self.data_lock:
+            drone_cmd_queue: Optional[PeekableQueue] = self.thread_data[cc.DRONE][cc.COMMAND_QUEUE]
+            if drone_cmd_queue is None:
+                logger.error("Drone command queue not found")
+                return
+
+            logger.debug("Adding parsed command to drone command queue")
+            drone_cmd_queue.put(parsed_command)
 
     def _switch_feeds(self) -> None:
         """

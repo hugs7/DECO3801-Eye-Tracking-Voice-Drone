@@ -5,9 +5,8 @@ Last Updated: 21/08/2024
 """
 
 import datetime
-from common.logger_helper import init_logger
 import pathlib
-from typing import Optional, Tuple, Dict, List
+from typing import Optional, Tuple, Dict
 from threading import Event, Lock
 
 import cv2
@@ -15,6 +14,7 @@ import numpy as np
 from omegaconf import OmegaConf
 
 from common import constants as cc, keyboard
+from common.logger_helper import init_logger
 from common.omegaconf_helper import conf_key_from_value
 from common.loop import run_loop_with_max_tickrate
 from common.PeekableQueue import PeekableQueue
@@ -110,6 +110,9 @@ class GazeDetector:
 
         # Hitboxes
         self.hitboxes = None
+
+        # Keyboard bindings
+        self.keyboard_bindings = self.config.keyboard_bindings
 
     def _init_hitboxes(self) -> Dict[str, Tuple[Tuple[int, int], Tuple[int, int]]]:
         """
@@ -434,22 +437,12 @@ class GazeDetector:
         """
 
         if self.running_in_thread:
-            if "keyboard_queue" not in self.thread_data.keys():
+            if cc.KEYBOARD_QUEUE not in self.thread_data.keys():
                 logger.trace("Keyboard queue not yet initialised in shared data.")
                 return False
 
-            # Define a buffer so that we are not locking the data for too long.
-            # Not critical while keyboard inputs are simple, however, this is good
-            # practice for more complex inputs.
-            key_buffer: List[int] = []
-            with self.data_lock:
-                keyboard_queue: Optional[PeekableQueue] = self.thread_data["keyboard_queue"]
-                if keyboard_queue is not None:
-                    while not keyboard_queue.empty():
-                        key_code: int = keyboard_queue.get()
-                        key_buffer.append(key_code)
-                else:
-                    logger.warning("Keyboard queue not initialised in shared data.")
+            keyboard_queue: PeekableQueue = self.thread_data[cc.KEYBOARD_QUEUE]
+            key_buffer = keyboard.keyboard_event_loop(self.data_lock, keyboard_queue, self.keyboard_bindings)
 
             accepted_keys = []
             for key_code in key_buffer:
@@ -468,6 +461,9 @@ class GazeDetector:
         """
         Keyboard controller for the gaze detector.
 
+        Args:
+            key_code: Key code
+
         Returns:
             True if a recognised key is pressed, False otherwise
         """
@@ -482,27 +478,26 @@ class GazeDetector:
             self.stop = True
             return True
 
-        keybindings = self.config.keyboard_bindings
-        key_action = conf_key_from_value(keybindings, key_chr)
+        key_action = conf_key_from_value(self.keyboard_bindings, key_chr)
         if key_action is None:
             logger.trace("Key %s not found in keybindings", key_chr)
             return False
 
         if key_action in c.LOOP_ACTIONS:
             match key_chr:
-                case keybindings.bbox:
+                case self.keyboard_bindings.bbox:
                     self.show_bbox = not self.show_bbox
-                case keybindings.landmark:
+                case self.keyboard_bindings.landmark:
                     self.show_landmarks = not self.show_landmarks
-                case keybindings.head_pose:
+                case self.keyboard_bindings.head_pose:
                     self.show_head_pose = not self.show_head_pose
-                case keybindings.normalized_image:
+                case self.keyboard_bindings.normalized_image:
                     self.show_normalized_image = not self.show_normalized_image
-                case keybindings.template_model:
+                case self.keyboard_bindings.template_model:
                     self.show_template_model = not self.show_template_model
-                case keybindings.gaze_vector:
+                case self.keyboard_bindings.gaze_vector:
                     self.show_gaze_vector = not self.show_gaze_vector
-                case keybindings.calibrate:
+                case self.keyboard_bindings.calibrate:
                     # Calibrate
                     logger.info("Setting calibrated to False")
                     self.calibrated = False
@@ -511,7 +506,7 @@ class GazeDetector:
                     return False
 
         match key_chr:
-            case keybindings.loop_toggle:
+            case self.keyboard_bindings.loop_toggle:
                 self.loop_enabled = not self.loop_enabled
 
         return True

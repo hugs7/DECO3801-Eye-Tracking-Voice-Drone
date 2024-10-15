@@ -45,6 +45,7 @@ GAZE_SIDE = "gaze_side"
 
 # Voice Control
 COMMAND_TEXT = "text"
+PARSED_COMMAND = "parsed_command"
 
 # GUI
 
