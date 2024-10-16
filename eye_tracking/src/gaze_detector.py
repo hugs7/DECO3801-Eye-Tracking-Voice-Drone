@@ -329,6 +329,8 @@ class GazeDetector:
 
         if self.config.demo.use_camera:
             self.camera_visualiser.flip_image()
+            if self.running_in_thread:
+                self.gaze_visualiser.flip_image()
 
             if self.loop_enabled:
                 self._flip_points()
@@ -566,7 +568,7 @@ class GazeDetector:
             None
         """
         if self.gaze_2d_point is not None:
-            self.gaze_2d_point = self.camera_visualiser.flip_point_x(
+            self.gaze_2d_point = self._get_gaze_visualiser().flip_point_x(
                 self.gaze_2d_point)
 
     def _get_gaze_visualiser(self) -> Visualiser:
