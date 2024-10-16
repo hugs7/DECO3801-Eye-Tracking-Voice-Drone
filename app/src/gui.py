@@ -34,6 +34,7 @@ logger = init_logger("DEBUG")
 
 class MainApp(QMainWindow, CommonGUI):
     def __init__(self, stop_event: Event, thread_data: Dict, data_lock: Lock, interprocess_data: Dict):
+        logger.info(">>> Initialising MainApp...")
         self.stop_event = stop_event
         self.thread_data = thread_data
         self.data_lock = data_lock
@@ -47,7 +48,13 @@ class MainApp(QMainWindow, CommonGUI):
         self._init_timers()
         self._init_queues()
 
+        logger.info("<<< MainApp initialised")
+
     def _init_gui(self):
+        """
+        Initialises the GUI components for the main window
+        """
+        logger.info("Initialising GUI components")
         self.setObjectName("MainWindow")
         self.resize(635, 523)
 
@@ -80,6 +87,9 @@ class MainApp(QMainWindow, CommonGUI):
         self._init_battery_gui()
         self._init_flight_stats_gui()
         self._position_drone_statistics_labels()
+
+        logger.info("GUI components initialised")
+
     def _init_battery_gui(self) -> None:
         """
         Initialises the battery GUI components
@@ -158,6 +168,7 @@ class MainApp(QMainWindow, CommonGUI):
         """
         Initialise the timers for the gui
         """
+        logger.debug("Initialising timers")
         self.timers_fps = self.config.timers
         self.callback_delays = self.config.callback_delays
         self.timers = dict()
@@ -177,6 +188,7 @@ class MainApp(QMainWindow, CommonGUI):
         Initialise the keyboard queue. Not assigned to any
         particular module since any thread can "subscribe" to this queue.
         """
+        logger.debug("Initialising queues")
         with self.data_lock:
             self.thread_data[cc.KEYBOARD_QUEUE] = PeekableQueue()
             self.thread_data[cc.DRONE][cc.COMMAND_QUEUE] = PeekableQueue()
