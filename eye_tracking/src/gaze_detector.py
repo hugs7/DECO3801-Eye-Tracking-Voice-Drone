@@ -222,6 +222,9 @@ class GazeDetector:
         """
         logger.debug(">>> Begin eye tracking loop")
 
+        if self.running_in_thread:
+            self.thread_loop_handler(self.stop_event)
+
         if self.config.demo.display_on_screen:
             self._wait_key()
             if self.stop:
@@ -235,9 +238,6 @@ class GazeDetector:
 
         if self.config.demo.display_on_screen:
             self._render_frame("frame", tick_rate)
-
-        if self.running_in_thread:
-            self.thread_loop_handler(self.stop_event)
 
         logger.debug("<<< End eye tracking loop")
         return not self.stop
