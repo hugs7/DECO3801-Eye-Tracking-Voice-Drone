@@ -217,7 +217,7 @@ class Controller:
 
         stat_vals[FlightStatistics.BATTERY] = self.model.battery_level
 
-        for statistic in FlightStatistics.__dict__.values():
+        for statistic in vars(FlightStatistics).values():
             try:
                 value = eval(f"self.model.get_{statistic}()")
             except AttributeError:
