@@ -395,14 +395,19 @@ class MainApp(QMainWindow, CommonGUI):
         """
 
         logger.debug("Updating battery level")
-        with self.data_lock:
-            drone_data: Dict = self.thread_data[cc.DRONE]
-            battery_level = drone_data.get(cc.BATTERY, None)
-            if battery_level is None:
-                return
+        drone_data: Dict = self.thread_data[cc.DRONE]
+        if cc.FLIGHT_STATISTICS not in drone_data.keys():
+            logger.debug("Flight statistics not found")
+            return
+
+        flight_statistics: Dict = drone_data[cc.FLIGHT_STATISTICS]
+        battery_level = flight_statistics.get(cc.BATTERY, None)
+        if battery_level is None:
+            logger.debug("Battery level not found")
+            return
 
         battery_text = f"Battery: {battery_level}%"
-        logger.info
+        logger.info(battery_text)
         self.batteryLabel.setText(battery_text)
 
     def _send_voice_command_to_drone(self, parsed_command: Optional[List[Tuple[str, int]]]) -> None:
