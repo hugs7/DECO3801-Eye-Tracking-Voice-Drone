@@ -5,6 +5,7 @@ Controller for the drone, handles the input of a drone from voice, Gaze or manua
 from typing import Union, Optional, Dict, List
 from threading import Event, Lock
 import sys
+import time
 
 from omegaconf import OmegaConf
 import cv2
@@ -12,7 +13,7 @@ import cv2
 from common import constants as cc, keyboard
 from common.logger_helper import init_logger
 from common.omegaconf_helper import conf_key_from_value
-from common.loop import run_loop_with_max_tickrate
+from common.loop import run_loop_with_max_tickrate, fps_to_ms
 from common.PeekableQueue import PeekableQueue
 
 from . import constants as c
@@ -85,7 +86,24 @@ class Controller:
 
         self.keyboard_bindings = self.config.keyboard_bindings
 
+        self._init_stat_params()
         logger.info("Drone controller initialised.")
+
+    def _init_stat_params(self) -> None:
+        """
+        Initialises the drone statistics parameters and times for the controller.
+        """
+
+        logger.info("Initialising drone statistics parameters...")
+        self.drone_stat_times = dict()
+        self.drone_stat_params = OmegaConf.to_container(self.config.drone_stat_params, resolve=True)
+
+        for param, tick_rate in self.drone_stat_params.items():
+            milliseconds = fps_to_ms(tick_rate)
+            self.drone_stat_params[param] = milliseconds
+            self.drone_stat_times[param] = time.perf_counter()
+
+        logger.info("Drone statistics parameters initialised %s", self.drone_stat_params)
 
     def _controller_loop(self, tick_rate: float) -> bool:
         """
@@ -108,6 +126,7 @@ class Controller:
                 return False
 
             self._render_frame(frame, tick_rate)
+            self._get_drone_statistics(tick_rate)
 
         self.thread_loop_handler(self.stop_event)
         logger.debug("<<< End drone loop")
@@ -154,6 +173,48 @@ class Controller:
         with self.data_lock:
             self.thread_data[cc.DRONE][cc.VIDEO_FRAME] = frame
             self.thread_data[cc.DRONE][cc.TICK_RATE] = tick_rate
+
+    def _get_drone_statistics(self, tick_rate: float) -> None:
+        """
+        Gets the flight statistics from the drone and sends it to the main GUI for rendering.
+            - pitch
+            - roll
+            - yaw
+            - speed_x
+            - speed_y
+            - speed_z
+            - acceleration_x
+            - acceleration_y
+            - cceleration_z
+            - lowest_temperature
+            - highest_temperature
+            - temperature
+            - height
+            - distance_tof
+            - barometer
+            - flight_time
+            - battery
+        """
+        now = time.perf_counter()
+        stat_vals = dict()
+
+        # Battery
+        if now - self.drone_stat_times[cc.BATTERY] > self.drone_stat_params[cc.BATTERY]:
+            self.model.battery_level = self.model.get_battery()
+            self.drone_stat_times[cc.BATTERY] = now
+
+        stat_vals[cc.BATTERY] = self.model.battery_level
+
+        for statistic in c.FLIGHT_STATISTICS:
+            try:
+                value = eval(f"self.model.get_{statistic}()")
+            except AttributeError:
+                logger.warning("Method get_%s not found in drone model", statistic)
+                continue
+
+        logger.info("Drone %s: %s", statistic, value)
+        with self.data_lock:
+            self.thread_data[cc.DRONE][cc.FLIGHT_STATISTICS] = stat_vals
 
     def _event_loop(self) -> None:
         """
