@@ -367,7 +367,8 @@ class Controller:
             logger.info("Performing action: %s", command)
 
         if magnitude is not None:
-            logger.info("Performing action: %s with magnitude", command, magnitude)
+            logger.info("Performing action: %s with magnitude %d",
+                        command, magnitude)
 
         try:
             match command:
