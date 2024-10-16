@@ -59,4 +59,3 @@ TEXT_BLACK = "black"
 # Drone
 
 FLIGHT_STATISTICS = "flight_statistics"
-BATTERY = "battery"

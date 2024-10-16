@@ -2,7 +2,7 @@
 Handles GUI for the application using PyQt6
 """
 
-from typing import Dict, List, Union, Tuple, Optional, Any
+from typing import Dict, List, Tuple, Optional, Any
 from threading import Event, Lock
 from multiprocessing import Queue as MPQueue
 
@@ -19,6 +19,8 @@ from common import image
 from common import constants as cc
 from common.PeekableQueue import PeekableQueue
 from common import omegaconf_helper as oh
+
+from drone.src.flight_statistics import FlightStatistics
 
 from options import PreferencesDialog
 from about import AboutDialog
@@ -401,7 +403,7 @@ class MainApp(QMainWindow, CommonGUI):
             return
 
         flight_statistics: Dict = drone_data[cc.FLIGHT_STATISTICS]
-        battery_level = flight_statistics.get(cc.BATTERY, None)
+        battery_level = flight_statistics.get(FlightStatistics.BATTERY, None)
         if battery_level is None:
             logger.debug("Battery level not found")
             return

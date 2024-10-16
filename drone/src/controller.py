@@ -18,6 +18,7 @@ from common.PeekableQueue import PeekableQueue
 
 from . import constants as c
 from .drone_actions import DroneActions
+from .flight_statistics import FlightStatistics
 from .models.tello_drone import TelloDrone
 from .models.mavic_drone import MavicDrone
 
@@ -208,15 +209,15 @@ class Controller:
         stat_vals = dict()
 
         # Battery
-        if now - self.drone_stat_times[cc.BATTERY] > self.drone_stat_params[cc.BATTERY]:
+        if now - self.drone_stat_times[FlightStatistics.BATTERY] > self.drone_stat_params[FlightStatistics.BATTERY]:
             logger.debug("Getting battery level...")
             self.model.battery_level = self.model.get_battery()
             logger.info("Drone battery: %d", self.model.battery_level)
-            self.drone_stat_times[cc.BATTERY] = now
+            self.drone_stat_times[FlightStatistics.BATTERY] = now
 
-        stat_vals[cc.BATTERY] = self.model.battery_level
+        stat_vals[FlightStatistics.BATTERY] = self.model.battery_level
 
-        for statistic in c.FLIGHT_STATISTICS:
+        for statistic in FlightStatistics.__dict__.values():
             try:
                 value = eval(f"self.model.get_{statistic}()")
             except AttributeError:

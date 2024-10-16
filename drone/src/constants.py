@@ -3,6 +3,7 @@ Constants file. Please define in UPPER_SNAKE_CASE
 """
 
 from .drone_actions import DroneActions
+from .flight_statistics import FlightStatistics
 
 # === Drone Types ===
 MAVIC = "mavic"
@@ -52,46 +53,6 @@ DRONE_ACTIONS_OTHER = [
     DroneActions.SPEED,
 ]
 
-# === Drone Stat Params ===
-
-BATTERY = "battery"
-PITCH = "pitch"
-ROLL = "roll"
-YAW = "yaw"
-SPEED_X = "speed_x"
-SPEED_Y = "speed_y"
-SPEED_Z = "speed_z"
-ACCELERATION_X = "acceleration_x"
-ACCELERATION_Y = "acceleration_y"
-CCELERATION_Z = "cceleration_z"
-LOWEST_TEMPERATURE = "lowest_temperature"
-HIGHEST_TEMPERATURE = "highest_temperature"
-TEMPERATURE = "temperature"
-HEIGHT = "height"
-DISTANCE_TOF = "distance_tof"
-BAROMETER = "barometer"
-FLIGHT_TIME = "flight_time"
-
-FLIGHT_STATISTICS = [
-    # PITCH,
-    # ROLL,
-    # YAW,
-    # SPEED_X,
-    # SPEED_Y,
-    # SPEED_Z,
-    # ACCELERATION_X,
-    # ACCELERATION_Y,
-    # CCELERATION_Z,
-    # LOWEST_TEMPERATURE,
-    # HIGHEST_TEMPERATURE,
-    # TEMPERATURE,
-    # HEIGHT,
-    # DISTANCE_TOF,
-    # BAROMETER,
-    # FLIGHT_TIME,
-    # BATTERYsstart,
-]
-
 # === Config ===
 
 DEFAULT_CONFIG = {
@@ -134,7 +95,7 @@ DEFAULT_CONFIG = {
             "motor off": "0",
         },
         "drone_stat_params": {
-            BATTERY: 0.2,
+            FlightStatistics.BATTERY: 0.2,
         },
     },
 }
