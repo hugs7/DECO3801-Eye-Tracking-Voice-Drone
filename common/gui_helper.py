@@ -5,7 +5,7 @@ Helper functions for GUI
 from . import constants as c
 
 
-def fps_to_ms(fps: int) -> int:
+def fps_to_ms(fps: float) -> int:
     """
     Convert frames per second to milliseconds.
 
@@ -19,7 +19,7 @@ def fps_to_ms(fps: int) -> int:
     if fps == 0:
         return 0
 
-    return c.MILLISECONDS_PER_SECOND // fps
+    return int(c.MILLISECONDS_PER_SECOND // fps)
 
 
 def ms_to_fps(ms: float) -> float:
