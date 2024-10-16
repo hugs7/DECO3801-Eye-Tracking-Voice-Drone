@@ -83,8 +83,9 @@ class GazeDetector:
         face_model_3d = FaceModelMediaPipe()
         self.camera_visualiser = Visualiser(
             self.gaze_estimator.camera, face_model_3d.NOSE_INDEX)
-        self.gaze_visualiser = Visualiser(
-            self.gaze_estimator.camera, face_model_3d.NOSE_INDEX)
+        if self.running_in_thread:
+            self.gaze_visualiser = Visualiser(
+                self.gaze_estimator.camera, face_model_3d.NOSE_INDEX)
 
         self.cap = self._create_capture()
         self.output_dir = self._create_output_dir()
@@ -307,7 +308,8 @@ class GazeDetector:
         """
         undistorted = self._undistort_image(image)
         self.camera_visualiser.set_image(image.copy())
-        self.gaze_visualiser.set_image(np.zeros_like(image))
+        if self.running_in_thread:
+            self.gaze_visualiser.set_image(np.zeros_like(image))
 
         if self.loop_enabled:
             if self.hitboxes is None:
@@ -567,6 +569,20 @@ class GazeDetector:
             self.gaze_2d_point = self.camera_visualiser.flip_point_x(
                 self.gaze_2d_point)
 
+    def _get_gaze_visualiser(self) -> Visualiser:
+        """
+        Get the appropriate visualiser for gaze overlay
+        depending on the application mode.
+
+        Returns:
+            Visualiser object
+        """
+
+        if self.running_in_thread:
+            return self.gaze_visualiser
+        else:
+            return self.camera_visualiser
+
     def _draw_face_bbox(self, face: Face) -> None:
         """
         Wrapper to draw a bounding box around the face.
@@ -718,7 +734,7 @@ class GazeDetector:
             self.point_buffer.pop(0)
 
         smoothed_3d_point = np.mean(self.point_buffer, axis=0)
-        self.gaze_2d_point = self.gaze_visualiser.draw_3d_point(
+        self.gaze_2d_point = self._get_gaze_visualiser().draw_3d_point(
             smoothed_3d_point, color=(0, 0, 255), size=self.config.gaze_point.dot_size, clamp_to_screen=True
         )
 
@@ -742,6 +758,8 @@ class GazeDetector:
         # Set only when looking at a hitbox
         gaze_side = None
 
+        visualiser = self._get_gaze_visualiser()
+
         for side in cc.SIDES:
             looking_hitbox = None
             side_hitbox = self.hitboxes[side]
@@ -759,10 +777,10 @@ class GazeDetector:
 
             top_left = side_hitbox[c.TOP_LEFT]
             bottom_right = side_hitbox[c.BOTTOM_RIGHT]
-            gaze_overlay = self.gaze_visualiser.draw_labelled_rectangle(
-                top_left, bottom_right, bg_color, bg_alpha, text, border_color=border, blend=not self.running_in_thread
+
+            visualiser.draw_labelled_rectangle(
+                top_left, bottom_right, bg_color, bg_alpha, text, border_color=border
             )
-            self.gaze_visualiser.set_image(gaze_overlay)
 
         if self.running_in_thread:
             logger.info("Setting gaze side to %s in shared data.", gaze_side)

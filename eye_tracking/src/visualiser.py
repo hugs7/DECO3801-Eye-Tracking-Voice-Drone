@@ -85,13 +85,16 @@ class Visualiser:
 
         fps_text = "inf" if fps == float("inf") else f"{fps:.2f}"
 
-        (text_width, text_height), text_bottom_y = cv2.getTextSize(fps_text, text_font_face, font_scale, thickness)
+        (text_width, text_height), text_bottom_y = cv2.getTextSize(
+            fps_text, text_font_face, font_scale, thickness)
 
         padding = 5
 
         fps_offset = 42
-        top_right_corner = (self.image.shape[1] - padding - text_width - fps_offset, padding + text_height)
-        self.draw_text(f"FPS: {fps_text}", top_right_corner, color, text_font_face, font_scale, thickness)
+        top_right_corner = (
+            self.image.shape[1] - padding - text_width - fps_offset, padding + text_height)
+        self.draw_text(f"FPS: {fps_text}", top_right_corner,
+                       color, text_font_face, font_scale, thickness)
 
     def draw_bbox(self, bbox: np.ndarray, color: Tuple[int, int, int] = (0, 255, 0), lw: int = 1) -> None:
         """
@@ -182,7 +185,8 @@ class Visualiser:
             Tuple[int, int]: The origin of the text
         """
 
-        (text_width, text_height), text_bottom_y = cv2.getTextSize(text, text_font_face, font_scale, thickness)
+        (text_width, text_height), text_bottom_y = cv2.getTextSize(
+            text, text_font_face, font_scale, thickness)
         text_middle = text_width // 2
 
         # Calculate the x_coordinate of the middle of the rectangle (i.e left-most x-coord of rectangle + middle of rectangle)
@@ -191,7 +195,8 @@ class Visualiser:
 
         # Aligns the centre of the text with the centre of the rectangle
         rectangle_bottom_left = rectangle_middle_x_coord - text_middle
-        text_org = (rectangle_bottom_left, (top_left[1] + bottom_right[1]) // 2)
+        text_org = (rectangle_bottom_left,
+                    (top_left[1] + bottom_right[1]) // 2)
 
         return text_org
 
@@ -207,7 +212,6 @@ class Visualiser:
         border_color: Optional[Tuple[int, int, int]] = None,
         border_thickness: int = 2,
         text_org: Optional[Tuple[int, int]] = None,
-        blend: bool = True,
     ) -> np.ndarray:
         """
         Draws a labelled rectangle on the specified overlay
@@ -223,8 +227,6 @@ class Visualiser:
             border_color: The colour of the border.
             border_thickness: The thickness of the border.
             text_org: The origin of the text.
-            blend: Whether to overlay the rectangle on the image or
-                   return it on a blank canvas. Default is True.
 
         Returns:
             np.ndarray: The overlay with the labelled rectangle.
@@ -232,24 +234,24 @@ class Visualiser:
 
         assert self.image is not None
         if text_org is None:
-            text_org = self.calculate_text_org(text, text_font_face, font_scale, 2, top_left, bottom_right)
+            text_org = self.calculate_text_org(
+                text, text_font_face, font_scale, 2, top_left, bottom_right)
 
         overlay = np.zeros_like(self.image, np.uint8)
         if border_color is not None:
             cv2.rectangle(overlay, top_left, bottom_right, border_color, -1)
 
             # Insets the rectangle to create a border effect
-            top_left = transforms.add_2d_point(top_left, (border_thickness, border_thickness))
-            bottom_right = transforms.add_2d_point(bottom_right, (-border_thickness, -border_thickness))
+            top_left = transforms.add_2d_point(
+                top_left, (border_thickness, border_thickness))
+            bottom_right = transforms.add_2d_point(
+                bottom_right, (-border_thickness, -border_thickness))
 
         cv2.rectangle(overlay, top_left, bottom_right, bg_color, -1)
-        if blend:
-            on_image = self.image
-            self.create_opacity(overlay, bg_alpha)
-        else:
-            on_image = overlay
+        self.create_opacity(overlay, bg_alpha)
 
-        self.draw_text(text, text_org, color=(255, 255, 255), font_face=text_font_face, font_scale=font_scale, on_image=on_image)
+        self.draw_text(text, text_org, color=(
+            255, 255, 255), font_face=text_font_face, font_scale=font_scale, on_image=self.image)
 
         return overlay
 
@@ -285,7 +287,8 @@ class Visualiser:
             on_image = self.image
 
         assert on_image is not None
-        cv2.putText(on_image, text, org, font_face, font_scale, color, thickness, line_type)
+        cv2.putText(on_image, text, org, font_face,
+                    font_scale, color, thickness, line_type)
 
     def draw_3d_point(
         self, point3d: np.ndarray, color: Tuple[int, int, int] = (255, 0, 255), size=3, clamp_to_screen: bool = False
@@ -375,9 +378,11 @@ class Visualiser:
         assert face.head_position is not None
         assert face.landmarks is not None
         # Get the axes of the model coordinate system
-        axes3d = np.eye(3, dtype=np.float32) @ Rotation.from_euler("XYZ", [0, np.pi, 0]).as_matrix()
+        axes3d = np.eye(
+            3, dtype=np.float32) @ Rotation.from_euler("XYZ", [0, np.pi, 0]).as_matrix()
         axes3d = axes3d * length
-        axes2d = self._camera.project_points(axes3d, face.head_pose_rot.as_rotvec(), face.head_position)
+        axes2d = self._camera.project_points(
+            axes3d, face.head_pose_rot.as_rotvec(), face.head_position)
         center = face.landmarks[self._center_point_index]
         center = self._convert_pt(center)
         for pt, color in zip(axes2d, c.AXIS_COLORS):
