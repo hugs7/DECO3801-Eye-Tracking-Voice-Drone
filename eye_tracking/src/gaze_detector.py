@@ -58,7 +58,8 @@ class GazeDetector:
         if self.running_in_thread:
             # If running in thread mode, all or none of the required args must be provided
             if not all(required_args):
-                raise ValueError("All or none of stop_event, thread_data, data_lock must be provided.")
+                raise ValueError(
+                    "All or none of stop_event, thread_data, data_lock must be provided.")
 
             logger.info("Running in thread mode")
             self.stop_event = stop_event
@@ -80,8 +81,10 @@ class GazeDetector:
         self.config = config
         self.gaze_estimator = GazeEstimator(config)
         face_model_3d = FaceModelMediaPipe()
-        self.camera_visualiser = Visualiser(self.gaze_estimator.camera, face_model_3d.NOSE_INDEX)
-        self.gaze_visualiser = Visualiser(self.gaze_estimator.camera, face_model_3d.NOSE_INDEX)
+        self.camera_visualiser = Visualiser(
+            self.gaze_estimator.camera, face_model_3d.NOSE_INDEX)
+        self.gaze_visualiser = Visualiser(
+            self.gaze_estimator.camera, face_model_3d.NOSE_INDEX)
 
         self.cap = self._create_capture()
         self.output_dir = self._create_output_dir()
@@ -128,19 +131,21 @@ class GazeDetector:
         out_height, out_width = resolution_2d
 
         hitbox_width = int(out_width * self.config.demo.hitbox_width_proprtion)
-        logger.debug(f"Hit-box width: {hitbox_width}")
+        logger.debug("Hit-box width: %d", hitbox_width)
 
         # Left hit-box
         left_hitbox_top_left = (0, 0)
         left_hitbox_bottom_right = (hitbox_width, out_height)
-        left_hitbox = {c.TOP_LEFT: left_hitbox_top_left, c.BOTTOM_RIGHT: left_hitbox_bottom_right}
-        logger.debug(f"Left hit-box: {left_hitbox}")
+        left_hitbox = {c.TOP_LEFT: left_hitbox_top_left,
+                       c.BOTTOM_RIGHT: left_hitbox_bottom_right}
+        logger.debug("Left hit-box: %d", left_hitbox)
 
         # Right hit-box
         right_hitbox_top_left = (int(out_width - hitbox_width), 0)
         right_hitbox_bottom_right = (out_width, out_height)
-        right_hitbox = {c.TOP_LEFT: right_hitbox_top_left, c.BOTTOM_RIGHT: right_hitbox_bottom_right}
-        logger.debug(f"Right hit-box: {right_hitbox}")
+        right_hitbox = {c.TOP_LEFT: right_hitbox_top_left,
+                        c.BOTTOM_RIGHT: right_hitbox_bottom_right}
+        logger.debug("Right hit-box: %d", right_hitbox)
 
         return {cc.LEFT: left_hitbox, cc.RIGHT: right_hitbox}
 
@@ -171,7 +176,8 @@ class GazeDetector:
             while True:
                 key_pressed = self._wait_key()
                 if self.stop:
-                    logger.info("Stopping gaze detector from user exit signal.")
+                    logger.info(
+                        "Stopping gaze detector from user exit signal.")
                     break
 
                 if key_pressed:
@@ -182,7 +188,7 @@ class GazeDetector:
         if self.config.demo.output_dir:
             name = pathlib.Path(self.config.demo.image_path).name
             output_path = pathlib.Path(self.config.demo.output_dir) / name
-            logger.info(f"Saving output to {output_path}")
+            logger.info("Saving output to %s", output_path)
             cv2.imwrite(output_path.as_posix(), self.camera_visualiser.image)
 
         if self.running_in_thread:
@@ -204,7 +210,8 @@ class GazeDetector:
             else:
                 logger.info("Video feed will be displayed on screen")
 
-        run_loop_with_max_tickrate(self.config.demo.max_tick_rate, self._gaze_loop)
+        run_loop_with_max_tickrate(
+            self.config.demo.max_tick_rate, self._gaze_loop)
 
         self.cap.release()
         if self.writer:
@@ -284,7 +291,8 @@ class GazeDetector:
             return ok, frame
 
         # Upscale feed
-        upscaled_frame = transforms.upscale(frame, self.config.demo.upscale_dim)
+        upscaled_frame = transforms.upscale(
+            frame, self.config.demo.upscale_dim)
         return ok, upscaled_frame
 
     def _process_image(self, image) -> None:
@@ -422,7 +430,8 @@ class GazeDetector:
         else:
             raise ValueError
         output_path = self.output_dir / output_name
-        writer = cv2.VideoWriter(output_path.as_posix(), fourcc, 30, (self.gaze_estimator.camera.width, self.gaze_estimator.camera.height))
+        writer = cv2.VideoWriter(output_path.as_posix(
+        ), fourcc, 30, (self.gaze_estimator.camera.width, self.gaze_estimator.camera.height))
         if writer is None:
             raise RuntimeError
         return writer
@@ -440,11 +449,13 @@ class GazeDetector:
 
         if self.running_in_thread:
             if cc.KEYBOARD_QUEUE not in self.thread_data.keys():
-                logger.trace("Keyboard queue not yet initialised in shared data.")
+                logger.trace(
+                    "Keyboard queue not yet initialised in shared data.")
                 return False
 
             keyboard_queue: PeekableQueue = self.thread_data[cc.KEYBOARD_QUEUE]
-            key_buffer = keyboard.keyboard_event_loop(self.data_lock, keyboard_queue, self.keyboard_bindings)
+            key_buffer = keyboard.keyboard_event_loop(
+                self.data_lock, keyboard_queue, self.keyboard_bindings)
 
             accepted_keys = []
             for key_code in key_buffer:
@@ -530,7 +541,8 @@ class GazeDetector:
         undistorted = self._undistort_image(frame)
         faces = self.gaze_estimator.detect_faces_raw(undistorted)
         if len(faces) != 1:
-            logger.info("Ensure only one face is visible in the camera feed then press 'c' to calibrate again.")
+            logger.info(
+                "Ensure only one face is visible in the camera feed then press 'c' to calibrate again.")
             return
 
         face_landmarks = faces[0]
@@ -538,7 +550,8 @@ class GazeDetector:
         # Add 1 meter to the z-axis ??
         self.calibration_landmarks[:, 2] += 1
 
-        self.gaze_estimator._face_model3d.set_landmark_calibration(self.calibration_landmarks)
+        self.gaze_estimator._face_model3d.set_landmark_calibration(
+            self.calibration_landmarks)
 
         self.calibrated = True
         logger.info("Calibration successful.")
@@ -551,7 +564,8 @@ class GazeDetector:
             None
         """
         if self.gaze_2d_point is not None:
-            self.gaze_2d_point = self.camera_visualiser.flip_point_x(self.gaze_2d_point)
+            self.gaze_2d_point = self.camera_visualiser.flip_point_x(
+                self.gaze_2d_point)
 
     def _draw_face_bbox(self, face: Face) -> None:
         """
@@ -587,7 +601,8 @@ class GazeDetector:
 
         euler_angles = face.head_pose_rot.as_euler("XYZ", degrees=True)
         pitch, yaw, roll = face.change_coordinate_system(euler_angles)
-        logger.debug(f"[head] pitch: {pitch:.2f}, yaw: {yaw:.2f}, " f"roll: {roll:.2f}, distance: {face.distance:.2f}")
+        logger.debug("[head] pitch: %d, yaw: %d, " f"roll: %d, distance: %d",
+                     pitch, yaw, roll, face.distance)
 
     def _draw_landmarks(self, face: Face) -> None:
         """
@@ -601,7 +616,8 @@ class GazeDetector:
         """
         if not self.show_landmarks:
             return
-        self.camera_visualiser.draw_points(face.landmarks, color=(0, 255, 255), size=1)
+        self.camera_visualiser.draw_points(
+            face.landmarks, color=(0, 255, 255), size=1)
 
     def _draw_face_template_model(self, face: Face) -> None:
         """
@@ -615,7 +631,8 @@ class GazeDetector:
         """
         if not self.show_template_model:
             return
-        self.camera_visualiser.draw_3d_points(face.model3d, color=(255, 0, 525), size=1)
+        self.camera_visualiser.draw_3d_points(
+            face.model3d, color=(255, 0, 525), size=1)
 
     def _display_normalized_image(self, face: Face) -> None:
         """
@@ -664,11 +681,14 @@ class GazeDetector:
             self.camera_visualiser.draw_3d_line(eye.center, end_point)
 
             pitch, yaw = np.rad2deg(eye.vector_to_angle(eye.gaze_vector))
-            logger.debug(f"[{key.name.lower()}] pitch: {pitch:.2f}, yaw: {yaw:.2f}")
+            logger.debug("[%s] pitch: %d, yaw: %d",
+                         key.name.lower(), pitch, yaw)
 
-        self.average_eye_distance = (face.reye.distance + face.leye.distance) / 2
+        self.average_eye_distance = (
+            face.reye.distance + face.leye.distance) / 2
         self.average_eye_center = (face.reye.center + face.leye.center) / 2
-        self.average_gaze_vector = (face.reye.gaze_vector + face.leye.gaze_vector) / 2
+        self.average_gaze_vector = (
+            face.reye.gaze_vector + face.leye.gaze_vector) / 2
 
         end_point = self.average_eye_center + length * self.average_gaze_vector
         self.camera_visualiser.draw_3d_line(self.average_eye_center, end_point)
@@ -687,7 +707,8 @@ class GazeDetector:
         # Draw the point on the screen the user is looking at
         point_on_screen = (
             self.average_eye_center
-            + (self.average_eye_distance * self.config.gaze_point.z_projection_multiplier) * self.average_gaze_vector
+            + (self.average_eye_distance *
+               self.config.gaze_point.z_projection_multiplier) * self.average_gaze_vector
         )
         point_on_screen[1] *= self.config.gaze_point.gaze_vector_y_scale
 
@@ -716,7 +737,7 @@ class GazeDetector:
         bg_color = (0, 0, 255)
 
         # Determine if user is looking in one of the hit-boxes
-        logger.info(f"Gaze 2d Point: {self.gaze_2d_point}")
+        logger.info("Gaze 2d Point: %s", str(self.gaze_2d_point))
 
         # Set only when looking at a hitbox
         gaze_side = None
@@ -743,7 +764,7 @@ class GazeDetector:
             )
 
         if self.running_in_thread:
-            logger.info(f"Setting gaze side to {gaze_side} in shared data.")
+            logger.info("Setting gaze side to %s in shared data.", gaze_side)
             with self.data_lock:
                 self.thread_data[cc.EYE_TRACKING][cc.GAZE_SIDE] = gaze_side
                 self.thread_data[cc.EYE_TRACKING][cc.GAZE_OVERLAY] = gaze_overlay
