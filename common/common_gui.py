@@ -107,6 +107,7 @@ class CommonGUI:
             timers_conf: Configuration dictionary
         """
 
+        logger.debug("Configuring %d timers", len(timers_conf))
         for timer_name, conf in timers_conf.items():
             if conf.get(cc.THREAD_CALLBACK) is None:
                 raise ValueError(f"Timer callback not found: {timer_name}")
@@ -129,7 +130,7 @@ class CommonGUI:
         Returns:
             QTimer: The configured QTimer
         """
-        logger.info(f"Configuring timer: {name}")
+        logger.debug(f"Configuring timer: {name}")
         timer = QTimer(self)
         timer.timeout.connect(lambda: callback(*args))
         timer.start(fps_to_ms(fps))
