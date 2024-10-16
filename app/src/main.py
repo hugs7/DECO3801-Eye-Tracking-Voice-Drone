@@ -157,9 +157,13 @@ def main():
         for process in processes:
             process.join(cc.PROCESS_TIMEOUT)
             if process.is_alive():
-                logger.info(f"Terminating process {process.name}")
-                process.terminate()
+                while process.is_alive():
+                    logger.info(f"Terminating process {process.name}")
+                    process.terminate()
+                    process.kill()
+                process.join()
 
+        logger.info("Waiting for threads to join")
         for thread in threads:
             thread.join()
 
