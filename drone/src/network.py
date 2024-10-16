@@ -8,14 +8,16 @@ import subprocess
 import re
 import os
 import time
+from threading import Event
 
 if __name__ == "__main__":
-
     # Add project directory to path
-    project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
+    project_root = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "../.."))
     sys.path.insert(0, project_root)
 
 from common.logger_helper import init_logger
+from common.thread_helper import thread_loop_handler
 
 
 logger = init_logger("DEBUG")
@@ -31,7 +33,8 @@ def win_ssid_profile_exists(ssid: str) -> bool:
     Returns:
         bool: True if the profile exists, False otherwise
     """
-    result = subprocess.run(["netsh", "wlan", "show", "profile"], capture_output=True, text=True, shell=True)
+    result = subprocess.run(
+        ["netsh", "wlan", "show", "profile"], capture_output=True, text=True, shell=True)
     return ssid in result.stdout
 
 
@@ -67,8 +70,8 @@ def win_create_wifi_profile(ssid: str, password: str) -> None:
     <MSM>
         <security>
             <authEncryption>
-                <authentication>{ 'WPA2PSK' if password else 'open' }</authentication>
-                <encryption>{ 'AES' if password else 'none' }</encryption>
+                <authentication>{'WPA2PSK' if password else 'open'}</authentication>
+                <encryption>{'AES' if password else 'none'}</encryption>
                 <useOneX>false</useOneX>
             </authEncryption>{shared_key if password else ''}
         </security>
@@ -80,7 +83,8 @@ def win_create_wifi_profile(ssid: str, password: str) -> None:
     with open(profile_file, "w") as f:
         f.write(profile_content)
 
-    subprocess.run(["netsh", "wlan", "add", "profile", f"filename={profile_file}"], shell=True)
+    subprocess.run(["netsh", "wlan", "add", "profile",
+                   f"filename={profile_file}"], shell=True)
 
     os.remove(profile_file)
 
@@ -93,34 +97,53 @@ def is_wifi_connected() -> bool:
         bool: True if connected, False otherwise
     """
     if sys.platform == "win32":
-        result = subprocess.run(["netsh", "wlan", "show", "interfaces"], capture_output=True, text=True, shell=True)
+        result = subprocess.run(
+            ["netsh", "wlan", "show", "interfaces"], capture_output=True, text=True, shell=True)
         pattern = r"State\s+:\s+connected"
         return re.search(pattern, result.stdout, re.MULTILINE) is not None
     elif sys.platform == "linux":
-        result = subprocess.run(["iwgetid"], capture_output=True, text=True, shell=True)
+        result = subprocess.run(
+            ["iwgetid"], capture_output=True, text=True, shell=True)
         return "ESSID" in result.stdout
     elif sys.platform == "darwin":
-        result = subprocess.run(["networksetup", "-getairportnetwork", "en0"], capture_output=True, text=True, shell=True)
+        result = subprocess.run(
+            ["networksetup", "-getairportnetwork", "en0"], capture_output=True, text=True, shell=True)
         return "Current Wi-Fi Network" in result.stdout
 
 
-def refresh_networks() -> None:
+def refresh_networks(stop_event: Optional[Event] = None) -> None:
     """
     Refreshes the list of available Wi-Fi networks
+
+    Args:
+        stop_event (Optional[Event], optional): The event to stop the connection process. Defaults to None.
     """
 
     logger.info("Refreshing available networks...")
     if sys.platform == "win32":
-        subprocess.run("explorer.exe ms-availablenetworks:", capture_output=False)
+        subprocess.run("explorer.exe ms-availablenetworks:",
+                       capture_output=False)
     elif sys.platform == "linux":
-        subprocess.run(["nmcli", "device", "wifi", "rescan"], capture_output=False)
+        subprocess.run(["nmcli", "device", "wifi", "rescan"],
+                       capture_output=False)
     elif sys.platform == "darwin":
-        subprocess.run(["networksetup", "-detectnewhardware"], capture_output=False)
+        subprocess.run(["networksetup", "-detectnewhardware"],
+                       capture_output=False)
 
-    time.sleep(3)
+    if stop_event is not None:
+        thread_loop_handler(stop_event)
+
+    time.sleep(10)
 
 
-def connect_to_wifi(ssid: str, password: str, network_interface: Optional[str] = None, max_attempts: int = 3, delay: float = 5.0) -> bool:
+def connect_to_wifi(
+    ssid: str,
+    password: str,
+    network_interface: Optional[str] = None,
+    max_attempts: int = 3,
+    delay: float = 5.0,
+    stop_event: Optional[Event] = None,
+) -> bool:
     """
     Connects to the specified wifi network
 
@@ -132,12 +155,13 @@ def connect_to_wifi(ssid: str, password: str, network_interface: Optional[str] =
                                                      Only required for MacOS. Defaults to None.
         max_attempts (int, optional): The maximum number of attempts to connect. Defaults to 3.
         delay (float, optional): Delay when checking WiFi Connection
+        stop_event (Optional[Event], optional): The event to stop the connection process. Defaults to None.
 
     Returns:
         bool: True if connection was successful, False otherwise
     """
     logger.info("Connecting to wifi network '%s'...", ssid)
-    refresh_networks()
+    refresh_networks(stop_event)
 
     if sys.platform == "win32":
         if win_ssid_profile_exists(ssid):
@@ -155,16 +179,21 @@ def connect_to_wifi(ssid: str, password: str, network_interface: Optional[str] =
         if not network_interface:
             network_interface = "en0"
 
-        connect_cmd = f'networksetup -setairportnetwork {network_interface} "{ssid}"'
+        connect_cmd = f'networksetup -setairportnetwork {
+            network_interface} "{ssid}"'
         if password:
             connect_cmd += f' "{password}"'
 
-    logger.debug("Running connection command: %s for a maximum of %d connection attempts", connect_cmd, max_attempts)
+    logger.debug("Running connection command: %s for a maximum of %d connection attempts",
+                 connect_cmd, max_attempts)
 
     connected = False
     attempts = 0
 
     while not connected and attempts < max_attempts:
+        if stop_event is not None:
+            thread_loop_handler(stop_event)
+
         try:
             subprocess.run(connect_cmd, shell=True, check=True)
         except subprocess.CalledProcessError as e:
@@ -174,7 +203,8 @@ def connect_to_wifi(ssid: str, password: str, network_interface: Optional[str] =
         time.sleep(delay)
         connected = is_wifi_connected()
         if connected:
-            logger.info("Successfully connected to wifi network '%s' on attempt %d", ssid, attempts)
+            logger.info(
+                "Successfully connected to wifi network '%s' on attempt %d", ssid, attempts)
         else:
             logger.error("Failed to connect to wifi network '%s'", ssid)
 

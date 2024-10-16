@@ -4,6 +4,7 @@ Init module for the drone package.
 """
 
 from typing import Union, Optional
+from threading import Event
 
 from omegaconf import DictConfig, OmegaConf
 
@@ -53,7 +54,7 @@ def init() -> DictConfig:
     return config
 
 
-def init_drone(config: OmegaConf) -> Optional[Union[models.TelloDrone, models.MavicDrone]]:
+def init_drone(config: OmegaConf, stop_event: Optional[Event] = None) -> Optional[Union[models.TelloDrone, models.MavicDrone]]:
     """
     Initialises the drone
 
@@ -73,7 +74,7 @@ def init_drone(config: OmegaConf) -> Optional[Union[models.TelloDrone, models.Ma
         case c.MAVIC:
             vehicle = models.MavicDrone(config.mavic)
         case c.TELLO:
-            vehicle = models.TelloDrone(config.tello)
+            vehicle = models.TelloDrone(config.tello, stop_event)
         case _:
             raise ValueError(f"Invalid drone type: {drone_type}")
 

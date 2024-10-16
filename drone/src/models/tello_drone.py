@@ -3,7 +3,8 @@ Defines class for Tello drone
 """
 
 from datetime import datetime
-from typing import Any, Tuple
+from typing import Any, Tuple, Optional
+from threading import Event
 
 import cv2
 from djitellopy import tello
@@ -33,18 +34,20 @@ class TelloDrone(Drone):
     Implements a Tello drone wrapper class
     """
 
-    def __init__(self, tello_config: OmegaConf) -> None:
+    def __init__(self, tello_config: OmegaConf, stop_event: Optional[Event]) -> None:
         """
         Initialises the Tello drone
 
         Args:
             tello_config (OmegaConf): The Tello config object
+            stop_event (Optional[Event]): The event to stop the connection process
         """
 
         logger.info("Initialising TelloDrone...")
         tello_drone = Tello()
         # Must be assigned first to avoid circular reference
         self.drone = tello_drone
+        self.stop_event = stop_event
 
         self.__init_config(tello_config)
 
@@ -174,7 +177,7 @@ class TelloDrone(Drone):
         logger.info("Connecting to the Tello Drone...")
 
         wifi_config = self.config.wifi
-        connected = network.connect_to_wifi(wifi_config.ssid, wifi_config.password)
+        connected = network.connect_to_wifi(wifi_config.ssid, wifi_config.password, stop_event=self.stop_event)
 
         if not connected:
             logger.error("Could not connect to the drone. Check your WiFi connection.")

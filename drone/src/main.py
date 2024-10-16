@@ -33,7 +33,7 @@ def main(stop_event: Optional[Event] = None, thread_data: Optional[Dict] = None,
         data_lock: Lock for shared data
     """
     drone_config = init.init()
-    drone = init.init_drone(drone_config)
+    drone = init.init_drone(drone_config, stop_event)
 
     controller = Controller(drone, drone_config.controller, stop_event, thread_data, data_lock)
     controller.run()
