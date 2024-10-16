@@ -367,36 +367,41 @@ class MainApp(QMainWindow, CommonGUI):
         Updates the display of the flight statistics from the drone module.
         """
 
-        flight_stats: Dict = self.thread_data[cc.DRONE][cc.FLIGHT_STATISTICS]
-        if not flight_stats:
+        drone_data: Dict = self.thread_data[cc.DRONE]
+        if cc.FLIGHT_STATISTICS not in drone_data.keys():
+            logger.debug("Flight statistics not found")
+            return
+
+        flight_statistics: Dict = drone_data[cc.FLIGHT_STATISTICS]
+        if not flight_statistics:
             return None
 
-        flight_stats = [f"Flight time: {flight_stats.get(FlightStatistics.FLIGHT_TIME, 'N/A')}s",
-                        f"Distance: {flight_stats.get(
-                            FlightStatistics.DISTANCE_TOF, 'N/A')}m",
-                        f"Speed x: {flight_stats.get(
-                            FlightStatistics.SPEED_X, 'N/A')}m/s",
-                        f"Speed y: {flight_stats.get(
-                            FlightStatistics.SPEED_Y, 'N/A')}m/s",
-                        f"Speed z: {flight_stats.get(
-                            FlightStatistics.SPEED_Z, 'N/A')}m/s",
-                        f"Accel x: {flight_stats.get(
-                            FlightStatistics.ACCELERATION_X, 'N/A')}m/s²",
-                        f"Accel y: {flight_stats.get(
-                            FlightStatistics.ACCELERATION_Y, 'N/A')}m/s²",
-                        f"Accel z: {flight_stats.get(
-                            FlightStatistics.ACCELERATION_Z, 'N/A')}m/s²",
-                        f"Altimeter: {flight_stats.get(
-                            FlightStatistics.BAROMETER, 'N/A')}cm",
-                        f"Yaw: {flight_stats.get(
-                            FlightStatistics.YAW, 'N/A')}°",
-                        f"Pitch: {flight_stats.get(
-                            FlightStatistics.PITCH, 'N/A')}°",
-                        f"Roll: {flight_stats.get(
-                            FlightStatistics.ROLL, 'N/A')}",
-                        f"WiFi SNR: {flight_stats.get(FlightStatistics.WIFI_SNR, 'N/A')}dB"]
+        flight_stats_lst = [f"Flight time: {flight_statistics.get(FlightStatistics.FLIGHT_TIME, 'N/A')}s",
+                            f"Distance: {flight_statistics.get(
+                                FlightStatistics.DISTANCE_TOF, 'N/A')}m",
+                            f"Speed x: {flight_statistics.get(
+                                FlightStatistics.SPEED_X, 'N/A')}m/s",
+                            f"Speed y: {flight_statistics.get(
+                                FlightStatistics.SPEED_Y, 'N/A')}m/s",
+                            f"Speed z: {flight_statistics.get(
+                                FlightStatistics.SPEED_Z, 'N/A')}m/s",
+                            f"Accel x: {flight_statistics.get(
+                                FlightStatistics.ACCELERATION_X, 'N/A')}m/s²",
+                            f"Accel y: {flight_statistics.get(
+                                FlightStatistics.ACCELERATION_Y, 'N/A')}m/s²",
+                            f"Accel z: {flight_statistics.get(
+                                FlightStatistics.ACCELERATION_Z, 'N/A')}m/s²",
+                            f"Altimeter: {flight_statistics.get(
+                                FlightStatistics.BAROMETER, 'N/A')}cm",
+                            f"Yaw: {flight_statistics.get(
+                                FlightStatistics.YAW, 'N/A')}°",
+                            f"Pitch: {flight_statistics.get(
+                                FlightStatistics.PITCH, 'N/A')}°",
+                            f"Roll: {flight_statistics.get(
+                                FlightStatistics.ROLL, 'N/A')}",
+                            f"WiFi SNR: {flight_statistics.get(FlightStatistics.WIFI_SNR, 'N/A')}dB"]
 
-        flight_stats_text = "\n".join(flight_stats)
+        flight_stats_text = "\n".join(flight_stats_lst)
         logger.info(flight_stats_text)
         self.statisticsLabel.setText(flight_stats_text)
 
