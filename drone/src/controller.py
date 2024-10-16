@@ -284,6 +284,8 @@ class Controller:
             accepted (bool): True if the command was accepted, False otherwise.
         """
 
+        command = command.lower()
+
         angle = 35
         dist = 20
 
