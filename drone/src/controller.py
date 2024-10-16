@@ -217,15 +217,16 @@ class Controller:
 
         stat_vals[FlightStatistics.BATTERY] = self.model.battery_level
 
-        for statistic in vars(FlightStatistics).values():
+        for statistic in FlightStatistics:
+            statistic_value = statistic.value
             try:
-                value = eval(f"self.model.get_{statistic}()")
+                value = eval(f"self.model.drone.get_{statistic_value}()")
             except AttributeError:
                 logger.warning(
-                    "Method get_%s not found in drone model", statistic)
+                    "Method get_%s not found in drone model", statistic_value)
                 continue
 
-            logger.info("Drone %s: %s", statistic, value)
+            logger.info("Drone %s: %s", statistic_value, value)
         with self.data_lock:
             self.thread_data[cc.DRONE][cc.FLIGHT_STATISTICS] = stat_vals
 

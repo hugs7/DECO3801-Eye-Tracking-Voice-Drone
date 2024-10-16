@@ -1,9 +1,10 @@
 """
 Flight Statistics definition
 """
+from enum import Enum
 
 
-class FlightStatistics:
+class FlightStatistics(Enum):
     BATTERY = "battery"
     PITCH = "pitch"
     ROLL = "roll"
