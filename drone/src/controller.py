@@ -298,7 +298,7 @@ class Controller:
             logger.trace("Key %s not found in keybindings", key_chr)
             return False
 
-        key_recognised = key_action in vars(DroneActions).values()
+        key_recognised = key_action in DroneActions
         if key_recognised:
             self.perform_action(key_action)
         else:
