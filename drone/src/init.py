@@ -29,13 +29,8 @@ def init_config() -> DictConfig:
     configs_folder = fh.get_configs_folder()
     path = configs_folder / "drone.yaml"
 
-    if path.is_file():
-        logger.info(f"Loading config from {path}")
-        config = OmegaConf.load(path)
-    else:
-        logger.info(f"Config file not found at {path}. Initialising with default values.")
-        config = oh.initialise_config(c.DEFAULT_CONFIG, path)
-
+    config = oh.load_or_create_config(path, c.DEFAULT_CONFIG)
+    logger.info("Drone configuration initialised")
     return config
 
 

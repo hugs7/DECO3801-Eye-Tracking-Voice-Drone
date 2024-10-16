@@ -69,3 +69,25 @@ def initialise_config(config_dict: Dict, config_path: Path) -> OmegaConf:
     logger.info("Config file initialised.")
 
     return default_config
+
+
+def load_or_create_config(config_path: Path, default_config: Dict) -> OmegaConf:
+    """
+    Load the configuration file if it exists, otherwise create it with default values.
+
+    Args:
+        config_path (Path): The path to the configuration file.
+        default_config (Dict): The default configuration settings.
+
+    Returns:
+        OmegaConf: The OmegaConf object of the configuration
+    """
+
+    if config_path.is_file():
+        logger.info("Loading config from %s", config_path)
+        config = OmegaConf.load(config_path)
+    else:
+        logger.info("Config file not found at %s. Initialising with default values.", config_path)
+        config = initialise_config(default_config, config_path)
+
+    return config
