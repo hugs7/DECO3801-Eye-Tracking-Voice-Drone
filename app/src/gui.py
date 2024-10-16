@@ -400,7 +400,7 @@ class MainApp(QMainWindow, CommonGUI):
                                 FlightStatistics.ROLL.value, 'N/A')}",]
 
         flight_stats_text = "\n".join(flight_stats_lst)
-        logger.info(flight_stats_text)
+        logger.trace(flight_stats_text)
         self.statisticsLabel.setText(flight_stats_text)
 
     def get_next_voice_command(self) -> None:
