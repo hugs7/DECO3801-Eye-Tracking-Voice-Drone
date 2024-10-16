@@ -182,6 +182,11 @@ def connect_to_wifi(
     if is_wifi_connected(ssid):
         logger.info("Already connected to wifi network '%s'", ssid)
         return True
+
+    if is_wifi_connected():
+        logger.info("Connected to another network.")
+        disconnect_from_wifi()
+
     logger.info("Connecting to wifi network '%s'...", ssid)
     refresh_networks(stop_event)
 
@@ -233,6 +238,28 @@ def connect_to_wifi(
         attempts += 1
 
     return connected
+
+
+def disconnect_from_wifi(network_interface: Optional[str] = None) -> None:
+    """
+    Disconnects from the current wifi network
+
+    Args:
+        network_interface (Optional[str], optional): The network interface to disconnect from.
+                                                     Only required for MacOS. Defaults to None.
+    """
+    logger.info("Disconnecting from wifi network...")
+
+    if sys.platform == "win32":
+        disconnect_cmd = "netsh wlan disconnect"
+        if network_interface:
+            disconnect_cmd += f" interface={network_interface}"
+        subprocess.run(disconnect_cmd, shell=True)
+    elif sys.platform == "linux":
+        subprocess.run("nmcli device disconnect", shell=True)
+    elif sys.platform == "darwin":
+        subprocess.run("networksetup -setairportpower en0 off", shell=True)
+        subprocess.run("networksetup -setairportpower en0 on", shell=True)
 
 
 if __name__ == "__main__":
