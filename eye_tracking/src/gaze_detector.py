@@ -307,7 +307,6 @@ class GazeDetector:
         """
         undistorted = self._undistort_image(image)
         self.camera_visualiser.set_image(image.copy())
-        self.gaze_visualiser.set_image(np.zeros_like(image))
 
         if self.loop_enabled:
             if self.hitboxes is None:
@@ -762,11 +761,12 @@ class GazeDetector:
             gaze_overlay = self.gaze_visualiser.draw_labelled_rectangle(
                 top_left, bottom_right, bg_color, bg_alpha, text, border_color=border, blend=not self.running_in_thread
             )
+            self.gaze_visualiser.set_image(gaze_overlay)
 
         if self.running_in_thread:
             logger.info("Setting gaze side to %s in shared data.", gaze_side)
             with self.data_lock:
                 self.thread_data[cc.EYE_TRACKING][cc.GAZE_SIDE] = gaze_side
-                self.thread_data[cc.EYE_TRACKING][cc.GAZE_OVERLAY] = gaze_overlay
+                self.thread_data[cc.EYE_TRACKING][cc.GAZE_OVERLAY] = self.gaze_visualiser.image
 
             logger.debug("Shared data updated.")
