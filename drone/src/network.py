@@ -92,9 +92,13 @@ def win_create_wifi_profile(ssid: str, password: str) -> None:
     os.remove(profile_file)
 
 
-def is_wifi_connected() -> bool:
+def is_wifi_connected(ssid: Optional[str] = None) -> bool:
     """
     Checks if the device is connected to a Wi-Fi network
+
+    Args:
+        ssid (Optional[str]): The SSID of the network to check we are connected to. If not
+                                provided, checks if we are connected to any network
 
     Returns:
         bool: True if connected, False otherwise
@@ -102,8 +106,20 @@ def is_wifi_connected() -> bool:
     if sys.platform == "win32":
         result = subprocess.run(
             ["netsh", "wlan", "show", "interfaces"], capture_output=True, text=True, shell=True)
-        pattern = r"State\s+:\s+connected"
-        return re.search(pattern, result.stdout, re.MULTILINE) is not None
+        connected_pattern = r"State\s+:\s+connected"
+        is_connected = re.search(connected_pattern, result.stdout) is not None
+        logger.debug("Connected to a WLAN: %s", is_connected)
+
+        if ssid is None or not is_connected:
+            return is_connected
+
+        ssid_pattern = re.compile(
+            rf"SSID\s+:\s({re.escape(ssid)})$", re.MULTILINE)
+        ssid_connected = re.search(ssid_pattern, result.stdout) is not None
+        logger.debug("Connected to the correct WLAN, %s: %s",
+                     ssid, ssid_connected)
+
+        return is_connected and ssid_connected
     elif sys.platform == "linux":
         result = subprocess.run(
             ["iwgetid"], capture_output=True, text=True, shell=True)
@@ -204,7 +220,7 @@ def connect_to_wifi(
             continue
 
         time.sleep(delay)
-        connected = is_wifi_connected()
+        connected = is_wifi_connected(ssid)
         if connected:
             logger.info(
                 "Successfully connected to wifi network '%s' on attempt %d", ssid, attempts)
