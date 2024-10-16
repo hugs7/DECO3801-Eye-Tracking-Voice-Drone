@@ -61,7 +61,7 @@ def keyboard_event_loop(data_lock: Lock, keyboard_queue: PeekableQueue, keyboard
     with data_lock:
         i = 0
         while i < keyboard_queue.qsize():
-            key_code = keyboard_queue.peek()
+            key_code = keyboard_queue.peek(i)
             is_bound = is_key_bound(keyboard_bindings, key_code)
             if is_bound:
                 key_code = keyboard_queue.get()
