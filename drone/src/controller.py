@@ -262,8 +262,10 @@ class Controller:
         if not self.drone_connected:
             return
 
-        for command in command_buffer:
-            accepted_commands.append(self.perform_action(*command))
+        for tup_command in command_buffer:
+            logger.info("Received voice command: %s", tup_command)
+            command, measurement = tup_command[0]
+            accepted_commands.append(self.perform_action(command, measurement))
 
         # Accept if any valid command was received
         return any(accepted_commands)
