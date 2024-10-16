@@ -95,7 +95,7 @@ DEFAULT_CONFIG = {
             "motor off": "0",
         },
         "drone_stat_params": {
-            FlightStatistics.BATTERY: 0.2,
+            FlightStatistics.BATTERY.value: 0.2,
         },
     },
 }

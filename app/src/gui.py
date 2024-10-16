@@ -375,30 +375,30 @@ class MainApp(QMainWindow, CommonGUI):
         if not flight_statistics:
             return None
 
-        flight_stats_lst = [f"Flight time: {flight_statistics.get(FlightStatistics.FLIGHT_TIME, 'N/A')}s",
+        flight_stats_lst = [f"Flight time: {flight_statistics.get(FlightStatistics.FLIGHT_TIME.value, 'N/A')}s",
                             f"Distance: {flight_statistics.get(
-                                FlightStatistics.DISTANCE_TOF, 'N/A')}m",
+                                FlightStatistics.DISTANCE_TOF.value, 'N/A')}m",
                             f"Speed x: {flight_statistics.get(
-                                FlightStatistics.SPEED_X, 'N/A')}m/s",
+                                FlightStatistics.SPEED_X.value, 'N/A')}m/s",
                             f"Speed y: {flight_statistics.get(
-                                FlightStatistics.SPEED_Y, 'N/A')}m/s",
+                                FlightStatistics.SPEED_Y.value, 'N/A')}m/s",
                             f"Speed z: {flight_statistics.get(
-                                FlightStatistics.SPEED_Z, 'N/A')}m/s",
+                                FlightStatistics.SPEED_Z.value, 'N/A')}m/s",
                             f"Accel x: {flight_statistics.get(
-                                FlightStatistics.ACCELERATION_X, 'N/A')}m/s²",
+                                FlightStatistics.ACCELERATION_X.value, 'N/A')}m/s²",
                             f"Accel y: {flight_statistics.get(
-                                FlightStatistics.ACCELERATION_Y, 'N/A')}m/s²",
+                                FlightStatistics.ACCELERATION_Y.value, 'N/A')}m/s²",
                             f"Accel z: {flight_statistics.get(
-                                FlightStatistics.ACCELERATION_Z, 'N/A')}m/s²",
+                                FlightStatistics.ACCELERATION_Z.value, 'N/A')}m/s²",
                             f"Altimeter: {flight_statistics.get(
-                                FlightStatistics.BAROMETER, 'N/A')}cm",
+                                FlightStatistics.BAROMETER.value, 'N/A')}cm",
                             f"Yaw: {flight_statistics.get(
-                                FlightStatistics.YAW, 'N/A')}°",
+                                FlightStatistics.YAW.value, 'N/A')}°",
                             f"Pitch: {flight_statistics.get(
-                                FlightStatistics.PITCH, 'N/A')}°",
+                                FlightStatistics.PITCH.value, 'N/A')}°",
                             f"Roll: {flight_statistics.get(
-                                FlightStatistics.ROLL, 'N/A')}",
-                            f"WiFi SNR: {flight_statistics.get(FlightStatistics.WIFI_SNR, 'N/A')}dB"]
+                                FlightStatistics.ROLL.value, 'N/A')}",
+                            f"WiFi SNR: {flight_statistics.get(FlightStatistics.WIFI_SNR.value, 'N/A')}dB"]
 
         flight_stats_text = "\n".join(flight_stats_lst)
         logger.info(flight_stats_text)
@@ -443,7 +443,8 @@ class MainApp(QMainWindow, CommonGUI):
             return
 
         flight_statistics: Dict = drone_data[cc.FLIGHT_STATISTICS]
-        battery_level = flight_statistics.get(FlightStatistics.BATTERY, None)
+        battery_level = flight_statistics.get(
+            FlightStatistics.BATTERY.value, None)
         if battery_level is None:
             logger.debug("Battery level not found")
             return

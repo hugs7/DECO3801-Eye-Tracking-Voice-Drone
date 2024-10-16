@@ -22,4 +22,3 @@ class FlightStatistics(Enum):
     DISTANCE_TOF = "distance_tof"
     BAROMETER = "barometer"
     FLIGHT_TIME = "flight_time"
-    # WIFI_SNR = "wifi_signal_noise_ratio"

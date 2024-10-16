@@ -212,13 +212,13 @@ class Controller:
         stat_vals = dict()
 
         # Battery
-        if now - self.drone_stat_times[FlightStatistics.BATTERY] > self.drone_stat_params[FlightStatistics.BATTERY]:
+        if now - self.drone_stat_times[FlightStatistics.BATTERY.value] > self.drone_stat_params[FlightStatistics.BATTERY.value]:
             logger.debug("Getting battery level...")
             self.model.battery_level = self.model.get_battery()
             logger.info("Drone battery: %d", self.model.battery_level)
-            self.drone_stat_times[FlightStatistics.BATTERY] = now
+            self.drone_stat_times[FlightStatistics.BATTERY.value] = now
 
-        stat_vals[FlightStatistics.BATTERY] = self.model.battery_level
+        stat_vals[FlightStatistics.BATTERY.value] = self.model.battery_level
 
         for statistic in FlightStatistics:
             statistic_value = statistic.value
