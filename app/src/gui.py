@@ -397,8 +397,7 @@ class MainApp(QMainWindow, CommonGUI):
                             f"Pitch: {flight_statistics.get(
                                 FlightStatistics.PITCH.value, 'N/A')}°",
                             f"Roll: {flight_statistics.get(
-                                FlightStatistics.ROLL.value, 'N/A')}",
-                            f"WiFi SNR: {flight_statistics.get(FlightStatistics.WIFI_SNR.value, 'N/A')}dB"]
+                                FlightStatistics.ROLL.value, 'N/A')}",]
 
         flight_stats_text = "\n".join(flight_stats_lst)
         logger.info(flight_stats_text)
