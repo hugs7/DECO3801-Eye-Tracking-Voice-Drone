@@ -77,13 +77,13 @@ class MainApp(QMainWindow, CommonGUI):
         self.drone_video_label.lower()
         self.centralwidget.raise_()
 
-        self.batteryLabel = QLabel("Battery: ???%", self)
-        self.batteryLabel.setAlignment(Qt.AlignmentFlag.AlignRight)
-        self.batteryLabel.setStyleSheet("color: green; font-size: 14px;")
+        self.battery_label = QLabel("Battery: ???%", self)
+        self.battery_label.setAlignment(Qt.AlignmentFlag.AlignRight)
+        self.battery_label.setStyleSheet("color: green; font-size: 14px;")
 
-        self.statisticsLabel = QLabel("Flight statistics", self)
-        self.statisticsLabel.setAlignment(Qt.AlignmentFlag.AlignRight)
-        self.statisticsLabel.setStyleSheet("color: white; font-size: 14px;")
+        self.statistics_label = QLabel("Flight statistics", self)
+        self.statistics_label.setAlignment(Qt.AlignmentFlag.AlignRight)
+        self.statistics_label.setStyleSheet("color: white; font-size: 14px;")
 
         self._position_drone_statistics_labels()
 
@@ -186,8 +186,8 @@ class MainApp(QMainWindow, CommonGUI):
         """
         Position the battery label at the top right of the window
         """
-        self.batteryLabel.move(self.width() - 120, 10)
-        self.statisticsLabel.move(self.width() - 120, 30)
+        self.battery_label.move(self.width() - 120, 10)
+        self.statistics_label.move(self.width() - 120, 30)
 
     def resizeEvent(self, event):
         """
@@ -401,8 +401,8 @@ class MainApp(QMainWindow, CommonGUI):
 
         flight_stats_text = "\n".join(flight_stats_lst)
         logger.trace(flight_stats_text)
-        self.statisticsLabel.setText(flight_stats_text)
-        self.statisticsLabel.adjustSize()
+        self.statistics_label.setText(flight_stats_text)
+        self.statistics_label.adjustSize()
 
     def get_next_voice_command(self) -> None:
         """
@@ -451,7 +451,7 @@ class MainApp(QMainWindow, CommonGUI):
 
         battery_text = f"Battery: {battery_level}%"
         logger.info(battery_text)
-        self.batteryLabel.setText(battery_text)
+        self.battery_label.setText(battery_text)
 
     def _send_voice_command_to_drone(self, parsed_command: Optional[List[Tuple[str, int]]]) -> None:
         """
