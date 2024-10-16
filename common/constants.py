@@ -55,3 +55,8 @@ LIGHT_THEME = "light"
 
 TEXT_WHITE = "white"
 TEXT_BLACK = "black"
+
+# Drone
+
+FLIGHT_STATISTICS = "flight_statistics"
+BATTERY = "battery"
