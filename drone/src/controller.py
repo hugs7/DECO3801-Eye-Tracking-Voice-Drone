@@ -57,7 +57,8 @@ class Controller:
         if self.running_in_thread:
             # If running in thread mode, all or none of the required args must be provided
             if not all(required_args):
-                raise ValueError("All or none of stop_event, thread_data, data_lock must be provided.")
+                raise ValueError(
+                    "All or none of stop_event, thread_data, data_lock must be provided.")
 
             logger.info("Running in thread mode")
             self.stop_event = stop_event
@@ -96,14 +97,16 @@ class Controller:
 
         logger.info("Initialising drone statistics parameters...")
         self.drone_stat_times = dict()
-        self.drone_stat_params = OmegaConf.to_container(self.config.drone_stat_params, resolve=True)
+        self.drone_stat_params = OmegaConf.to_container(
+            self.config.drone_stat_params, resolve=True)
 
         for param, tick_rate in self.drone_stat_params.items():
             milliseconds = fps_to_ms(tick_rate)
             self.drone_stat_params[param] = milliseconds
             self.drone_stat_times[param] = time.perf_counter()
 
-        logger.info("Drone statistics parameters initialised %s", self.drone_stat_params)
+        logger.info("Drone statistics parameters initialised %s",
+                    self.drone_stat_params)
 
     def _controller_loop(self, tick_rate: float) -> bool:
         """
@@ -138,9 +141,11 @@ class Controller:
         """
 
         if self.running_in_thread:
-            logger.debug("Drone module running in thread mode. Local GUI disabled.")
+            logger.debug(
+                "Drone module running in thread mode. Local GUI disabled.")
 
-            run_loop_with_max_tickrate(self.config.max_tick_rate, self._controller_loop)
+            run_loop_with_max_tickrate(
+                self.config.max_tick_rate, self._controller_loop)
         else:
             logger.debug("Importing PyQt6...")
 
@@ -163,7 +168,8 @@ class Controller:
         """
 
         if not self.running_in_thread:
-            logger.warning("Video feed polling should be disabled in main mode")
+            logger.warning(
+                "Video feed polling should be disabled in main mode")
             return
 
         if frame is None:
@@ -214,7 +220,8 @@ class Controller:
             try:
                 value = eval(f"self.model.get_{statistic}()")
             except AttributeError:
-                logger.warning("Method get_%s not found in drone model", statistic)
+                logger.warning(
+                    "Method get_%s not found in drone model", statistic)
                 continue
 
             logger.info("Drone %s: %s", statistic, value)
@@ -251,7 +258,8 @@ class Controller:
             return False
 
         keyboard_queue: PeekableQueue = self.thread_data[cc.KEYBOARD_QUEUE]
-        key_buffer = keyboard.keyboard_event_loop(self.data_lock, keyboard_queue, self.keyboard_bindings)
+        key_buffer = keyboard.keyboard_event_loop(
+            self.data_lock, keyboard_queue, self.keyboard_bindings)
         if not self.drone_connected:
             return
 
@@ -283,7 +291,8 @@ class Controller:
 
             return True
 
-        key_action = conf_key_from_value(self.keyboard_bindings, key_code, key_chr)
+        key_action = conf_key_from_value(
+            self.keyboard_bindings, key_code, key_chr)
         if key_action is None:
             logger.trace("Key %s not found in keybindings", key_chr)
             return False
@@ -292,7 +301,8 @@ class Controller:
         if key_recognised:
             self.perform_action(key_action)
         else:
-            logger.warning("Key action %s not found in DroneActions", key_action)
+            logger.warning(
+                "Key action %s not found in DroneActions", key_action)
 
         return key_recognised
 
@@ -305,7 +315,8 @@ class Controller:
         """
 
         if not self.running_in_thread:
-            logger.warning("_wait_voice_command should not be called in main mode")
+            logger.warning(
+                "_wait_voice_command should not be called in main mode")
             return False
 
         if cc.DRONE not in self.thread_data.keys():
@@ -316,7 +327,8 @@ class Controller:
         with self.data_lock:
             drone_data: Optional[Dict] = self.thread_data[cc.DRONE]
             if cc.COMMAND_QUEUE not in drone_data:
-                logger.trace("Command queue not yet initialised in shared data.")
+                logger.trace(
+                    "Command queue not yet initialised in shared data.")
                 return False
 
             command_queue: PeekableQueue = drone_data[cc.COMMAND_QUEUE]
@@ -331,7 +343,8 @@ class Controller:
         for voice_command in command_buffer:
             for command, measurement in voice_command:
                 logger.info("Received voice command: %s", voice_command)
-                accepted_commands.append(self.perform_action(command, measurement))
+                accepted_commands.append(
+                    self.perform_action(command, measurement))
 
         # Accept if any valid command was received
         return any(accepted_commands)
