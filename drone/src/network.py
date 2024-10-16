@@ -179,6 +179,9 @@ def connect_to_wifi(
     Returns:
         bool: True if connection was successful, False otherwise
     """
+    if is_wifi_connected(ssid):
+        logger.info("Already connected to wifi network '%s'", ssid)
+        return True
     logger.info("Connecting to wifi network '%s'...", ssid)
     refresh_networks(stop_event)
 
