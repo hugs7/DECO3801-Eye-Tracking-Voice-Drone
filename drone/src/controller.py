@@ -205,6 +205,9 @@ class Controller:
         Args:
             tick_rate (float): The tick rate of the loop.
         """
+        if not self.drone_connected:
+            return
+
         now = time.perf_counter()
         stat_vals = dict()
 
