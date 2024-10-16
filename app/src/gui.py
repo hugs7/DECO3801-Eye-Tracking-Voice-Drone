@@ -402,6 +402,7 @@ class MainApp(QMainWindow, CommonGUI):
         flight_stats_text = "\n".join(flight_stats_lst)
         logger.trace(flight_stats_text)
         self.statisticsLabel.setText(flight_stats_text)
+        self.statisticsLabel.adjustSize()
 
     def get_next_voice_command(self) -> None:
         """
