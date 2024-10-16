@@ -100,6 +100,10 @@ class VoiceController:
         Args:
             key_code (int): The key code received from the keyboard.
         """
+        if (not (0 <= key_code <= 0x110000)):
+            logger.warning("Keycode %d outside accepted range.", key_code)
+            return
+
         key_chr = chr(key_code).lower()
         logger.info(f"Received key: %s (%d)", key_chr, key_code)
 
