@@ -88,7 +88,7 @@ DEFAULT_CONFIG = {
             "forward": "w",
             "backward": "s",
             "emergency": 16777223,  # Delete key
-            "flip foward": "f",
+            "flip forward": "f",
             "cw": "e",
             "ccw": "q",
             "motor on": "9",
