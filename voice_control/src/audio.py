@@ -208,7 +208,7 @@ class AudioRecogniser:
         except sr.UnknownValueError:
             logger.debug("No speech detected.")
         except sr.RequestError as e:
-            logger.error(e)
+            logger.error("Error converting voice to command. Details: %s", e)
 
         return text
 

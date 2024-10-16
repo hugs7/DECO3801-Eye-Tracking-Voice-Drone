@@ -5,7 +5,7 @@ mavic:
     connection_timeout: 60 # Seconds
 tello:
     wifi:
-        ssid: TELLO-C38725
+        ssid: TELLO-5B59E2
         password: ""
     poll_response: false
     default_speed: 50
@@ -15,7 +15,7 @@ tello:
     video_fps: 30
     camera_selection: forward
 controller:
-    connect_to_drone: false
+    connect_to_drone: true
     max_tick_rate: 30
     keyboard_bindings:
         land: l

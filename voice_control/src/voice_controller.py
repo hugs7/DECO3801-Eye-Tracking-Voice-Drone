@@ -41,7 +41,7 @@ class VoiceController:
         self.config = config
         self.voice_control_config = config.voice_control
         self.running_in_process = interprocess_data is not None
-        self.loop_toggle = False
+        self.loop_toggle = True
 
         if self.running_in_process:
             logger.info("Running in process mode")
@@ -100,7 +100,7 @@ class VoiceController:
         Args:
             key_code (int): The key code received from the keyboard.
         """
-        if (not (0 <= key_code <= 0x110000)):
+        if not (0 <= key_code <= 0x110000):
             logger.warning("Keycode %d outside accepted range.", key_code)
             return
 
