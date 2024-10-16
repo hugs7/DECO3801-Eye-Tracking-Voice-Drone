@@ -341,6 +341,8 @@ class MainApp(QMainWindow, CommonGUI):
         if gaze_overlay_frame is None:
             out_frame = drone_frame
         else:
+            gaze_overlay_frame = image.rescale_frame(
+                gaze_overlay_frame, drone_frame.shape)
             out_frame = image.blend_frame(drone_frame, gaze_overlay_frame, 0.5)
 
         self._set_pixmap(self.drone_video_label, out_frame)
@@ -428,7 +430,7 @@ class MainApp(QMainWindow, CommonGUI):
                 logger.debug(f"Stopping timer: {timer}")
                 timer.stop()
 
-    def closeEvent(self) -> None:
+    def closeEvent(self, event: any) -> None:
         """
         Override close event handler
         """
