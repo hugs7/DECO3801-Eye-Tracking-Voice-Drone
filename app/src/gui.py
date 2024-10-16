@@ -361,18 +361,11 @@ class MainApp(QMainWindow, CommonGUI):
 
         self._set_pixmap(self.drone_video_label, out_frame)
 
-    def get_next_voice_command(self) -> Optional[List[Dict[str, Union[str, Tuple[str, int]]]]]:
+
+    def get_next_voice_command(self) -> None:
         """
         Gets the voice command from the IPC shared data of the voice control
         module.
-
-        Returns:
-            Optional[
-                List[Dict[str,
-                          Union[str,
-                                Tuple[str, int]]]]]: A dictionary of the voice as
-                                                     text and parsed command The
-                                                     voice command.
         """
 
         voice_data: Dict = self.interprocess_data[cc.VOICE_CONTROL]
