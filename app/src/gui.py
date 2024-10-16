@@ -75,6 +75,11 @@ class MainApp(QMainWindow, CommonGUI):
         self.drone_video_label.lower()
         self.centralwidget.raise_()
 
+        self.batteryLabel = QLabel("Battery: 100%", self)
+        self.batteryLabel.setAlignment(Qt.AlignmentFlag.AlignRight)
+        self.batteryLabel.setStyleSheet("color: green; font-size: 14px;")
+        self.batteryLabel.move(self.width() - 120, 10)
+
     def _init_qpixmaps(self) -> None:
         """
         Initialises qpixmaps for the video feeds.
@@ -133,6 +138,7 @@ class MainApp(QMainWindow, CommonGUI):
             "webcam": {cc.THREAD_CALLBACK: self.get_webcam_feed, cc.THREAD_FPS: self.timers_fps.webcam},
             "drone_feed": {cc.THREAD_CALLBACK: self.get_drone_feed, cc.THREAD_FPS: self.timers_fps.drone_video},
             "voice_command": {cc.THREAD_CALLBACK: self.get_next_voice_command, cc.THREAD_FPS: self.timers_fps.voice_command},
+            "battery": {cc.THREAD_CALLBACK: self.update_battery, cc.THREAD_FPS: self.timers_fps.battery},
         }
 
         self._configure_timers(timers_conf)
@@ -168,6 +174,12 @@ class MainApp(QMainWindow, CommonGUI):
         self.webcam_video_label.setGeometry(
             x_pos, y_pos, target_width, target_height)
 
+    def _position_battery_label(self):
+        """
+        Position the battery label at the top right of the window
+        """
+        self.batteryLabel.move(self.width() - 120, 10)
+
     def resizeEvent(self, event):
         """
         Handles the event where the window gets resized
@@ -175,6 +187,7 @@ class MainApp(QMainWindow, CommonGUI):
 
         self.__resize_drone_frame()
         self._resize_and_position_webcam_label()
+        self._position_battery_label()
 
         return super().resizeEvent(event)
 
@@ -375,6 +388,22 @@ class MainApp(QMainWindow, CommonGUI):
 
             self._send_voice_command_to_drone(parsed_command)
             self._display_voice_command(command_text)
+
+    def update_battery(self) -> None:
+        """
+        Updates the battery level of the drone
+        """
+
+        logger.debug("Updating battery level")
+        with self.data_lock:
+            drone_data: Dict = self.thread_data[cc.DRONE]
+            battery_level = drone_data.get(cc.BATTERY, None)
+            if battery_level is None:
+                return
+
+        battery_text = f"Battery: {battery_level}%"
+        logger.info
+        self.batteryLabel.setText(battery_text)
 
     def _send_voice_command_to_drone(self, parsed_command: Optional[List[Tuple[str, int]]]) -> None:
         """
