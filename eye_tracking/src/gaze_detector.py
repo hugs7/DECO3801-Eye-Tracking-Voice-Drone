@@ -307,6 +307,7 @@ class GazeDetector:
         """
         undistorted = self._undistort_image(image)
         self.camera_visualiser.set_image(image.copy())
+        self.gaze_visualiser.set_image(np.zeros_like(image))
 
         if self.loop_enabled:
             if self.hitboxes is None:
