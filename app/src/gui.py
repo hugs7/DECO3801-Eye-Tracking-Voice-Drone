@@ -77,10 +77,15 @@ class MainApp(QMainWindow, CommonGUI):
         self.drone_video_label.lower()
         self.centralwidget.raise_()
 
-        self.batteryLabel = QLabel("Battery: 100%", self)
+        self.batteryLabel = QLabel("Battery: ???%", self)
         self.batteryLabel.setAlignment(Qt.AlignmentFlag.AlignRight)
         self.batteryLabel.setStyleSheet("color: green; font-size: 14px;")
-        self.batteryLabel.move(self.width() - 120, 10)
+
+        self.statisticsLabel = QLabel("Flight statistics", self)
+        self.statisticsLabel.setAlignment(Qt.AlignmentFlag.AlignRight)
+        self.statisticsLabel.setStyleSheet("color: white; font-size: 14px;")
+
+        self._position_drone_statistics_labels()
 
     def _init_qpixmaps(self) -> None:
         """
@@ -176,11 +181,12 @@ class MainApp(QMainWindow, CommonGUI):
         self.webcam_video_label.setGeometry(
             x_pos, y_pos, target_width, target_height)
 
-    def _position_battery_label(self):
+    def _position_drone_statistics_labels(self):
         """
         Position the battery label at the top right of the window
         """
         self.batteryLabel.move(self.width() - 120, 10)
+        self.statisticsLabel.move(self.width() - 120, 30)
 
     def resizeEvent(self, event):
         """
@@ -189,7 +195,7 @@ class MainApp(QMainWindow, CommonGUI):
 
         self.__resize_drone_frame()
         self._resize_and_position_webcam_label()
-        self._position_battery_label()
+        self._position_drone_statistics_labels()
 
         return super().resizeEvent(event)
 
