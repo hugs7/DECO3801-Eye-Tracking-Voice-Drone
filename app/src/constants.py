@@ -21,3 +21,13 @@ THREAD_DATA = "thread_data"
 IPC_DATA = "interprocess_data"
 THREADS = "threads"
 PROCESSES = "processes"
+
+# === DEFAULT CONFIG ===
+
+DEFAULT_GUI_CONFIG = {
+    "timers": {
+        "voice_command": 5,
+        "webcam": 30,
+        "drone_video": 30,
+    }
+}
