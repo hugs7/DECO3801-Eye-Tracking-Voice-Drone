@@ -194,6 +194,9 @@ class Controller:
             - barometer
             - flight_time
             - battery
+
+        Args:
+            tick_rate (float): The tick rate of the loop.
         """
         now = time.perf_counter()
         stat_vals = dict()
