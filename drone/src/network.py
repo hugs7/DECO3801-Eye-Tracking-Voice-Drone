@@ -151,14 +151,14 @@ def connect_to_wifi(ssid: str, password: str, network_interface: Optional[str] =
         try:
             subprocess.run(connect_cmd, shell=True, check=True)
         except subprocess.CalledProcessError as e:
-            logger.error("Failed to connect to wifi network '%s'. Details: %s", ssid, e)
-            attempt += 1
+            attempts += 1
             continue
 
         time.sleep(delay)
         connected = is_wifi_connected()
         if connected:
-            logger.info("Successfully connected to wifi network '%s' on attempt %d", ssid, attempt)
+            logger.info(
+                "Successfully connected to wifi network '%s' on attempt %d", ssid, attempts)
         else:
             logger.error("Failed to connect to wifi network '%s'", ssid)
 
