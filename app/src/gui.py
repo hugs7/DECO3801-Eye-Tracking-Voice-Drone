@@ -17,9 +17,12 @@ from common.logger_helper import init_logger
 from common.common_gui import CommonGUI
 from common import constants as cc
 from common.PeekableQueue import PeekableQueue
+from common import omegaconf_helper as oh
 
 from options import PreferencesDialog
 from about import AboutDialog
+import constants as c
+
 import utils.file_handler as file_handler
 
 
@@ -89,13 +92,12 @@ class MainApp(QMainWindow, CommonGUI):
 
         logger.info("Initialising configuration")
         configs_folder = file_handler.get_configs_folder()
-        gui_config = configs_folder / "gui.yaml"
-        if not gui_config.exists():
-            raise FileNotFoundError(f"GUI configuration file not found: {gui_config}")
+        gui_config_path = configs_folder / "gui.yaml"
+        if not gui_config_path.exists():
+            raise FileNotFoundError(f"GUI configuration file not found: {gui_config_path}")
 
-        config = OmegaConf.load(gui_config)
+        config = oh.load_or_create_config(gui_config_path, c.DEFAULT_GUI_CONFIG)
         logger.info("Configuration initialised")
-
         return config
 
     def _init_menu(self) -> None:

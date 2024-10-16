@@ -51,3 +51,48 @@ DRONE_ACTIONS_OTHER = [
     DroneActions.MOTOR_ON,
     DroneActions.SPEED,
 ]
+
+
+# === Config ===
+
+DEFAULT_CONFIG = {
+    "drone_type": "tello",
+    "mavic": {
+        "ip": "192.168.x.x",
+        "port": 14551,
+        "connection_timeout": 60,
+    },
+    "tello": {
+        "wifi": {
+            "ssid": "TELLO-XXXXX",
+            "password": "",
+        },
+        "poll_response": False,
+        "default_speed": 50,
+        "video_settings_supported": False,
+        "video_bitrate": "auto",
+        "video_resolution": "720p",
+        "video_fps": 30,
+        "camera_selection": "forward",
+    },
+    "controller": {
+        "connect_to_drone": True,
+        "max_tick_rate": 30,
+        "keyboard_bindings": {
+            "land": "l",
+            "takeoff": 32,  # Space key
+            "up": 16777235,  # Up arrow
+            "down": 16777237,  # Down arrow
+            "left": "a",
+            "right": "d",
+            "forward": "w",
+            "backward": "s",
+            "emergency": 16777223,  # Delete key
+            "flip foward": "f",
+            "cw": "e",
+            "ccw": "q",
+            "motor on": "9",
+            "motor off": "0",
+        },
+    },
+}
