@@ -53,7 +53,6 @@ def get_file_extension(file_path: Path, remove_dot: bool = False) -> str:
     return suffix
 
 
-
 def file_exists(file_path: Path) -> bool:
     """
     Checks if a file exists at the specified path.
@@ -83,7 +82,7 @@ def create_folder_if_not_exists(folder_path: Path):
     """
 
     if not folder_path.exists():
-        folder_path.mkdir(parent=True)
+        folder_path.mkdir(parents=True)
         logger.info(f"Folder created: {folder_path}")
     else:
         logger.debug(f"Folder already exists: {folder_path}")
