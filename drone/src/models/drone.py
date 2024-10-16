@@ -152,3 +152,12 @@ class Drone(ABC):
             int: The altitude of the drone.
         """
         pass
+
+    @abstractmethod
+    def get_battery(self) -> int:
+        """Get the battery percentage of the drone.
+
+        Returns:
+            int: The battery percentage of the drone.
+        """
+        pass
