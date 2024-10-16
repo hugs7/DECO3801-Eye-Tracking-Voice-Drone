@@ -290,7 +290,7 @@ class MainApp(QMainWindow, CommonGUI):
         except Exception as e:
             logger.error(f"Error converting frame to QImage: {e}")
 
-    def get_video_feed(self, source: str, frame_key: str = cc.VIDEO_FRAME) -> Optional[cv2.typing.MatLike]:
+    def get_video_feed(self, source: str, frame_key: str = cc.VIDEO_FRAME, flip_colours: bool = True) -> Optional[cv2.typing.MatLike]:
         """
         Retrieves the video feed from the specified module.
 
@@ -298,6 +298,7 @@ class MainApp(QMainWindow, CommonGUI):
             source (str): The key in thread_data to retrieve the video frame from.
             frame_key (str): The key in the thread data to retrieve the video frame from.
                              Defaults to cc.VIDEO_FRAME.
+            flip_colours (bool): Whether to flip the colours of the frame. Defaults to True.
 
         Returns:
             frame_qpixmap Optional[QPixmap]: Converted qpix map from frame or None
@@ -309,7 +310,8 @@ class MainApp(QMainWindow, CommonGUI):
             if frame is None:
                 return None
 
-            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            if flip_colours:
+                frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         except KeyboardInterrupt:
             logger.critical("Interrupted! Stopping all threads...")
             self.close_app()
@@ -330,7 +332,7 @@ class MainApp(QMainWindow, CommonGUI):
         """
         Retrieves the drone feed from the shared data of the drone module.
         """
-        drone_frame = self.get_video_feed(cc.DRONE)
+        drone_frame = self.get_video_feed(cc.DRONE, flip_colours=False)
         if drone_frame is None:
             return None
 
