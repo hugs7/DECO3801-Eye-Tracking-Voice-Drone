@@ -144,6 +144,7 @@ class MainApp(QMainWindow, CommonGUI):
         timers_conf = {
             "webcam": {cc.THREAD_CALLBACK: self.get_webcam_feed, cc.THREAD_FPS: self.timers_fps.webcam},
             "drone_feed": {cc.THREAD_CALLBACK: self.get_drone_feed, cc.THREAD_FPS: self.timers_fps.drone_video},
+            "flight_stats": {cc.THREAD_CALLBACK: self.update_flight_stats, cc.THREAD_FPS: self.timers_fps.flight_stats},
             "voice_command": {cc.THREAD_CALLBACK: self.get_next_voice_command, cc.THREAD_FPS: self.timers_fps.voice_command},
             "battery": {cc.THREAD_CALLBACK: self.update_battery, cc.THREAD_FPS: self.timers_fps.battery},
         }
@@ -361,6 +362,43 @@ class MainApp(QMainWindow, CommonGUI):
 
         self._set_pixmap(self.drone_video_label, out_frame)
 
+    def update_flight_stats(self) -> None:
+        """
+        Updates the display of the flight statistics from the drone module.
+        """
+
+        flight_stats: Dict = self.thread_data[cc.DRONE][cc.FLIGHT_STATISTICS]
+        if not flight_stats:
+            return None
+
+        flight_stats = [f"Flight time: {flight_stats.get(FlightStatistics.FLIGHT_TIME, 'N/A')}s",
+                        f"Distance: {flight_stats.get(
+                            FlightStatistics.DISTANCE_TOF, 'N/A')}m",
+                        f"Speed x: {flight_stats.get(
+                            FlightStatistics.SPEED_X, 'N/A')}m/s",
+                        f"Speed y: {flight_stats.get(
+                            FlightStatistics.SPEED_Y, 'N/A')}m/s",
+                        f"Speed z: {flight_stats.get(
+                            FlightStatistics.SPEED_Z, 'N/A')}m/s",
+                        f"Accel x: {flight_stats.get(
+                            FlightStatistics.ACCELERATION_X, 'N/A')}m/s²",
+                        f"Accel y: {flight_stats.get(
+                            FlightStatistics.ACCELERATION_Y, 'N/A')}m/s²",
+                        f"Accel z: {flight_stats.get(
+                            FlightStatistics.ACCELERATION_Z, 'N/A')}m/s²",
+                        f"Altimeter: {flight_stats.get(
+                            FlightStatistics.BAROMETER, 'N/A')}cm",
+                        f"Yaw: {flight_stats.get(
+                            FlightStatistics.YAW, 'N/A')}°",
+                        f"Pitch: {flight_stats.get(
+                            FlightStatistics.PITCH, 'N/A')}°",
+                        f"Roll: {flight_stats.get(
+                            FlightStatistics.ROLL, 'N/A')}",
+                        f"WiFi SNR: {flight_stats.get(FlightStatistics.WIFI_SNR, 'N/A')}dB"]
+
+        flight_stats_text = "\n".join(flight_stats)
+        logger.info(flight_stats_text)
+        self.statisticsLabel.setText(flight_stats_text)
 
     def get_next_voice_command(self) -> None:
         """
