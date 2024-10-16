@@ -94,7 +94,8 @@ class MainApp(QMainWindow, CommonGUI):
         configs_folder = file_handler.get_configs_folder()
         gui_config_path = configs_folder / "gui.yaml"
 
-        config = oh.load_or_create_config(gui_config_path, c.DEFAULT_GUI_CONFIG)
+        config = oh.load_or_create_config(
+            gui_config_path, c.DEFAULT_GUI_CONFIG)
         logger.info("Configuration initialised")
         return config
 
@@ -161,7 +162,8 @@ class MainApp(QMainWindow, CommonGUI):
         x_pos = (window_width - target_width) // 2
         y_pos = window_height - target_height - 20
 
-        self.webcam_video_label.setGeometry(x_pos, y_pos, target_width, target_height)
+        self.webcam_video_label.setGeometry(
+            x_pos, y_pos, target_width, target_height)
 
     def resizeEvent(self, event):
         """
@@ -176,7 +178,8 @@ class MainApp(QMainWindow, CommonGUI):
     def retranslateUi(self):
         _translate = QCoreApplication.translate
         self.setWindowTitle(_translate("MainWindow", "MainWindow"))
-        self.drone_video_label.setText(_translate("MainWindow", "Main drone feed"))
+        self.drone_video_label.setText(
+            _translate("MainWindow", "Main drone feed"))
         self.webcam_video_label.setText(_translate("MainWindow", "Video feed"))
         self.recentCommand.setText(_translate("MainWindow", "Recent command"))
         # self.menuFile.setTitle(_translate("MainWindow", "File"))
@@ -258,9 +261,11 @@ class MainApp(QMainWindow, CommonGUI):
         pixmap = QPixmap.fromImage(q_img)
         if retain_label_size:
             if not label.hasScaledContents():
-                logger.warning("Label %s does not have scaled contents. Setting true", label.objectName())
+                logger.warning(
+                    "Label %s does not have scaled contents. Setting true", label.objectName())
                 label.setScaledContents(True)
-            pixmap = pixmap.scaled(label.size(), Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
+            pixmap = pixmap.scaled(label.size(
+            ), Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
 
         label.setPixmap(pixmap)
         return pixmap
@@ -315,13 +320,15 @@ class MainApp(QMainWindow, CommonGUI):
         """
         Retrieves the webcam feed from the shared data of the eye tracking module.
         """
-        self.webcam_pixmap = self.update_video_feed(cc.EYE_TRACKING, self.webcam_video_label)
+        self.webcam_pixmap = self.update_video_feed(
+            cc.EYE_TRACKING, self.webcam_video_label)
 
     def get_drone_feed(self) -> None:
         """
         Retrieves the drone feed from the shared data of the drone module.
         """
-        self.drone_pixmap = self.update_video_feed(cc.DRONE, self.drone_video_label)
+        self.drone_pixmap = self.update_video_feed(
+            cc.DRONE, self.drone_video_label)
 
     def get_next_voice_command(self) -> Optional[List[Dict[str, Union[str, Tuple[str, int]]]]]:
         """
@@ -351,8 +358,10 @@ class MainApp(QMainWindow, CommonGUI):
             logger.info("Voice command queue size %d", queue_size)
             next_command: Dict[str, Any] = command_queue.get()
             command_text = next_command.get(cc.COMMAND_TEXT, None)
-            parsed_command: Optional[List[Tuple[str, int]]] = next_command.get(cc.PARSED_COMMAND, None)
-            logger.info("Next voice command %s with parsed command %s", command_text, parsed_command)
+            parsed_command: Optional[List[Tuple[str, int]]
+                                     ] = next_command.get(cc.PARSED_COMMAND, None)
+            logger.info("Next voice command %s with parsed command %s",
+                        command_text, parsed_command)
 
             self._send_voice_command_to_drone(parsed_command)
 
@@ -403,6 +412,12 @@ class MainApp(QMainWindow, CommonGUI):
             if timer.isActive():
                 logger.debug(f"Stopping timer: {timer}")
                 timer.stop()
+
+    def closeEvent(self) -> None:
+        """
+        Override close event handler
+        """
+        self.close_app()
 
     def close_app(self) -> None:
         """

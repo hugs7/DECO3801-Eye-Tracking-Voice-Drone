@@ -153,6 +153,10 @@ def main():
         main_window.wrap_show()
         main_gui.exec()
 
+        if not stop_event.is_set():
+            logger.info("Signalling all threads to stop")
+            stop_event.set()
+
         # Ensure all threads and processes are properly joined after signaling them to stop.
         for process in processes:
             process.join(cc.PROCESS_TIMEOUT)
