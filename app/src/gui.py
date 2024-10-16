@@ -369,7 +369,6 @@ class MainApp(QMainWindow, CommonGUI):
 
         drone_data: Dict = self.thread_data[cc.DRONE]
         if cc.FLIGHT_STATISTICS not in drone_data.keys():
-            logger.debug("Flight statistics not found")
             return
 
         flight_statistics: Dict = drone_data[cc.FLIGHT_STATISTICS]
@@ -441,7 +440,6 @@ class MainApp(QMainWindow, CommonGUI):
         logger.debug("Updating battery level")
         drone_data: Dict = self.thread_data[cc.DRONE]
         if cc.FLIGHT_STATISTICS not in drone_data.keys():
-            logger.debug("Flight statistics not found")
             return
 
         flight_statistics: Dict = drone_data[cc.FLIGHT_STATISTICS]
