@@ -78,14 +78,23 @@ class VoiceController:
                         logger.info(" <<< End voice control loop")
 
             except KeyboardInterrupt:
-                logger.error("    >>> Keyboard interrupt received. Exiting immediately.")
+                logger.error(
+                    "    >>> Keyboard interrupt received. Exiting immediately.")
                 run = False
 
     def _wait_key(self) -> None:
         if not self.running_in_process:
             return
 
-        keyboard_queue: Optional[MPQueue] = self.interprocess_data[cc.KEYBOARD_QUEUE]
+        try:
+            keyboard_queue: Optional[MPQueue] = self.interprocess_data[cc.KEYBOARD_QUEUE]
+        except FileNotFoundError:
+            logger.warning("Keyboard queue not found in shared data.")
+            return
+        except AttributeError:
+            logger.warning("Keyboard queue not initialised in shared data.")
+            return
+
         if keyboard_queue is not None:
             while not keyboard_queue.empty():
                 key: int = keyboard_queue.get()
@@ -206,11 +215,13 @@ class VoiceController:
             None
         """
         if not self.running_in_process:
-            logger.trace("Not running in process mode. Not saving command to shared data.")
+            logger.trace(
+                "Not running in process mode. Not saving command to shared data.")
             return
 
         command_text = command_data[cc.COMMAND_TEXT]
         logger.info("Setting voice command to '%s'", command_text)
         command_queue: MPQueue = self.interprocess_data[cc.VOICE_CONTROL][cc.COMMAND_QUEUE]
         command_queue.put(command_data)
-        logger.debug("Voice command added to command queue of length %d.", command_queue.qsize())
+        logger.debug(
+            "Voice command added to command queue of length %d.", command_queue.qsize())

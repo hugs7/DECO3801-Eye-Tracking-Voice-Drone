@@ -15,6 +15,7 @@ from PyQt6.QtGui import QImage, QPixmap, QKeyEvent
 
 from common.logger_helper import init_logger
 from common.common_gui import CommonGUI
+from common import image
 from common import constants as cc
 from common.PeekableQueue import PeekableQueue
 from common import omegaconf_helper as oh
@@ -289,13 +290,15 @@ class MainApp(QMainWindow, CommonGUI):
         except Exception as e:
             logger.error(f"Error converting frame to QImage: {e}")
 
-    def update_video_feed(self, source: str, label: QLabel) -> Optional[QPixmap]:
+    def get_video_feed(self, source: str, frame_key: str = cc.VIDEO_FRAME, flip_colours: bool = True) -> Optional[cv2.typing.MatLike]:
         """
-        Retrieves the video feed from the specified module and updates the corresponding label.
+        Retrieves the video feed from the specified module.
 
         Args:
             source (str): The key in thread_data to retrieve the video frame from.
-            label (QLabel): The label to update with the video feed.
+            frame_key (str): The key in the thread data to retrieve the video frame from.
+                             Defaults to cc.VIDEO_FRAME.
+            flip_colours (bool): Whether to flip the colours of the frame. Defaults to True.
 
         Returns:
             frame_qpixmap Optional[QPixmap]: Converted qpix map from frame or None
@@ -303,32 +306,46 @@ class MainApp(QMainWindow, CommonGUI):
         """
         try:
             data: Dict = self.thread_data[source]
-            frame = data.get(cc.VIDEO_FRAME, None)
+            frame = data.get(frame_key, None)
             if frame is None:
                 return None
 
-            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-
-            frame_qpixmap = self._set_pixmap(label, frame)
+            if flip_colours:
+                frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         except KeyboardInterrupt:
             logger.critical("Interrupted! Stopping all threads...")
             self.close_app()
 
-        return frame_qpixmap
+        return frame
 
-    def get_webcam_feed(self) -> None:
+    def get_webcam_feed(self) -> Optional[cv2.typing.MatLike]:
         """
         Retrieves the webcam feed from the shared data of the eye tracking module.
         """
-        self.webcam_pixmap = self.update_video_feed(
-            cc.EYE_TRACKING, self.webcam_video_label)
+        webcam_frame = self.get_video_feed(cc.EYE_TRACKING)
+        if webcam_frame is None:
+            return None
+
+        self._set_pixmap(self.webcam_video_label, webcam_frame)
 
     def get_drone_feed(self) -> None:
         """
         Retrieves the drone feed from the shared data of the drone module.
         """
-        self.drone_pixmap = self.update_video_feed(
-            cc.DRONE, self.drone_video_label)
+        drone_frame = self.get_video_feed(cc.DRONE, flip_colours=False)
+        if drone_frame is None:
+            return None
+
+        gaze_overlay_frame = self.get_video_feed(
+            cc.EYE_TRACKING, cc.GAZE_OVERLAY)
+        if gaze_overlay_frame is None:
+            out_frame = drone_frame
+        else:
+            gaze_overlay_frame = image.rescale_frame(
+                gaze_overlay_frame, drone_frame.shape)
+            out_frame = image.blend_frame(drone_frame, gaze_overlay_frame, 0.5)
+
+        self._set_pixmap(self.drone_video_label, out_frame)
 
     def get_next_voice_command(self) -> Optional[List[Dict[str, Union[str, Tuple[str, int]]]]]:
         """
@@ -413,7 +430,7 @@ class MainApp(QMainWindow, CommonGUI):
                 logger.debug(f"Stopping timer: {timer}")
                 timer.stop()
 
-    def closeEvent(self) -> None:
+    def closeEvent(self, event: any) -> None:
         """
         Override close event handler
         """

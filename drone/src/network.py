@@ -83,8 +83,11 @@ def win_create_wifi_profile(ssid: str, password: str) -> None:
     with open(profile_file, "w") as f:
         f.write(profile_content)
 
-    subprocess.run(["netsh", "wlan", "add", "profile",
-                   f"filename={profile_file}"], shell=True)
+    try:
+        subprocess.run(["netsh", "wlan", "add", "profile",
+                        f"filename={profile_file}"], shell=True)
+    except subprocess.CalledProcessError as e:
+        logger.error("Error creating Wi-Fi profile: %s", e)
 
     os.remove(profile_file)
 
