@@ -8,6 +8,7 @@ from typing import Union, Optional
 from omegaconf import DictConfig, OmegaConf
 
 from common.logger_helper import init_logger
+from common import omegaconf_helper as oh
 
 from .utils import file_handler as fh
 from . import constants as c
@@ -28,8 +29,12 @@ def init_config() -> DictConfig:
     configs_folder = fh.get_configs_folder()
     path = configs_folder / "drone.yaml"
 
-    logger.info(f"Loading config from {path}")
-    config = OmegaConf.load(path)
+    if path.is_file():
+        logger.info(f"Loading config from {path}")
+        config = OmegaConf.load(path)
+    else:
+        logger.info(f"Config file not found at {path}. Initialising with default values.")
+        config = oh.initialise_config(c.DEFAULT_CONFIG, path)
 
     return config
 
