@@ -93,8 +93,6 @@ class MainApp(QMainWindow, CommonGUI):
         logger.info("Initialising configuration")
         configs_folder = file_handler.get_configs_folder()
         gui_config_path = configs_folder / "gui.yaml"
-        if not gui_config_path.exists():
-            raise FileNotFoundError(f"GUI configuration file not found: {gui_config_path}")
 
         config = oh.load_or_create_config(gui_config_path, c.DEFAULT_GUI_CONFIG)
         logger.info("Configuration initialised")
