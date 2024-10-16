@@ -104,7 +104,23 @@ def is_wifi_connected() -> bool:
         return "Current Wi-Fi Network" in result.stdout
 
 
-def connect_to_wifi(ssid: str, password: str, network_interface: Optional[str] = None, max_attempts: int = 3, delay: float = 10.0) -> bool:
+def refresh_networks() -> None:
+    """
+    Refreshes the list of available Wi-Fi networks
+    """
+
+    logger.info("Refreshing available networks...")
+    if sys.platform == "win32":
+        subprocess.run("explorer.exe ms-availablenetworks:", capture_output=False)
+    elif sys.platform == "linux":
+        subprocess.run(["nmcli", "device", "wifi", "rescan"], capture_output=False)
+    elif sys.platform == "darwin":
+        subprocess.run(["networksetup", "-detectnewhardware"], capture_output=False)
+
+    time.sleep(3)
+
+
+def connect_to_wifi(ssid: str, password: str, network_interface: Optional[str] = None, max_attempts: int = 3, delay: float = 5.0) -> bool:
     """
     Connects to the specified wifi network
 
@@ -121,6 +137,7 @@ def connect_to_wifi(ssid: str, password: str, network_interface: Optional[str] =
         bool: True if connection was successful, False otherwise
     """
     logger.info("Connecting to wifi network '%s'...", ssid)
+    refresh_networks()
 
     if sys.platform == "win32":
         if win_ssid_profile_exists(ssid):
