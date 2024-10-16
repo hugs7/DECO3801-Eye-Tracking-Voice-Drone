@@ -165,6 +165,8 @@ def main():
 
         logger.info("Waiting for threads to join")
         for thread in threads:
+            thread_name = thread.name
+            logger.info("Waiting for thread: %s to join", thread_name)
             thread.join()
 
         logger.info("Closing GUI")
