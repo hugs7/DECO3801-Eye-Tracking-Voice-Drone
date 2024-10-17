@@ -44,11 +44,13 @@ class LoadingGUI(QMainWindow, CommonGUI):
 
         super(LoadingGUI, self).__init__()
 
-        required_args = [loading_shared_data, loading_data_lock, loading_stop_event]
+        required_args = [loading_shared_data,
+                         loading_data_lock, loading_stop_event]
         self.running_in_thread = all(required_args)
         if self.running_in_thread:
             if not all(required_args):
-                raise ValueError("All or none of the optional arguments must be provided.")
+                raise ValueError(
+                    "All or none of the optional arguments must be provided.")
 
             self.loading_shared_data = loading_shared_data
             self.loading_data_lock = loading_data_lock
@@ -93,11 +95,13 @@ class LoadingGUI(QMainWindow, CommonGUI):
     def __init_messages(self):
         """Initialise the messages for the loading screen."""
         self.title_label = QLabel("Starting...", self.central_widget)
-        self.title_label.setStyleSheet(f"color: {self.text_color}; font-size: 24px;")
+        self.title_label.setStyleSheet(
+            f"color: {self.text_color}; font-size: 24px;")
         self.title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         self.task_label = QLabel("", self.central_widget)
-        self.task_label.setStyleSheet(f"color: {self.text_color}; font-size: 18px;")
+        self.task_label.setStyleSheet(
+            f"color: {self.text_color}; font-size: 18px;")
         self.task_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
     def __init_progress_bar(self):
@@ -134,10 +138,13 @@ class LoadingGUI(QMainWindow, CommonGUI):
         label_layout.setContentsMargins(0, 0, 0, 0)
         label_layout.setSpacing(0)
 
-        label_layout.addWidget(self.title_label, alignment=Qt.AlignmentFlag.AlignCenter)
-        label_layout.addWidget(self.task_label, alignment=Qt.AlignmentFlag.AlignCenter)
+        label_layout.addWidget(
+            self.title_label, alignment=Qt.AlignmentFlag.AlignCenter)
+        label_layout.addWidget(
+            self.task_label, alignment=Qt.AlignmentFlag.AlignCenter)
 
-        self.layout.addWidget(self.label_container, alignment=Qt.AlignmentFlag.AlignCenter)
+        self.layout.addWidget(self.label_container,
+                              alignment=Qt.AlignmentFlag.AlignCenter)
         self.layout.addWidget(self.progress_bar)
 
         self.central_widget.setLayout(self.layout)
@@ -156,7 +163,8 @@ class LoadingGUI(QMainWindow, CommonGUI):
         timers_conf = dict()
 
         if self.running_in_thread:
-            thread_check = {cc.THREAD_CALLBACK: self.thread_check, cc.THREAD_FPS: 30}
+            thread_check = {
+                cc.THREAD_CALLBACK: self.thread_check, cc.THREAD_FPS: 30}
             timers_conf["thread_check"] = thread_check
 
         timers = self._configure_timers(timers_conf)
@@ -215,7 +223,7 @@ class LoadingGUI(QMainWindow, CommonGUI):
         self.progress_bar.setValue(progress)
 
         if progress % 10 == 0:
-            logger.info(f"Progress: {self.progress}")
+            logger.info("Progress: %d", self.progress)
 
     def thread_check(self):
         """
@@ -226,7 +234,8 @@ class LoadingGUI(QMainWindow, CommonGUI):
             ValueError: If the main thread is not alive
         """
         if not self.running_in_thread:
-            raise ValueError("This function should only be called when running in a thread.")
+            raise ValueError(
+                "This function should only be called when running in a thread.")
 
         if self.loading_stop_event.is_set():
             self.close()
@@ -241,7 +250,8 @@ class LoadingGUI(QMainWindow, CommonGUI):
         self.background_label.setGeometry(0, 0, self.width(), self.height())
         self.background_label.setPixmap(
             self.background_pixmap.scaled(
-                self.width(), self.height(), Qt.AspectRatioMode.KeepAspectRatioByExpanding, Qt.TransformationMode.SmoothTransformation
+                self.width(), self.height(
+                ), Qt.AspectRatioMode.KeepAspectRatioByExpanding, Qt.TransformationMode.SmoothTransformation
             )
         )
 
