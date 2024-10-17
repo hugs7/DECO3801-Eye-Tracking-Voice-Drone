@@ -58,10 +58,12 @@ class MavicDrone(Drone):
         logger.info("Port: %s", port)
 
         connection_string = f"udp:{ip}:{port}"
-        logger.debug(f"Connecting to mavic on with connection: %s", connection_string)
+        logger.debug("Connecting to mavic on with connection: %s",
+                     connection_string)
 
         try:
-            vehicle = mavic_connect(connection_string, wait_ready=True, timeout=60)
+            vehicle = mavic_connect(
+                connection_string, wait_ready=True, timeout=60)
             vehicle = None
         except Exception as e:
             logger.error("Failed to connect to Mavic drone")
@@ -85,7 +87,7 @@ class MavicDrone(Drone):
             mode (str): The mode to set the vehicle to
         """
 
-        logger.info(f"Setting vehicle mode to {mode}")
+        logger.info("Setting vehicle mode to %s", mode)
         self.vehicle.mode = self.VehicleMode(mode)
 
     def _is_armable(self) -> bool:
@@ -162,12 +164,13 @@ class MavicDrone(Drone):
         self.vehicle.simple_takeoff(target_altitude_metres)
 
         while True:
-            logger.info(f"Drone altitude: {self.get_height()}")
-
-            # Break and return from function just below target altitude.
             alt = self.get_height()
+
+            logger.info("Drone altitude: %d", alt)
+            # Break and return from function just below target altitude.
             if alt >= target_altitude_metres * c.ALTITUDE_THRESHOLD_MULTIPLIER:
-                logger.info(f"Reached altitude: {alt} (of target {target_altitude_metres} m)")
+                logger.info("Reached altitude: %d of target %d m", alt,
+                            target_altitude_metres)
                 break
             time.sleep(1)
 
