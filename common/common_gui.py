@@ -133,7 +133,7 @@ class CommonGUI:
         Returns:
             QTimer: The configured QTimer
         """
-        logger.debug(f"Configuring timer: {name}")
+        logger.debug("Configuring timer: %s", name)
         timer = QTimer(self)
         timer.timeout.connect(lambda: callback(*args))
         timer.start(fps_to_ms(fps))
@@ -152,7 +152,7 @@ class CommonGUI:
         """
         timer = self.timers.get(name, None)
         if timer is None:
-            logger.error(f"Timer not found: {name}")
+            logger.error("Timer not found: %s", name)
 
         return timer
 
