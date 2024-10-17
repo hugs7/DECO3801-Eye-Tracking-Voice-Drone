@@ -103,6 +103,15 @@ Each module contains its own configuration file which can be used to customise t
 
 ## Debugging
 
-As some modules can be run independently, they can also be debugged independently.
+The application can be debugged using MSDebugPy or another python debugger. A VSCode debug configuration is provided in [/.vscode/launch.json](/.vscode/launch.json). Unfortunately, there are currently some outstanding issues with Microsoft DebugPy, specifically with PyQt6
 
-To add more here after merging [#33](https://github.com/hugs7/DECO3801/pull/34).
+-   https://github.com/microsoft/debugpy/issues/1488. This affects PyQt6 and a dependency PySide6, and the error does trigger for the main GUI upon initialisation. Breakpoints also cannot be hit in PyQt6 threads due to lack of thread hooks support, which is a problem for this project.
+-   https://github.com/microsoft/debugpy/issues/1531. This affects initialisation of PyQt6 as well. This issue is easier to solve and I have provided a drop in replacement solution in [/app/README.md](/app/README.md#app-readme).
+
+Each module can be debugged independently. The following debug configurations are provided for debugging in VSCode:
+
+-   App Multithreadding: the entire application
+-   Eye Tracking: To test eye tracking without connecting to the drone
+-   Voice Control: To test voice control without connecting to the drone
+-   Drone: To fly the drone without voice control or gaze tracking
+-   Network: To test auto WiFi connection.
