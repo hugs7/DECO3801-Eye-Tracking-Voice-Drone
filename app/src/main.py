@@ -70,8 +70,10 @@ def initialise_modules(loading_shared_data: Dict, progress: ProgressController, 
         progress.set_loading_task("Configuring IPC data", 0.5)
         loading_shared_data[c.IPC_DATA] = interprocess_data
         progress.set_loading_task("Initialising process functions", 0.1)
-        process_functions = {voice_control: {cc.COMMAND_QUEUE: manager.Queue()}}
-        process_shared_dict = {get_function_module(func): init_val for func, init_val in process_functions.items()}
+        process_functions = {voice_control: {
+            cc.COMMAND_QUEUE: manager.Queue()}}
+        process_shared_dict = {get_function_module(
+            func): init_val for func, init_val in process_functions.items()}
         process_shared_dict[cc.KEYBOARD_QUEUE] = manager.Queue()
         interprocess_data.update(process_shared_dict)
         processes = [
@@ -92,11 +94,13 @@ def initialise_modules(loading_shared_data: Dict, progress: ProgressController, 
         progress.set_stage("Initialising threads", 2)
         thread_functions = [eye_tracking, drone]
         progress.set_loading_task("Initialising shared data dictionary", 0.5)
-        thread_data = {get_function_module(func): {} for func in thread_functions}
+        thread_data = {get_function_module(func): {}
+                       for func in thread_functions}
         loading_shared_data[c.THREAD_DATA] = thread_data
         progress.set_loading_task("Initialising thread functions", 0.2)
         threads = [
-            Thread(target=func, args=(stop_event, thread_data, data_lock), name=f"thread_{get_function_module(func)}")
+            Thread(target=func, args=(stop_event, thread_data, data_lock),
+                   name=f"thread_{get_function_module(func)}")
             for func in thread_functions
         ]
         loading_shared_data[c.THREADS] = threads
@@ -106,7 +110,8 @@ def initialise_modules(loading_shared_data: Dict, progress: ProgressController, 
             progress.set_loading_task(f"Starting thread {thread.name}", 0.1)
             thread.start()
     except KeyboardInterrupt:
-        logger.info("Keyboard interrupt detected, stopping threads and processes.")
+        logger.info(
+            "Keyboard interrupt detected, stopping threads and processes.")
 
     logger.info("Modules initialised.")
 
@@ -118,7 +123,8 @@ def main():
     loading_data_lock = Lock()
     loading_stop_event = Event()
     loading_shared_data = dict()
-    loading_window = LoadingGUI(loading_shared_data, loading_data_lock, loading_stop_event)
+    loading_window = LoadingGUI(
+        loading_shared_data, loading_data_lock, loading_stop_event)
     progress = ProgressController(5, loading_window.progress_update_signal)
 
     try:
@@ -126,7 +132,8 @@ def main():
         # can signal all threads to stop.
         stop_event = Event()
         data_lock = Lock()
-        init_thread = Thread(target=initialise_modules, args=(loading_shared_data, progress, stop_event, data_lock), name="init_thread")
+        init_thread = Thread(target=initialise_modules, args=(
+            loading_shared_data, progress, stop_event, data_lock), name="init_thread")
         init_thread.start()
 
         loading_window.wrap_show()
@@ -149,7 +156,8 @@ def main():
 
         logger.info("Launching Main GUI")
         main_gui = QApplication(sys.argv)
-        main_window = MainApp(stop_event, thread_data, data_lock, interprocess_data)
+        main_window = MainApp(stop_event, thread_data,
+                              data_lock, interprocess_data)
         main_window.wrap_show()
         main_gui.exec()
 
@@ -162,7 +170,7 @@ def main():
             process.join(cc.PROCESS_TIMEOUT)
             if process.is_alive():
                 while process.is_alive():
-                    logger.info(f"Terminating process {process.name}")
+                    logger.info("Terminating process %s", process.name)
                     process.terminate()
                     process.kill()
                 process.join()
