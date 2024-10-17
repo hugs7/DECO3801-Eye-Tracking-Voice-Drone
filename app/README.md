@@ -1,4 +1,14 @@
-# App Readme
+# Main GUI
+
+This module contains code for the main GUI. This module serves as the main entry point to the application and can be run via
+
+```bash
+python app/src/main.py
+```
+
+The app will then load, which may take some time (~10 - 30 seconds). Be patient during this time. If the drone is configured to connect as per the drone's configuration, it will connect and the video feed will be displayed
+
+## Microsoft DebugPy Current Issue
 
 Note due to issue [#1531 on Microsoft DebugPy](https://github.com/microsoft/debugpy/issues/1531) I have written a drop-in replacement to fix a bug. There does exist a PR for this but it hasn't been merged yet.
 
