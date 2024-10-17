@@ -98,7 +98,7 @@ DEFAULT_CONFIG = {
         },
         "drone_stat_params": {
             FlightStatistics.BATTERY.value: 0.2,
-            FLIGHT_STATISTICS: 10
+            FLIGHT_STATISTICS: 0.2
         },
     },
 }
