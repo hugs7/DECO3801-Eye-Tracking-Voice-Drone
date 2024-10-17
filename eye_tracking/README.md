@@ -5,7 +5,7 @@
 To get started, install the dependencies via
 
 ```bash
-python eye_tracking/requirements.txt
+pip install -r eye_tracking/requirements.txt
 ```
 
 ## Running the module
@@ -13,7 +13,7 @@ python eye_tracking/requirements.txt
 Then you can run the eye tracking module standalone via
 
 ```bash
-python eye_tracking/main
+python eye_tracking/main.py
 ```
 
 You can also run
