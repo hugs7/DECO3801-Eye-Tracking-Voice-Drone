@@ -328,21 +328,21 @@ class MainApp(QMainWindow, CommonGUI):
             None
         """
         key = event.key()
-        logger.info(f"Key pressed: {key}")
+        logger.info("Key pressed: %s", key)
 
         if key == Qt.Key.Key_Escape:
             self.close_app()
 
         # Any other key goes into the keyboard queue
         with self.data_lock:
-            logger.debug(f"Adding key to queue: {key}")
+            logger.debug("Adding key to queue: %s", key)
             keyboard_queue: PeekableQueue = self.thread_data[cc.KEYBOARD_QUEUE]
             keyboard_queue.put(key)
 
         keyboard_mp_queue: MPQueue = self.interprocess_data[cc.KEYBOARD_QUEUE]
         keyboard_mp_queue.put(key)
 
-        logger.info(f"Key {key} added to keyboard queue")
+        logger.info("Key %s added to keyboard queue", key)
 
     def _open_options(self) -> None:
         """
@@ -402,7 +402,7 @@ class MainApp(QMainWindow, CommonGUI):
         try:
             return QImage(frame_data, width, height, bytes_per_line, QImage.Format.Format_RGB888)
         except Exception as e:
-            logger.error(f"Error converting frame to QImage: {e}")
+            logger.error("Error converting frame to QImage: %s", e)
 
     def get_video_feed(self, source: str, frame_key: str = cc.VIDEO_FRAME, flip_colours: bool = True) -> Optional[cv2.typing.MatLike]:
         """
@@ -627,7 +627,7 @@ class MainApp(QMainWindow, CommonGUI):
             None
         """
         self.swap_feeds = not self.swap_feeds
-        logger.info(f"Swapping feeds: {self.swap_feeds}")
+        logger.info("Swapping feeds: %s", self.swap_feeds)
 
     def _stop_all_timers(self) -> None:
         """
@@ -642,7 +642,7 @@ class MainApp(QMainWindow, CommonGUI):
                 continue
 
             if timer.isActive():
-                logger.debug(f"Stopping timer: {timer}")
+                logger.debug("Stopping timer: %s", timer)
                 timer.stop()
 
     def closeEvent(self, event: any) -> None:
