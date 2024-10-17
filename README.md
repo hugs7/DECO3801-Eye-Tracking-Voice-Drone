@@ -1,6 +1,6 @@
 # Eye Gaze and Voice Aware Drone Controller
 
-**Developers:**
+## Developers
 
 -   Hugo Burton
 -   Nicholas Roughley
@@ -11,7 +11,7 @@
 
 Completed as project for DECO3801 at the University of Queensland, St Lucia, Australia.
 
-Semester 2, 2024
+**Semester:** 2, 2024
 
 [Repo Link](https://github.com/hugs7/DECO3801)
 
@@ -39,7 +39,7 @@ The project repository is split into five main sections summarised below:
 
 Modules `drone`, `eye_tracking`, and `voice_control` can indeed run independently. See individual documentation linked below or how to run in this way.
 
-### Gaze Tracking
+### Gaze (Eye) Tracking
 
 See also [the gaze tracking documentation](./gaze_tracking/README.md)
 
