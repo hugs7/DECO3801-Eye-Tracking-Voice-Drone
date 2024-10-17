@@ -5,6 +5,7 @@ Controller for the drone, handles the input of a drone from voice, Gaze or manua
 from typing import Union, Optional, Dict, List
 from threading import Event, Lock
 import sys
+import time
 
 from omegaconf import OmegaConf
 import cv2
@@ -12,11 +13,12 @@ import cv2
 from common import constants as cc, keyboard
 from common.logger_helper import init_logger
 from common.omegaconf_helper import conf_key_from_value
-from common.loop import run_loop_with_max_tickrate
+from common.loop import run_loop_with_max_tickrate, fps_to_ms
 from common.PeekableQueue import PeekableQueue
 
 from . import constants as c
 from .drone_actions import DroneActions
+from .flight_statistics import FlightStatistics
 from .models.tello_drone import TelloDrone
 from .models.mavic_drone import MavicDrone
 
@@ -56,7 +58,8 @@ class Controller:
         if self.running_in_thread:
             # If running in thread mode, all or none of the required args must be provided
             if not all(required_args):
-                raise ValueError("All or none of stop_event, thread_data, data_lock must be provided.")
+                raise ValueError(
+                    "All or none of stop_event, thread_data, data_lock must be provided.")
 
             logger.info("Running in thread mode")
             self.stop_event = stop_event
@@ -85,7 +88,26 @@ class Controller:
 
         self.keyboard_bindings = self.config.keyboard_bindings
 
+        self._init_stat_params()
         logger.info("Drone controller initialised.")
+
+    def _init_stat_params(self) -> None:
+        """
+        Initialises the drone statistics parameters and times for the controller.
+        """
+
+        logger.info("Initialising drone statistics parameters...")
+        self.drone_stat_times = dict()
+        self.drone_stat_params = OmegaConf.to_container(
+            self.config.drone_stat_params, resolve=True)
+
+        for param, tick_rate in self.drone_stat_params.items():
+            milliseconds = fps_to_ms(tick_rate)
+            self.drone_stat_params[param] = milliseconds
+            self.drone_stat_times[param] = time.perf_counter()
+
+        logger.info("Drone statistics parameters initialised %s",
+                    self.drone_stat_params)
 
     def _controller_loop(self, tick_rate: float) -> bool:
         """
@@ -108,6 +130,7 @@ class Controller:
                 return False
 
             self._render_frame(frame, tick_rate)
+            self._get_drone_statistics()
 
         self.thread_loop_handler(self.stop_event)
         logger.debug("<<< End drone loop")
@@ -119,9 +142,11 @@ class Controller:
         """
 
         if self.running_in_thread:
-            logger.debug("Drone module running in thread mode. Local GUI disabled.")
+            logger.debug(
+                "Drone module running in thread mode. Local GUI disabled.")
 
-            run_loop_with_max_tickrate(self.config.max_tick_rate, self._controller_loop)
+            run_loop_with_max_tickrate(
+                self.config.max_tick_rate, self._controller_loop)
         else:
             logger.debug("Importing PyQt6...")
 
@@ -144,7 +169,8 @@ class Controller:
         """
 
         if not self.running_in_thread:
-            logger.warning("Video feed polling should be disabled in main mode")
+            logger.warning(
+                "Video feed polling should be disabled in main mode")
             return
 
         if frame is None:
@@ -154,6 +180,66 @@ class Controller:
         with self.data_lock:
             self.thread_data[cc.DRONE][cc.VIDEO_FRAME] = frame
             self.thread_data[cc.DRONE][cc.TICK_RATE] = tick_rate
+
+    def _has_waited(self, key: str) -> bool:
+        """
+        Checks the drone stat times to see if we have waited enough before updating the value corresponding to the key
+
+        Args:
+            key (str): The key to check
+
+        Returns:
+            bool: True if we have waited enough, False otherwise
+        """
+        now = time.perf_counter()
+        stat_time = self.drone_stat_times[key]
+        stat_wait = self.drone_stat_params[key]
+
+        return now - stat_time > stat_wait
+
+    def _get_drone_statistics(self) -> None:
+        """
+        Gets the flight statistics from the drone and sends it to the main GUI for rendering.
+
+            pitch, roll, yaw, speed_x, speed_y, speed_z, acceleration_x, acceleration_y, cceleration_z, 
+            lowest_temperature, highest_temperature, temperature, height, distance_tof, barometer, flight_time, battery
+        """
+        if not self.drone_connected:
+            return
+
+        now = time.perf_counter()
+        stat_vals = dict()
+
+        # Battery
+        if self._has_waited(FlightStatistics.BATTERY.value):
+            logger.debug("Getting battery level...")
+            self.model.battery_level = self.model.get_battery()
+            logger.info("Drone battery: %d", self.model.battery_level)
+            self.drone_stat_times[FlightStatistics.BATTERY.value] = now
+
+        stat_vals[FlightStatistics.BATTERY.value] = self.model.battery_level
+
+        if self._has_waited(c.FLIGHT_STATISTICS):
+            for statistic in FlightStatistics:
+                statistic_value = statistic.value
+                if statistic_value == FlightStatistics.BATTERY.value:
+                    continue
+
+                try:
+                    command = f"self.model.drone.get_{statistic_value}()"
+                    logger.trace("Evaluating %s", command)
+                    value = eval(command)
+                except AttributeError:
+                    logger.warning(
+                        "Method get_%s not found in drone model", statistic_value)
+                    continue
+
+                logger.debug(" Statistic > %s: %s", statistic_value, value)
+
+                stat_vals[statistic_value] = value
+
+        with self.data_lock:
+            self.thread_data[cc.DRONE][cc.FLIGHT_STATISTICS] = stat_vals
 
     def _event_loop(self) -> None:
         """
@@ -185,7 +271,8 @@ class Controller:
             return False
 
         keyboard_queue: PeekableQueue = self.thread_data[cc.KEYBOARD_QUEUE]
-        key_buffer = keyboard.keyboard_event_loop(self.data_lock, keyboard_queue, self.keyboard_bindings)
+        key_buffer = keyboard.keyboard_event_loop(
+            self.data_lock, keyboard_queue, self.keyboard_bindings)
         if not self.drone_connected:
             return
 
@@ -217,16 +304,19 @@ class Controller:
 
             return True
 
-        key_action = conf_key_from_value(self.keyboard_bindings, key_code, key_chr)
+        key_action = conf_key_from_value(
+            self.keyboard_bindings, key_code, key_chr)
         if key_action is None:
             logger.trace("Key %s not found in keybindings", key_chr)
             return False
 
-        key_recognised = key_action in vars(DroneActions).values()
+        key_recognised = key_action in {
+            action.value for action in DroneActions}
         if key_recognised:
             self.perform_action(key_action)
         else:
-            logger.warning("Key action %s not found in DroneActions", key_action)
+            logger.warning(
+                "Key action %s not found in DroneActions", key_action)
 
         return key_recognised
 
@@ -239,7 +329,8 @@ class Controller:
         """
 
         if not self.running_in_thread:
-            logger.warning("_wait_voice_command should not be called in main mode")
+            logger.warning(
+                "_wait_voice_command should not be called in main mode")
             return False
 
         if cc.DRONE not in self.thread_data.keys():
@@ -250,7 +341,8 @@ class Controller:
         with self.data_lock:
             drone_data: Optional[Dict] = self.thread_data[cc.DRONE]
             if cc.COMMAND_QUEUE not in drone_data:
-                logger.trace("Command queue not yet initialised in shared data.")
+                logger.trace(
+                    "Command queue not yet initialised in shared data.")
                 return False
 
             command_queue: PeekableQueue = drone_data[cc.COMMAND_QUEUE]
@@ -265,7 +357,8 @@ class Controller:
         for voice_command in command_buffer:
             for command, measurement in voice_command:
                 logger.info("Received voice command: %s", voice_command)
-                accepted_commands.append(self.perform_action(command, measurement))
+                accepted_commands.append(
+                    self.perform_action(command, measurement))
 
         # Accept if any valid command was received
         return any(accepted_commands)
@@ -301,37 +394,38 @@ class Controller:
             logger.info("Performing action: %s", command)
 
         if magnitude is not None:
-            logger.info("Performing action: %s with magnitude", command, magnitude)
+            logger.info("Performing action: %s with magnitude %d",
+                        command, magnitude)
 
         try:
             match command:
-                case DroneActions.ROTATE_CW:
+                case DroneActions.ROTATE_CW.value:
                     self.model.rotate_clockwise(angle)
-                case DroneActions.ROTATE_CCW:
+                case DroneActions.ROTATE_CCW.value:
                     self.model.rotate_counter_clockwise(angle)
-                case DroneActions.UP:
+                case DroneActions.UP.value:
                     self.model.move_up(dist)
-                case DroneActions.DOWN:
+                case DroneActions.DOWN.value:
                     self.model.move_down(dist)
-                case DroneActions.LEFT:
+                case DroneActions.LEFT.value:
                     self.model.move_left(dist)
-                case DroneActions.RIGHT:
+                case DroneActions.RIGHT.value:
                     self.model.move_right(dist)
-                case DroneActions.FORWARD:
+                case DroneActions.FORWARD.value:
                     self.model.move_forward(dist)
-                case DroneActions.BACKWARD:
+                case DroneActions.BACKWARD.value:
                     self.model.move_backward(dist)
-                case DroneActions.TAKEOFF:
+                case DroneActions.TAKEOFF.value:
                     self.model.takeoff()
-                case DroneActions.LAND:
+                case DroneActions.LAND.value:
                     self.model.land()
-                case DroneActions.FLIP_FORWARD:
+                case DroneActions.FLIP_FORWARD.value:
                     self.model.flip_forward()
-                case DroneActions.EMERGENCY:
+                case DroneActions.EMERGENCY.value:
                     self.model.emergency()
-                case DroneActions.MOTOR_ON:
+                case DroneActions.MOTOR_ON.value:
                     self.model.motor_on()
-                case DroneActions.MOTOR_OFF:
+                case DroneActions.MOTOR_OFF.value:
                     self.model.motor_off()
                 case _:
                     logger.warning("Command %s not recognised", command)

@@ -2,14 +2,14 @@
 Handles GUI for the application using PyQt6
 """
 
-from typing import Dict, List, Union, Tuple, Optional, Any
+from typing import Dict, List, Tuple, Optional, Any
 from threading import Event, Lock
 from multiprocessing import Queue as MPQueue
 
 import cv2
 import numpy as np
 from omegaconf import OmegaConf
-from PyQt6.QtWidgets import QMainWindow, QLabel, QVBoxLayout, QWidget
+from PyQt6.QtWidgets import QMainWindow, QLabel, QVBoxLayout, QHBoxLayout,  QWidget, QProgressBar, QSizePolicy
 from PyQt6.QtCore import Qt, QRect, QCoreApplication
 from PyQt6.QtGui import QImage, QPixmap, QKeyEvent
 
@@ -19,6 +19,8 @@ from common import image
 from common import constants as cc
 from common.PeekableQueue import PeekableQueue
 from common import omegaconf_helper as oh
+
+from drone.src.flight_statistics import FlightStatistics
 
 from options import PreferencesDialog
 from about import AboutDialog
@@ -32,6 +34,7 @@ logger = init_logger("DEBUG")
 
 class MainApp(QMainWindow, CommonGUI):
     def __init__(self, stop_event: Event, thread_data: Dict, data_lock: Lock, interprocess_data: Dict):
+        logger.info(">>> Initialising MainApp...")
         self.stop_event = stop_event
         self.thread_data = thread_data
         self.data_lock = data_lock
@@ -40,12 +43,19 @@ class MainApp(QMainWindow, CommonGUI):
         super().__init__()
 
         self.config = self._init_config()
+        self.init_palette()
         self._init_gui()
         self._init_qpixmaps()
         self._init_timers()
         self._init_queues()
 
+        logger.info("<<< MainApp initialised")
+
     def _init_gui(self):
+        """
+        Initialises the GUI components for the main window
+        """
+        logger.info("Initialising GUI components")
         self.setObjectName("MainWindow")
         self.resize(635, 523)
 
@@ -60,12 +70,14 @@ class MainApp(QMainWindow, CommonGUI):
 
         self.recentCommand = QLabel("Recent command", self.centralwidget)
         self.recentCommand.setAlignment(Qt.AlignmentFlag.AlignHCenter)
-        self.recentCommand.setStyleSheet("color: red; font-size: 14px;")
+        self.recentCommand.setStyleSheet(
+            f"color: red; font-size: {self.font_size};")
 
         self.webcam_video_label = QLabel("webcam", self.centralwidget)
         self.webcam_video_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.webcam_video_label.setScaledContents(True)
-        self.webcam_video_label.setStyleSheet("color: red; font-size: 14px;")
+        self.webcam_video_label.setStyleSheet(
+            f"color: red; font-size: {self.font_size};")
         self._resize_and_position_webcam_label()
 
         self.layout = QVBoxLayout(self.centralwidget)
@@ -74,6 +86,66 @@ class MainApp(QMainWindow, CommonGUI):
 
         self.drone_video_label.lower()
         self.centralwidget.raise_()
+
+        self._init_battery_and_stats_gui()
+        self._position_battery_and_stats()
+
+        logger.info("GUI components initialised")
+
+    def _init_battery_and_stats_gui(self) -> None:
+        """
+        Initializes the battery and flight statistics GUI components.
+        """
+        logger.debug("Initialising battery and flight stats GUI components")
+
+        # Create a container widget for both battery and statistics labels
+        self.battery_and_stats_widget = QWidget(self)
+        self.battery_and_stats_layout = QVBoxLayout(
+            self.battery_and_stats_widget)
+        self.battery_and_stats_widget.setObjectName(c.BATTERY_STATS_WIDGET)
+        self.battery_and_stats_widget.setStyleSheet(f"""
+            QWidget#{c.BATTERY_STATS_WIDGET} {{
+                border: {c.BATTERY_WIDGET_BORDER_WIDTH}px solid {c.BATTERY_WIDGET_BORDER_COLOUR};
+                border-radius: {c.BATTERY_WIDGET_BORDER_RADIUS}px;
+                padding: 5px;
+            }}
+        """)
+
+        self.battery_widget = QWidget(self.battery_and_stats_widget)
+        self.battery_layout = QHBoxLayout(self.battery_widget)
+        self.battery_layout.setContentsMargins(0, 0, 0, 0)
+        self.battery_layout.setSpacing(10)
+
+        self.battery_progress = QProgressBar(self.battery_widget)
+        self.battery_progress.setRange(0, 100)
+        self.battery_progress.setValue(0)
+        self.battery_progress.setTextVisible(False)
+        self.battery_progress.setObjectName(c.BATTERY_PROGRESS)
+        self.battery_progress.setFixedSize(
+            c.BATTERY_PROGRESS_WIDTH, c.BATTERY_PROGRESS_HEIGHT)
+        self.battery_progress.setObjectName(c.BATTERY_PROGRESS)
+        self._set_battery_progress_style()
+
+        self.battery_label = QLabel("0 %", self.battery_widget)
+        self.battery_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.battery_label.setFixedWidth(c.BATTERY_TEXT_WIDTH)
+        self.battery_label.setStyleSheet(
+            f"color: green; font-size: {self.font_size};")
+
+        self.battery_layout.addWidget(self.battery_progress)
+        self.battery_layout.addWidget(self.battery_label)
+
+        self.battery_and_stats_layout.addWidget(self.battery_widget)
+
+        self.statistics_label = QLabel(
+            "Flight Statistics: ", self.battery_and_stats_widget)
+        self.statistics_label.setAlignment(Qt.AlignmentFlag.AlignRight)
+        self.statistics_label.setStyleSheet(
+            f"color: {self.text_color}; font-size: {self.font_size};")
+
+        self.battery_and_stats_layout.addWidget(self.statistics_label)
+        self.battery_and_stats_layout.setAlignment(Qt.AlignmentFlag.AlignRight)
+        self.battery_and_stats_widget.setLayout(self.battery_and_stats_layout)
 
     def _init_qpixmaps(self) -> None:
         """
@@ -125,6 +197,7 @@ class MainApp(QMainWindow, CommonGUI):
         """
         Initialise the timers for the gui
         """
+        logger.debug("Initialising timers")
         self.timers_fps = self.config.timers
         self.callback_delays = self.config.callback_delays
         self.timers = dict()
@@ -132,7 +205,9 @@ class MainApp(QMainWindow, CommonGUI):
         timers_conf = {
             "webcam": {cc.THREAD_CALLBACK: self.get_webcam_feed, cc.THREAD_FPS: self.timers_fps.webcam},
             "drone_feed": {cc.THREAD_CALLBACK: self.get_drone_feed, cc.THREAD_FPS: self.timers_fps.drone_video},
+            "flight_stats": {cc.THREAD_CALLBACK: self.update_flight_stats, cc.THREAD_FPS: self.timers_fps.flight_stats},
             "voice_command": {cc.THREAD_CALLBACK: self.get_next_voice_command, cc.THREAD_FPS: self.timers_fps.voice_command},
+            "battery": {cc.THREAD_CALLBACK: self.update_battery, cc.THREAD_FPS: self.timers_fps.battery},
         }
 
         self._configure_timers(timers_conf)
@@ -142,6 +217,7 @@ class MainApp(QMainWindow, CommonGUI):
         Initialise the keyboard queue. Not assigned to any
         particular module since any thread can "subscribe" to this queue.
         """
+        logger.debug("Initialising queues")
         with self.data_lock:
             self.thread_data[cc.KEYBOARD_QUEUE] = PeekableQueue()
             self.thread_data[cc.DRONE][cc.COMMAND_QUEUE] = PeekableQueue()
@@ -168,6 +244,50 @@ class MainApp(QMainWindow, CommonGUI):
         self.webcam_video_label.setGeometry(
             x_pos, y_pos, target_width, target_height)
 
+    def _position_battery_and_stats(self) -> None:
+        """
+        Positions the battery and flight statistics widget in the top-right corner of the window.
+        """
+        width = c.BATTERY_PROGRESS_WIDTH + c.BATTERY_TEXT_WIDTH + 2 * c.WIDGET_PADDING
+        height = c.BATTERY_PROGRESS_HEIGHT + c.WIDGET_PADDING + c.BATTERY_TEXT_WIDTH
+        self.battery_and_stats_widget.setGeometry(
+            self.width() - width,
+            c.WIDGET_PADDING, width, height
+        )
+
+    def _set_battery_progress_style(self) -> None:
+        """
+        Sets the style of the battery progress bar based on the battery level.
+        """
+
+        logger.debug("Setting battery progress style")
+        lower_bounds = c.BATTERY_INDICATOR_COLOLURS.keys()
+        drone_battery_level = self.get_battery_level()
+        if drone_battery_level is None:
+            indicator_colour = c.BATTERY_GOOD_CHUNK_COLOUR
+        else:
+            # Loop descending through the lower bounds until we find the correct colour
+            for lower_bound in sorted(lower_bounds, reverse=True):
+                if drone_battery_level >= lower_bound:
+                    indicator_colour = c.BATTERY_INDICATOR_COLOLURS[lower_bound]
+                    break
+            else:
+                logger.error(
+                    "Failed to find colour for battery level %d", drone_battery_level)
+                indicator_colour = c.BATTERY_GOOD_CHUNK_COLOUR
+
+        self.battery_progress.setStyleSheet(f"""
+            QProgressBar#{c.BATTERY_PROGRESS} {{
+                border: {c.BATTERY_PROGRESS_BORDER_WIDTH}px solid {c.BATTERY_PROGRESS_BORDER_COLOUR};
+                border-radius: {c.BATTERY_PROGRESS_BORDER_RADIUS}px;
+                background-color: {self.surface_color};
+            }}
+            QProgressBar#{c.BATTERY_PROGRESS}::chunk {{
+                background-color:{indicator_colour};
+                border-radius: {c.BATTERY_PROGRESS_BORDER_RADIUS}px;
+            }}
+        """)
+
     def resizeEvent(self, event):
         """
         Handles the event where the window gets resized
@@ -175,6 +295,7 @@ class MainApp(QMainWindow, CommonGUI):
 
         self.__resize_drone_frame()
         self._resize_and_position_webcam_label()
+        self._position_battery_and_stats()
 
         return super().resizeEvent(event)
 
@@ -340,18 +461,54 @@ class MainApp(QMainWindow, CommonGUI):
 
         self._set_pixmap(self.drone_video_label, out_frame)
 
-    def get_next_voice_command(self) -> Optional[List[Dict[str, Union[str, Tuple[str, int]]]]]:
+    def update_flight_stats(self) -> None:
+        """
+        Updates the display of the flight statistics from the drone module.
+        """
+
+        drone_data: Dict = self.thread_data[cc.DRONE]
+        if cc.FLIGHT_STATISTICS not in drone_data.keys():
+            return
+
+        flight_statistics: Dict = drone_data[cc.FLIGHT_STATISTICS]
+        logger.trace("Flight statistics: %s", flight_statistics)
+        if not flight_statistics:
+            return None
+
+        flight_stats_lst = [f"Flight time: {flight_statistics.get(FlightStatistics.FLIGHT_TIME.value, 'N/A')}s",
+                            f"Distance: {flight_statistics.get(
+                                FlightStatistics.DISTANCE_TOF.value, 'N/A')}m",
+                            f"Speed x: {flight_statistics.get(
+                                FlightStatistics.SPEED_X.value, 'N/A')}m/s",
+                            f"Speed y: {flight_statistics.get(
+                                FlightStatistics.SPEED_Y.value, 'N/A')}m/s",
+                            f"Speed z: {flight_statistics.get(
+                                FlightStatistics.SPEED_Z.value, 'N/A')}m/s",
+                            f"Accel x: {flight_statistics.get(
+                                FlightStatistics.ACCELERATION_X.value, 'N/A')}m/s²",
+                            f"Accel y: {flight_statistics.get(
+                                FlightStatistics.ACCELERATION_Y.value, 'N/A')}m/s²",
+                            f"Accel z: {flight_statistics.get(
+                                FlightStatistics.ACCELERATION_Z.value, 'N/A')}m/s²",
+                            f"Altimeter: {flight_statistics.get(
+                                FlightStatistics.BAROMETER.value, 'N/A')}cm",
+                            f"Yaw: {flight_statistics.get(
+                                FlightStatistics.YAW.value, 'N/A')}°",
+                            f"Pitch: {flight_statistics.get(
+                                FlightStatistics.PITCH.value, 'N/A')}°",
+                            f"Roll: {flight_statistics.get(
+                                FlightStatistics.ROLL.value, 'N/A')}",]
+
+        flight_stats_text = "\n".join(flight_stats_lst)
+        logger.trace(flight_stats_text)
+        self.statistics_label.setText(flight_stats_text)
+        self.statistics_label.adjustSize()
+        self.battery_and_stats_widget.adjustSize()
+
+    def get_next_voice_command(self) -> None:
         """
         Gets the voice command from the IPC shared data of the voice control
         module.
-
-        Returns:
-            Optional[
-                List[Dict[str,
-                          Union[str,
-                                Tuple[str, int]]]]]: A dictionary of the voice as
-                                                     text and parsed command The
-                                                     voice command.
         """
 
         voice_data: Dict = self.interprocess_data[cc.VOICE_CONTROL]
@@ -375,6 +532,40 @@ class MainApp(QMainWindow, CommonGUI):
 
             self._send_voice_command_to_drone(parsed_command)
             self._display_voice_command(command_text)
+
+    def get_battery_level(self) -> Optional[int]:
+        """
+        Gets the battery level of the drone
+
+        Returns:
+            battery_level (Optional[int]): The battery level of the drone or None if not found
+        """
+        logger.debug("Updating battery level")
+        drone_data: Dict = self.thread_data[cc.DRONE]
+        if cc.FLIGHT_STATISTICS not in drone_data.keys():
+            return
+
+        flight_statistics: Dict = drone_data[cc.FLIGHT_STATISTICS]
+        battery_level = flight_statistics.get(
+            FlightStatistics.BATTERY.value, None)
+        if battery_level is None:
+            logger.debug("Battery level not found")
+
+        return battery_level
+
+    def update_battery(self) -> None:
+        """
+        Updates the battery level of the drone
+        """
+        battery_level = self.get_battery_level()
+        if battery_level is None:
+            return
+
+        battery_text = f"{battery_level} %"
+        logger.info(battery_text)
+        self.battery_label.setText(battery_text)
+        self.battery_progress.setValue(battery_level)
+        self._set_battery_progress_style()
 
     def _send_voice_command_to_drone(self, parsed_command: Optional[List[Tuple[str, int]]]) -> None:
         """

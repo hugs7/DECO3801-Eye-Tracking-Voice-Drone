@@ -167,6 +167,8 @@ class TelloDrone(Drone):
             except tello.TelloException as e:
                 logger.error("Failed to set camera selection. Details: %s", e)
 
+            self.battery_level = self.drone.get_battery()
+
     def connect(self) -> bool:
         """
         Connects to the drone
@@ -191,11 +193,11 @@ class TelloDrone(Drone):
             return False
 
         logger.info("Connected to the Tello Drone")
-        battery_level = self.drone.get_battery()
-        logger.info("Drone battery: %d", battery_level)
+        self.battery_level = self.drone.get_battery()
+        logger.info("Drone battery: %d", self.battery_level)
 
-        if battery_level < 20:
-            logger.warning("Battery level not sufficient for flight: %d", battery_level)
+        if self.battery_level < 20:
+            logger.warning("Battery level not sufficient for flight: %d", self.battery_level)
 
         return True
 

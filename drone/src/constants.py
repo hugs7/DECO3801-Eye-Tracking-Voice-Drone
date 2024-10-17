@@ -3,6 +3,7 @@ Constants file. Please define in UPPER_SNAKE_CASE
 """
 
 from .drone_actions import DroneActions
+from .flight_statistics import FlightStatistics
 
 # === Drone Types ===
 MAVIC = "mavic"
@@ -52,8 +53,9 @@ DRONE_ACTIONS_OTHER = [
     DroneActions.SPEED,
 ]
 
-
 # === Config ===
+
+FLIGHT_STATISTICS = "flight_statistics"
 
 DEFAULT_CONFIG = {
     "drone_type": "tello",
@@ -93,6 +95,10 @@ DEFAULT_CONFIG = {
             "ccw": "q",
             "motor on": "9",
             "motor off": "0",
+        },
+        "drone_stat_params": {
+            FlightStatistics.BATTERY.value: 0.2,
+            FLIGHT_STATISTICS: 0.2
         },
     },
 }

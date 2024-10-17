@@ -28,10 +28,13 @@ class CommonGUI:
         self.theme = cc.DARK_THEME if palette.color(
             QPalette.ColorRole.Window).lightness() < 128 else cc.LIGHT_THEME
 
+        self.font_size = "14px"
         if self.theme == cc.DARK_THEME:
             self.text_color = cc.TEXT_WHITE
+            self.surface_color = cc.SURFACE_DARK
         else:
             self.text_color = cc.TEXT_BLACK
+            self.surface_color = cc.SURFACE_LIGHT
 
     def __check_layout(self):
         if self.layout is None:
@@ -107,6 +110,7 @@ class CommonGUI:
             timers_conf: Configuration dictionary
         """
 
+        logger.debug("Configuring %d timers", len(timers_conf))
         for timer_name, conf in timers_conf.items():
             if conf.get(cc.THREAD_CALLBACK) is None:
                 raise ValueError(f"Timer callback not found: {timer_name}")
@@ -129,7 +133,7 @@ class CommonGUI:
         Returns:
             QTimer: The configured QTimer
         """
-        logger.info(f"Configuring timer: {name}")
+        logger.debug(f"Configuring timer: {name}")
         timer = QTimer(self)
         timer.timeout.connect(lambda: callback(*args))
         timer.start(fps_to_ms(fps))

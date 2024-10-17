@@ -1,9 +1,10 @@
 """
 Drone actions definition
 """
+from enum import Enum
 
 
-class DroneActions:
+class DroneActions(Enum):
     TAKEOFF = "takeoff"
     LAND = "land"
     UP = "up"

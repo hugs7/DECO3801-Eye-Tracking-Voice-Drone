@@ -29,7 +29,8 @@ def get_key_chr(key_code: int) -> str:
         try:
             key_chr = chr(key_code).lower()
         except ValueError:
-            logger.error("Failed to obtain character from key code %d", key_code)
+            logger.error(
+                "Failed to obtain character from key code %d", key_code)
             key_chr = ""
     else:
         key_chr = ""
@@ -61,14 +62,16 @@ def keyboard_event_loop(data_lock: Lock, keyboard_queue: PeekableQueue, keyboard
     with data_lock:
         i = 0
         while i < keyboard_queue.qsize():
-            key_code = keyboard_queue.peek()
+            key_code = keyboard_queue.peek(i)
             is_bound = is_key_bound(keyboard_bindings, key_code)
             if is_bound:
                 key_code = keyboard_queue.get()
                 key_buffer.append(key_code)
             else:
                 i += 1
-                logger.trace("Key %s not bound in keybindings", get_key_chr(key_code))
+                key_chr = get_key_chr(key_code)
+                logger.trace("Key %s not bound in keybindings",
+                             key_chr)
 
     return key_buffer
 
