@@ -194,15 +194,6 @@ class MainApp(QMainWindow, CommonGUI):
         """Resizes the drone label to the frame size"""
         self.drone_video_label.resize(self.width(), self.height())
 
-    def updateRecentCommand(self, newCommand):
-        """
-        Updates the recent command at the top, to some given new command
-
-        Args:
-            newCommand (string): the new command to be updated to
-        """
-        self.recentCommand.setText(newCommand)
-
     def keyPressEvent(self, event: QKeyEvent) -> None:
         """
         Handle key press events
@@ -381,6 +372,7 @@ class MainApp(QMainWindow, CommonGUI):
                         command_text, parsed_command)
 
             self._send_voice_command_to_drone(parsed_command)
+            self._display_voice_command(command_text)
 
     def _send_voice_command_to_drone(self, parsed_command: Optional[List[Tuple[str, int]]]) -> None:
         """
@@ -403,6 +395,16 @@ class MainApp(QMainWindow, CommonGUI):
 
             logger.debug("Adding parsed command to drone command queue")
             drone_cmd_queue.put(parsed_command)
+
+    def _display_voice_command(self, command_text: str) -> None:
+        """
+        Displays the voice command on the GUI
+
+        Args:
+            command_text (str): The voice command text
+        """
+
+        self.recentCommand.setText(command_text)
 
     def _switch_feeds(self) -> None:
         """
