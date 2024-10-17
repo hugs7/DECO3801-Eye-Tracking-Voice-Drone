@@ -222,8 +222,13 @@ class Controller:
         if self._has_waited(c.FLIGHT_STATISTICS):
             for statistic in FlightStatistics:
                 statistic_value = statistic.value
+                if statistic_value == FlightStatistics.BATTERY.value:
+                    continue
+
                 try:
-                    value = eval(f"self.model.drone.get_{statistic_value}()")
+                    command = f"self.model.drone.get_{statistic_value}()"
+                    logger.trace("Evaluating %s", command)
+                    value = eval(command)
                 except AttributeError:
                     logger.warning(
                         "Method get_%s not found in drone model", statistic_value)
