@@ -25,7 +25,8 @@ class CommonGUI:
         """Initialise the palette and theme"""
         palette = QApplication.palette()
         # Determine if the theme is dark or light
-        self.theme = cc.DARK_THEME if palette.color(QPalette.ColorRole.Window).lightness() < 128 else cc.LIGHT_THEME
+        self.theme = cc.DARK_THEME if palette.color(
+            QPalette.ColorRole.Window).lightness() < 128 else cc.LIGHT_THEME
 
         if self.theme == cc.DARK_THEME:
             self.text_color = cc.TEXT_WHITE
@@ -150,6 +151,24 @@ class CommonGUI:
             logger.error(f"Timer not found: {name}")
 
         return timer
+
+    def _delayed_callback(self, name: str, callback: Callable, delay_ms: int, *args) -> QTimer:
+        """
+        Configures a QTimer that triggers the callback only once after the delay.
+
+        Args:
+            name: The name of the timer
+            callback: The callback function to run
+            delay_ms: The delay in milliseconds before triggering the callback
+            *args: Additional arguments for the callback function
+
+        Returns:
+            QTimer: The configured QTimer
+        """
+        logger.info(
+            "Configuring single-shot timer: %s with delay %d", name, delay_ms)
+
+        return QTimer.singleShot(delay_ms, lambda: callback(*args))
 
     def wrap_show(self) -> None:
         """

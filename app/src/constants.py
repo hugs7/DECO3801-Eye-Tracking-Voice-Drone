@@ -29,5 +29,8 @@ DEFAULT_GUI_CONFIG = {
         "voice_command": 5,
         "webcam": 30,
         "drone_video": 30,
+    },
+    "callback_delays": {
+        "voice_command": 5000,
     }
 }
