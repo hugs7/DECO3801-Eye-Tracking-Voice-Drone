@@ -96,19 +96,38 @@ class MainApp(QMainWindow, CommonGUI):
         Initialises the battery GUI components
         """
         logger.debug("Initialising battery GUI components")
-        self.battery_layout = QHBoxLayout()
+        self.battery_widget = QWidget(self)
+        self.battery_layout = QHBoxLayout(self.battery_widget)
 
         self.battery_progress = QProgressBar(self)
         self.battery_progress.setRange(0, 100)
         self.battery_progress.setValue(0)
         self.battery_progress.setTextVisible(False)
+        self.battery_progress.setFixedSize(
+            c.BATTERY_WIDGET_WIDTH + 2 * c.BATTERY_PROGRESS_BORDER_WIDTH, c.BATTERY_WIDGET_HEIGHT + 2 * c.BATTERY_PROGRESS_BORDER_WIDTH)
+        self.battery_progress.setStyleSheet(f"""
+        QProgressBar {{
+            border: {c.BATTERY_PROGRESS_BORDER_WIDTH}px solid # 8f8f8f;
+            border-radius: 5px;
+            min-height: {c.BATTERY_WIDGET_HEIGHT}px;
+            color: {self.text_color};
+        }}
+        QProgressBar::chunk {{
+            background-color: #76c7c0;
+            border-radius: 5px;
+        }}
+        """)
 
-        self.battery_label = QLabel("Battery: ???%", self)
+        self.battery_label = QLabel("0 %", self)
         self.battery_label.setAlignment(Qt.AlignmentFlag.AlignRight)
         self.battery_label.setStyleSheet("color: green; font-size: 14px;")
+        self.battery_label.setGeometry(
+            c.BATTERY_WIDGET_WIDTH, 0, c.BATTERY_TEXT_WIDTH, c.BATTERY_WIDGET_HEIGHT)
 
         self.battery_layout.addWidget(self.battery_progress)
         self.battery_layout.addWidget(self.battery_label)
+
+        self.battery_widget.setLayout(self.battery_layout)
 
     def _init_flight_stats_gui(self) -> None:
         """
@@ -220,10 +239,13 @@ class MainApp(QMainWindow, CommonGUI):
         """
         Position the battery label at the top right of the window
         """
-        self.battery_layout.parentWidget().move(
-            self.width() - c.BATTERY_WIDGET_WIDTH - c.FLIGHT_PARAMS_X_PADDING, c.FLIGHT_PARAMS_X_PADDING)
+        battery_widget_width = (
+            c.BATTERY_WIDGET_WIDTH + c.BATTERY_TEXT_WIDTH + c.WIDGET_PADDING)
+        self.battery_widget.move(
+            self.width() - battery_widget_width, c.WIDGET_PADDING)
+
         self.statistics_label.move(
-            self.width() - c.FLIGHT_STATS_X_PADDING, c.FLIGHT_STATS_Y_PADDING)
+            self.width() - c.FLIGHT_STATS_X_MARGIN, c.FLIGHT_STATS_Y_MARGIN)
 
     def resizeEvent(self, event):
         """
@@ -484,7 +506,7 @@ class MainApp(QMainWindow, CommonGUI):
             logger.debug("Battery level not found")
             return
 
-        battery_text = f"Battery: {battery_level}%"
+        battery_text = f"{battery_level} %"
         logger.info(battery_text)
         self.battery_label.setText(battery_text)
         self.battery_progress.setValue(battery_level)
