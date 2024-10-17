@@ -169,7 +169,7 @@ def main():
         for process in processes:
             process.join(cc.PROCESS_TIMEOUT)
             if process.is_alive():
-                while process.is_alive():
+                if process.is_alive():
                     logger.info("Terminating process %s", process.name)
                     process.terminate()
                     process.kill()
