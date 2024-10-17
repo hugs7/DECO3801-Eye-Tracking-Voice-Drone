@@ -31,10 +31,10 @@ def init_ptgaze_config() -> DictConfig:
     package_root = pathlib.Path(__file__).parent.parent.resolve()
     path = package_root / "configs/mpiigaze.yaml"
 
-    logger.info(f"Loading config from {path}")
+    logger.info("Loading config from %s", path)
     config = OmegaConf.load(path)
     config.PACKAGE_ROOT = package_root.as_posix()
-    logger.info(f"Pacakge root: {config.PACKAGE_ROOT}")
+    logger.info("Pacakge root: %s", config.PACKAGE_ROOT)
 
     return config
 

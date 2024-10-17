@@ -102,7 +102,8 @@ def run_entry(interactive_console: AgentInteractiveConsole, entry_code: str) -> 
                         interactive_console.push("")
                 except AgentIsDone:
                     agent_is_done = True
-        executed_lines = add_terminal_line_decorators("\n".join(executed_lines))
+        executed_lines = add_terminal_line_decorators(
+            "\n".join(executed_lines))
         return (
             agent_is_done,
             redirected_stdout_stderr.getvalue().strip(),
@@ -181,23 +182,24 @@ def run_until_halt(
             ) = run_entry(interactive_console, entry_code)
             executed_entries.append(executed_lines)
             # As soon as there's some output, the LLM might want to react to it -> put it in context and ask again.
-            logger.info(f"Captured output: {str_helper.trim(captured_output)}")
+            logger.info("Captured output: %s",
+                        str_helper.trim(captured_output))
             if agent_is_done or captured_output != "":
                 break
 
         executed_code = "\n".join(executed_entries)
         context.append({"role": "assistant", "content": executed_code})
-        logger.info(f"Executed code: {str_helper.trim(executed_code)}")
+        logger.info("Executed code: %s", str_helper.trim(executed_code))
         if captured_output != "":
             context.append({"role": "user", "content": captured_output})
-            logger.info(f"Captured output: {str_helper.trim(captured_output)}")
+            logger.info("Captured output: {str_helper.trim(captured_output)}")
             if correct_format(captured_output):
                 break
 
         loop_count += 1
 
     if loop_count >= MAX_LOOP:
-        logger.warning(f"Max loop count {MAX_LOOP} reached")
+        logger.warning("Max loop count %s reached", MAX_LOOP)
 
     return agent_is_done, message, captured_output
 
@@ -251,5 +253,6 @@ def react(
 
     logger.info(user_command)
     context.append({"role": "user", "content": user_command})
-    agent_is_done, message, output = run_until_halt(interactive_console, ask_fn, stored_context)
+    agent_is_done, message, output = run_until_halt(
+        interactive_console, ask_fn, stored_context)
     return agent_is_done, message, output

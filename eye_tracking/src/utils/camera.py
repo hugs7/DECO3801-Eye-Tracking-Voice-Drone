@@ -15,7 +15,7 @@ def generate_dummy_camera_params(config: DictConfig) -> None:
         image = cv2.imread(path.as_posix())
         h, w = image.shape[:2]
     elif config.demo.video_path:
-        logger.debug(f"Open video {config.demo.video_path}")
+        logger.debug("Open video %s", config.demo.video_path)
         path = pathlib.Path(config.demo.video_path).expanduser().as_posix()
         cap = cv2.VideoCapture(path)
         if not cap.isOpened():
@@ -24,12 +24,13 @@ def generate_dummy_camera_params(config: DictConfig) -> None:
         w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         cap.release()
     else:
-        raise ValueError("Either demo.image_path or demo.video_path must be set.")
+        raise ValueError(
+            "Either demo.image_path or demo.video_path must be set.")
 
-    logger.debug(f"Frame size is ({w}, {h})")
-    logger.debug(f"Close video {config.demo.video_path}")
+    logger.debug("Frame size is (%d, %d", w, h)
+    logger.debug("Close video %s", config.demo.video_path)
     out_file = tempfile.NamedTemporaryFile(suffix=".yaml", delete=False)
-    logger.debug(f"Create a dummy camera param file {out_file.name}")
+    logger.debug("Create a dummy camera param file %s", out_file.name)
     dic = {
         "image_width": w,
         "image_height": h,
@@ -39,4 +40,5 @@ def generate_dummy_camera_params(config: DictConfig) -> None:
     with open(out_file.name, "w") as f:
         yaml.safe_dump(dic, f)
     config.gaze_estimator.camera_params = out_file.name
-    logger.debug(f"Update config.gaze_estimator.camera_params to {out_file.name}")
+    logger.debug(
+        "Update config.gaze_estimator.camera_params to %s", out_file.name)

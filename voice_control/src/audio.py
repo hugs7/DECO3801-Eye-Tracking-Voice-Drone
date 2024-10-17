@@ -85,10 +85,10 @@ class AudioRecogniser:
         wake_word_detected = self.wake_command.lower() in command.lower()
 
         if wake_word_detected:
-            logger.info(f"Wake word detected: '{self.wake_command}'")
+            logger.info("Wake word detected: '%s'", self.wake_command)
             self.play_sound_effect("wake")
         else:
-            logger.info(f"Not the wake word: '{command}'")
+            logger.info("Not the wake word: '%s'", command)
 
         return wake_word_detected
 
@@ -106,7 +106,8 @@ class AudioRecogniser:
         logger.info("Listening for user input...")
 
         try:
-            audio = self.listen_for_audio(source, True, self.config.listen_timeout)
+            audio = self.listen_for_audio(
+                source, True, self.config.listen_timeout)
         except sr.WaitTimeoutError:
             logger.warning("Listening timed out.")
             self.play_sound_effect("reject")
@@ -136,8 +137,10 @@ class AudioRecogniser:
         def listen_callback(source: sr.Microphone) -> sr.AudioData:
             logger.info("    >>> Listening for audio...")
             # Adjust for ambient noise to improve speech detection
-            self.recogniser.adjust_for_ambient_noise(source, self.config.ambient_noise_duration)
-            audio = self.recogniser.listen(source, timeout, phrase_time_limit=self.config.phrase_time_limit)
+            self.recogniser.adjust_for_ambient_noise(
+                source, self.config.ambient_noise_duration)
+            audio = self.recogniser.listen(
+                source, timeout, phrase_time_limit=self.config.phrase_time_limit)
 
             if audio is not None:
                 logger.info("    <<< Finished listening.")
@@ -183,7 +186,8 @@ class AudioRecogniser:
 
                 audio = self.listen_for_audio(source, False, None)
                 if self._detect_wake_word(audio):
-                    logger.info("Wake word detected, listening for commands...")
+                    logger.info(
+                        "Wake word detected, listening for commands...")
                     return self._listen_until_silence(source)
         except OSError as e:
             self.__handle_microphone_error(e)
@@ -204,7 +208,7 @@ class AudioRecogniser:
 
         try:
             text = self.recogniser.recognize_google(audio)
-            logger.info(f"You said: '{text}'")
+            logger.info("You said: '%s'", text)
         except sr.UnknownValueError:
             logger.debug("No speech detected.")
         except sr.RequestError as e:
@@ -233,11 +237,11 @@ class AudioRecogniser:
         recording_name = f"recording_{timestamp}.wav"
         recording_save_path = recording_folder / recording_name
 
-        logger.info(f"Saving audio to {recording_save_path}")
+        logger.info("Saving audio to %s", recording_save_path)
         with open(recording_save_path, c.WRITE_BINARY_MODE) as f:
             f.write(audio.get_wav_data())
 
-        logger.info(f"Audio saved to {recording_save_path}")
+        logger.info("Audio saved to %s", recording_save_path)
 
     def load_audio(self) -> sr.AudioData:
         """
@@ -252,13 +256,15 @@ class AudioRecogniser:
         logger.info("Loading audio...")
 
         recordings_folder = file_handler.get_recordings_folder()
-        audio_files = file_handler.list_files_in_folder(recordings_folder, c.AUDIO_FILE_EXTENSIONS)
+        audio_files = file_handler.list_files_in_folder(
+            recordings_folder, c.AUDIO_FILE_EXTENSIONS)
 
         if not audio_files:
             logger.info("No audio files found. Listening for new audio...")
             return self.capture_voice_input()
 
-        most_recent_audio_file = sorted(audio_files, key=lambda x: x.stat().st_ctime, reverse=True)[0]
+        most_recent_audio_file = sorted(
+            audio_files, key=lambda x: x.stat().st_ctime, reverse=True)[0]
 
         audio = self.load_audio_file(str(most_recent_audio_file))
         return audio
@@ -273,11 +279,11 @@ class AudioRecogniser:
         Returns:
             AudioData: An AudioData object containing the recorded audio input.
         """
-        logger.info(f"Loading audio from {file_path}")
+        logger.info("Loading audio from %s", file_path)
         with sr.AudioFile(file_path) as source:
             audio = self.recogniser.record(source)
 
-        logger.debug(f"Audio loaded.")
+        logger.debug("Audio loaded.")
         return audio
 
     def load_audio_segment(self, file_path: pathlib.Path) -> AudioSegment:
@@ -299,11 +305,13 @@ class AudioRecogniser:
         logger.debug("Loading sound file: %s", file_path)
         try:
             extension = get_file_extension(file_path, True)
-            logger.debug(f"Audio format: {extension}")
+            logger.debug("Audio format: %s", extension)
             segment = AudioSegment.from_file(str_file_path, format=extension)
         except Exception as e:
-            logger.error("Error loading sound file: %s. Check you have ffmpeg installed and on $PATH.", str_file_path)
-            logger.error("In CMD: 'where ffmpeg' should return the path to ffmpeg.exe")
+            logger.error(
+                "Error loading sound file: %s. Check you have ffmpeg installed and on $PATH.", str_file_path)
+            logger.error(
+                "In CMD: 'where ffmpeg' should return the path to ffmpeg.exe")
             logger.error(e)
             segment = None
 
@@ -325,10 +333,10 @@ class AudioRecogniser:
 
         sound = self.sound_effects.get(sound_name)
         if sound:
-            logger.info(f"Playing sound effect: {sound_name}")
+            logger.info("Playing sound effect: %s", sound_name)
             play(sound)
         else:
-            logger.error(f"Sound effect not found: {sound_name}")
+            logger.error("Sound effect not found: %s",  sound_name)
 
     def __handle_microphone_error(self, e: Exception):
         """
@@ -360,4 +368,4 @@ class AudioRecogniser:
             None
         """
         volume_norm = np.linalg.norm(indata) * c.MAX_VOLUME_THRESHOLD
-        logger.info(f"Microphone Volume: {volume_norm:.2f}")
+        logger.info("Microphone Volume: %d", volume_norm)

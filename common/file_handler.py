@@ -66,9 +66,9 @@ def file_exists(file_path: Path) -> bool:
 
     exists = file_path.exists()
     if exists:
-        logger.debug(f"File exists: {file_path}")
+        logger.debug("File exists: %s", file_path)
     else:
-        logger.debug(f"File does not exist: {file_path}")
+        logger.debug("File does not exist: %s", file_path)
 
     return exists
 
@@ -83,9 +83,9 @@ def create_folder_if_not_exists(folder_path: Path):
 
     if not folder_path.exists():
         folder_path.mkdir(parents=True)
-        logger.info(f"Folder created: {folder_path}")
+        logger.info("Folder created: %s", folder_path)
     else:
-        logger.debug(f"Folder already exists: {folder_path}")
+        logger.debug("Folder already exists: %s", folder_path)
 
 
 def list_files_in_folder(folder_path: Path, file_types: Optional[list[str]] = None) -> list[Path]:
@@ -103,9 +103,10 @@ def list_files_in_folder(folder_path: Path, file_types: Optional[list[str]] = No
     if file_types is None:
         file_types = [".*"]
 
-    files = [f for f in folder_path.iterdir() if f.is_file() and any(f.name.endswith(file_type) for file_type in file_types)]
+    files = [f for f in folder_path.iterdir() if f.is_file() and any(
+        f.name.endswith(file_type) for file_type in file_types)]
 
-    logger.debug(f"Files in folder: {folder_path} - {files}")
+    logger.debug("Files in folder: %s - %s", folder_path, files)
     return files
 
 

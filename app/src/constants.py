@@ -61,6 +61,7 @@ DEFAULT_GUI_CONFIG = {
         "webcam": 30,
         "drone_video": 30,
         "battery": 0.2,
+        "flight_stats": 0.4
     },
     "callback_delays": {
         "voice_command": 5000,

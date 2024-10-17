@@ -27,14 +27,15 @@ def init_config() -> DictConfig:
 
     package_root = file_handler.get_package_folder()
     config_path = package_root / "configs/config.yaml"
-    logger.debug(f"Config path: {file_handler.relative_path(config_path)}")
+    logger.debug("Config path: %s", file_handler.relative_path(config_path))
     if not file_handler.file_exists(config_path):
         raise FileNotFoundError("Configuration file not found.")
 
-    logger.info(f"Loading config from {file_handler.relative_path(config_path)}")
+    logger.info(
+        "Loading config from %s", file_handler.relative_path(config_path))
     config = OmegaConf.load(config_path)
     config.PACKAGE_ROOT = package_root.as_posix()
-    logger.debug(f"Pacakge root: {config.PACKAGE_ROOT}")
+    logger.debug("Pacakge root: %s", config.PACKAGE_ROOT)
 
     return config
 
@@ -58,7 +59,8 @@ def init_openai():
 
     api_key = os.getenv(c.OPENAI_API_KEY_CONFIG_KEY)
     if api_key is None:
-        raise Exception(f"Please assign a valid OpenAI API key to the environment variable {c.OPENAI_API_KEY_CONFIG_KEY}.")
+        raise Exception(
+            "Please assign a valid OpenAI API key to the environment variable %s.", c.OPENAI_API_KEY_CONFIG_KEY)
 
     openai.api_key = api_key
 

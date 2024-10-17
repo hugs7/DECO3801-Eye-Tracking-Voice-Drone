@@ -114,7 +114,7 @@ class VoiceController:
             return
 
         key_chr = chr(key_code).lower()
-        logger.info(f"Received key: %s (%d)", key_chr, key_code)
+        logger.info("Received key: %s (%d)", key_chr, key_code)
 
         key_action = conf_key_from_value(self.keybindings, key_code, key_chr)
         if key_action is None:
@@ -185,8 +185,8 @@ class VoiceController:
                                              is invalid.
         """
         result = self.llm.run_terminal_agent(user_command)
-        logger.info(f"Voice command: '%s'", user_command)
-        logger.trace(f"Voice command of type %s", type(user_command))
+        logger.info("Voice command: '%s'", user_command)
+        logger.trace("Voice command of type %s", type(user_command))
 
         if result is None:
             logger.debug("No voice command detected.")
@@ -199,8 +199,8 @@ class VoiceController:
         except Exception:
             logger.error("Failed to parse result into dictionary.")
 
-        logger.info(f"Parsed voice command: '%s'", parsed_commands)
-        logger.trace(f"Parsed voice command of type %s", type(parsed_commands))
+        logger.info("Parsed voice command: '%s'", parsed_commands)
+        logger.trace("Parsed voice command of type %s", type(parsed_commands))
 
         return parsed_commands
 

@@ -20,7 +20,7 @@ def get_package_folder() -> Path:
     """
     project_root = cfu.get_project_root()
     package_folder = project_root / "drone"
-    logger.trace(f"Package folder: {cfu.relative_path(package_folder)}")
+    logger.trace("Package folder: %s", cfu.relative_path(package_folder))
     return package_folder
 
 
@@ -35,7 +35,7 @@ def get_configs_folder() -> Path:
     drone_folder = get_package_folder()
     configs_folder = drone_folder / "configs"
     cfu.create_folder_if_not_exists(configs_folder)
-    logger.trace(f"Configs folder: {cfu.relative_path(configs_folder)}")
+    logger.trace("Configs folder: %s", cfu.relative_path(configs_folder))
     return configs_folder
 
 
@@ -49,5 +49,5 @@ def get_assets_folder() -> Path:
     drone_folder = get_package_folder()
     data_folder = drone_folder / "assets"
     cfu.create_folder_if_not_exists(data_folder)
-    logger.trace(f"Data folder: {cfu.relative_path(data_folder)}")
+    logger.trace("Data folder: %s", cfu.relative_path(data_folder))
     return data_folder

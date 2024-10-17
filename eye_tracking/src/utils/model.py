@@ -48,7 +48,7 @@ def download_mpiigaze_model() -> pathlib.Path:
         logger.debug("Downloading the pretrained model from '%s'", url)
         torch.hub.download_url_to_file(url, output_path.as_posix())
     else:
-        logger.debug(f"The pretrained model {output_path} already exists.")
+        logger.debug("The pretrained model %s already exists.", output_path)
     return output_path
 
 
