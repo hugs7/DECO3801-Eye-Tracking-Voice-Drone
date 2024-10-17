@@ -392,33 +392,33 @@ class Controller:
 
         try:
             match command:
-                case DroneActions.ROTATE_CW:
+                case DroneActions.ROTATE_CW.value:
                     self.model.rotate_clockwise(angle)
-                case DroneActions.ROTATE_CCW:
+                case DroneActions.ROTATE_CCW.value:
                     self.model.rotate_counter_clockwise(angle)
-                case DroneActions.UP:
+                case DroneActions.UP.value:
                     self.model.move_up(dist)
-                case DroneActions.DOWN:
+                case DroneActions.DOWN.value:
                     self.model.move_down(dist)
-                case DroneActions.LEFT:
+                case DroneActions.LEFT.value:
                     self.model.move_left(dist)
-                case DroneActions.RIGHT:
+                case DroneActions.RIGHT.value:
                     self.model.move_right(dist)
-                case DroneActions.FORWARD:
+                case DroneActions.FORWARD.value:
                     self.model.move_forward(dist)
-                case DroneActions.BACKWARD:
+                case DroneActions.BACKWARD.value:
                     self.model.move_backward(dist)
-                case DroneActions.TAKEOFF:
+                case DroneActions.TAKEOFF.value:
                     self.model.takeoff()
-                case DroneActions.LAND:
+                case DroneActions.LAND.value:
                     self.model.land()
-                case DroneActions.FLIP_FORWARD:
+                case DroneActions.FLIP_FORWARD.value:
                     self.model.flip_forward()
-                case DroneActions.EMERGENCY:
+                case DroneActions.EMERGENCY.value:
                     self.model.emergency()
-                case DroneActions.MOTOR_ON:
+                case DroneActions.MOTOR_ON.value:
                     self.model.motor_on()
-                case DroneActions.MOTOR_OFF:
+                case DroneActions.MOTOR_OFF.value:
                     self.model.motor_off()
                 case _:
                     logger.warning("Command %s not recognised", command)
