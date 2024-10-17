@@ -85,58 +85,92 @@ class MainApp(QMainWindow, CommonGUI):
         self.drone_video_label.lower()
         self.centralwidget.raise_()
 
-        self._init_battery_gui()
-        self._init_flight_stats_gui()
-        self._position_drone_statistics_labels()
+        self._init_battery_and_stats_gui()
+        self._position_battery_and_stats()
 
         logger.info("GUI components initialised")
 
-    def _init_battery_gui(self) -> None:
+    def _init_battery_and_stats_gui(self) -> None:
         """
-        Initialises the battery GUI components
+        Initializes the battery and flight statistics GUI components.
         """
-        logger.debug("Initialising battery GUI components")
-        self.battery_widget = QWidget(self)
+        logger.debug("Initialising battery and flight stats GUI components")
+
+        # Create a container widget for both battery and statistics labels
+        self.battery_and_stats_widget = QWidget(self)
+        self.battery_and_stats_layout = QVBoxLayout(
+            self.battery_and_stats_widget)
+        self.battery_and_stats_widget.setObjectName(c.BATTERY_STATS_WIDGET)
+        self.battery_and_stats_widget.setStyleSheet(f"""
+            QWidget#{c.BATTERY_STATS_WIDGET} {{
+                border: 1px solid green;
+                border-radius: 5px;
+                padding: 5px;
+            }}
+        """)
+        self.battery_and_stats_widget.setGeometry(
+            self.width() - c.BATTERY_WIDGET_WIDTH -
+            c.WIDGET_PADDING, c.WIDGET_PADDING, c.BATTERY_WIDGET_WIDTH, c.BATTERY_WIDGET_HEIGHT +
+            c.BATTERY_TEXT_WIDTH
+        )
+
+        self.battery_widget = QWidget(self.battery_and_stats_widget)
         self.battery_layout = QHBoxLayout(self.battery_widget)
 
-        self.battery_progress = QProgressBar(self)
+        self.battery_progress = QProgressBar(self.battery_widget)
         self.battery_progress.setRange(0, 100)
         self.battery_progress.setValue(0)
         self.battery_progress.setTextVisible(False)
+        self.battery_progress.setObjectName(c.BATTERY_PROGRESS)
         self.battery_progress.setFixedSize(
-            c.BATTERY_WIDGET_WIDTH + 2 * c.BATTERY_PROGRESS_BORDER_WIDTH, c.BATTERY_WIDGET_HEIGHT + 2 * c.BATTERY_PROGRESS_BORDER_WIDTH)
+            c.BATTERY_WIDGET_WIDTH, c.BATTERY_WIDGET_HEIGHT)
         self.battery_progress.setStyleSheet(f"""
-        QProgressBar {{
-            border: {c.BATTERY_PROGRESS_BORDER_WIDTH}px solid # 8f8f8f;
-            border-radius: 5px;
-            min-height: {c.BATTERY_WIDGET_HEIGHT}px;
-            color: {self.text_color};
-        }}
-        QProgressBar::chunk {{
-            background-color: #76c7c0;
-            border-radius: 5px;
-        }}
-        """)
+           QProgressBar#{c.BATTERY_PROGRESS} {{
+               border: {c.BATTERY_PROGRESS_BORDER_WIDTH}px solid # 8f8f8f;
+               border-radius: 5px;
+               border-color: #8f8f8f;
+               min-height: {c.BATTERY_WIDGET_HEIGHT}px;
+               height: {c.BATTERY_WIDGET_HEIGHT}px;
+               width: {c.BATTERY_WIDGET_WIDTH}px;
+               color: {self.text_color};
+           }}
+           QProgressBar#{c.BATTERY_PROGRESS}::chunk {{
+               background-color: #76c7c0;
+               border-radius: 5px;
+           }}
+           """)
 
-        self.battery_label = QLabel("0 %", self)
+        # Create the battery percentage label
+        self.battery_label = QLabel("0 %", self.battery_widget)
         self.battery_label.setAlignment(Qt.AlignmentFlag.AlignRight)
         self.battery_label.setStyleSheet("color: green; font-size: 14px;")
-        self.battery_label.setGeometry(
-            c.BATTERY_WIDGET_WIDTH, 0, c.BATTERY_TEXT_WIDTH, c.BATTERY_WIDGET_HEIGHT)
 
+        # Add progress bar and percentage label to the battery layout (side by side)
         self.battery_layout.addWidget(self.battery_progress)
         self.battery_layout.addWidget(self.battery_label)
 
-        self.battery_widget.setLayout(self.battery_layout)
+        # Add the battery widget to the vertical layout
+        self.battery_and_stats_layout.addWidget(self.battery_widget)
 
-    def _init_flight_stats_gui(self) -> None:
-        """
-        Initialises the flight statistics GUI components
-        """
-        logger.debug("Initialising flight statistics GUI components")
-        self.statistics_label = QLabel("Flight statistics", self)
+        # Create the statistics label (below battery widget)
+        self.statistics_label = QLabel(
+            "Flight Statistics: ", self.battery_and_stats_widget)
         self.statistics_label.setAlignment(Qt.AlignmentFlag.AlignRight)
-        self.statistics_label.setStyleSheet("color: white; font-size: 14px;")
+        self.statistics_label.setStyleSheet(
+            f"color: {self.text_color}; font-size: 14px;")
+
+        self.battery_and_stats_layout.addWidget(self.statistics_label)
+
+        self.battery_and_stats_layout.setAlignment(Qt.AlignmentFlag.AlignRight)
+
+        self.battery_and_stats_widget.setLayout(self.battery_and_stats_layout)
+
+    def _position_battery_and_stats(self) -> None:
+        """
+        Positions the battery and flight statistics widget in the top-right corner of the window.
+        """
+        self.battery_and_stats_widget.move(
+            self.width() - c.BATTERY_WIDGET_WIDTH - c.WIDGET_PADDING, c.WIDGET_PADDING)
 
     def _init_qpixmaps(self) -> None:
         """
@@ -235,17 +269,17 @@ class MainApp(QMainWindow, CommonGUI):
         self.webcam_video_label.setGeometry(
             x_pos, y_pos, target_width, target_height)
 
-    def _position_drone_statistics_labels(self):
-        """
-        Position the battery label at the top right of the window
-        """
-        battery_widget_width = (
-            c.BATTERY_WIDGET_WIDTH + c.BATTERY_TEXT_WIDTH + c.WIDGET_PADDING)
-        self.battery_widget.move(
-            self.width() - battery_widget_width, c.WIDGET_PADDING)
+    # def _position_drone_statistics_labels(self):
+    #     """
+    #     Position the battery label at the top right of the window
+    #     """
+    #     battery_widget_width = (
+    #         c.BATTERY_WIDGET_WIDTH + c.BATTERY_TEXT_WIDTH + c.WIDGET_PADDING)
+    #     self.battery_widget.move(
+    #         self.width() - battery_widget_width, c.WIDGET_PADDING)
 
-        self.statistics_label.move(
-            self.width() - c.FLIGHT_STATS_X_MARGIN, c.FLIGHT_STATS_Y_MARGIN)
+    #     self.statistics_label.move(
+    #         self.width() - c.FLIGHT_STATS_X_MARGIN, c.FLIGHT_STATS_Y_MARGIN)
 
     def resizeEvent(self, event):
         """
@@ -254,7 +288,7 @@ class MainApp(QMainWindow, CommonGUI):
 
         self.__resize_drone_frame()
         self._resize_and_position_webcam_label()
-        self._position_drone_statistics_labels()
+        self._position_battery_and_stats()
 
         return super().resizeEvent(event)
 
