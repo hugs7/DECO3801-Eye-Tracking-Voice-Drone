@@ -39,9 +39,9 @@ The project repository is split into five main sections summarised below:
 
 Modules `drone`, `eye_tracking`, and `voice_control` can indeed run independently. See individual documentation linked below or how to run in this way.
 
-### Gaze (Eye) Tracking
+### Eye (Gaze) Tracking
 
-See also [the gaze tracking documentation](./gaze_tracking/README.md)
+See also [the eye tracking documentation](./eye_tracking/README.md)
 
 ### Voice Control
 
@@ -54,6 +54,18 @@ See also [the drone controller documentation](./drone/README.md)
 ---
 
 ## Getting Started
+
+Before running the project, ensure you have all the necessary dependencies installed via
+
+```bash
+pip install -r requirements.txt
+```
+
+Each module has its own `requirements.txt` file, however, a global copy is kept in the root for ease of installation.
+
+An additional dependency, FFMpeg, is required for audio playback in the voice control module. Note: this is **NOT** a Python package, and has a custom install procedure. Please refer to the [voice control documentation](./voice_control/README.md) for installation instructions.
+
+### Running the application
 
 To run the project, use the following Python script
 
