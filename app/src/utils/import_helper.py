@@ -31,12 +31,12 @@ def dynamic_import(module_path: str, alias: str) -> object:
     Returns:
         (object) Imported module
     """
-    logger.info(f"Importing module: {module_path}")
+    logger.info("Importing module: %s", module_path)
 
     try:
         module = importlib.import_module(module_path)
     except KeyboardInterrupt:
-        logger.critical(f"Interrupted while importing module: {module_path}")
+        logger.critical("Interrupted while importing module: %s", module_path)
         sys.exit(1)
 
     return getattr(module, alias)
