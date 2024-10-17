@@ -1,6 +1,6 @@
 """
 Class to run the gaze estimation model
-Modified by: Hugo Burton
+Developer: Hugo Burton
 Last Updated: 17/09/2024
 """
 
@@ -43,7 +43,8 @@ class GazeEstimator:
         self._face_model3d = FaceModelMediaPipe()
 
         self.camera = Camera(config.gaze_estimator.camera_params)
-        self._normalized_camera = Camera(config.gaze_estimator.normalized_camera_params)
+        self._normalized_camera = Camera(
+            config.gaze_estimator.normalized_camera_params)
 
         self._landmark_estimator = LandmarkEstimator(config)
         self._head_pose_normalizer = HeadPoseNormalizer(
@@ -60,7 +61,8 @@ class GazeEstimator:
             Gaze estimation model
         """
         model = create_model(self._config)
-        checkpoint = torch.load(self._config.gaze_estimator.checkpoint, map_location="cpu")
+        checkpoint = torch.load(
+            self._config.gaze_estimator.checkpoint, map_location="cpu")
         model.load_state_dict(checkpoint["model"])
         model.to(torch.device(self._config.device))
         model.eval()

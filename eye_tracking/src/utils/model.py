@@ -1,6 +1,6 @@
 """
 Utils for gaze estimation
-Modified by: Hugo Burton
+Developer: Hugo Burton
 Last Updated: 21/08/2024
 """
 
@@ -75,9 +75,12 @@ def expanduser_all(config: DictConfig) -> None:
     Args:
         config (DictConfig): The config to expand the user in.
     """
-    config.gaze_estimator.checkpoint = _expanduser(config.gaze_estimator.checkpoint)
-    config.gaze_estimator.camera_params = _expanduser(config.gaze_estimator.camera_params)
-    config.gaze_estimator.normalized_camera_params = _expanduser(config.gaze_estimator.normalized_camera_params)
+    config.gaze_estimator.checkpoint = _expanduser(
+        config.gaze_estimator.checkpoint)
+    config.gaze_estimator.camera_params = _expanduser(
+        config.gaze_estimator.camera_params)
+    config.gaze_estimator.normalized_camera_params = _expanduser(
+        config.gaze_estimator.normalized_camera_params)
     if hasattr(config.demo, "image_path"):
         config.demo.image_path = _expanduser(config.demo.image_path)
     if hasattr(config.demo, "video_path"):

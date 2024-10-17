@@ -1,7 +1,7 @@
 """
 Main class for the gaze detector.
-Modified by: Hugo Burton
-Last Updated: 21/08/2024
+Developer: Hugo Burton
+Last Updated: 10/09/2024
 """
 
 import datetime
