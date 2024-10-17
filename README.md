@@ -58,7 +58,7 @@ See also [the drone controller documentation](./drone/README.md)
 To run the project, use the following Python script
 
 ```bash
-python ./app/main.py
+python ./app/src/main.py
 ```
 
 For running each module independently, see the relevant documentation linked above.
