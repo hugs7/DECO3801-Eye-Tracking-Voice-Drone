@@ -125,12 +125,14 @@ class MainApp(QMainWindow, CommonGUI):
         """
         Initialise the timers for the gui
         """
+        self.timers_fps = self.config.timers
+        self.callback_delays = self.config.callback_delays
         self.timers = dict()
 
         timers_conf = {
-            "webcam": {cc.THREAD_CALLBACK: self.get_webcam_feed, cc.THREAD_FPS: self.config.timers.webcam},
-            "drone_feed": {cc.THREAD_CALLBACK: self.get_drone_feed, cc.THREAD_FPS: self.config.timers.drone_video},
-            "voice_command": {cc.THREAD_CALLBACK: self.get_next_voice_command, cc.THREAD_FPS: self.config.timers.voice_command},
+            "webcam": {cc.THREAD_CALLBACK: self.get_webcam_feed, cc.THREAD_FPS: self.timers_fps.webcam},
+            "drone_feed": {cc.THREAD_CALLBACK: self.get_drone_feed, cc.THREAD_FPS: self.timers_fps.drone_video},
+            "voice_command": {cc.THREAD_CALLBACK: self.get_next_voice_command, cc.THREAD_FPS: self.timers_fps.voice_command},
         }
 
         self._configure_timers(timers_conf)
@@ -193,15 +195,6 @@ class MainApp(QMainWindow, CommonGUI):
     def __resize_drone_frame(self) -> None:
         """Resizes the drone label to the frame size"""
         self.drone_video_label.resize(self.width(), self.height())
-
-    def updateRecentCommand(self, newCommand):
-        """
-        Updates the recent command at the top, to some given new command
-
-        Args:
-            newCommand (string): the new command to be updated to
-        """
-        self.recentCommand.setText(newCommand)
 
     def keyPressEvent(self, event: QKeyEvent) -> None:
         """
@@ -381,6 +374,7 @@ class MainApp(QMainWindow, CommonGUI):
                         command_text, parsed_command)
 
             self._send_voice_command_to_drone(parsed_command)
+            self._display_voice_command(command_text)
 
     def _send_voice_command_to_drone(self, parsed_command: Optional[List[Tuple[str, int]]]) -> None:
         """
@@ -403,6 +397,36 @@ class MainApp(QMainWindow, CommonGUI):
 
             logger.debug("Adding parsed command to drone command queue")
             drone_cmd_queue.put(parsed_command)
+
+    def _display_voice_command(self, command_text: str) -> None:
+        """
+        Displays the voice command on the GUI
+
+        Args:
+            command_text (str): The voice command text
+        """
+
+        # Check for existing timers
+
+        self.recentCommand.setText(command_text)
+        delay_ms = self.callback_delays.voice_command
+        if delay_ms is None:
+            logger.error("Voice command delay not found")
+            return
+
+        if delay_ms <= 0:
+            logger.warning("Voice command delay is 0 or negative")
+            return
+
+        singleshot = self._delayed_callback("clear_voice_command",
+                                            self._clear_voice_command, delay_ms)
+
+    def _clear_voice_command(self) -> None:
+        """
+        Clears the voice command text
+        """
+        self.recentCommand.setText("")
+        logger.debug("Cleared voice command")
 
     def _switch_feeds(self) -> None:
         """
