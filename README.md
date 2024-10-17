@@ -73,9 +73,29 @@ To run the project, use the following Python script
 python ./app/src/main.py
 ```
 
-For running each module independently, see the relevant documentation linked above.
+For running each module independently, see the relevant documentation linked above, [here](README.md#project-hierarchy).
 
-To add some information here about how the application opeprates, it's controls, etc.
+# Using the App
+
+On application startup, the necessary dependencies and custom modules will be initialised. During this time you will see a loading GUI screen. As per the drone configuration file, if set to Tello mode, the application will attempt to connect to the Tello drone's WiFi network automatically.
+
+If successful, you will see the live video feed from the drone, as well as your webcam at the bottom
+
+## Eye (Gaze) Tracking
+
+With the default keyboard bindings, ';' (semicolon) can be used to toggle the facial landmarks. If you are able to see your facial landmarks, look straight at the camera and press 'c' to calibrate the eye tracking, then 'g' to enable the gaze overlay.
+
+Additionally, 'b' and 'h' can be used to toggle the facial bounding box and head pose indicator respectively, though these are not required for normal operation.
+
+## Voice Control
+
+With the drone connected, you can say the wake command as defined in the drone's configuration file. By default this is "Ok Drone", and when recognised, the app will play a wake tone indicating it is listening to your next command. You can then say a command for the drone to interpret such as _"Takeoff then rotate right 90 degrees"_. The command will be accepted as indicated by a higher pitched tone, at which time your command will be interpreted using artificial intelligence, then sent to the drone to perform the actions requested. This process runs in a loop meaning you can say the voice activation command, as the app is always listening while the drone is connected.
+
+To toggle the voice control feature, the period (.) key can be used, while retaining other drone control functionality.
+
+# Drone Control
+
+In addition to eye tracking and voice commands, the drone can also be controlled via keyboard inputs, with keybindings defined in the drone's configuration file at [./drone/configs/drone.yaml](./drone/configs/drone.yaml) under **controller > keyboard_bindings**.
 
 ## Configuration
 
