@@ -70,12 +70,14 @@ class MainApp(QMainWindow, CommonGUI):
 
         self.recentCommand = QLabel("Recent command", self.centralwidget)
         self.recentCommand.setAlignment(Qt.AlignmentFlag.AlignHCenter)
-        self.recentCommand.setStyleSheet("color: red; font-size: 14px;")
+        self.recentCommand.setStyleSheet(
+            f"color: red; font-size: {self.font_size};")
 
         self.webcam_video_label = QLabel("webcam", self.centralwidget)
         self.webcam_video_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.webcam_video_label.setScaledContents(True)
-        self.webcam_video_label.setStyleSheet("color: red; font-size: 14px;")
+        self.webcam_video_label.setStyleSheet(
+            f"color: red; font-size: {self.font_size};")
         self._resize_and_position_webcam_label()
 
         self.layout = QVBoxLayout(self.centralwidget)
@@ -122,22 +124,13 @@ class MainApp(QMainWindow, CommonGUI):
         self.battery_progress.setFixedSize(
             c.BATTERY_PROGRESS_WIDTH, c.BATTERY_PROGRESS_HEIGHT)
         self.battery_progress.setObjectName(c.BATTERY_PROGRESS)
-        self.battery_progress.setStyleSheet(f"""
-            QProgressBar#{c.BATTERY_PROGRESS} {{
-                border: 1px solid #8f8f8f;
-                border-radius: 5px;
-                background-color: #e0e0e0;
-            }}
-            QProgressBar#{c.BATTERY_PROGRESS}::chunk {{
-                background-color: #76c7c0;
-                border-radius: 5px;
-            }}
-        """)
+        self._set_battery_progress_style()
 
         self.battery_label = QLabel("0 %", self.battery_widget)
         self.battery_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.battery_label.setFixedWidth(c.BATTERY_TEXT_WIDTH)
-        self.battery_label.setStyleSheet("color: green; font-size: 14px;")
+        self.battery_label.setStyleSheet(
+            f"color: green; font-size: {self.font_size};")
 
         self.battery_layout.addWidget(self.battery_progress)
         self.battery_layout.addWidget(self.battery_label)
@@ -148,7 +141,7 @@ class MainApp(QMainWindow, CommonGUI):
             "Flight Statistics: ", self.battery_and_stats_widget)
         self.statistics_label.setAlignment(Qt.AlignmentFlag.AlignRight)
         self.statistics_label.setStyleSheet(
-            f"color: {self.text_color}; font-size: 14px;")
+            f"color: {self.text_color}; font-size: {self.font_size};")
 
         self.battery_and_stats_layout.addWidget(self.statistics_label)
         self.battery_and_stats_layout.setAlignment(Qt.AlignmentFlag.AlignRight)
@@ -261,6 +254,39 @@ class MainApp(QMainWindow, CommonGUI):
             self.width() - width,
             c.WIDGET_PADDING, width, height
         )
+
+    def _set_battery_progress_style(self) -> None:
+        """
+        Sets the style of the battery progress bar based on the battery level.
+        """
+
+        logger.debug("Setting battery progress style")
+        lower_bounds = c.BATTERY_INDICATOR_COLOLURS.keys()
+        drone_battery_level = self.get_battery_level()
+        if drone_battery_level is None:
+            indicator_colour = c.BATTERY_GOOD_CHUNK_COLOUR
+        else:
+            # Loop descending through the lower bounds until we find the correct colour
+            for lower_bound in sorted(lower_bounds, reverse=True):
+                if drone_battery_level >= lower_bound:
+                    indicator_colour = c.BATTERY_INDICATOR_COLOLURS[lower_bound]
+                    break
+            else:
+                logger.error(
+                    "Failed to find colour for battery level %d", drone_battery_level)
+                indicator_colour = c.BATTERY_GOOD_CHUNK_COLOUR
+
+        self.battery_progress.setStyleSheet(f"""
+            QProgressBar#{c.BATTERY_PROGRESS} {{
+                border: {c.BATTERY_PROGRESS_BORDER_WIDTH}px solid {c.BATTERY_PROGRESS_BORDER_COLOUR};
+                border-radius: {c.BATTERY_PROGRESS_BORDER_RADIUS}px;
+                background-color: {self.surface_color};
+            }}
+            QProgressBar#{c.BATTERY_PROGRESS}::chunk {{
+                background-color:{indicator_colour};
+                border-radius: {c.BATTERY_PROGRESS_BORDER_RADIUS}px;
+            }}
+        """)
 
     def resizeEvent(self, event):
         """
@@ -505,9 +531,12 @@ class MainApp(QMainWindow, CommonGUI):
             self._send_voice_command_to_drone(parsed_command)
             self._display_voice_command(command_text)
 
-    def update_battery(self) -> None:
+    def get_battery_level(self) -> Optional[int]:
         """
-        Updates the battery level of the drone
+        Gets the battery level of the drone
+
+        Returns:
+            battery_level (Optional[int]): The battery level of the drone or None if not found
         """
         logger.debug("Updating battery level")
         drone_data: Dict = self.thread_data[cc.DRONE]
@@ -519,12 +548,22 @@ class MainApp(QMainWindow, CommonGUI):
             FlightStatistics.BATTERY.value, None)
         if battery_level is None:
             logger.debug("Battery level not found")
+
+        return battery_level
+
+    def update_battery(self) -> None:
+        """
+        Updates the battery level of the drone
+        """
+        battery_level = self.get_battery_level()
+        if battery_level is None:
             return
 
         battery_text = f"{battery_level} %"
         logger.info(battery_text)
         self.battery_label.setText(battery_text)
         self.battery_progress.setValue(battery_level)
+        self._set_battery_progress_style()
 
     def _send_voice_command_to_drone(self, parsed_command: Optional[List[Tuple[str, int]]]) -> None:
         """
