@@ -22,7 +22,7 @@ def get_package_folder() -> pathlib.Path:
     """
     project_root = get_project_root()
     package_folder = project_root / "voice_control"
-    logger.trace(f"Package folder: {relative_path(package_folder)}")
+    logger.trace("Package folder: %s", relative_path(package_folder))
     return package_folder
 
 
@@ -36,7 +36,7 @@ def get_data_folder() -> pathlib.Path:
     voice_control_folder = get_package_folder()
     data_folder = voice_control_folder / "data"
     create_folder_if_not_exists(data_folder)
-    logger.trace(f"Data folder: {relative_path(data_folder)}")
+    logger.trace("Data folder: %s",  relative_path(data_folder))
     return data_folder
 
 
@@ -50,7 +50,7 @@ def get_recordings_folder() -> pathlib.Path:
     package_root = get_package_folder()
     recordings_folder = package_root / "recordings"
     create_folder_if_not_exists(recordings_folder)
-    logger.info(f"Recordings folder: {relative_path(recordings_folder)}")
+    logger.info("Recordings folder: %s", relative_path(recordings_folder))
     return recordings_folder
 
 
@@ -64,7 +64,7 @@ def get_assets_folder() -> pathlib.Path:
     package_root = get_package_folder()
     assets_folder = package_root / "assets"
     create_folder_if_not_exists(assets_folder)
-    logger.trace(f"Assets folder: {relative_path(assets_folder)}")
+    logger.trace("Assets folder: %s", relative_path(assets_folder))
     return assets_folder
 
 
@@ -92,9 +92,9 @@ def file_exists(file_path: pathlib.Path) -> bool:
 
     exists = os.path.exists(file_path)
     if exists:
-        logger.debug(f"File exists: {file_path}")
+        logger.debug("File exists: %s", file_path)
     else:
-        logger.debug(f"File does not exist: {file_path}")
+        logger.debug("File does not exist: %s", file_path)
 
     return exists
 
@@ -109,9 +109,9 @@ def create_folder_if_not_exists(folder_path: pathlib.Path):
 
     if not os.path.exists(folder_path):
         os.makedirs(folder_path)
-        logger.info(f"Folder created: {folder_path}")
+        logger.info("Folder created: %s", folder_path)
     else:
-        logger.debug(f"Folder already exists: {folder_path}")
+        logger.debug("Folder already exists: %s", folder_path)
 
 
 def list_files_in_folder(folder_path: pathlib.Path, file_types: Optional[list[str]] = None) -> list[pathlib.Path]:
@@ -129,9 +129,10 @@ def list_files_in_folder(folder_path: pathlib.Path, file_types: Optional[list[st
     if file_types is None:
         file_types = [".*"]
 
-    files = [f for f in folder_path.iterdir() if f.is_file() and any(f.name.endswith(file_type) for file_type in file_types)]
+    files = [f for f in folder_path.iterdir() if f.is_file() and any(
+        f.name.endswith(file_type) for file_type in file_types)]
 
-    logger.debug(f"Files in folder: {folder_path} - {files}")
+    logger.debug("Files in folder: %s - %s", folder_path, str(files))
     return files
 
 
