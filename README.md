@@ -99,7 +99,7 @@ In addition to eye tracking and voice commands, the drone can also be controlled
 
 ## Configuration
 
-TODO
+Each module contains its own configuration file which can be used to customise the functionality of the module. The voice control and eye tracking configs do not need to change, and hence are git tracked, however the drone and main GUI configurations are designed to be customisable and hence are not git tracked. Instead, a default configuration file is generated and saved on first launch if the config file is not found. See each module's respective README, linked above to determine how to configure it's configuration.
 
 ## Debugging
 
