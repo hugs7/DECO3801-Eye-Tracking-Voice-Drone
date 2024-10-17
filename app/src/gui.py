@@ -43,6 +43,7 @@ class MainApp(QMainWindow, CommonGUI):
         super().__init__()
 
         self.config = self._init_config()
+        self.init_palette()
         self._init_gui()
         self._init_qpixmaps()
         self._init_timers()
