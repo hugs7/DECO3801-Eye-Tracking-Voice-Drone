@@ -502,6 +502,7 @@ class MainApp(QMainWindow, CommonGUI):
         logger.trace(flight_stats_text)
         self.statistics_label.setText(flight_stats_text)
         self.statistics_label.adjustSize()
+        self.battery_and_stats_widget.adjustSize()
 
     def get_next_voice_command(self) -> None:
         """
