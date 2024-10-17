@@ -471,7 +471,7 @@ class MainApp(QMainWindow, CommonGUI):
             return
 
         flight_statistics: Dict = drone_data[cc.FLIGHT_STATISTICS]
-        logger.debug("Flight statistics: %s", flight_statistics)
+        logger.trace("Flight statistics: %s", flight_statistics)
         if not flight_statistics:
             return None
 
