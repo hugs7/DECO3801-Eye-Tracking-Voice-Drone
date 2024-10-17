@@ -63,7 +63,7 @@ def initialise_config(config_dict: Dict, config_path: Path) -> OmegaConf:
 
     default_config = OmegaConf.create(config_dict)
 
-    logger.info(f"Initialising config file at {config_path}")
+    logger.info("Initialising config file at %s", config_path)
     parent = config_path.parent
     fh.create_folder_if_not_exists(parent)
     OmegaConf.save(default_config, config_path)
@@ -88,7 +88,8 @@ def load_or_create_config(config_path: Path, default_config: Dict) -> OmegaConf:
         logger.info("Loading config from %s", config_path)
         config = OmegaConf.load(config_path)
     else:
-        logger.info("Config file not found at %s. Initialising with default values.", config_path)
+        logger.info(
+            "Config file not found at %s. Initialising with default values.", config_path)
         config = initialise_config(default_config, config_path)
 
     return config
