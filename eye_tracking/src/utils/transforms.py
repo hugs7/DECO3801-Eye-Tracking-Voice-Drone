@@ -36,7 +36,7 @@ def upscale(frame: cv2.VideoCapture, upscaled_dim: Tuple[int, int]) -> cv2.Video
         cv2.VideoCapture: The upscaled frame
     """
 
-    logger.debug(f"Upscaling frame to {upscaled_dim}")
+    logger.debug("Upscaling frame to %s", str(upscaled_dim))
     upscaled_frame = cv2.resize(frame, upscaled_dim)
 
     return upscaled_frame
