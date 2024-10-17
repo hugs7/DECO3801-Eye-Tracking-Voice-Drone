@@ -120,7 +120,7 @@ class MainApp(QMainWindow, CommonGUI):
         self.battery_progress.setTextVisible(False)
         self.battery_progress.setObjectName(c.BATTERY_PROGRESS)
         self.battery_progress.setFixedSize(
-            c.BATTERY_WIDGET_WIDTH, c.BATTERY_WIDGET_HEIGHT)
+            c.BATTERY_PROGRESS_WIDTH, c.BATTERY_PROGRESS_HEIGHT)
         self.battery_progress.setObjectName(c.BATTERY_PROGRESS)
         self.battery_progress.setStyleSheet(f"""
             QProgressBar#{c.BATTERY_PROGRESS} {{
@@ -255,8 +255,8 @@ class MainApp(QMainWindow, CommonGUI):
         """
         Positions the battery and flight statistics widget in the top-right corner of the window.
         """
-        width = c.BATTERY_WIDGET_WIDTH + c.BATTERY_TEXT_WIDTH + 2 * c.WIDGET_PADDING
-        height = c.BATTERY_WIDGET_HEIGHT + c.WIDGET_PADDING + c.BATTERY_TEXT_WIDTH
+        width = c.BATTERY_PROGRESS_WIDTH + c.BATTERY_TEXT_WIDTH + 2 * c.WIDGET_PADDING
+        height = c.BATTERY_PROGRESS_HEIGHT + c.WIDGET_PADDING + c.BATTERY_TEXT_WIDTH
         self.battery_and_stats_widget.setGeometry(
             self.width() - width,
             c.WIDGET_PADDING, width, height
