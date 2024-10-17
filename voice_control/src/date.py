@@ -20,7 +20,7 @@ def timestamp(format="%Y-%m-%d %H:%M:%S") -> str:
         str: The current timestamp.
     """
     timestamp = datetime.now().strftime(format)
-    logger.info(f"Timestamp: {timestamp}")
+    logger.debug("Timestamp: %s", timestamp)
 
     return timestamp
 
