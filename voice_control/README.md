@@ -34,8 +34,8 @@ OPENAI_API_KEY=...
 
 Add context and prompt information (used by the NLU/LLM in order to process the voice commands in a desirable manner). You can download the data folder used in development at [this Google Drive folder](https://drive.google.com/drive/folders/1vTnuQttrPQ0hgq_KUsqppmDC-xUoEvJI?usp=sharing]). Once downloaded, unzip and place at `/voice_control/data`, ensuring there is no sub-data folder within it. That is, you should have defined the following files.
 
--   `/voice_control/data/context.jsonl`: TBD
--   `/voice_control/data/initial.jsonl`: TBD
+-   `/voice_control/data/context.jsonl`: Stores updated contextual information about the problem during model evaluation.
+-   `/voice_control/data/initial.jsonl`: Used for training the model, but not used during evaluation.
 -   `/voice_control/data/system_prompt.txt`: Defines the prompt provided to the LLM for how to respond when it is provided with your voice command.
 
 ### 5. Run the main script.
