@@ -28,10 +28,13 @@ class CommonGUI:
         self.theme = cc.DARK_THEME if palette.color(
             QPalette.ColorRole.Window).lightness() < 128 else cc.LIGHT_THEME
 
+        self.font_size = "14px"
         if self.theme == cc.DARK_THEME:
             self.text_color = cc.TEXT_WHITE
+            self.surface_color = cc.SURFACE_DARK
         else:
             self.text_color = cc.TEXT_BLACK
+            self.surface_color = cc.SURFACE_LIGHT
 
     def __check_layout(self):
         if self.layout is None:

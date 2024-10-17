@@ -56,6 +56,9 @@ LIGHT_THEME = "light"
 TEXT_WHITE = "white"
 TEXT_BLACK = "black"
 
+SURFACE_DARK = "#292929"
+SURFACE_LIGHT = "#cfcaca"
+
 # Drone
 
 FLIGHT_STATISTICS = "flight_statistics"
