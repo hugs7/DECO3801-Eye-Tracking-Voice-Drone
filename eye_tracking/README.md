@@ -8,6 +8,8 @@ To get started, install the dependencies via
 python eye_tracking/requirements.txt
 ```
 
+## Running the module
+
 Then you can run the eye tracking module standalone via
 
 ```bash
@@ -21,6 +23,8 @@ python -m eye_tracking.src.main
 ```
 
 however, this way **must** be run in module mode.
+
+## Using Eye Tracking
 
 Upon first run, the app will download and save the machine learning model file used in gaze tracking. Once started, you can press 'c' to calibrate and 'g' to begin showing the gaze tracking. Note only the **x** axis will be tracked.
 
