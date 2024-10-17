@@ -103,8 +103,8 @@ class MainApp(QMainWindow, CommonGUI):
         self.battery_and_stats_widget.setObjectName(c.BATTERY_STATS_WIDGET)
         self.battery_and_stats_widget.setStyleSheet(f"""
             QWidget#{c.BATTERY_STATS_WIDGET} {{
-                border: 1px solid green;
-                border-radius: 5px;
+                border: {c.BATTERY_WIDGET_BORDER_WIDTH}px solid {c.BATTERY_WIDGET_BORDER_COLOUR};
+                border-radius: {c.BATTERY_WIDGET_BORDER_RADIUS}px;
                 padding: 5px;
             }}
         """)
