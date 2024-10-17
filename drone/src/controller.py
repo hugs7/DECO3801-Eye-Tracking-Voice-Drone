@@ -130,7 +130,7 @@ class Controller:
                 return False
 
             self._render_frame(frame, tick_rate)
-            self._get_drone_statistics(tick_rate)
+            self._get_drone_statistics()
 
         self.thread_loop_handler(self.stop_event)
         logger.debug("<<< End drone loop")
@@ -181,29 +181,28 @@ class Controller:
             self.thread_data[cc.DRONE][cc.VIDEO_FRAME] = frame
             self.thread_data[cc.DRONE][cc.TICK_RATE] = tick_rate
 
-    def _get_drone_statistics(self, tick_rate: float) -> None:
+    def _has_waited(self, key: str) -> bool:
         """
-        Gets the flight statistics from the drone and sends it to the main GUI for rendering.
-            - pitch
-            - roll
-            - yaw
-            - speed_x
-            - speed_y
-            - speed_z
-            - acceleration_x
-            - acceleration_y
-            - cceleration_z
-            - lowest_temperature
-            - highest_temperature
-            - temperature
-            - height
-            - distance_tof
-            - barometer
-            - flight_time
-            - battery
+        Checks the drone stat times to see if we have waited enough before updating the value corresponding to the key
 
         Args:
-            tick_rate (float): The tick rate of the loop.
+            key (str): The key to check
+
+        Returns:
+            bool: True if we have waited enough, False otherwise
+        """
+        now = time.perf_counter()
+        stat_time = self.drone_stat_times[key]
+        stat_wait = self.drone_stat_params[key]
+
+        return now - stat_time > stat_wait
+
+    def _get_drone_statistics(self) -> None:
+        """
+        Gets the flight statistics from the drone and sends it to the main GUI for rendering.
+
+            pitch, roll, yaw, speed_x, speed_y, speed_z, acceleration_x, acceleration_y, cceleration_z, 
+            lowest_temperature, highest_temperature, temperature, height, distance_tof, barometer, flight_time, battery
         """
         if not self.drone_connected:
             return
@@ -212,7 +211,7 @@ class Controller:
         stat_vals = dict()
 
         # Battery
-        if now - self.drone_stat_times[FlightStatistics.BATTERY.value] > self.drone_stat_params[FlightStatistics.BATTERY.value]:
+        if self._has_waited(FlightStatistics.BATTERY.value):
             logger.debug("Getting battery level...")
             self.model.battery_level = self.model.get_battery()
             logger.info("Drone battery: %d", self.model.battery_level)
@@ -220,16 +219,19 @@ class Controller:
 
         stat_vals[FlightStatistics.BATTERY.value] = self.model.battery_level
 
-        for statistic in FlightStatistics:
-            statistic_value = statistic.value
-            try:
-                value = eval(f"self.model.drone.get_{statistic_value}()")
-            except AttributeError:
-                logger.warning(
-                    "Method get_%s not found in drone model", statistic_value)
-                continue
+        if self._has_waited(c.FLIGHT_STATISTICS):
+            for statistic in FlightStatistics:
+                statistic_value = statistic.value
+                try:
+                    value = eval(f"self.model.drone.get_{statistic_value}()")
+                except AttributeError:
+                    logger.warning(
+                        "Method get_%s not found in drone model", statistic_value)
+                    continue
 
-            logger.trace("Drone %s: %s", statistic_value, value)
+                logger.debug(" Statistic > %s: %s", statistic_value, value)
+
+                stat_vals[statistic_value] = value
 
         with self.data_lock:
             self.thread_data[cc.DRONE][cc.FLIGHT_STATISTICS] = stat_vals

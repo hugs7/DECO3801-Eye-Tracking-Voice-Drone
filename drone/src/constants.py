@@ -55,6 +55,8 @@ DRONE_ACTIONS_OTHER = [
 
 # === Config ===
 
+FLIGHT_STATISTICS = "flight_statistics"
+
 DEFAULT_CONFIG = {
     "drone_type": "tello",
     "mavic": {
@@ -96,6 +98,7 @@ DEFAULT_CONFIG = {
         },
         "drone_stat_params": {
             FlightStatistics.BATTERY.value: 0.2,
+            FLIGHT_STATISTICS: 10
         },
     },
 }
