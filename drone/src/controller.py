@@ -229,7 +229,8 @@ class Controller:
                     "Method get_%s not found in drone model", statistic_value)
                 continue
 
-            logger.info("Drone %s: %s", statistic_value, value)
+            logger.trace("Drone %s: %s", statistic_value, value)
+
         with self.data_lock:
             self.thread_data[cc.DRONE][cc.FLIGHT_STATISTICS] = stat_vals
 
