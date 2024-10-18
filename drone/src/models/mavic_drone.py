@@ -162,6 +162,7 @@ class MavicDrone(Drone):
         
 
     def rotate_counter_clockwise(self, degrees: int) -> None:
+        print("rotating clockwise")
         self.send_ned_velocity(0, 0, 0, 5, yaw=(-degrees))
 
     # Could change these units to metres if needed
