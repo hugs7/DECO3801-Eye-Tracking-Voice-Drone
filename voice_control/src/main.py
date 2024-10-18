@@ -32,9 +32,9 @@ def main(manager_data: Optional[Dict] = None):
 
     config = init.init()
 
-    running_in_thread = manager_data is not None
+    running_as_process = manager_data is not None
 
-    if running_in_thread:
+    if running_as_process:
         logger.info("Running as process.")
     else:
         logger.info("Running in main mode")
