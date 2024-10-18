@@ -425,7 +425,7 @@ class Controller:
         command = command.lower()
 
         angle = 35
-        dist = 20
+        dist = 300
 
         angle = measurement or angle
         dist = measurement or dist
