@@ -41,6 +41,8 @@ class MavicDrone(Drone):
 
         self.VehicleMode = VehicleMode
 
+        self.video_fps = 30
+
     def connect(self) -> Optional[Any]:
         """
         Connects to the Mavic drone
@@ -65,6 +67,7 @@ class MavicDrone(Drone):
         try:
             vehicle = mavic_connect(
                 connection_string, wait_ready=True, timeout=60)
+            self.success = True
         except Exception as e:
             logger.error("Failed to connect to Mavic drone")
             logger.error("Details %s", e)
@@ -115,9 +118,9 @@ class MavicDrone(Drone):
         Cannot arm until the drone's autopilot is ready.
         """
         logger.info("Performing basic pre-arm checks")
-        while not self._is_armable():
-            logger.info(" Waiting for vehicle to initialise...")
-            time.sleep(1)
+        # while not self._is_armable():
+        #     logger.info(" Waiting for vehicle to initialise...")
+        #     time.sleep(1)
 
         logger.info("Arming motors")
         self.__set_vehicle_mode("GUIDED")
@@ -193,7 +196,7 @@ class MavicDrone(Drone):
         print("sending move backward x axis \n")
         self.send_ned_velocity(0, cm, 0, 2)
 
-    def takeoff(self, target_altitude_metres = 2) -> None:
+    def takeoff(self, target_altitude_metres: float = 1.2) -> None:
         """
         Takes off the drone to the specified altitude
 
