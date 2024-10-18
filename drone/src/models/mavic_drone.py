@@ -123,7 +123,7 @@ class MavicDrone(Drone):
         self.__set_vehicle_mode("GUIDED")
         self.vehicle.armed = True
 
-    def send_ned_velocity(self, velocity_x, velocity_y, velocity_z, duration) -> None:
+    def send_ned_velocity(self, velocity_x, velocity_y, velocity_z, duration, yaw=0) -> None:
         """
         Move vehicle in direction based on specified velocity vectors and
         for the specified duration.
@@ -148,7 +148,7 @@ class MavicDrone(Drone):
             0, 0, 0, # x, y, z positions (not used)
             velocity_x, velocity_y, velocity_z, # x, y, z velocity in m/s
             0, 0, 0, # x, y, z acceleration (not supported yet, ignored in GCS_Mavlink)
-            0, 0)    # yaw, yaw_rate (not supported yet, ignored in GCS_Mavlink) 
+            yaw, 0)    # yaw, yaw_rate (not supported yet, ignored in GCS_Mavlink) 
 
         # send command to vehicle on 1 Hz cycle
         for x in range(0,duration):
@@ -156,12 +156,13 @@ class MavicDrone(Drone):
             time.sleep(1)
 
     def rotate_clockwise(self, degrees: int) -> None:
-        raise NotImplementedError
+        print("rotating clockwise")
+        self.send_ned_velocity(0, 0, 0, 5, yaw=degrees)
 
         
 
     def rotate_counter_clockwise(self, degrees: int) -> None:
-        raise NotImplementedError
+        self.send_ned_velocity(0, 0, 0, 5, yaw=(-degrees))
 
     # Could change these units to metres if needed
 
