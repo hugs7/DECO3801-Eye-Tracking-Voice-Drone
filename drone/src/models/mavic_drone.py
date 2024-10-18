@@ -65,7 +65,6 @@ class MavicDrone(Drone):
         try:
             vehicle = mavic_connect(
                 connection_string, wait_ready=True, timeout=60)
-            vehicle = None
         except Exception as e:
             logger.error("Failed to connect to Mavic drone")
             logger.error("Details %s", e)
@@ -158,6 +157,8 @@ class MavicDrone(Drone):
 
     def rotate_clockwise(self, degrees: int) -> None:
         raise NotImplementedError
+
+        
 
     def rotate_counter_clockwise(self, degrees: int) -> None:
         raise NotImplementedError
