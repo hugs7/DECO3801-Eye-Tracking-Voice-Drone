@@ -250,6 +250,7 @@ class Controller:
 
         self._wait_key()
         self._wait_voice_command()
+        self._wait_gaze_command()
 
     def _wait_key(self) -> bool:
         """
@@ -362,6 +363,50 @@ class Controller:
 
         # Accept if any valid command was received
         return any(accepted_commands)
+    
+    def _wait_gaze_command(self) -> bool:
+        """
+        Handles gaze commands. If the gaze command is recognised, it will be performed.
+
+        Returns:
+            True if a recognised gaze command is received, False otherwise.
+        """
+
+        if not self.running_in_thread:
+            logger.warning(
+                "_wait_gaze_command should not be called in main mode")
+            return False
+
+        if cc.DRONE not in self.thread_data.keys():
+            logger.trace("Drone not yet initialised in shared data.")
+            return False
+
+        with self.data_lock:
+            eye_tracking_data: Optional[Dict] = self.thread_data[cc.EYE_TRACKING]
+            if cc.GAZE_SIDE not in eye_tracking_data.keys():
+                logger.trace(
+                    "Gaze queue not yet initialised in shared data.")
+                return False
+
+            gaze_command = eye_tracking_data[cc.GAZE_SIDE]
+
+        if not self.drone_connected:
+            return
+
+        if gaze_command is None:
+            return False
+
+        logger.info("Received gaze command: %s", gaze_command)
+        match gaze_command:
+            case cc.LEFT:
+                self.perform_action(DroneActions.ROTATE_CCW.value)
+            case cc.RIGHT:
+                self.perform_action(DroneActions.ROTATE_CW.value)
+            case _:
+                logger.warning("Gaze command %s not recognised", gaze_command)
+                return False
+
+        return True
 
     def perform_action(self, command: str, measurement: Optional[int] = None) -> bool:
         """
