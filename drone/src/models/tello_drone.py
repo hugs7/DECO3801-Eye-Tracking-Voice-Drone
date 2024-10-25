@@ -56,9 +56,7 @@ class TelloDrone(Drone):
             return
 
         self.__init_drone_params()
-
-        self.last_command_time = datetime.now()
-        self.in_flight = False
+        self.__finalise_initialisation()
 
         logger.info("TelloDrone initialised.")
 
@@ -168,6 +166,27 @@ class TelloDrone(Drone):
                 logger.error("Failed to set camera selection. Details: %s", e)
 
             self.battery_level = self.drone.get_battery()
+
+    def __finalise_initialisation(self) -> None:
+        """Finalises the initialisation process"""
+        self.last_command_time = datetime.now()
+        self.in_flight = False
+
+    def ext_connect(self) -> bool:
+        """
+        Wrapper for connect method to be used in external scripts
+
+        Returns:
+            bool: True if the drone connected successfully, False otherwise
+        """
+
+        self.success = self.connect()
+        if not self.success:
+            return False
+        
+        self.__init_drone_params()
+        self.__finalise_initialisation()
+        return self.success
 
     def connect(self) -> bool:
         """

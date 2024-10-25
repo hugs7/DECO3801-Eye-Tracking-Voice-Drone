@@ -40,6 +40,18 @@ class MavicDrone(Drone):
 
         self.VehicleMode = VehicleMode
 
+    def ext_connect(self) -> bool:
+        """
+        Wrapper for connect method to be used in external scripts
+
+        Returns:
+            bool: True if the drone connected successfully, False otherwise
+        """
+
+        self.success = self.connect()
+        
+        return self.success
+    
     def connect(self) -> Optional[Any]:
         """
         Connects to the Mavic drone

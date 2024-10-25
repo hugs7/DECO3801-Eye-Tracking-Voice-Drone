@@ -81,7 +81,7 @@ class Controller:
         self.model = drone
         self.config = controller_config
         self.connect_to_drone = self.config.connect_to_drone
-        self.drone_connected = self.connect_to_drone and self.model and self.model.success
+        self._check_drone_connected()
 
         if self.drone_connected:
             self.drone_video_fps = self.model.video_fps
@@ -251,6 +251,7 @@ class Controller:
         self._wait_key()
         self._wait_voice_command()
         self._wait_gaze_command()
+        self._wait_drone_connection()
 
     def _wait_key(self) -> bool:
         """
@@ -363,7 +364,7 @@ class Controller:
 
         # Accept if any valid command was received
         return any(accepted_commands)
-    
+
     def _wait_gaze_command(self) -> bool:
         """
         Handles gaze commands. If the gaze command is recognised, it will be performed.
@@ -407,6 +408,40 @@ class Controller:
                 return False
 
         return True
+
+    def _wait_drone_connection(self) -> None:
+        """
+        Handles drone connection. If the drone is not connected, it will attempt to connect.
+        """
+
+        if self.drone_connected:
+            return
+        
+        logger.debug("Waiting for drone connection.")
+        
+        with self.data_lock:
+            if cc.CONNECT_TO_DRONE not in self.thread_data[cc.DRONE].keys():
+                logger.info(
+                    "Connect to drone not yet initialised in shared data.")
+                return
+
+            connect_to_drone = self.thread_data[cc.DRONE][cc.CONNECT_TO_DRONE]
+            logger.info("Connect to drone = %s", connect_to_drone)
+            self.thread_data[cc.CONNECT_TO_DRONE] = False
+
+        if connect_to_drone:
+            if self.drone_connected:
+                logger.info("Drone already connected.")
+                return
+            
+            logger.info("Drone not connected, attempting to connect...")
+            self.drone_connected = self.model.ext_connect()
+
+    def _check_drone_connected(self) -> None:
+        """
+        Checks if the drone is connected and updates the drone_connected attribute.
+        """
+        self.drone_connected = self.connect_to_drone and self.model and self.model.success
 
     def perform_action(self, command: str, measurement: Optional[int] = None) -> bool:
         """
