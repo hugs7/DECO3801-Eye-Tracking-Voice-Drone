@@ -32,7 +32,7 @@ class PreferencesDialog(CommonDialog):
         self.cancel_button = self._add_button(
             "Cancel", self.reject, button_layout)
 
-        self.window_layout.addChildLayout(button_layout)
+        self.window_layout.addLayout(button_layout)
 
         self.retranslateUi()
         QMetaObject.connectSlotsByName(self)
