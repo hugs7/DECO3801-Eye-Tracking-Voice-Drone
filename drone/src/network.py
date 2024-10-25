@@ -206,8 +206,7 @@ def connect_to_wifi(
         if not network_interface:
             network_interface = "en0"
 
-        connect_cmd = f'networksetup -setairportnetwork {
-            network_interface} "{ssid}"'
+        connect_cmd = f"networksetup -setairportnetwork {network_interface} \"{ssid}\""
         if password:
             connect_cmd += f' "{password}"'
 
