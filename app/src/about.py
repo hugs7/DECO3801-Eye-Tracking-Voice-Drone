@@ -2,21 +2,14 @@
 Defines the abouts window for the gui
 """
 
-from PyQt6.QtWidgets import QDialogButtonBox, QVBoxLayout, QLabel,  QDialog
-from PyQt6.QtCore import Qt, QMetaObject, QCoreApplication, QRect
+from PyQt6.QtCore import QMetaObject
 
-from common.common_gui import CommonGUI
+from common.common_dialog import CommonDialog
 
 
-class AboutDialog(QDialog, CommonGUI):
+class AboutDialog(CommonDialog):
     def __init__(self):
-        super().__init__()
-
-        self.setWindowTitle("About Drone Control")
-        self.setWindowModality(Qt.WindowModality.WindowModal)
-        self.setFixedSize(300, 300)
-
-        self.layout = QVBoxLayout()
+        super().__init__("About Drone Control", 300, 300)
 
         self.__init_ui()
 
@@ -29,7 +22,3 @@ class AboutDialog(QDialog, CommonGUI):
 
         self.retranslateUi()
         QMetaObject.connectSlotsByName(self)
-
-    def retranslateUi(self, ):
-        _translate = QCoreApplication.translate
-        self.setWindowTitle(_translate("Dialog", "Dialog"))

@@ -2,21 +2,16 @@
 Defines the options window for the gui
 """
 
+
 from PyQt6.QtWidgets import QDialogButtonBox, QVBoxLayout, QLabel,  QDialog
 from PyQt6.QtCore import Qt, QMetaObject, QCoreApplication, QRect
 
-from common.common_gui import CommonGUI
+from common.common_dialog import CommonDialog
 
 
-class PreferencesDialog(QDialog, CommonGUI):
+class PreferencesDialog(CommonDialog):
     def __init__(self):
-        super().__init__()
-
-        self.setWindowTitle("Drone Control Preferences")
-        self.setWindowModality(Qt.WindowModality.WindowModal)
-        self.setFixedSize(300, 300)
-
-        self.layout = QVBoxLayout()
+        super().__init__("Drone Control Preferences", 300, 300)
 
         self.__init_ui()
 
@@ -29,7 +24,3 @@ class PreferencesDialog(QDialog, CommonGUI):
 
         self.retranslateUi()
         QMetaObject.connectSlotsByName(self)
-
-    def retranslateUi(self, ):
-        _translate = QCoreApplication.translate
-        self.setWindowTitle(_translate("Dialog", "Dialog"))
