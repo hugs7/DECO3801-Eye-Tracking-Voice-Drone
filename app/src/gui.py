@@ -45,6 +45,7 @@ class MainApp(QMainWindow, CommonGUI):
         self.config = self._init_config()
         self.init_palette()
         self._init_gui()
+        self._init_menu()
         self._init_qpixmaps()
         self._init_timers()
         self._init_queues()
@@ -80,9 +81,9 @@ class MainApp(QMainWindow, CommonGUI):
             f"color: red; font-size: {self.font_size};")
         self._resize_and_position_webcam_label()
 
-        self.layout = QVBoxLayout(self.centralwidget)
-        self.layout.addWidget(self.recentCommand)
-        self.centralwidget.setLayout(self.layout)
+        self.window_layout = QVBoxLayout(self.centralwidget)
+        self.window_layout.addWidget(self.recentCommand)
+        self.centralwidget.setLayout(self.window_layout)
 
         self.drone_video_label.lower()
         self.centralwidget.raise_()
@@ -190,7 +191,7 @@ class MainApp(QMainWindow, CommonGUI):
         self.help_menu = menu_bar.addMenu("Help")
         self._add_menu_action(self.help_menu, "About", self._open_about)
 
-        self.retranslateUi(self)
+        self.retranslateUi()
         logger.info("Menu bar initialised")
 
     def _init_timers(self) -> None:

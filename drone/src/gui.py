@@ -56,13 +56,13 @@ class DroneApp(QMainWindow, CommonGUI):
         self.main_widget = QWidget(self)
         self.setCentralWidget(self.main_widget)
 
-        self.layout = QVBoxLayout(self.main_widget)
+        self.window_layout = QVBoxLayout(self.main_widget)
 
         self.drone_video_label = QLabel(self)
         self.drone_video_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.layout.addWidget(self.drone_video_label)
+        self.window_layout.addWidget(self.drone_video_label)
 
-        self.layout.addStretch()
+        self.window_layout.addStretch()
 
         button_layout = QHBoxLayout()
 
@@ -74,7 +74,7 @@ class DroneApp(QMainWindow, CommonGUI):
         button_layout.addStretch()
         button_layout.addWidget(self.quit_button)
 
-        self.layout.addLayout(button_layout)
+        self.window_layout.addLayout(button_layout)
 
         self._init_menu()
 
