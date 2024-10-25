@@ -45,6 +45,7 @@ class MainApp(QMainWindow, CommonGUI):
         self.config = self._init_config()
         self.init_palette()
         self._init_gui()
+        self._init_menu()
         self._init_qpixmaps()
         self._init_timers()
         self._init_queues()
@@ -190,7 +191,7 @@ class MainApp(QMainWindow, CommonGUI):
         self.help_menu = menu_bar.addMenu("Help")
         self._add_menu_action(self.help_menu, "About", self._open_about)
 
-        self.retranslateUi(self)
+        self.retranslateUi()
         logger.info("Menu bar initialised")
 
     def _init_timers(self) -> None:
