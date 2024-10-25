@@ -188,6 +188,10 @@ class MainApp(QMainWindow, CommonGUI):
         self.file_menu.addSeparator()
         self._add_menu_action(self.file_menu, "Quit", self.close_app)
 
+        self.drone_menu = menu_bar.addMenu("Drone")
+        self.drone_menu.addAction("Switch feeds", self._switch_feeds)
+        self.drone_menu.addAction("Connect to drone", self._connect_to_drone)
+
         self.help_menu = menu_bar.addMenu("Help")
         self._add_menu_action(self.help_menu, "About", self._open_about)
 
@@ -222,6 +226,7 @@ class MainApp(QMainWindow, CommonGUI):
         with self.data_lock:
             self.thread_data[cc.KEYBOARD_QUEUE] = PeekableQueue()
             self.thread_data[cc.DRONE][cc.COMMAND_QUEUE] = PeekableQueue()
+            self.thread_data[cc.DRONE][cc.CONNECT_TO_DRONE] = False
 
     def _resize_and_position_webcam_label(self):
         """
@@ -629,6 +634,18 @@ class MainApp(QMainWindow, CommonGUI):
         """
         self.swap_feeds = not self.swap_feeds
         logger.info("Swapping feeds: %s", self.swap_feeds)
+
+    def _connect_to_drone(self) -> None:
+        """
+        Connect to the drone
+
+        Returns:
+            None
+        """
+        logger.info("Connecting to drone")
+        with self.data_lock:
+            drone_data: Dict = self.thread_data[cc.DRONE]
+            drone_data[cc.CONNECT_TO_DRONE] = True
 
     def _stop_all_timers(self) -> None:
         """
