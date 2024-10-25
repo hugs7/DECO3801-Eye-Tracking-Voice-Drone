@@ -73,6 +73,17 @@ class VoiceController:
                     self._wait_key()
 
                     if self.loop_toggle:
+                        if not self.audio_recogniser.network_available:
+                            logger.error(
+                                "No network available. Disabling loop.")
+                            self.loop_toggle = False
+
+                        if not self.audio_recogniser.microphone_available:
+                            logger.error(
+                                "No microphone available. Disabling loop.")
+                            self.loop_toggle = False
+
+                    if self.loop_toggle:
                         logger.info(" >>> Begin voice control loop")
                         run = self.audio_loop()
                         logger.info(" <<< End voice control loop")
@@ -134,7 +145,18 @@ class VoiceController:
         """
         match key_action:
             case VoiceActions.LOOP_TOGGLE:
-                self.loop_toggle = not self.loop_toggle
+                self.toggle_loop()
+
+    def toggle_loop(self) -> None:
+        """
+        Toggles the loop on and off.
+        """
+
+        logger.info("Toggling loop to %s", self.loop_toggle)
+
+        self.loop_toggle = not self.loop_toggle
+        if self.loop_toggle:
+            self.audio_recogniser.check_network_connection()
 
     def audio_loop(self) -> bool:
         """

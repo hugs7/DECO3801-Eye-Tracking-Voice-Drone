@@ -13,6 +13,7 @@ from omegaconf import OmegaConf
 
 from common.logger_helper import init_logger
 from common.file_handler import get_file_extension
+from common import network
 
 from . import constants as c
 from . import file_handler
@@ -39,12 +40,25 @@ class AudioRecogniser:
 
         # Assume microphone is available by default
         self.microphone_available = True
+        self.check_network_connection()
 
         self.wake_command = self.config.wake_command
         self.enable_sound_effects = self.config.sound_effects.enable
         self.sound_effects: Dict[str, AudioSegment] = {}
 
         self.__load_sounds()
+
+    def check_network_connection(self) -> bool:
+        """
+        Checks if an internet connection is available.
+
+        Args:
+            None
+
+        Returns:
+            bool: True if an internet connection is available, False otherwise.
+        """
+        self.network_available = network.check_internet_connection()
 
     def __load_sounds(self):
         """
@@ -202,6 +216,11 @@ class AudioRecogniser:
         Returns:
             str: The text output from the audio input.
         """
+
+        if not self.network_available:
+            logger.warning(
+                "No internet connection. Cannot convert audio to text.")
+            return None
 
         text = None
         logger.info("Converting audio to text...")
