@@ -3,8 +3,7 @@ Defines the options window for the gui
 """
 
 
-from PyQt6.QtWidgets import QDialogButtonBox, QVBoxLayout, QLabel,  QDialog
-from PyQt6.QtCore import Qt, QMetaObject, QCoreApplication, QRect
+from PyQt6.QtCore import QMetaObject
 
 from common.common_dialog import CommonDialog
 
