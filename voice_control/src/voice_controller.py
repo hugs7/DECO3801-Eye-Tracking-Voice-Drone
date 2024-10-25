@@ -83,6 +83,7 @@ class VoiceController:
                                 "No microphone available. Disabling loop.")
                             self.loop_toggle = False
 
+                    if self.loop_toggle:
                         logger.info(" >>> Begin voice control loop")
                         run = self.audio_loop()
                         logger.info(" <<< End voice control loop")
