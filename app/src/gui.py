@@ -81,9 +81,9 @@ class MainApp(QMainWindow, CommonGUI):
             f"color: red; font-size: {self.font_size};")
         self._resize_and_position_webcam_label()
 
-        self.layout = QVBoxLayout(self.centralwidget)
-        self.layout.addWidget(self.recentCommand)
-        self.centralwidget.setLayout(self.layout)
+        self.window_layout = QVBoxLayout(self.centralwidget)
+        self.window_layout.addWidget(self.recentCommand)
+        self.centralwidget.setLayout(self.window_layout)
 
         self.drone_video_label.lower()
         self.centralwidget.raise_()

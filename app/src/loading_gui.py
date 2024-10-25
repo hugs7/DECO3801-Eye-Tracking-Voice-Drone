@@ -1,24 +1,22 @@
+import constants as c
+from utils import file_handler
+from common import constants as cc
+from common.logger_helper import init_logger
+from common.common_gui import CommonGUI
+from PyQt6.QtCore import QTimer, Qt, pyqtSignal
+from PyQt6.QtGui import QPixmap, QResizeEvent
+from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel, QProgressBar, QVBoxLayout, QWidget
+from threading import Lock, Event
+from typing import Dict, Union
 import os
 import sys
 
 # Add the project root to the path
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
+project_root = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), "../.."))
 print("Project root: ", project_root)
 sys.path.insert(0, project_root)
 
-from typing import Dict, Union
-from threading import Lock, Event
-
-from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel, QProgressBar, QVBoxLayout, QWidget
-from PyQt6.QtGui import QPixmap, QResizeEvent
-from PyQt6.QtCore import QTimer, Qt, pyqtSignal
-
-from common.common_gui import CommonGUI
-from common.logger_helper import init_logger
-from common import constants as cc
-
-from utils import file_handler
-import constants as c
 
 logger = init_logger()
 
@@ -128,10 +126,10 @@ class LoadingGUI(QMainWindow, CommonGUI):
         """
         Initialise layout for the loading screen.
         """
-        self.layout = QVBoxLayout(self.central_widget)
+        self.window_layout = QVBoxLayout(self.central_widget)
 
-        self.layout.setContentsMargins(0, 0, 0, 0)
-        self.layout.setSpacing(0)
+        self.window_layout.setContentsMargins(0, 0, 0, 0)
+        self.window_layout.setSpacing(0)
 
         self.label_container = QWidget(self.central_widget)
         label_layout = QVBoxLayout(self.label_container)
@@ -143,11 +141,11 @@ class LoadingGUI(QMainWindow, CommonGUI):
         label_layout.addWidget(
             self.task_label, alignment=Qt.AlignmentFlag.AlignCenter)
 
-        self.layout.addWidget(self.label_container,
-                              alignment=Qt.AlignmentFlag.AlignCenter)
-        self.layout.addWidget(self.progress_bar)
+        self.window_layout.addWidget(self.label_container,
+                                     alignment=Qt.AlignmentFlag.AlignCenter)
+        self.window_layout.addWidget(self.progress_bar)
 
-        self.central_widget.setLayout(self.layout)
+        self.central_widget.setLayout(self.window_layout)
         self.central_widget.raise_()
 
     def __init_timers(self) -> Dict[str, QTimer]:

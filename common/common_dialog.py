@@ -21,7 +21,7 @@ class CommonDialog(QDialog, CommonWidgets):
         self.setWindowModality(Qt.WindowModality.WindowModal)
         self.setFixedSize(width, height)
 
-        self.layout = QVBoxLayout()
+        self.window_layout = QVBoxLayout()
 
     def retranslateUi(self):
         """
