@@ -1,13 +1,3 @@
-import constants as c
-from utils import file_handler
-from common import constants as cc
-from common.logger_helper import init_logger
-from common.common_gui import CommonGUI
-from PyQt6.QtCore import QTimer, Qt, pyqtSignal
-from PyQt6.QtGui import QPixmap, QResizeEvent
-from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel, QProgressBar, QVBoxLayout, QWidget
-from threading import Lock, Event
-from typing import Dict, Union
 import os
 import sys
 
@@ -17,6 +7,16 @@ project_root = os.path.abspath(
 print("Project root: ", project_root)
 sys.path.insert(0, project_root)
 
+from typing import Dict, Union
+from threading import Lock, Event
+from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel, QProgressBar, QVBoxLayout, QWidget
+from PyQt6.QtGui import QPixmap, QResizeEvent
+from PyQt6.QtCore import QTimer, Qt, pyqtSignal
+from common.common_gui import CommonGUI
+from common.logger_helper import init_logger
+from common import constants as cc
+from utils import file_handler
+import constants as c
 
 logger = init_logger()
 
