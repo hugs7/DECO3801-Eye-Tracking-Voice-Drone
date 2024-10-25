@@ -62,3 +62,4 @@ SURFACE_LIGHT = "#cfcaca"
 # Drone
 
 FLIGHT_STATISTICS = "flight_statistics"
+CONNECT_TO_DRONE = "connect_to_drone"
