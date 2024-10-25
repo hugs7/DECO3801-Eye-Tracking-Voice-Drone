@@ -13,7 +13,7 @@ class AboutDialog(QDialog, CommonGUI):
         super().__init__()
 
         self.setWindowTitle("About Drone Control")
-        self.setWindowModality(Qt.ApplicationModal)
+        self.setWindowModality(Qt.WindowModality.WindowModal)
         self.setFixedSize(300, 300)
 
         self.layout = QVBoxLayout()

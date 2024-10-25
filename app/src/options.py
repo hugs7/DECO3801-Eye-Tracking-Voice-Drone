@@ -13,7 +13,7 @@ class PreferencesDialog(QDialog, CommonGUI):
         super().__init__()
 
         self.setWindowTitle("Drone Control Preferences")
-        self.setWindowModality(Qt.ApplicationModal)
+        self.setWindowModality(Qt.WindowModality.WindowModal)
         self.setFixedSize(300, 300)
 
         self.layout = QVBoxLayout()
