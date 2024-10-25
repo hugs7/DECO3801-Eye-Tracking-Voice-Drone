@@ -6,6 +6,9 @@ from PyQt6.QtCore import QMetaObject
 from PyQt6.QtWidgets import QHBoxLayout, QSpacerItem, QSizePolicy
 
 from common.common_dialog import CommonDialog
+from common.logger_helper import init_logger
+
+logger = init_logger()
 
 
 class AboutDialog(CommonDialog):
@@ -16,6 +19,7 @@ class AboutDialog(CommonDialog):
 
     def __init_ui(self):
         if self.window_layout is None:
+            logger.error("Window layout is None")
             return
 
         self.setObjectName("About")
