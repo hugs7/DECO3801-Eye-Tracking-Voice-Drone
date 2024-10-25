@@ -414,19 +414,26 @@ class Controller:
         Handles drone connection. If the drone is not connected, it will attempt to connect.
         """
 
-        if not self.connect_to_drone:
+        if self.drone_connected:
             return
-
+        
+        logger.debug("Waiting for drone connection.")
+        
         with self.data_lock:
-            if cc.CONNECT_TO_DRONE not in self.thread_data.keys():
-                logger.trace(
+            if cc.CONNECT_TO_DRONE not in self.thread_data[cc.DRONE].keys():
+                logger.info(
                     "Connect to drone not yet initialised in shared data.")
                 return
 
-            connect_to_drone = self.thread_data[cc.CONNECT_TO_DRONE]
+            connect_to_drone = self.thread_data[cc.DRONE][cc.CONNECT_TO_DRONE]
+            logger.info("Connect to drone = %s", connect_to_drone)
             self.thread_data[cc.CONNECT_TO_DRONE] = False
 
-        if not self.drone_connected and connect_to_drone:
+        if connect_to_drone:
+            if self.drone_connected:
+                logger.info("Drone already connected.")
+                return
+            
             logger.info("Drone not connected, attempting to connect...")
             self.drone_connected = self.model.ext_connect()
 
